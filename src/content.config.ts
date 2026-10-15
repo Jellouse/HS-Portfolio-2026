@@ -52,8 +52,9 @@ export const blockSchema = z.discriminatedUnion('discriminant', [
 ]);
 
 const creditSchema = z.object({
-  label: z.string(),
-  value: z.string(),
+  role: z.string(),
+  name: z.string(),
+  url: z.string().optional(),
 });
 
 const infoSchema = z.object({

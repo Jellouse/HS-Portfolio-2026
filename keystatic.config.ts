@@ -67,12 +67,13 @@ export default config({
         }),
         credits: fields.array(
           fields.object({
-            label: fields.text({ label: 'Label' }),
-            value: fields.text({ label: 'Value' }),
+            role: fields.text({ label: 'Role' }),
+            name: fields.text({ label: 'Name' }),
+            url: fields.text({ label: 'URL', description: 'Optional. The name is underlined as a link.' }),
           }),
           {
             label: 'Credit',
-            itemLabel: (props) => props.fields.value.value || 'Credit',
+            itemLabel: (props) => props.fields.name.value || 'Credit',
           },
         ),
         info: fields.array(

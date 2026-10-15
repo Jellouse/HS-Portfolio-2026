@@ -1,7 +1,6 @@
 ---
 import Blocks from '../../components/Blocks.astro';
 import Credits from '../../components/Credits.astro';
-import Info from '../../components/Info.astro';
 import ProjectHero from '../../components/ProjectHero.astro';
 import Base from '../../layouts/Base.astro';
 import { absoluteUrl, getProjects, type ProjectEntry } from '../../lib/content';
@@ -37,9 +36,6 @@ const title = `${project.data.caption} · Humansize`;
   <article class:list={['project', { 'is-plain': project.data.rounded === false }]} data-slug={project.id}>
     <ProjectHero title={project.data.caption} />
     <Blocks blocks={project.data.blocks} />
-    <div class="meta">
-      <Credits items={project.data.credits} />
-      <Info items={project.data.info} />
-    </div>
+    <Credits items={project.data.credits} />
   </article>
 </Base>

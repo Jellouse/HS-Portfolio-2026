@@ -11,8 +11,8 @@ cover: /src/content/projects/industrial-bloom/cover.jpg
 coverAlt: Industrial Bloom
 coverFrame: full
 credits:
-  - label: Design
-    value: Johann Schnettker
+  - role: Design
+    name: Johann Schnettker
 info:
   - label: Year
     value: "2026"

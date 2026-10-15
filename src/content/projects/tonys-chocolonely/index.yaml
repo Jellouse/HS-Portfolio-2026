@@ -12,10 +12,10 @@ coverAlt: Tony's Chocolonely
 coverFrame: medium
 rounded: false
 credits:
-  - label: Design
-    value: Johann Schnettker
-  - label: With
-    value: Analogue and Build
+  - role: Design
+    name: Johann Schnettker
+  - role: With
+    name: Analogue and Build
 info:
   - label: Year
     value: "2025"

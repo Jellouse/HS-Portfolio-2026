@@ -12,10 +12,10 @@ cover: /src/content/projects/atomic/cover.jpg
 coverAlt: Atomic Ski
 coverFrame: narrow
 credits:
-  - label: Design
-    value: Johann Schnettker
-  - label: With
-    value: Analogue
+  - role: Design
+    name: Johann Schnettker
+  - role: With
+    name: Analogue
 info:
   - label: Year
     value: "2026"
