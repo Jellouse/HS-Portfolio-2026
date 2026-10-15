@@ -67,6 +67,11 @@
   --radius-sm: 15px;
   --pad: 20px;
   --mark-stretch-max: 1.35;
+  /* easing, after s-p.studio */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out-expo: cubic-bezier(0.65, 0, 0.15, 1);
+  --ease-out-quad: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --ease-in-quad: cubic-bezier(0.55, 0.085, 0.68, 0.53);
   color: var(--ink);
   background: var(--bg);
   font-family: 'ABC Areal', 'Helvetica Neue', Helvetica, Arial, sans-serif;
@@ -1014,13 +1019,18 @@ html.show-grid .grid-overlay .page-grid {
 }
 
 ::view-transition-group(hs-mark) {
-  animation-duration: 450ms;
-  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  animation-duration: 500ms;
+  animation-timing-function: var(--ease-out-expo);
 }
 
-::view-transition-old(root),
+::view-transition-old(root) {
+  animation-duration: 250ms;
+  animation-timing-function: var(--ease-in-quad);
+}
+
 ::view-transition-new(root) {
-  animation-duration: 180ms;
+  animation-duration: 300ms;
+  animation-timing-function: var(--ease-out-quad);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1030,12 +1040,12 @@ html.show-grid .grid-overlay .page-grid {
 }
 
 /* Text reveal: a quick blur-to-sharp per visual line as text enters.
-   Scroll-linked where supported; otherwise a 250ms fallback with a tiny stagger.
+   Scroll-linked where supported; otherwise a 400ms fallback with a tiny stagger.
    Never touches the faces or the mark. */
 @keyframes text-in {
   from {
     opacity: 0;
-    filter: blur(6px);
+    filter: blur(4px);
     transform: translateY(4px);
   }
 }
@@ -1058,15 +1068,15 @@ html.show-grid .grid-overlay .page-grid {
   @supports not (animation-timeline: view()) {
     .reveal-pending .reveal-word {
       opacity: 0;
-      filter: blur(6px);
+      filter: blur(4px);
       transform: translateY(4px);
     }
 
     .reveal-in .reveal-word {
       transition:
-        opacity 250ms ease-out calc(var(--line, 0) * 30ms),
-        filter 250ms ease-out calc(var(--line, 0) * 30ms),
-        transform 250ms ease-out calc(var(--line, 0) * 30ms);
+        opacity 400ms var(--ease-out-expo) calc(var(--line, 0) * 30ms),
+        filter 400ms var(--ease-out-expo) calc(var(--line, 0) * 30ms),
+        transform 400ms var(--ease-out-expo) calc(var(--line, 0) * 30ms);
     }
 
     .reveal-now .reveal-word {
@@ -1080,7 +1090,7 @@ html.show-grid .grid-overlay .page-grid {
   .contact:hover .contact-menu > *,
   .contact:focus-within .contact-menu > *,
   .contact.is-open .contact-menu > * {
-    animation: text-in 250ms ease-out both;
+    animation: text-in 300ms var(--ease-out-expo) both;
   }
 
   .contact-menu > :nth-child(2) {
