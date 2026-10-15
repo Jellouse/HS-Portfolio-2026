@@ -32,6 +32,27 @@ function dropVite8RefreshWrapper() {
   };
 }
 
+// The integration always injects /api/keystatic/[...params]. We own that
+// route so the GitHub callback host comes from the forwarded headers.
+function keystaticAdmin() {
+  const integration = keystatic();
+  const setup = integration.hooks['astro:config:setup'];
+  return {
+    name: 'keystatic',
+    hooks: {
+      'astro:config:setup'(options) {
+        setup({
+          ...options,
+          injectRoute(route) {
+            if (route.pattern === '/api/keystatic/[...params]') return;
+            options.injectRoute(route);
+          },
+        });
+      },
+    },
+  };
+}
+
 export default defineConfig({
   site,
   output: 'static',
@@ -99,6 +120,6 @@ export default defineConfig({
       },
     }),
     react(),
-    keystatic(),
+    keystaticAdmin(),
   ],
 });
