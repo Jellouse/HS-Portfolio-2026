@@ -485,7 +485,7 @@ body:has(.project) .site-header {
 }
 
 .text-block {
-  width: min(100%, 800px);
+  width: min(100%, var(--measure));
   margin: 0 auto 80px;
   font-size: var(--text-title);
   line-height: var(--lh-title);
