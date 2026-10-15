@@ -1,6 +1,5 @@
-// Desktop only: the small header mark stretches toward the cursor while hovered.
-// The stretch is 0 at the edges of the hover area and rises smoothly toward the centre,
-// and the mark follows with a time-based lerp, so entering or leaving never jumps.
+// Desktop only: the small header mark stretches when the cursor is near it (not on it),
+// and follows with a time-based lerp, so it never jumps.
 const MAX = 0.15; // max stretch along one axis
 const ZONE = 120; // px around the mark where it reacts
 const TAU = 90; // follow time constant in ms
@@ -9,6 +8,7 @@ export function initMarkHover() {
   const fine = window.matchMedia('(hover: hover) and (pointer: fine)');
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
   document.querySelectorAll<SVGElement>('.project-mark .mark').forEach((mark) => {
+    const box = (mark.parentElement ?? mark) as Element;
     let tx = 1;
     let ty = 1;
     let x = 1;
@@ -40,7 +40,7 @@ export function initMarkHover() {
     // outer edge, peaking smoothly in between. Direction comes from the mark's centre.
     window.addEventListener('pointermove', (e) => {
       if (!fine.matches || reduce.matches || e.pointerType !== 'mouse') return;
-      const r = mark.getBoundingClientRect();
+      const r = box.getBoundingClientRect(); // untransformed parent, so the stretch doesn't feed back
       const ox = Math.max(r.left - e.clientX, 0, e.clientX - r.right);
       const oy = Math.max(r.top - e.clientY, 0, e.clientY - r.bottom);
       const t = Math.min(1, Math.hypot(ox, oy) / ZONE);
