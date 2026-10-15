@@ -18,6 +18,22 @@ function storage() {
 const imageDirectory = 'src/content/projects';
 const imagePublicPath = '/src/content/projects';
 
+const inlineLink = {
+  bold: false,
+  italic: false,
+  strikethrough: false,
+  code: false,
+  heading: false,
+  blockquote: false,
+  orderedList: false,
+  unorderedList: false,
+  table: false,
+  divider: false,
+  codeBlock: false,
+  image: false,
+  link: true,
+} as const;
+
 const frame = fields.select({
   label: 'Frame',
   options: [
@@ -155,10 +171,11 @@ export default config({
         name: fields.text({ label: 'Name' }),
         studio: fields.text({ label: 'Studio' }),
         email: fields.text({ label: 'Email' }),
-        intro: fields.text({
+        intro: fields.markdoc.inline({
           label: 'Intro',
-          multiline: true,
-          description: 'One factual sentence about Johann and Humansize.',
+          description:
+            'Footer line and the page description. Use the link mark for a name that has a project page, such as /work/atomic.',
+          options: inlineLink,
         }),
         timezone: fields.text({
           label: 'Timezone',
@@ -166,10 +183,11 @@ export default config({
         }),
         place: fields.text({ label: 'Place label', description: 'Example: Tokyo' }),
         about: fields.array(
-          fields.text({
+          fields.markdoc.inline({
             label: 'Paragraph',
-            multiline: true,
-            description: 'A link is [label](https://...).',
+            description:
+              'Use the link mark for a name that has a project page. Leave other names as text.',
+            options: inlineLink,
           }),
           {
             label: 'About',

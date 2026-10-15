@@ -21,7 +21,7 @@ export function homeJsonLd(site: SiteData, pageUrl: string) {
         name: site.studio,
         url: pageUrl,
         email: site.email,
-        description: site.intro,
+        description: plainText(site.intro),
         founder: { '@id': personId },
       },
     ],

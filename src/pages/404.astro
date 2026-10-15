@@ -2,12 +2,12 @@
 export const prerender = true;
 
 import Base from '../layouts/Base.astro';
-import { getSite } from '../lib/content';
+import { getSite, plainText } from '../lib/content';
 
 const site = await getSite();
 ---
 
-<Base title="Page not found · Humansize" description={site.intro}>
+<Base title="Page not found · Humansize" description={plainText(site.intro)}>
   <div class="not-found">
     <div>
       <h1>Page not found</h1>

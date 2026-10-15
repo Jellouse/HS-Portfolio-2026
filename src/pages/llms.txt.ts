@@ -10,7 +10,7 @@ export const GET: APIRoute = async ({ site }) => {
   const lines = [
     `# ${settings.studio}`,
     '',
-    settings.intro,
+    plainText(settings.intro),
     '',
     `Email: ${settings.email}`,
     '',

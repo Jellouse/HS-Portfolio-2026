@@ -4,7 +4,7 @@ export const prerender = true;
 import Mark from '../components/Mark.astro';
 import ProjectFeed from '../components/ProjectFeed.astro';
 import Base from '../layouts/Base.astro';
-import { absoluteUrl, getProjects, getSite } from '../lib/content';
+import { absoluteUrl, getProjects, getSite, plainText } from '../lib/content';
 import { resolveImage } from '../lib/images';
 import { homeJsonLd } from '../lib/seo';
 
@@ -13,7 +13,7 @@ const projects = await getProjects();
 const cover = projects[0]?.data.cover;
 const image = cover ? resolveImage(cover) : undefined;
 const pageUrl = absoluteUrl(Astro.site, '/');
-const description = site.intro;
+const description = plainText(site.intro);
 ---
 
 <Base
