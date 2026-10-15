@@ -53,7 +53,11 @@ const title = `${projectLabel(project.data)} · Humansize`;
       </a>
     </p>
     <ProjectHero title={projectLabel(project.data)} summary={project.data.summary} />
-    <Blocks blocks={project.data.blocks} />
+    <Blocks
+      blocks={project.data.blocks}
+      slug={project.id}
+      processFromFolder={project.data.processFromFolder}
+    />
     <Info items={info} />
   </article>
 </Base>
