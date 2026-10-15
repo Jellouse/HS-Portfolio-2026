@@ -582,7 +582,7 @@ body:has(.project) .site-header {
 }
 
 .site-footer {
-  width: min(var(--card), calc(100% - 40px));
+  width: calc(100% - 40px);
   margin: 48px auto 72px;
   text-align: left;
 }
@@ -591,9 +591,6 @@ body:has(.project) .site-header {
   margin: 0 0 10px;
 }
 
-body:has(.project) .site-footer {
-  width: min(var(--measure), calc(100% - 40px));
-}
 
 .not-found {
   min-height: 100svh;
@@ -710,7 +707,7 @@ body:has(.project) .site-footer {
   }
 
   body:has(.hero) .site-header.page-grid,
-  body:has(.project) .site-footer.page-grid {
+  .site-footer.page-grid {
     width: min(100%, 1440px);
   }
 
@@ -795,10 +792,6 @@ body:has(.project) .site-footer {
   }
 
   .site-footer.page-grid > p {
-    grid-column: 1 / -1;
-  }
-
-  body:has(.project) .site-footer.page-grid > p {
     grid-column: 3 / 7;
   }
 }
