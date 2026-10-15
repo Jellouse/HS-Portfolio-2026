@@ -85,6 +85,17 @@ const site = await getSite();
           else img.addEventListener('load', mark, { once: true });
         });
 
+        // phones: an open menu or time closes itself after 5s
+        var autoClose = 0;
+        var armClose = function (el) {
+          clearTimeout(autoClose);
+          if (!el.classList.contains('is-open')) return;
+          if (!window.matchMedia('(max-width: 759px)').matches) return;
+          autoClose = setTimeout(function () {
+            el.classList.remove('is-open');
+          }, 5000);
+        };
+
         document.querySelectorAll('.contact').forEach(function (el) {
           var button = el.querySelector('.contact-label');
           if (!button) return;
@@ -96,6 +107,7 @@ const site = await getSite();
                 who.classList.remove('is-open');
               });
             }
+            armClose(el);
           });
         });
 
@@ -113,6 +125,14 @@ const site = await getSite();
                 el.classList.remove('is-open');
               });
             }
+            armClose(who);
+          });
+        });
+
+        // a tap outside an open menu or time closes it
+        document.addEventListener('click', function (event) {
+          document.querySelectorAll('.contact.is-open, .who.is-open').forEach(function (el) {
+            if (!el.contains(event.target)) el.classList.remove('is-open');
           });
         });
 

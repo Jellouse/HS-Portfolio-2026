@@ -735,45 +735,48 @@ body:has(.project) .site-header {
     transform: translateX(-50%);
   }
 
-  /* In-flow stack: the open menu shifts the block up so its middle item stays on the
-     @Humansize line (pushing the name up); the open time pushes @Humansize down a line. */
-  body:has(.hero) .site-header:has(.contact.is-open) {
-    transform: translate(-50%, -36px);
+  /* Fixed block: an open menu or time overlays the lines and hides what it covers. */
+  body:has(.hero) .who .time {
+    left: 50%;
+    transform: translateX(-50%);
   }
 
-  body:has(.hero) .who .time {
-    position: static;
-    display: none;
-    opacity: 1;
+  body:has(.hero) .who:hover .time,
+  body:has(.hero) .who:focus-within .time {
+    opacity: 0;
   }
 
   body:has(.hero) .who.is-open .time {
-    display: block;
+    opacity: 1;
+  }
+
+  body:has(.hero) .site-header:has(.who.is-open) .contact {
+    visibility: hidden;
+  }
+
+  body:has(.hero) .site-header:has(.contact.is-open) .who > a {
+    visibility: hidden;
   }
 
   body:has(.hero) .contact {
     text-align: center;
   }
 
-  body:has(.hero) .contact-menu,
-  body:has(.hero) .contact:hover .contact-menu,
-  body:has(.hero) .contact:focus-within .contact-menu {
-    position: static;
-    display: none;
+  body:has(.hero) .contact-menu {
+    right: auto;
+    left: 50%;
     align-items: center;
+    transform: translateX(-50%);
   }
 
-  body:has(.hero) .contact.is-open .contact-menu {
-    display: flex;
-  }
-
-  body:has(.hero) .contact:hover .contact-label,
-  body:has(.hero) .contact:focus-within .contact-label {
-    visibility: visible;
-  }
-
-  body:has(.hero) .contact.is-open .contact-label {
+  body:has(.hero) .contact:hover:not(.is-open) .contact-menu,
+  body:has(.hero) .contact:focus-within:not(.is-open) .contact-menu {
     display: none;
+  }
+
+  body:has(.hero) .contact:hover:not(.is-open) .contact-label,
+  body:has(.hero) .contact:focus-within:not(.is-open) .contact-label {
+    visibility: visible;
   }
 
   .feed {
