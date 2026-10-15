@@ -545,10 +545,22 @@ body:has(.project) .site-header {
 
 .process-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--gutter);
   align-items: start;
   width: 100%;
+}
+
+.process-grid > .frame {
+  width: 100%;
+  min-width: 0;
+}
+
+.process-grid img,
+.image-block img,
+.pair img {
+  width: 100%;
+  height: auto;
 }
 
 .info {
@@ -776,10 +788,6 @@ body:has(.project) .site-footer {
   body:has(.project) .site-footer.page-grid > p {
     grid-column: 3 / 7;
   }
-
-  html.show-grid .grid-overlay {
-    display: block;
-  }
 }
 
 .grid-overlay {
@@ -790,8 +798,18 @@ body:has(.project) .site-footer {
   pointer-events: none;
 }
 
-.grid-overlay .page-grid {
+html.show-grid .grid-overlay {
+  display: block;
+}
+
+html.show-grid .grid-overlay .page-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+  column-gap: var(--gutter);
+  width: min(100%, 1440px);
   height: 100%;
+  margin-inline: auto;
+  padding-inline: var(--margin);
 }
 
 .grid-overlay span {
