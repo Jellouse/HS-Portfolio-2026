@@ -95,6 +95,51 @@ const site = await getSite();
             el.classList.remove('is-open');
           });
         });
+
+        var marks = document.querySelectorAll('.mark');
+        if (marks.length) {
+          var fine = window.matchMedia('(hover: hover) and (pointer: fine)');
+          var reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+          var current = 1;
+          var target = 1;
+          var frame = 0;
+
+          var paint = function () {
+            var value = current.toFixed(4);
+            marks.forEach(function (mark) {
+              mark.style.setProperty('--mark-scale', value);
+            });
+          };
+
+          var tick = function () {
+            current += (target - current) * 0.12;
+            if (Math.abs(target - current) < 0.0008) {
+              current = target;
+              paint();
+              frame = 0;
+              return;
+            }
+            paint();
+            frame = requestAnimationFrame(tick);
+          };
+
+          var wake = function () {
+            if (!frame) frame = requestAnimationFrame(tick);
+          };
+
+          window.addEventListener('pointermove', function (event) {
+            if (!fine.matches || reduce.matches || event.pointerType === 'touch') return;
+            var distance = Math.abs(event.clientX - window.innerWidth / 2);
+            var reach = Math.min(1, distance / (window.innerWidth / 2));
+            target = 1 + 0.12 * reach * reach;
+            wake();
+          });
+
+          document.documentElement.addEventListener('pointerleave', function () {
+            target = 1;
+            wake();
+          });
+        }
       })();
     </script>
   </body>
