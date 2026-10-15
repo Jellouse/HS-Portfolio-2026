@@ -546,7 +546,10 @@ body:has(.project) .site-header {
   top: auto;
   left: auto;
   width: 42px;
-  transform: scaleX(var(--mark-scale, 1));
+  transform: scale(
+    calc(var(--mark-scale, 1) * var(--hover-x, 1)),
+    var(--hover-y, 1)
+  );
   transform-origin: center center;
 }
 
