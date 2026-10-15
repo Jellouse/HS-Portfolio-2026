@@ -67,5 +67,3 @@ blocks:
   - discriminant: process
     value:
       images: []
-todo:
-  - The line about campaigns with Analogue is not in the project-page mock.

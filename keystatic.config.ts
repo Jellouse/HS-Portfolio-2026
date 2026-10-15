@@ -205,10 +205,6 @@ export default config({
           },
           { label: 'Blocks' },
         ),
-        todo: fields.array(fields.text({ label: 'Note', multiline: true }), {
-          label: 'TODOs',
-          description: 'Editor notes. Not shown on the site.',
-        }),
       },
     }),
   },

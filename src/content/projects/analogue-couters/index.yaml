@@ -146,8 +146,3 @@ blocks:
         - src: >-
             /src/content/projects/analogue-couters/blocks/14/value/images/15/src.jpg
           flush: false
-todo:
-  - >-
-    TODO: add more photographs of the vitrines, the milk glass and the gallery
-    room.
-  - 'TODO: confirm collaborators beyond the design and build.'

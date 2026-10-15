@@ -55,5 +55,3 @@ blocks:
           alt: Industrial Bloom round vase
         - src: /src/content/projects/industrial-bloom/vase-3.jpg
           alt: Industrial Bloom vase
-todo:
-  - "TODO: confirm edition sizes. The process block reuses the vase renders until a dedicated process set exists."
