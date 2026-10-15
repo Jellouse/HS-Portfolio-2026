@@ -42,7 +42,7 @@ const socials = site.socials.filter((item) => item.href);
 </header>
 
 <details class="menu">
-  <summary>Menu</summary>
+  <summary aria-label="Menu"><span class="sr-only">Menu</span></summary>
   <div class="menu-panel">
     <a href="/" data-close-menu>{site.name}</a>
     <p class="menu-time" data-tokyo-time data-place={site.place} data-timezone={site.timezone}>
