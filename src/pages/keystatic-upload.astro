@@ -1,0 +1,194 @@
+---
+// Batch upload of process photos. Uses the GitHub session Keystatic already
+// holds in this browser (the keystatic-gh-access-token cookie that the
+// Keystatic admin itself reads client-side). No secrets ship with the page.
+// All dropped files go into src/content/projects/<slug>/process/ in one commit.
+import { getCollection } from 'astro:content';
+
+export const prerender = true;
+
+const projects = (await getCollection('projects'))
+  .sort((a, b) => a.data.order - b.data.order)
+  .map((p) => ({ slug: p.id, title: p.data.title }));
+const repo = 'Jellouse/HS-Portfolio-2026';
+const branch = 'main';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Process photo upload</title>
+    <style>
+      body { font: 15px/1.5 system-ui, sans-serif; max-width: 640px; margin: 40px auto; padding: 0 20px; color: #111; }
+      h1 { font-size: 22px; margin: 0 0 8px; }
+      p { margin: 0 0 16px; color: #555; }
+      select, button { font: inherit; padding: 8px 12px; border-radius: 8px; border: 1px solid #ccc; background: #fff; }
+      button { background: #111; color: #fff; border-color: #111; cursor: pointer; }
+      button:disabled { opacity: 0.4; cursor: default; }
+      #drop { margin: 16px 0; border: 2px dashed #bbb; border-radius: 16px; padding: 40px 20px; text-align: center; color: #666; cursor: pointer; }
+      #drop.over { border-color: #111; color: #111; background: #f5f5f5; }
+      ul { padding: 0; list-style: none; margin: 0 0 16px; max-height: 300px; overflow: auto; }
+      li { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #eee; font-size: 13px; }
+      #status { white-space: pre-wrap; font-size: 14px; }
+      .row { display: flex; gap: 8px; align-items: center; }
+      a { color: inherit; }
+    </style>
+  </head>
+  <body>
+    <h1>Process photos</h1>
+    <p>
+      Pick a project and drop photos. They are committed to its process folder in
+      one commit and sorted by file name. Then turn on "Use process folder" in the
+      <a href="/keystatic">CMS</a>.
+    </p>
+    <div class="row">
+      <select id="project">
+        {projects.map((p) => <option value={p.slug}>{p.title}</option>)}
+      </select>
+    </div>
+    <div id="drop">Drop photos here or click to choose</div>
+    <input id="input" type="file" accept="image/jpeg,image/png,image/webp,image/avif" multiple hidden />
+    <ul id="list"></ul>
+    <div class="row">
+      <button id="upload" disabled>Upload</button>
+      <button id="clear" type="button" style="background:#fff;color:#111">Clear</button>
+    </div>
+    <p id="status"></p>
+
+    <script define:vars={{ repo, branch }}>
+      const MAX_EDGE = 2400; // Site renders at most 2000px wide.
+      const BATCH_BYTES = 25 * 1024 * 1024; // Stay well under GitHub's request limit.
+      const OK = /\.(jpe?g|png|webp|avif)$/i;
+      const $ = (id) => document.getElementById(id);
+      const drop = $('drop'), input = $('input'), list = $('list'), status = $('status'), btn = $('upload');
+      let files = [];
+      const collator = new Intl.Collator('en', { numeric: true, sensitivity: 'base' });
+
+      function token() {
+        const m = document.cookie.match(/(?:^|;\s*)keystatic-gh-access-token=([^;]+)/);
+        return m ? decodeURIComponent(m[1]) : null;
+      }
+      function safeName(name) {
+        const dot = name.lastIndexOf('.');
+        const base = name.slice(0, dot).normalize('NFKD').replace(/[^\w.-]+/g, '-').replace(/^-+|-+$/g, '').toLowerCase() || 'photo';
+        return `${base}${name.slice(dot).toLowerCase().replace('.jpeg', '.jpg')}`;
+      }
+      function render() {
+        files.sort((a, b) => collator.compare(a.name, b.name));
+        list.innerHTML = '';
+        for (const f of files) {
+          const li = document.createElement('li');
+          li.textContent = safeName(f.name);
+          const s = document.createElement('span');
+          s.textContent = `${(f.size / 1048576).toFixed(1)} MB`;
+          li.append(s);
+          list.append(li);
+        }
+        btn.disabled = files.length === 0;
+      }
+      function add(fileList) {
+        const skipped = [];
+        for (const f of fileList) (OK.test(f.name) ? files.push(f) : skipped.push(f.name));
+        status.textContent = skipped.length ? `Skipped (not an image): ${skipped.join(', ')}` : '';
+        render();
+      }
+      drop.onclick = () => input.click();
+      input.onchange = () => { add(input.files); input.value = ''; };
+      drop.ondragover = (e) => { e.preventDefault(); drop.classList.add('over'); };
+      drop.ondragleave = () => drop.classList.remove('over');
+      drop.ondrop = (e) => { e.preventDefault(); drop.classList.remove('over'); add(e.dataTransfer.files); };
+      $('clear').onclick = () => { files = []; status.textContent = ''; render(); };
+
+      // Shrink big JPEG/WebP photos so the repo stays small. PNGs keep transparency untouched.
+      async function prepare(f) {
+        if (/\.(jpe?g|webp)$/i.test(f.name)) {
+          try {
+            const bmp = await createImageBitmap(f);
+            const scale = Math.min(1, MAX_EDGE / Math.max(bmp.width, bmp.height));
+            if (scale < 1) {
+              const c = document.createElement('canvas');
+              c.width = Math.round(bmp.width * scale);
+              c.height = Math.round(bmp.height * scale);
+              c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height);
+              const type = /webp$/i.test(f.name) ? 'image/webp' : 'image/jpeg';
+              const blob = await new Promise((r) => c.toBlob(r, type, 0.9));
+              if (blob) return blob;
+            }
+          } catch {}
+        }
+        return f;
+      }
+      async function b64(blob) {
+        const buf = new Uint8Array(await blob.arrayBuffer());
+        let s = '';
+        for (let i = 0; i < buf.length; i += 0x8000) s += String.fromCharCode(...buf.subarray(i, i + 0x8000));
+        return btoa(s);
+      }
+      async function gh(path, t, init = {}) {
+        const res = await fetch(`https://api.github.com${path}`, {
+          ...init,
+          headers: { Authorization: `Bearer ${t}`, Accept: 'application/vnd.github+json', ...(init.headers || {}) },
+        });
+        const body = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(body.message || `GitHub ${res.status}`);
+        return body;
+      }
+      async function commit(t, additions, headline) {
+        const ref = await gh(`/repos/${repo}/git/ref/heads/${branch}`, t);
+        const query = `mutation($input: CreateCommitOnBranchInput!) { createCommitOnBranch(input: $input) { commit { oid } } }`;
+        const out = await gh('/graphql', t, {
+          method: 'POST',
+          body: JSON.stringify({
+            query,
+            variables: {
+              input: {
+                branch: { repositoryNameWithOwner: repo, branchName: branch },
+                expectedHeadOid: ref.object.sha,
+                message: { headline },
+                fileChanges: { additions },
+              },
+            },
+          }),
+        });
+        if (out.errors?.length) throw new Error(out.errors.map((e) => e.message).join('; '));
+        return out.data.createCommitOnBranch.commit.oid;
+      }
+
+      btn.onclick = async () => {
+        const t = token();
+        if (!t) {
+          status.innerHTML = 'Not signed in. Open the <a href="/keystatic">CMS</a> first, then come back.';
+          return;
+        }
+        const slug = $('project').value;
+        btn.disabled = true;
+        try {
+          const batches = [[]];
+          let size = 0;
+          for (let i = 0; i < files.length; i++) {
+            status.textContent = `Preparing ${i + 1} of ${files.length}`;
+            const contents = await b64(await prepare(files[i]));
+            if (size + contents.length > BATCH_BYTES && batches.at(-1).length) { batches.push([]); size = 0; }
+            batches.at(-1).push({ path: `src/content/projects/${slug}/process/${safeName(files[i].name)}`, contents });
+            size += contents.length;
+          }
+          for (let i = 0; i < batches.length; i++) {
+            status.textContent = `Uploading${batches.length > 1 ? ` part ${i + 1} of ${batches.length}` : ''}`;
+            await commit(t, batches[i], `Add ${batches[i].length} process photos to ${slug}`);
+          }
+          status.innerHTML = `Done. ${files.length} photos added to ${slug}/process. The site redeploys in a minute or two. Turn on "Use process folder" in the <a href="/keystatic/branch/${branch}/collection/projects/item/${slug}">CMS</a>.`;
+          files = [];
+          render();
+        } catch (e) {
+          status.textContent = /credentials|401/i.test(e.message)
+            ? 'Your CMS session expired. Open the CMS once to refresh it, then try again.'
+            : `Upload failed: ${e.message}`;
+          btn.disabled = false;
+        }
+      };
+    </script>
+  </body>
+</html>

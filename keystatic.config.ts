@@ -128,7 +128,7 @@ export default config({
           label: 'Use process folder',
           defaultValue: false,
           description:
-            'Show every image in this project\'s process/ folder, sorted by file name. Upload them on GitHub into src/content/projects/<project>/process/. If the folder is empty, the Process photos below are used.',
+            'Show every image in this project\'s process/ folder, sorted by file name. Upload many at once at /keystatic-upload. If the folder is empty, the Process photos below are used.',
         }),
         blocks: fields.blocks(
           {
