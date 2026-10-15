@@ -717,14 +717,42 @@ body:has(.project) .site-header {
     height: 100%;
   }
 
+  html:has(.hero),
+  body:has(.hero) {
+    background: var(--bg);
+  }
+
+  .hero .mark {
+    top: 17svh;
+    width: 33vw;
+  }
+
   body:has(.hero) .site-header {
-    top: auto;
-    bottom: 96px;
+    top: 72svh;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    transform: translateX(-50%);
+  }
+
+  body:has(.hero) .who .time {
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  body:has(.hero) .contact {
+    text-align: center;
+  }
+
+  body:has(.hero) .contact-menu {
+    right: auto;
+    left: 50%;
+    align-items: center;
     transform: translateX(-50%);
   }
 
   .feed {
-    margin-top: -64px;
+    margin-top: -8svh;
   }
 }
 
