@@ -11,18 +11,17 @@ cover: /src/content/projects/tonys-chocolonely/cover.jpg
 coverAlt: Tony's Chocolonely
 coverFrame: medium
 rounded: false
-credits:
-  - role: Design
-    name: Johann Schnettker
-  - role: With
-    name: Analogue and Build
 info:
+  - label: Design
+    value: Johann Schnettker
+  - label: Role
+    value: Website
+  - label: With
+    value: Analogue and Build
   - label: Year
     value: "2025"
   - label: Client
     value: Tony's Chocolonely
-  - label: Role
-    value: Website
 blocks:
   - discriminant: text
     value:

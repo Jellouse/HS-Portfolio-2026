@@ -10,10 +10,9 @@ summary: >
 cover: /src/content/projects/analogue/cover.jpg
 coverAlt: Analogue store on Zeedijk in Amsterdam
 coverFrame: wide
-credits:
-  - role: Design and build
-    name: Johann Schnettker
 info:
+  - label: Design and build
+    value: Johann Schnettker
   - label: Year
     value: "2025"
   - label: Client

@@ -1,6 +1,6 @@
 ---
 import Blocks from '../../components/Blocks.astro';
-import Credits from '../../components/Credits.astro';
+import Info from '../../components/Info.astro';
 import ProjectHero from '../../components/ProjectHero.astro';
 import Base from '../../layouts/Base.astro';
 import { absoluteUrl, getProjects, plainText, type ProjectEntry } from '../../lib/content';
@@ -37,6 +37,6 @@ const title = `${project.data.caption} · Humansize`;
     <p class="project-back"><a href="/">Close</a></p>
     <ProjectHero title={project.data.caption} />
     <Blocks blocks={project.data.blocks} />
-    <Credits items={project.data.credits} />
+    <Info items={project.data.info} />
   </article>
 </Base>

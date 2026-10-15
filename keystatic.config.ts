@@ -61,26 +61,19 @@ export default config({
           defaultValue: true,
           description: 'Turn off for a square frame with a little padding.',
         }),
-        credits: fields.array(
-          fields.object({
-            role: fields.text({ label: 'Role' }),
-            name: fields.text({ label: 'Name' }),
-            url: fields.text({ label: 'URL', description: 'Optional. The name is underlined as a link.' }),
-          }),
-          {
-            label: 'Credit',
-            itemLabel: (props) => props.fields.name.value || 'Credit',
-          },
-        ),
         info: fields.array(
           fields.object({
-            label: fields.text({ label: 'Label' }),
+            label: fields.text({ label: 'Key' }),
             value: fields.text({ label: 'Value' }),
-            href: fields.text({ label: 'Link', description: 'Optional URL.' }),
+            href: fields.text({
+              label: 'Link',
+              description: 'Optional. The value is underlined.',
+            }),
           }),
           {
             label: 'Info',
-            itemLabel: (props) => props.fields.label.value || 'Info',
+            description: 'Shown as Key: Value under a centred Info label. Leave out anything unknown.',
+            itemLabel: (props) => props.fields.label.value || 'Line',
           },
         ),
         blocks: fields.blocks(

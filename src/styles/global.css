@@ -130,7 +130,7 @@ a:hover:has(img),
 .about a,
 .text-block a,
 .summary a,
-.credits-list a,
+.info-list a,
 .site-footer a,
 .not-found a {
   color: inherit;
@@ -144,7 +144,7 @@ a:hover:has(img),
 .about a:hover,
 .text-block a:hover,
 .summary a:hover,
-.credits-list a:hover,
+.info-list a:hover,
 .site-footer a:hover,
 .not-found a:hover {
   color: inherit;
@@ -508,7 +508,7 @@ body:has(.hero) .site-header {
 }
 
 .process-label,
-.credits-label {
+.info-label {
   margin: 0 0 120px;
   font-size: var(--text-title);
   font-weight: 400;
@@ -526,16 +526,12 @@ body:has(.hero) .site-header {
   margin: 0 auto;
 }
 
-.credits {
+.info {
   width: min(100%, var(--measure));
   margin: 120px auto 40px;
 }
 
-.credits-label {
-  margin-bottom: 28px;
-}
-
-.credits-list {
+.info-list {
   margin: 0;
   padding: 0;
   list-style: none;
@@ -544,7 +540,7 @@ body:has(.hero) .site-header {
   line-height: 29px;
 }
 
-.credits-list li {
+.info-list li {
   margin: 0;
 }
 

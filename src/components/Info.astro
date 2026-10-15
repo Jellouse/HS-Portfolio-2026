@@ -14,18 +14,15 @@ const { items } = Astro.props;
 
 {
   items.length > 0 && (
-    <section>
-      <h2>Info</h2>
-      <dl>
+    <section class="info">
+      <h2 class="info-label">Info</h2>
+      <ul class="info-list">
         {items.map((item) => (
-          <>
-            <dt>{item.label}</dt>
-            <dd>
-              {item.href ? <a href={item.href}>{item.value}</a> : item.value}
-            </dd>
-          </>
+          <li>
+            {item.label}: {item.href ? <a href={item.href}>{item.value}</a> : item.value}
+          </li>
         ))}
-      </dl>
+      </ul>
     </section>
   )
 }

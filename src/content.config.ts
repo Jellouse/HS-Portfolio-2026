@@ -51,12 +51,6 @@ export const blockSchema = z.discriminatedUnion('discriminant', [
   processBlock,
 ]);
 
-const creditSchema = z.object({
-  role: z.string(),
-  name: z.string(),
-  url: z.string().optional(),
-});
-
 const infoSchema = z.object({
   label: z.string(),
   value: z.string(),
@@ -81,7 +75,6 @@ const projects = defineCollection({
     coverAlt: z.string().optional(),
     coverFrame: frame.default('full'),
     rounded: z.boolean().default(true),
-    credits: z.array(creditSchema).default([]),
     info: z.array(infoSchema).default([]),
     blocks: z.array(blockSchema).default([]),
     todo: z.array(z.string()).default([]),

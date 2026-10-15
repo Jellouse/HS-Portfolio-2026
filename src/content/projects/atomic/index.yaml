@@ -10,18 +10,17 @@ summary: >
 cover: /src/content/projects/atomic/cover.jpg
 coverAlt: Atomic Ski
 coverFrame: narrow
-credits:
-  - role: Design
-    name: Johann Schnettker
-  - role: With
-    name: Analogue
 info:
+  - label: Design
+    value: Humansize
+  - label: Role
+    value: Web design, motion and 3D
+  - label: With
+    value: Analogue
   - label: Year
     value: "2026"
   - label: Client
     value: Atomic
-  - label: Role
-    value: Web design, motion and 3D
   - label: Site
     value: atomic.com
     href: https://www.atomic.com/
@@ -44,5 +43,3 @@ blocks:
       src: /src/content/projects/atomic/archive.jpg
       alt: Atomic Ski, 3D work for goggles, boots and skis
       frame: wide
-todo:
-  - "TODO: confirm the full credit list for the web redesign."

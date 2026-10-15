@@ -7,7 +7,7 @@ Portfolio for Johann Schnettker. Static Astro site, content in the repo, Keystat
 - `src/pages/index.astro` is the homepage. The work is the page. The first project peeks above the fold.
 - `src/pages/work/[slug].astro` builds every published project from its block list. New projects do not need a new page. Close returns to the homepage.
 - `src/content.config.ts` is the typed schema. `keystatic.config.ts` edits the same files. Keep the two in step.
-- `src/components/` holds the UI. Header, Mark, ProjectFeed, ProjectCard, About, ProjectHero, TextBlock, ImageBlock, ImagePair, Credits, Info, Footer.
+- `src/components/` holds the UI. Header, Mark, ProjectFeed, ProjectCard, About, ProjectHero, TextBlock, ImageBlock, ImagePair, Info, Footer.
 - Images live next to their project and go through `astro:assets` (`src/lib/images.ts`, `BlurImage.astro`).
 - Keystatic is mounted only during `npm run dev`. Its admin routes are server routes, and the Vercel build stays `output: 'static'`.
 
@@ -20,8 +20,8 @@ Portfolio for Johann Schnettker. Static Astro site, content in the repo, Keystat
 ## Add a project
 
 1. `npm run dev` and open `/keystatic`, or duplicate a project folder.
-2. Set title, caption (`Name, Year`), order, summary (two or three sentences), cover, alt text, credits (role, name, optional URL), and blocks.
-3. Blocks are `text`, `image`, `pair`, or `process`. `process` is an optional centred Process label and a two-column grid of photos. That is the whole project page.
+2. Set title, caption (`Name, Year`), order, summary (two or three sentences), cover, alt text, info lines (`Key: Value`, optional link on the value), and blocks. Leave out unknown info lines.
+3. Blocks are `text`, `image`, `pair`, or `process`. `process` is an optional centred Process label and a two-column grid of photos. The project page ends with a centred Info label and the info list, aligned to the image column.
 4. Leave `published` off until the cover image and alt text exist.
 5. Put unknowns in `todo`. Those notes are not rendered.
 6. Update `src/pages/llms.txt.ts` only if you want a line the generator does not already build. It reads the collection.
