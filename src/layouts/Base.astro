@@ -91,6 +91,28 @@ const site = await getSite();
           button.addEventListener('click', function () {
             if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
             el.classList.toggle('is-open');
+            if (el.classList.contains('is-open')) {
+              document.querySelectorAll('.who.is-open').forEach(function (who) {
+                who.classList.remove('is-open');
+              });
+            }
+          });
+        });
+
+        // touch phones: tapping the name toggles the Tokyo time instead of navigating
+        document.querySelectorAll('.who').forEach(function (who) {
+          var link = who.querySelector('a');
+          if (!link) return;
+          link.addEventListener('click', function (event) {
+            if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+            if (!window.matchMedia('(max-width: 759px)').matches) return;
+            event.preventDefault();
+            who.classList.toggle('is-open');
+            if (who.classList.contains('is-open')) {
+              document.querySelectorAll('.contact.is-open').forEach(function (el) {
+                el.classList.remove('is-open');
+              });
+            }
           });
         });
 
