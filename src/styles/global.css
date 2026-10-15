@@ -780,10 +780,17 @@ body:has(.project) .site-header {
     margin-right: 0;
   }
 
-  .project.page-grid > .text-block,
   .project.page-grid > .image-block,
   .project.page-grid > .pair,
-  .project.page-grid > .process,
+  .project.page-grid > .process {
+    grid-column: 2 / 8;
+    width: auto;
+    max-width: none;
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .project.page-grid > .text-block,
   .project.page-grid > .info {
     grid-column: 3 / 7;
     width: auto;
