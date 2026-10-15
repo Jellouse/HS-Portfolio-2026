@@ -700,12 +700,12 @@ body:has(.project) .site-header {
   margin-bottom: 0;
 }
 
-/* The faces span the full width edge to edge. Their box is as tall as the full stretch
-   range (4x the rest height), so nothing is ever cropped. Same proportions as the homepage
+/* The faces span the full width edge to edge. Their height is capped at 2x here, and the
+   box is exactly that tall, so nothing is ever cropped. Same proportions as the homepage
    red box: rest height = 1.3x a face's base width, base width = 1/5 of the row. */
 .footer-faces {
   position: relative;
-  aspect-ratio: 100 / 104;
+  aspect-ratio: 100 / 52;
   pointer-events: none;
 }
 

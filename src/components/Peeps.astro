@@ -1,8 +1,14 @@
 ---
 import PeepsStatic from './PeepsStatic.astro';
+
+interface Props {
+  maxH?: number;
+}
+
+const { maxH } = Astro.props;
 ---
 
-<div class="peeps" data-peeps>
+<div class="peeps" data-peeps data-max-h={maxH}>
   <PeepsStatic />
 </div>
 
