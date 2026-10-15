@@ -430,18 +430,11 @@ body:has(.hero) .site-header {
 
 .caption {
   display: block;
-  margin-top: 22px;
+  margin-top: 138px;
+  margin-bottom: 247px;
   font-size: 23px;
   line-height: 29px;
-  text-align: left;
-}
-
-.summary {
-  width: 100%;
-  margin: 28px 0 0;
-  font-size: 23px;
-  line-height: 29px;
-  text-align: left;
+  text-align: center;
 }
 
 .about {
@@ -702,7 +695,8 @@ body:has(.project) .site-footer {
   }
 
   .caption {
-    margin-top: 28px;
+    margin-top: 138px;
+    margin-bottom: 247px;
     text-align: center;
   }
 
@@ -750,6 +744,10 @@ body:has(.project) .site-footer {
     margin-bottom: 120px;
   }
 
+  .card > .caption {
+    margin-bottom: 247px;
+  }
+
   .card.is-lead > .lead,
   .card[data-frame='full'] > a:first-child {
     grid-column: 1 / -1;
@@ -768,8 +766,7 @@ body:has(.project) .site-footer {
   }
 
   .about,
-  .card > .caption,
-  .card > .summary {
+  .card > .caption {
     grid-column: 3 / 7;
     width: auto;
     margin-left: 0;

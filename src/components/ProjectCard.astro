@@ -1,7 +1,7 @@
 ---
 import BlurImage from './BlurImage.astro';
 import { resolveImage } from '../lib/images';
-import { renderInline, type ProjectEntry } from '../lib/content';
+import type { ProjectEntry } from '../lib/content';
 
 interface Props {
   project: ProjectEntry;
@@ -9,7 +9,7 @@ interface Props {
 }
 
 const { project, priority = false } = Astro.props;
-const { caption, summary, cover, coverAlt, coverFrame, coverFlush, rounded } = project.data;
+const { caption, cover, coverAlt, coverFrame, coverFlush, rounded } = project.data;
 if (!cover || !coverAlt) throw new Error(`${project.id} is missing a cover`);
 const image = resolveImage(cover);
 const sizes = {
@@ -18,7 +18,6 @@ const sizes = {
   medium: '(min-width: 1440px) 552px, (min-width: 760px) 40vw, 100vw',
   narrow: '(min-width: 1440px) 410px, (min-width: 760px) 30vw, 100vw',
 }[coverFrame];
-const text = renderInline(summary.replace(/\s+/g, ' ').trim());
 ---
 
 <article class:list={['card', { 'is-plain': rounded === false }]} data-frame={coverFrame}>
@@ -33,5 +32,4 @@ const text = renderInline(summary.replace(/\s+/g, ' ').trim());
     />
   </a>
   <a class="caption" href={`/work/${project.id}`}>{caption}</a>
-  <p class="summary" set:html={text} />
 </article>
