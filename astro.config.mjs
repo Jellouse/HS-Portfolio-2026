@@ -116,7 +116,7 @@ export default defineConfig({
     sitemap({
       filter: (page) => {
         const path = new URL(page).pathname.replace(/\/$/, '') || '/';
-        return path !== '/work' && path !== '/projects' && path !== '/all';
+        return !path.startsWith('/lab') && path !== '/work' && path !== '/projects' && path !== '/all';
       },
     }),
     react(),
