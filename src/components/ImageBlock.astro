@@ -11,14 +11,9 @@ interface Props {
 
 const { src, alt, frame = 'full', priority = false } = Astro.props;
 const image = resolveImage(src);
-const sizes = {
-  full: '(min-width: 1200px) 1120px, 100vw',
-  wide: '(min-width: 1200px) 848px, 100vw',
-  medium: '(min-width: 1200px) 652px, 100vw',
-  narrow: '(min-width: 760px) 420px, 100vw',
-}[frame];
+const sizes = '(min-width: 760px) 550px, calc(100vw - 40px)';
 ---
 
 <figure class="image-block" data-frame={frame}>
-  <BlurImage src={image} alt={alt} sizes={sizes} priority={priority} />
+  <BlurImage src={image} alt={alt} sizes={sizes} priority={priority} cover />
 </figure>

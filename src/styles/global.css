@@ -402,6 +402,14 @@ body:has(#grid-toggle:checked) {
   border-radius: inherit;
 }
 
+.frame.is-cover img {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
 .js .frame img {
   opacity: 0;
 }
@@ -444,12 +452,12 @@ body:has(#grid-toggle:checked) {
 }
 
 .project {
-  padding: 213px var(--pad) 40px;
+  padding: 218px var(--pad) 40px;
 }
 
 .project-hero {
   width: min(var(--measure), 100%);
-  margin: 0 auto 118px;
+  margin: 0 auto 120px;
   text-align: center;
 }
 
@@ -463,7 +471,7 @@ body:has(#grid-toggle:checked) {
 
 .text-block {
   width: min(var(--measure), 100%);
-  margin: 0 auto 72px;
+  margin: 0 auto 59px;
   font-size: var(--text-title);
   line-height: var(--lh-title);
 }
@@ -612,14 +620,25 @@ body:has(#grid-toggle:checked) .grid-view {
     margin-top: -64px;
   }
 
-  .project-hero h1 {
+  .project {
+    padding-top: 220px;
+  }
+
+  .project-hero {
+    margin-bottom: 98px;
+  }
+
+  .project-hero h1,
+  .text-block {
     font-size: 18px;
-    line-height: 24px;
+    line-height: 23px;
   }
 
   .text-block {
-    font-size: 17px;
-    line-height: 23px;
+    width: min(335px, 100%);
+    margin-bottom: 20px;
+    margin-left: 0;
+    letter-spacing: -0.035em;
   }
 }
 
@@ -660,6 +679,18 @@ body:has(#grid-toggle:checked) .grid-view {
   .feed {
     margin-top: -32px;
     padding-bottom: 80px;
+  }
+
+  .text-block,
+  .image-block,
+  .pair {
+    margin-left: calc(50% - var(--measure) / 2 + 13px);
+    margin-right: auto;
+  }
+
+  .text-block {
+    width: 520px;
+    letter-spacing: -0.03em;
   }
 
   .frame,

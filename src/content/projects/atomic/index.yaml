@@ -30,13 +30,15 @@ blocks:
     value:
       text: |
         It started with the Boot Hub, a vision we set months ago and hoped to carry across the whole site one day. Now it does. Web design, motion and 3D, all built around tension and ski nets.
-
-        Together with Analogue, we've launched several campaigns for Atomic Ski products. I've mostly been involved in the 3D rendering of goggles, boots and skis.
   - discriminant: image
     value:
       src: /src/content/projects/atomic/web.jpg
       alt: Atomic Ski website
       frame: full
+  - discriminant: text
+    value:
+      text: |
+        Together with Analogue, we've launched several campaigns for Atomic Ski products. I've mostly been involved in the 3D rendering of goggles, boots and skis.
   - discriminant: image
     value:
       src: /src/content/projects/atomic/archive.jpg

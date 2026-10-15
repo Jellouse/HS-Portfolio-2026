@@ -7,11 +7,13 @@ interface Props {
   alt: string;
   sizes: string;
   priority?: boolean;
+  cover?: boolean;
 }
 
-const { src, alt, sizes, priority = false } = Astro.props;
-const widths = [480, 768, 1100, 1600, 2000].filter((width) => width < src.width);
-if (widths.length === 0) widths.push(src.width);
+const { src, alt, sizes, priority = false, cover = false } = Astro.props;
+const widths = [...new Set([480, 768, 1100, 1600, 2000, src.width])].filter(
+  (width) => width <= src.width,
+);
 const placeholder = await getImage({
   src,
   width: 24,
@@ -20,7 +22,10 @@ const placeholder = await getImage({
 });
 ---
 
-<div class="frame" style={`background-image:url('${placeholder.src}')`}>
+<div
+  class:list={['frame', { 'is-cover': cover }]}
+  style={`background-image:url('${placeholder.src}')${cover ? `;aspect-ratio:${src.width}/${src.height}` : ''}`}
+>
   <Image
     src={src}
     alt={alt}
