@@ -800,8 +800,38 @@ body:has(.project) .site-header {
   }
 
   .mark {
-    top: calc(50% - 196px);
+    top: calc(50% - 181px);
     width: 171px;
+  }
+
+  /* Layout try: bio first, centred at a narrow measure, then the faces row in red on white
+     spanning the header edges, then the projects. */
+  .feed > .about {
+    order: -1;
+    grid-column: 1 / -1;
+    justify-self: center;
+    width: min(100%, var(--measure));
+    margin-top: 120px;
+    margin-bottom: 200px;
+  }
+
+  .card.is-lead > .lead {
+    aspect-ratio: auto;
+    padding: 160px 0;
+    overflow: visible;
+    background: transparent;
+    border-radius: 0;
+    clip-path: none;
+  }
+
+  .card.is-lead > .lead .peeps {
+    width: 100%;
+    transform: none;
+  }
+
+  .card.is-lead > .lead .peeps-static :is(path, ellipse),
+  .card.is-lead > .lead .peeps-row svg {
+    fill: var(--red);
   }
 
   .lead {
