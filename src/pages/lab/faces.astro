@@ -1,7 +1,7 @@
 ---
 export const prerender = true;
 import '../../styles/global.css';
-const base = [0.7, 1.15, 0.85, 1.4, 0.95, 1.25, 0.75];
+const base = [1, 1, 1, 1, 1, 1, 1, 1, 1];
 ---
 <!doctype html>
 <html lang="en">
@@ -15,7 +15,7 @@ const base = [0.7, 1.15, 0.85, 1.4, 0.95, 1.25, 0.75];
   <main class="stage" id="stage">
     <div class="row" id="row">
       {base.map((s) => (
-        <svg class="face" data-base={s} viewBox="0 0 122 180" style={`--s:${s}`} aria-hidden="true">
+        <svg class="face" data-base={s} viewBox="0 0 122 180" preserveAspectRatio="none" aria-hidden="true">
           <g class="g">
             <path d="M60.9844 0C94.665 2.50437e-05 121.969 40.5453 121.969 90.5605C121.969 134.795 100.612 171.621 72.375 179.543V179.323C96.0654 171.722 113.794 140.903 113.794 104.04C113.794 61.4697 90.1516 26.9594 60.9873 26.959C31.8228 26.959 8.17983 61.4695 8.17969 104.04C8.17969 140.901 25.9058 171.717 49.5938 179.321V179.543C21.3571 171.621 6.24157e-07 134.795 0 90.5605C9.09239e-05 40.5453 27.3037 4.56074e-06 60.9844 0Z"/>
             <g class="feat">
@@ -30,12 +30,11 @@ const base = [0.7, 1.15, 0.85, 1.4, 0.95, 1.25, 0.75];
   </main>
   <aside class="panel">
     <div class="modes" role="tablist">
-      <button data-mode="pull" class="on">Pull</button>
-      <button data-mode="wobble">Wobble</button>
+      <button data-mode="focus" class="on">Focus</button>
       <button data-mode="wave">Wave</button>
-      <button data-mode="magnet">Magnet</button>
+      <button data-mode="tilt">Tilt</button>
       <button data-mode="look">Look</button>
-      <button data-mode="jelly">Jelly</button>
+      <button data-mode="split">Split</button>
     </div>
     <div id="dials"></div>
     <button id="copy" class="copy">Copy settings as JSON</button>
@@ -43,11 +42,10 @@ const base = [0.7, 1.15, 0.85, 1.4, 0.95, 1.25, 0.75];
   </aside>
   <style is:global>
     body.lab { margin: 0; background: var(--red); color: #f8f8f8; overflow: hidden; }
-    .stage { height: 100vh; display: flex; align-items: center; justify-content: center; }
-    .row { display: flex; align-items: flex-end; gap: 12px; height: 220px; }
-    .face { height: 180px; width: calc(122px * var(--s)); overflow: visible; fill: #f8f8f8; }
+    .stage { height: 100vh; display: flex; align-items: center; }
+    .row { display: flex; align-items: center; width: 100%; height: 70vh; padding: 0 16px; box-sizing: border-box; }
+    .face { flex: 1 1 0; min-width: 0; height: 40%; display: block; overflow: visible; fill: #f8f8f8; }
     .face .feat { transform-box: view-box; }
-    .face .g { transform-origin: 61px 180px; transform-box: view-box; }
     .panel { position: fixed; right: 16px; bottom: 16px; width: 260px; padding: 16px; border-radius: 15px;
       background: rgba(248,248,248,.96); color: #000; font-size: 13px; line-height: 18px; }
     .modes { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 12px; }
@@ -61,26 +59,25 @@ const base = [0.7, 1.15, 0.85, 1.4, 0.95, 1.25, 0.75];
   </style>
   <script is:inline>
   (() => {
+    const ALL = ['focus','wave','tilt','look','split'];
     const D = {
-      stretch: { label: 'Stretch amount', min: 0, max: 1, step: .01, v: .35, modes: ['pull','wobble','wave','magnet','look','jelly'] },
-      speed: { label: 'Speed', min: .1, max: 3, step: .05, v: 1, modes: ['pull','wobble','wave','jelly'] },
-      radius: { label: 'Cursor radius (px)', min: 40, max: 800, step: 10, v: 260, modes: ['pull','wobble','magnet','look'] },
-      falloff: { label: 'Falloff', min: .5, max: 4, step: .1, v: 2, modes: ['pull'] },
-      strength: { label: 'Cursor strength', min: 0, max: 2, step: .05, v: 1, modes: ['pull','wobble','magnet','look','jelly'] },
-      randomness: { label: 'Randomness', min: 0, max: 1, step: .01, v: .3, modes: ['pull','wobble','wave','jelly'] },
-      stiffness: { label: 'Spring stiffness', min: 10, max: 400, step: 5, v: 120, modes: ['pull','wobble','magnet','look','jelly'] },
-      damping: { label: 'Spring damping', min: 1, max: 40, step: .5, v: 10, modes: ['pull','wobble','magnet','look','jelly'] },
-      wavelength: { label: 'Wave length (faces)', min: 1, max: 14, step: .5, v: 5, modes: ['wave'] },
+      stretch: { label: 'Width stretch', min: 0, max: 4, step: .05, v: 2, modes: ALL },
+      height: { label: 'Height stretch', min: 0, max: 2, step: .05, v: .8, modes: ALL },
+      radius: { label: 'Radius (faces)', min: .3, max: 6, step: .1, v: 1.5, modes: ['focus','look'] },
+      sharpness: { label: 'Sharpness', min: .5, max: 6, step: .1, v: 2, modes: ['focus','look','split'] },
+      wavelength: { label: 'Wave length (faces)', min: 1, max: 14, step: .5, v: 4, modes: ['wave'] },
+      eyes: { label: 'Eye shift', min: 0, max: 30, step: 1, v: 14, modes: ['look'] },
+      randomness: { label: 'Randomness', min: 0, max: 1, step: .01, v: .2, modes: ALL },
+      speed: { label: 'Idle speed', min: .1, max: 3, step: .05, v: 1, modes: ALL },
     };
     const S = Object.fromEntries(Object.entries(D).map(([k, d]) => [k, d.v]));
-    let mode = 'pull';
+    let mode = 'focus';
     const reduce = matchMedia('(prefers-reduced-motion: reduce)');
-    const finePointer = matchMedia('(hover: hover) and (pointer: fine)');
-    const faces = [...document.querySelectorAll('.face')].map((el, i) => ({
-      el, g: el.querySelector('.g'), ft: el.querySelector('.feat'), i, ox: 0, ovx: 0, ex: 0, ey: 0, evx: 0, evy: 0, x: 1, y: 1, vx: 0, vy: 0, seed: Math.random() * 1000,
-    }));
-    const dials = document.getElementById('dials');
-    const note = document.getElementById('note');
+    const fine = matchMedia('(hover: hover) and (pointer: fine)');
+    const row = document.getElementById('row');
+    const faces = [...document.querySelectorAll('.face')].map((el, i) => ({ el, ft: el.querySelector('.feat'), i, seed: Math.random() * 100 }));
+    const N = faces.length;
+    const dials = document.getElementById('dials'), note = document.getElementById('note');
     function render() {
       dials.innerHTML = '';
       for (const [k, d] of Object.entries(D)) {
@@ -88,16 +85,16 @@ const base = [0.7, 1.15, 0.85, 1.4, 0.95, 1.25, 0.75];
         const l = document.createElement('label');
         l.innerHTML = `<span>${d.label}<b>${S[k]}</b></span><input type="range" min="${d.min}" max="${d.max}" step="${d.step}" value="${S[k]}">`;
         const inp = l.querySelector('input'), b = l.querySelector('b');
-        inp.oninput = () => { S[k] = +inp.value; b.textContent = inp.value; };
+        inp.oninput = () => { S[k] = +inp.value; b.textContent = inp.value; if (reduce.matches) draw(.5, .5, 0); };
         dials.appendChild(l);
       }
-      note.textContent = reduce.matches ? 'Reduced motion is on, so animation is paused.'
-        : finePointer.matches ? 'Move the cursor over the faces.' : 'No cursor, so this runs as a continuous animation.';
+      note.textContent = reduce.matches ? 'Reduced motion is on, so faces hold a still layout.'
+        : fine.matches ? 'Move the cursor across the faces.' : 'No cursor, so a simulated one drives the faces.';
     }
     document.querySelectorAll('[data-mode]').forEach((b) => b.onclick = () => {
       mode = b.dataset.mode;
       document.querySelectorAll('[data-mode]').forEach((x) => x.classList.toggle('on', x === b));
-      render();
+      render(); if (reduce.matches) draw(.5, .5, 0);
     });
     document.getElementById('copy').onclick = async (e) => {
       const out = { mode };
@@ -106,94 +103,53 @@ const base = [0.7, 1.15, 0.85, 1.4, 0.95, 1.25, 0.75];
       catch { prompt('Settings', JSON.stringify(out)); }
       setTimeout(() => e.target.textContent = 'Copy settings as JSON', 1200);
     };
-    let px = -9999, py = -9999, pspeed = 0, pvx = 0, pvy = 0, hasPointer = false, lastMove = 0;
-    addEventListener('pointermove', (e) => {
-      if (e.pointerType !== 'mouse') return;
-      const now = performance.now(), dt = Math.max(1, now - lastMove);
-      pvx = (e.clientX - px) / dt; pvy = (e.clientY - py) / dt; if (Math.abs(pvx) > 5) pvx = pvy = 0;
-      pspeed = Math.min(4, Math.hypot(e.clientX - px, e.clientY - py) / dt);
-      px = e.clientX; py = e.clientY; hasPointer = true; lastMove = now;
-    });
-    document.addEventListener('pointerleave', () => { px = py = -9999; });
+    let px = 0, py = 0, last = -1e9;
+    addEventListener('pointermove', (e) => { if (e.pointerType === 'mouse') { px = e.clientX; py = e.clientY; last = performance.now(); } });
     const noise = (s, t) => Math.sin(t * 1.3 + s) * .6 + Math.sin(t * 2.7 + s * 1.7) * .4;
-    let t = 0, prev = performance.now();
-    function frame(now) {
-      const dt = Math.min(.05, (now - prev) / 1000); prev = now;
-      if (reduce.matches) { faces.forEach((f) => { f.g.style.transform = ''; f.el.style.transform = ''; f.ft.style.transform = ''; }); requestAnimationFrame(frame); return; }
-      t += dt * S.speed;
-      const live = hasPointer && finePointer.matches && now - lastMove < 2500;
-      // simulated pointer for touch / idle
-      let cx = px, cy = py, cspeed = pspeed;
-      if (!live) {
-        const r = document.getElementById('row').getBoundingClientRect();
-        cx = r.left + r.width * (.5 + .5 * Math.sin(t * .6)); cy = r.top + r.height * (.5 + .3 * Math.sin(t * 1.1));
-        cspeed = .6 + .4 * Math.sin(t * .9);
-      }
-      let cvx = live ? pvx : Math.cos(t * .6) * .6, cvy = live ? pvy : Math.cos(t * 1.1) * .2;
-      pvx *= .9; pvy *= .9;
-      pspeed *= .9;
+    // pure function: (u, v in 0..1 across the row, t) -> widths (flex shares) and heights
+    function draw(u, v, t) {
+      const cx = u * N - .5; // cursor in face-index units
+      const r = row.getBoundingClientRect();
       for (const f of faces) {
-        const r = f.el.getBoundingClientRect();
-        const fx = r.left + r.width / 2, fy = r.top + r.height / 2;
-        const jitter = S.randomness * noise(f.seed, t);
-        let tx = 1, ty = 1;
-        if (mode === 'pull') {
-          const d = Math.hypot(cx - fx, cy - fy);
-          const k = Math.pow(Math.max(0, 1 - d / S.radius), S.falloff) * S.strength;
-          const ax = Math.abs(cx - fx) / (d || 1), ay = Math.abs(cy - fy) / (d || 1);
-          tx = 1 + S.stretch * k * ax * 1.5 + jitter * .1 * S.stretch;
-          ty = 1 + S.stretch * k * ay * 1.5 + S.stretch * k * .3 - jitter * .1 * S.stretch;
-        } else if (mode === 'wobble') {
-          const d = Math.hypot(cx - fx, cy - fy);
-          const near = Math.max(0, 1 - d / S.radius);
-          const p = (.4 + S.randomness) * dt * S.speed * (1 + cspeed * near * S.strength * 3);
-          if (Math.random() < p) {
-            const a = S.stretch * (.5 + Math.random()) * 4;
-            const v = Math.random() < .5 ? -1 : 1;
-            f.vx += v * a; f.vy -= v * a;
+        const j = S.randomness * noise(f.seed, t);
+        let lw = 0, h = 0, ex = 0, ey = 0;
+        const d = Math.abs(f.i - cx);
+        if (mode === 'focus' || mode === 'look') {
+          const k = Math.exp(-Math.pow(d / S.radius, S.sharpness));
+          lw = S.stretch * k; h = S.height * (k - .3) * (1 - v * 2) ;
+          if (mode === 'look') {
+            const fxp = (f.i + .5) / N, dx = u - fxp, dy = v - .5, m = Math.hypot(dx, dy) || 1;
+            ex = dx / m * S.eyes * Math.min(1, m * 4); ey = dy / m * S.eyes * .7 * Math.min(1, m * 4);
           }
-        } else if (mode === 'magnet') {
-          const dx = fx - f.ox - cx, dy = cy - fy, d = Math.abs(dx);
-          const k = Math.max(0, 1 - d / S.radius) * (Math.abs(dy) < 200 ? 1 : 0) * S.strength;
-          const push = Math.sign(dx || 1) * k * 60;
-          f.tox = push; tx = 1 - S.stretch * k * .8; ty = 1 + S.stretch * k * .3;
-        } else if (mode === 'look') {
-          const dx = cx - fx, dy = cy - fy, d = Math.hypot(dx, dy) || 1;
-          const reach = Math.min(1, d / S.radius) * S.strength;
-          f.tex = dx / d * 14 * reach; f.tey = dy / d * 10 * reach;
-          tx = 1 + S.stretch * .25 * Math.abs(dx / d) * reach; ty = 1 + S.stretch * .25 * Math.abs(dy / d) * reach;
-        } else if (mode === 'jelly') {
-          const v = Math.max(-3, Math.min(3, cvx)) * S.strength;
-          f.tsk = -v * 12 * S.stretch * (1 + jitter * .5);
-          tx = 1 + Math.abs(v) * S.stretch * .3; ty = 1 - Math.abs(v) * S.stretch * .15;
+        } else if (mode === 'wave') {
+          const w = Math.sin((f.i / S.wavelength) * Math.PI * 2 - u * Math.PI * 4);
+          lw = S.stretch * w * .8; h = -S.height * w * (v - .5) * 2;
+        } else if (mode === 'tilt') {
+          const x = f.i / (N - 1) - .5;
+          lw = S.stretch * x * (u - .5) * 4; h = S.height * x * (v - .5) * 4;
         } else {
-          const ph = (f.i / S.wavelength) * Math.PI * 2 - t * 2;
-          const w = Math.sin(ph + jitter);
-          tx = 1 - w * S.stretch * .4; ty = 1 + w * S.stretch * .6;
+          // split: faces left of cursor share one side, right the other; cursor x sets the split ratio
+          const side = f.i < cx ? (cx + .5) / N : 1 - (cx + .5) / N;
+          const k = Math.pow(Math.max(.02, side), S.sharpness);
+          lw = S.stretch * Math.log(k + .01) * -.3 * (f.i < cx ? -1 : 1); h = S.height * (f.i % 2 ? 1 : -1) * (v - .5) * 2;
         }
-        if (mode === 'wave') { f.x = tx; f.y = ty; f.vx = f.vy = 0; }
-        else {
-          const tgx = mode === 'wobble' ? 1 : tx, tgy = mode === 'wobble' ? 1 : ty;
-          f.vx += (S.stiffness * (tgx - f.x) - S.damping * f.vx) * dt;
-          f.vy += (S.stiffness * (tgy - f.y) - S.damping * f.vy) * dt;
-          f.x += f.vx * dt; f.y += f.vy * dt;
-          f.x = Math.max(.3, Math.min(3, f.x)); f.y = Math.max(.3, Math.min(3, f.y));
-        }
-        const spring = (pos, vel, tgt) => { f[vel] += (S.stiffness * (tgt - f[pos]) - S.damping * f[vel]) * dt; f[pos] += f[vel] * dt; };
-        spring('ox', 'ovx', mode === 'magnet' ? f.tox || 0 : 0);
-        spring('ex', 'evx', mode === 'look' ? f.tex || 0 : mode === 'jelly' ? f.tsk || 0 : 0);
-        spring('ey', 'evy', mode === 'look' ? f.tey || 0 : 0);
-        f.el.style.transform = f.ox ? `translateX(${f.ox.toFixed(2)}px)` : '';
-        f.ft.style.transform = mode === 'look' ? `translate(${f.ex.toFixed(2)}px, ${f.ey.toFixed(2)}px)` : '';
-        const sk = mode === 'jelly' ? ` skewX(${f.ex.toFixed(2)}deg)` : '';
-        f.g.style.transform = `scale(${f.x.toFixed(4)}, ${f.y.toFixed(4)})${sk}`;
+        f.el.style.flexGrow = Math.exp(lw + j * .5).toFixed(4);
+        f.el.style.height = (40 * Math.exp(h + j * .2)).toFixed(3) + '%';
+        f.ft.style.transform = ex || ey ? `translate(${ex.toFixed(2)}px, ${ey.toFixed(2)}px)` : '';
+      }
+    }
+    function frame(now) {
+      if (!reduce.matches) {
+        const t = now / 1000 * S.speed, r = row.getBoundingClientRect();
+        let u, v;
+        if (fine.matches && now - last < 2500) { u = (px - r.left) / r.width; v = (py - r.top) / r.height; }
+        else { u = .5 + .48 * Math.sin(t * .5) * Math.cos(t * .17); v = .5 + .4 * Math.sin(t * .37 + 1); }
+        draw(Math.max(0, Math.min(1, u)), Math.max(0, Math.min(1, v)), t);
       }
       requestAnimationFrame(frame);
     }
-    // face base width is set via CSS width; scale path horizontally to fill it
-    faces.forEach((f) => f.el.setAttribute('preserveAspectRatio', 'none'));
-    reduce.addEventListener('change', render);
-    render();
+    reduce.addEventListener('change', () => { render(); draw(.5, .5, 0); });
+    render(); draw(.5, .5, 0);
     requestAnimationFrame(frame);
   })();
   </script>
