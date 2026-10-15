@@ -1,6 +1,7 @@
 ---
 import Blocks from '../../components/Blocks.astro';
 import Info from '../../components/Info.astro';
+import Mark from '../../components/Mark.astro';
 import ProjectHero from '../../components/ProjectHero.astro';
 import Base from '../../layouts/Base.astro';
 import { absoluteUrl, getProjects, plainText, type ProjectEntry } from '../../lib/content';
@@ -34,7 +35,11 @@ const title = `${project.data.caption} · Humansize`;
   jsonLd={projectJsonLd(project, pageUrl)}
 >
   <article class:list={['project', { 'is-plain': project.data.rounded === false }]} data-slug={project.id}>
-    <p class="project-back"><a href="/">Close</a></p>
+    <p class="project-mark">
+      <a href="/" aria-label="Humansize">
+        <Mark />
+      </a>
+    </p>
     <ProjectHero title={project.data.caption} />
     <Blocks blocks={project.data.blocks} />
     <Info items={project.data.info} />

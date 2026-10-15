@@ -153,7 +153,7 @@ a:hover:has(img),
 
 .site-header a,
 .caption,
-.project-back a,
+.project-mark a,
 a:has(img) {
   text-decoration: none;
 }
@@ -444,20 +444,34 @@ body:has(.hero) .site-header {
   margin-bottom: 0;
 }
 
-.project {
-  padding: 72px var(--pad) 40px;
+body:has(.project) .site-header {
+  display: none;
 }
 
-.project-back {
-  width: min(100%, var(--measure));
-  margin: 0 auto 28px;
-  font-size: 23px;
-  line-height: 29px;
-  text-align: left;
+.project {
+  padding: 32px var(--pad) 40px;
+}
+
+.project-mark {
+  display: flex;
+  justify-content: center;
+  margin: 0 0 96px;
+}
+
+.project-mark .mark {
+  position: static;
+  top: auto;
+  left: auto;
+  width: 42px;
+  transform: none;
+}
+
+.project-mark a:hover {
+  opacity: 1;
 }
 
 .project-hero {
-  width: min(var(--measure), 100%);
+  width: min(100%, 800px);
   margin: 0 auto 120px;
   text-align: center;
 }
@@ -471,8 +485,8 @@ body:has(.hero) .site-header {
 }
 
 .text-block {
-  width: min(var(--measure), 100%);
-  margin: 0 auto 59px;
+  width: min(100%, 800px);
+  margin: 0 auto 80px;
   font-size: var(--text-title);
   line-height: var(--lh-title);
 }
@@ -504,12 +518,12 @@ body:has(.hero) .site-header {
 
 .process {
   width: min(100%, var(--measure));
-  margin: 120px auto;
+  margin: 188px auto 0;
 }
 
 .process-label,
 .info-label {
-  margin: 0 0 120px;
+  margin: 0 0 72px;
   font-size: var(--text-title);
   font-weight: 400;
   line-height: var(--lh-title);
@@ -520,15 +534,14 @@ body:has(.hero) .site-header {
 .process-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  gap: 8px;
   align-items: start;
-  width: min(420px, 100%);
-  margin: 0 auto;
+  width: 100%;
 }
 
 .info {
   width: min(100%, var(--measure));
-  margin: 120px auto 40px;
+  margin: 188px auto 40px;
 }
 
 .info-list {
@@ -635,6 +648,11 @@ body:has(.project) .site-footer {
   .lead,
   .frame img {
     border-radius: var(--radius);
+  }
+
+  .project .frame,
+  .project .frame img {
+    border-radius: var(--radius-sm);
   }
 
   .frame.is-plain,

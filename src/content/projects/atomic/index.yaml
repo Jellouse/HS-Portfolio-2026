@@ -34,12 +34,12 @@ blocks:
       src: /src/content/projects/atomic/web.jpg
       alt: Atomic Ski website
       frame: full
-  - discriminant: text
+  - discriminant: process
     value:
-      text: |
-        Together with Analogue, we've launched several campaigns for Atomic Ski products. I've mostly been involved in the 3D rendering of goggles, boots and skis.
-  - discriminant: image
-    value:
-      src: /src/content/projects/atomic/archive.jpg
-      alt: Atomic Ski, 3D work for goggles, boots and skis
-      frame: wide
+      images:
+        - src: /src/content/projects/atomic/archive.jpg
+          alt: Atomic Ski, 3D work for goggles, boots and skis
+        - src: /src/content/projects/atomic/cover.jpg
+          alt: Atomic Ski
+todo:
+  - "The line about campaigns with Analogue is not in the project-page mock."
