@@ -1,5 +1,6 @@
 ---
 import BlurImage from './BlurImage.astro';
+import VideoFrame from './VideoFrame.astro';
 import { resolveImage } from '../lib/images';
 import type { ProjectEntry } from '../lib/content';
 
@@ -9,9 +10,9 @@ interface Props {
 }
 
 const { project, priority = false } = Astro.props;
-const { caption, cover, coverAlt, coverFrame, coverFlush, rounded } = project.data;
-if (!cover || !coverAlt) throw new Error(`${project.id} is missing a cover`);
-const image = resolveImage(cover);
+const { caption, cover, coverAlt, coverVideo, coverFrame, coverFlush, rounded } = project.data;
+if (!coverVideo && (!cover || !coverAlt)) throw new Error(`${project.id} is missing a cover`);
+const image = cover ? resolveImage(cover) : undefined;
 const sizes = {
   full: '(min-width: 1440px) 1120px, (min-width: 760px) 80vw, 100vw',
   wide: '(min-width: 1440px) 836px, (min-width: 760px) 60vw, 100vw',
@@ -22,14 +23,25 @@ const sizes = {
 
 <article class:list={['card', { 'is-plain': rounded === false }]} data-frame={coverFrame}>
   <a href={`/work/${project.id}`}>
-    <BlurImage
-      src={image}
-      alt={coverAlt}
-      sizes={sizes}
-      priority={priority}
-      plain={rounded === false}
-      flush={coverFlush === true}
-    />
+    {coverVideo ? (
+      <VideoFrame
+        src={coverVideo}
+        poster={image}
+        label={coverAlt}
+        plain={rounded === false}
+        flush={coverFlush === true}
+        priority={priority}
+      />
+    ) : (
+      <BlurImage
+        src={image!}
+        alt={coverAlt ?? ''}
+        sizes={sizes}
+        priority={priority}
+        plain={rounded === false}
+        flush={coverFlush === true}
+      />
+    )}
   </a>
   <a class="caption" href={`/work/${project.id}`}>{caption}</a>
 </article>

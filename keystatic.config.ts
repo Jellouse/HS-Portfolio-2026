@@ -45,6 +45,16 @@ const frame = fields.select({
   defaultValue: 'full',
 });
 
+// Videos are not processed by Astro. They live under public/ and are served as-is.
+function videoField(label: string, description?: string) {
+  return fields.file({
+    label,
+    description,
+    directory: 'public/media/projects',
+    publicPath: '/media/projects/',
+  });
+}
+
 function imageField(label: string) {
   return fields.image({
     label,
@@ -85,6 +95,10 @@ export default config({
           description: 'Two or three sentences for the homepage. A link is [label](https://...).',
         }),
         cover: imageField('Cover'),
+        coverVideo: videoField(
+          'Cover video',
+          'Optional mp4 or webm. Plays muted on a loop instead of the cover image, which becomes the poster. Keep it under 15 MB.',
+        ),
         coverAlt: fields.text({ label: 'Cover alt text' }),
         coverFrame: frame,
         coverFlush: fields.checkbox({
@@ -131,6 +145,21 @@ export default config({
               schema: fields.object({
                 src: imageField('Image'),
                 alt: fields.text({ label: 'Alt text' }),
+                frame,
+                flush: fields.checkbox({
+                  label: 'Flush',
+                  defaultValue: false,
+                  description:
+                    'White or transparent edges. No rounded corners and no padding.',
+                }),
+              }),
+            },
+            video: {
+              label: 'Video',
+              schema: fields.object({
+                src: videoField('Video', 'mp4 or webm. Plays muted on a loop. Keep it under 15 MB.'),
+                poster: imageField('Poster'),
+                alt: fields.text({ label: 'Label', description: 'Optional description of the video.' }),
                 frame,
                 flush: fields.checkbox({
                   label: 'Flush',

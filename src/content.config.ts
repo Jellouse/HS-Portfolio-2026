@@ -21,6 +21,17 @@ const imageBlock = z.object({
   }),
 });
 
+const videoBlock = z.object({
+  discriminant: z.literal('video'),
+  value: z.object({
+    src: z.string().nullish(),
+    poster: z.string().nullish(),
+    alt: z.string().nullish(),
+    frame: frame.default('full'),
+    flush: z.boolean().default(false),
+  }),
+});
+
 const pairBlock = z.object({
   discriminant: z.literal('pair'),
   value: z.object({
@@ -51,6 +62,7 @@ export const blockSchema = z.discriminatedUnion('discriminant', [
   imageBlock,
   pairBlock,
   processBlock,
+  videoBlock,
 ]);
 
 const infoSchema = z.object({
@@ -74,6 +86,7 @@ const projects = defineCollection({
     published: z.boolean().default(true),
     summary: z.string(),
     cover: z.string().optional(),
+    coverVideo: z.string().nullish(),
     coverAlt: z.string().optional(),
     coverFrame: frame.default('full'),
     coverFlush: z.boolean().default(false),

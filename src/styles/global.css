@@ -420,6 +420,13 @@ body:has(.hero) .site-header {
   border-radius: inherit;
 }
 
+.frame video {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: inherit;
+}
+
 .js .frame img {
   opacity: 0;
 }

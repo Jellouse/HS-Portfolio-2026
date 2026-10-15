@@ -1,0 +1,50 @@
+---
+import { getImage } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+interface Props {
+  src: string;
+  poster?: ImageMetadata;
+  label?: string | null;
+  plain?: boolean;
+  flush?: boolean;
+  priority?: boolean;
+}
+
+const { src, poster, label, plain = false, flush = false, priority = false } = Astro.props;
+const posterImage = poster
+  ? await getImage({ src: poster, width: Math.min(poster.width, 2000), format: 'webp' })
+  : undefined;
+const type = src.toLowerCase().endsWith('.webm') ? 'video/webm' : 'video/mp4';
+---
+
+<div class:list={['frame', 'is-video', { 'is-plain': plain, 'is-flush': flush }]}>
+  <video
+    muted
+    autoplay
+    loop
+    playsinline
+    preload={priority ? 'auto' : 'metadata'}
+    poster={posterImage?.src}
+    aria-label={label || undefined}
+    data-autoplay
+  >
+    <source src={src} type={type} />
+  </video>
+</div>
+
+<script>
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+  function apply() {
+    document.querySelectorAll<HTMLVideoElement>('video[data-autoplay]').forEach((video) => {
+      if (reduce.matches) {
+        video.pause();
+        video.currentTime = 0;
+      } else {
+        video.play().catch(() => {});
+      }
+    });
+  }
+  apply();
+  reduce.addEventListener('change', apply);
+</script>

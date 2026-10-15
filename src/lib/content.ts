@@ -17,9 +17,9 @@ export async function getProjects(): Promise<ProjectEntry[]> {
     .sort((a, b) => a.data.order - b.data.order);
 
   for (const project of published) {
-    if (!project.data.cover || !project.data.coverAlt) {
+    if (!project.data.coverVideo && (!project.data.cover || !project.data.coverAlt)) {
       throw new Error(
-        `${project.id} is published and needs cover and coverAlt.`,
+        `${project.id} is published and needs cover and coverAlt, or a cover video.`,
       );
     }
   }

@@ -3,6 +3,7 @@ import ImageBlock from './ImageBlock.astro';
 import ImagePair from './ImagePair.astro';
 import ProcessBlock from './ProcessBlock.astro';
 import TextBlock from './TextBlock.astro';
+import VideoBlock from './VideoBlock.astro';
 import type { ProjectEntry } from '../lib/content';
 
 interface Props {
@@ -22,6 +23,18 @@ const { blocks } = Astro.props;
         <ImageBlock
           src={block.value.src}
           alt={block.value.alt}
+          frame={block.value.frame}
+          flush={block.value.flush}
+        />
+      );
+    }
+    if (block.discriminant === 'video') {
+      if (!block.value.src) return null;
+      return (
+        <VideoBlock
+          src={block.value.src}
+          poster={block.value.poster ?? undefined}
+          label={block.value.alt ?? undefined}
           frame={block.value.frame}
           flush={block.value.flush}
         />

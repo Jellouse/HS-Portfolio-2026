@@ -1,0 +1,19 @@
+---
+import VideoFrame from './VideoFrame.astro';
+import { resolveImage } from '../lib/images';
+
+interface Props {
+  src: string;
+  poster?: string;
+  label?: string;
+  frame?: 'full' | 'wide' | 'medium' | 'narrow';
+  flush?: boolean;
+}
+
+const { src, poster, label, frame = 'full', flush = false } = Astro.props;
+const posterImage = poster ? resolveImage(poster) : undefined;
+---
+
+<figure class="image-block video-block" data-frame={frame}>
+  <VideoFrame src={src} poster={posterImage} label={label} flush={flush} />
+</figure>
