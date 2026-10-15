@@ -26,26 +26,44 @@ info:
     value: atomic.com
     href: https://www.atomic.com/
 blocks:
-  - discriminant: text
+  - discriminant: image
     value:
-      text: >
-        It started with the Boot Hub, a vision we set months ago and hoped to
-        carry across the whole site one day. Now it does. Web design, motion and
-        3D, all built around tension and ski nets.
+      src: /src/content/projects/atomic/blocks/0/value/src.jpg
+      alt: Atomic Ski website
+      frame: full
+      flush: false
   - discriminant: image
     value:
       src: /src/content/projects/atomic/blocks/1/value/src.jpg
-      alt: Atomic Ski website
+      frame: full
+      flush: false
+  - discriminant: image
+    value:
+      src: /src/content/projects/atomic/blocks/2/value/src.jpg
+      frame: full
+      flush: false
+  - discriminant: image
+    value:
+      src: /src/content/projects/atomic/blocks/3/value/src.jpg
+      frame: full
+      flush: false
+  - discriminant: image
+    value:
+      src: /src/content/projects/atomic/blocks/4/value/src.jpg
+      frame: full
+      flush: false
+  - discriminant: image
+    value:
+      src: /src/content/projects/atomic/blocks/5/value/src.jpg
+      frame: full
+      flush: false
+  - discriminant: image
+    value:
+      src: /src/content/projects/atomic/blocks/6/value/src.jpg
       frame: full
       flush: false
   - discriminant: process
     value:
-      images:
-        - src: /src/content/projects/atomic/blocks/2/value/images/0/src.jpg
-          alt: Atomic Ski, 3D work for goggles, boots and skis
-          flush: false
-        - src: /src/content/projects/atomic/blocks/2/value/images/1/src.png
-          alt: Atomic Ski
-          flush: true
+      images: []
 todo:
   - The line about campaigns with Analogue is not in the project-page mock.
