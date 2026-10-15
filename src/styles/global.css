@@ -1028,3 +1028,57 @@ html.show-grid .grid-overlay .page-grid {
     navigation: none;
   }
 }
+
+/* Text reveal: a quick blur-to-sharp as text enters. Scroll-linked where supported, so it
+   moves at the reader's scroll speed and is sharp once the text is 15% into the viewport.
+   Never touches the faces or the mark. */
+@keyframes text-in {
+  from {
+    opacity: 0;
+    filter: blur(6px);
+    transform: translateY(4px);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    :is(.about p, .text-block p, .footer-text p, .caption, .project-summary, .info-list li, .project-hero h1) {
+      animation: text-in linear both;
+      animation-timeline: view();
+      animation-range: cover 0px cover 15vh;
+    }
+  }
+
+  @supports not (animation-timeline: view()) {
+    .reveal-pending {
+      opacity: 0;
+      filter: blur(6px);
+      transform: translateY(4px);
+    }
+
+    .reveal-in {
+      transition:
+        opacity 250ms ease-out,
+        filter 250ms ease-out,
+        transform 250ms ease-out;
+    }
+  }
+
+  /* Text that appears on demand: Tokyo time and the contact menu items. */
+  .who:hover .time,
+  .who:focus-within .time,
+  .who.is-open .time,
+  .contact:hover .contact-menu > *,
+  .contact:focus-within .contact-menu > *,
+  .contact.is-open .contact-menu > * {
+    animation: text-in 250ms ease-out both;
+  }
+
+  .contact-menu > :nth-child(2) {
+    animation-delay: 30ms;
+  }
+
+  .contact-menu > :nth-child(3) {
+    animation-delay: 60ms;
+  }
+}
