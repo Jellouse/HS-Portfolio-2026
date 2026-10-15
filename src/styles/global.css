@@ -260,7 +260,7 @@ body:has(.hero) .site-header {
 .who .time {
   position: absolute;
   top: 29px;
-  left: 34px;
+  left: 0;
   margin: 0;
   color: var(--muted);
   white-space: nowrap;
