@@ -13,10 +13,10 @@ const { caption, summary, cover, coverAlt, coverFrame, rounded } = project.data;
 if (!cover || !coverAlt) throw new Error(`${project.id} is missing a cover`);
 const image = resolveImage(cover);
 const sizes = {
-  full: '(min-width: 1200px) 1120px, 100vw',
-  wide: '(min-width: 1200px) 848px, 100vw',
-  medium: '(min-width: 1200px) 652px, 100vw',
-  narrow: '(min-width: 760px) 420px, 100vw',
+  full: '(min-width: 1440px) 1120px, (min-width: 760px) 80vw, 100vw',
+  wide: '(min-width: 1440px) 836px, (min-width: 760px) 60vw, 100vw',
+  medium: '(min-width: 1440px) 552px, (min-width: 760px) 40vw, 100vw',
+  narrow: '(min-width: 1440px) 410px, (min-width: 760px) 30vw, 100vw',
 }[coverFrame];
 const text = renderInline(summary.replace(/\s+/g, ' ').trim());
 ---

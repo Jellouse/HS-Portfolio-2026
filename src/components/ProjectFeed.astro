@@ -12,7 +12,7 @@ interface Props {
 const { projects, about } = Astro.props;
 ---
 
-<div class="feed">
+<div class="feed page-grid">
   <LeadCard />
   <About paragraphs={about} />
   {projects.map((project, index) => <ProjectCard project={project} priority={index === 0} />)}

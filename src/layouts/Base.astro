@@ -27,6 +27,11 @@ const site = await getSite();
     <Seo title={title} description={description} image={image} type={type} jsonLd={jsonLd} />
     <script is:inline>
       document.documentElement.classList.add('js');
+      (function () {
+        var value = new URLSearchParams(location.search).get('grid');
+        if (value === null || value === '0' || value === 'false' || value === 'off') return;
+        document.documentElement.classList.add('show-grid');
+      })();
     </script>
   </head>
   <body>
@@ -44,6 +49,11 @@ const site = await getSite();
       <slot />
     </main>
     <Footer site={site} />
+    <div class="grid-overlay" aria-hidden="true">
+      <div class="page-grid">
+        <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+      </div>
+    </div>
     <script is:inline>
       (function () {
         function tick() {
