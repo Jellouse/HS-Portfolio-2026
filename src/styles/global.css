@@ -402,6 +402,8 @@ body:has(.hero) .site-header {
   display: block;
   width: 54.9%;
   height: auto;
+  transform: scaleX(var(--peeps-scale, 1));
+  transform-origin: center center;
 }
 
 .frame img {
@@ -646,7 +648,7 @@ body:has(.project) .site-footer {
   }
 
   .peeps {
-    transform: translateY(-12px);
+    transform: translateY(-12px) scaleX(var(--peeps-scale, 1));
   }
 
   .feed {

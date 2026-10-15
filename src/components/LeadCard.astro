@@ -7,3 +7,50 @@ import Peeps from './Peeps.astro';
     <Peeps />
   </div>
 </div>
+
+<script>
+  const fine = window.matchMedia('(hover: hover) and (pointer: fine)');
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const lead = document.querySelector('.lead');
+  const peeps = lead?.querySelector('.peeps');
+
+  if (lead && peeps) {
+    let current = 1;
+    let target = 1;
+    let frame = 0;
+
+    const paint = () => {
+      peeps.style.setProperty('--peeps-scale', current.toFixed(4));
+    };
+
+    const tick = () => {
+      current += (target - current) * 0.12;
+      if (Math.abs(target - current) < 0.0008) {
+        current = target;
+        paint();
+        frame = 0;
+        return;
+      }
+      paint();
+      frame = requestAnimationFrame(tick);
+    };
+
+    const wake = () => {
+      if (!frame) frame = requestAnimationFrame(tick);
+    };
+
+    lead.addEventListener('pointermove', (event) => {
+      if (!fine.matches || reduce.matches || event.pointerType === 'touch') return;
+      const rect = lead.getBoundingClientRect();
+      const distance = Math.abs(event.clientX - (rect.left + rect.width / 2));
+      const reach = Math.min(1, distance / (rect.width / 2));
+      target = 1 + 0.12 * reach * reach;
+      wake();
+    });
+
+    lead.addEventListener('pointerleave', () => {
+      target = 1;
+      wake();
+    });
+  }
+</script>
