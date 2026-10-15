@@ -26,6 +26,7 @@ info:
   - label: Site
     value: atomic.com
     href: https://www.atomic.com/
+processFromFolder: true
 blocks:
   - discriminant: image
     value:
