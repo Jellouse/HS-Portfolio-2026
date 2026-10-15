@@ -1,0 +1,112 @@
+---
+import '@fontsource-variable/geist/wght.css';
+import '../styles/global.css';
+import Footer from '../components/Footer.astro';
+import GridView from '../components/GridView.astro';
+import Header from '../components/Header.astro';
+import Seo from '../components/Seo.astro';
+import { getProjects, getSite } from '../lib/content';
+import type { ImageMetadata } from 'astro';
+
+interface Props {
+  title: string;
+  description: string;
+  image?: ImageMetadata;
+  type?: 'website' | 'article';
+  jsonLd?: unknown;
+}
+
+const { title, description, image, type, jsonLd } = Astro.props;
+const site = await getSite();
+const projects = await getProjects();
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#ffffff" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <Seo title={title} description={description} image={image} type={type} jsonLd={jsonLd} />
+    <script is:inline>
+      document.documentElement.classList.add('js');
+    </script>
+  </head>
+  <body>
+    <Header site={site} />
+    <main id="content">
+      <slot />
+    </main>
+    <GridView projects={projects} />
+    <Footer site={site} />
+    <script is:inline>
+      (function () {
+        function tick() {
+          document.querySelectorAll('[data-tokyo-time]').forEach(function (el) {
+            var zone = el.getAttribute('data-timezone') || 'Asia/Tokyo';
+            var place = el.getAttribute('data-place') || 'Tokyo';
+            var time = new Intl.DateTimeFormat('en-GB', {
+              timeZone: zone,
+              hour: '2-digit',
+              minute: '2-digit',
+              hourCycle: 'h23',
+            }).format(new Date());
+            el.textContent = place + ', ' + time;
+          });
+        }
+        tick();
+        setInterval(tick, 30000);
+
+        var hero = document.querySelector('.hero');
+        var pill = document.querySelector('.pill');
+        if (hero && pill && 'IntersectionObserver' in window) {
+          var update = function (center) {
+            pill.classList.toggle('is-center', center);
+          };
+          update(true);
+          var observer = new IntersectionObserver(
+            function (entries) {
+              update(entries[0].isIntersecting);
+            },
+            { threshold: 0.2 },
+          );
+          observer.observe(hero);
+        }
+
+        document.querySelectorAll('.frame img').forEach(function (img) {
+          var mark = function () {
+            img.classList.add('is-ready');
+          };
+          if (img.complete) mark();
+          else img.addEventListener('load', mark, { once: true });
+        });
+
+        var grid = document.getElementById('grid-toggle');
+        if (grid) {
+          grid.addEventListener('change', function () {
+            if (grid.checked) {
+              var first = document.querySelector('#project-grid a');
+              if (first) first.focus();
+            }
+          });
+        }
+
+        document.querySelectorAll('[data-close-menu]').forEach(function (el) {
+          el.addEventListener('click', function () {
+            document.querySelectorAll('details.menu').forEach(function (menu) {
+              menu.removeAttribute('open');
+            });
+          });
+        });
+
+        document.addEventListener('keydown', function (event) {
+          if (event.key !== 'Escape') return;
+          if (grid && grid.checked) grid.checked = false;
+          document.querySelectorAll('details[open]').forEach(function (menu) {
+            menu.removeAttribute('open');
+          });
+        });
+      })();
+    </script>
+  </body>
+</html>

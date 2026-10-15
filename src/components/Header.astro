@@ -1,0 +1,63 @@
+---
+import type { SiteData } from '../lib/content';
+
+interface Props {
+  site: SiteData;
+}
+
+const { site } = Astro.props;
+const socials = site.socials.filter((item) => item.href);
+---
+
+<a class="skip" href="#content">Skip to content</a>
+<input id="grid-toggle" class="sr-only" type="checkbox" />
+
+<header class="pill">
+  <div class="who">
+    <a href="/">{site.name}</a>
+    <p class="time" data-tokyo-time data-place={site.place} data-timezone={site.timezone}>
+      {site.place}
+    </p>
+  </div>
+  <nav class="pill-nav" aria-label="Primary">
+    <span class="nav-extra">
+      <label for="grid-toggle">
+        <span class="when-closed">Projects</span>
+        <span class="when-open">Close</span>
+      </label>
+      <a href="/#about">About</a>
+    </span>
+    <details class="contact">
+      <summary>@Humansize</summary>
+      <div class="contact-links">
+        {
+          socials.map((item) => (
+            <a href={item.href}>{item.label}</a>
+          ))
+        }
+        <a href={`mailto:${site.email}`}>Email</a>
+      </div>
+    </details>
+  </nav>
+</header>
+
+<details class="menu">
+  <summary>Menu</summary>
+  <div class="menu-panel">
+    <a href="/" data-close-menu>{site.name}</a>
+    <p class="menu-time" data-tokyo-time data-place={site.place} data-timezone={site.timezone}>
+      {site.place}
+    </p>
+    <label for="grid-toggle" data-close-menu>
+      <span class="when-closed">Projects</span>
+      <span class="when-open">Close</span>
+    </label>
+    <a href="/#about" data-close-menu>About</a>
+    {
+      socials.map((item) => (
+        <a href={item.href}>{item.label}</a>
+      ))
+    }
+    <a href={`mailto:${site.email}`}>Email</a>
+  </div>
+</details>

@@ -1,0 +1,46 @@
+title: Atomic Ski
+caption: Atomic Ski, 2026
+year: 2026
+order: 2
+published: true
+summary: >
+  It started with the Boot Hub, a vision we set months ago and hoped to carry across the whole site one day.
+  Now it does.
+  Web design, motion and 3D, all built around tension and ski nets.
+cover: /src/content/projects/atomic/cover.jpg
+coverAlt: Atomic Ski
+coverFrame: narrow
+credits:
+  - label: Design
+    value: Johann Schnettker
+  - label: With
+    value: Analogue
+info:
+  - label: Year
+    value: "2026"
+  - label: Client
+    value: Atomic
+  - label: Role
+    value: Web design, motion and 3D
+  - label: Site
+    value: atomic.com
+    href: https://www.atomic.com/
+blocks:
+  - discriminant: text
+    value:
+      text: |
+        It started with the Boot Hub, a vision we set months ago and hoped to carry across the whole site one day. Now it does. Web design, motion and 3D, all built around tension and ski nets.
+
+        Together with Analogue, we've launched several campaigns for Atomic Ski products. I've mostly been involved in the 3D rendering of goggles, boots and skis.
+  - discriminant: image
+    value:
+      src: /src/content/projects/atomic/web.jpg
+      alt: Atomic Ski website
+      frame: full
+  - discriminant: image
+    value:
+      src: /src/content/projects/atomic/archive.jpg
+      alt: Atomic Ski, 3D work for goggles, boots and skis
+      frame: wide
+todo:
+  - "TODO: confirm the full credit list for the web redesign."

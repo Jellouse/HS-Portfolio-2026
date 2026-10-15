@@ -4,14 +4,21 @@
   "type": "module",
   "version": "0.0.0",
   "scripts": {
-    "dev": "astro dev",
-    "build": "astro build",
-    "preview": "astro preview"
+    "dev": "ASTRO_TELEMETRY_DISABLED=1 astro dev",
+    "build": "ASTRO_TELEMETRY_DISABLED=1 astro build",
+    "preview": "ASTRO_TELEMETRY_DISABLED=1 astro preview"
   },
   "engines": {
     "node": ">=22"
   },
   "dependencies": {
-    "astro": "^5.14.1"
+    "@astrojs/react": "^7.0.1",
+    "@astrojs/sitemap": "^3.7.4",
+    "@fontsource-variable/geist": "^5.3.0",
+    "@keystatic/astro": "^6.0.0",
+    "@keystatic/core": "^0.6.9",
+    "astro": "^5.14.1",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
   }
 }

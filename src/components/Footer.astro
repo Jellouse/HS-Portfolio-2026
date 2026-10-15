@@ -1,0 +1,15 @@
+---
+import type { SiteData } from '../lib/content';
+
+interface Props {
+  site: SiteData;
+}
+
+const { site } = Astro.props;
+---
+
+<footer class="site-footer">
+  <p>{site.intro}</p>
+  <p><a href={`mailto:${site.email}`}>{site.email}</a></p>
+  <p>{site.studio}</p>
+</footer>
