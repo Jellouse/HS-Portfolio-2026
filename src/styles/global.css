@@ -886,3 +886,9 @@ html.show-grid .grid-overlay .page-grid {
     opacity: 1;
   }
 }
+
+/* Invisible haptic switch over links and buttons on iOS. Never visible. */
+[data-haptic-overlay] {
+  z-index: 1;
+  -webkit-tap-highlight-color: transparent;
+}
