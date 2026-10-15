@@ -7,6 +7,18 @@ import { Haptics } from '@haptics/vanilla';
 const TARGETS = 'a[href], button, summary, [role="button"]';
 
 if (window.matchMedia('(pointer: coarse)').matches) {
+  // Project cards have two links (cover and caption). Make the whole card one
+  // haptic host so a tap anywhere on it ticks once, then follow the cover link.
+  // Skipped where the card is display: contents (wide grid), since it has no box.
+  document.querySelectorAll<HTMLElement>('.card').forEach((card) => {
+    const link = card.querySelector<HTMLAnchorElement>('a[href]');
+    if (!link || getComputedStyle(card).display === 'contents') return;
+    card.setAttribute('data-haptic', 'selection');
+    card.querySelectorAll('a[href]').forEach((a) => a.setAttribute('data-no-haptic', ''));
+    card.addEventListener('click', (e) => {
+      if (e.target === card) link.click();
+    });
+  });
   const tag = (root: ParentNode) => {
     root.querySelectorAll<HTMLElement>(TARGETS).forEach((el) => {
       if (!el.hasAttribute('data-haptic') && !el.hasAttribute('data-no-haptic')) {
