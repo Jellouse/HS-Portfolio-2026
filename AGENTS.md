@@ -42,13 +42,9 @@ Set `SITE_URL` to the production origin (no trailing slash). On Vercel it falls 
 - Email is `schnettker.johann@gmail.com` only.
 - Do not invent clients, numbers, quotes, or credits. Mark gaps as `TODO` in the content file.
 - Bodil Ouédraogo: the scans already exist. Johann makes sculptures from them. He does not do the scanning.
-- The design typeface is ABC Areal. The site uses Geist (OFL) until the licensed files are added.
+- The design typeface is ABC Areal, self-hosted from `public/fonts`.
 - Spell Tony's Chocolonely with the h and the apostrophe.
 
 ## Type scale
 
-Desktop sizes in the Figma export collapse to three tokens:
-
-- 50px display, weight 500 (the large title size in the source file)
-- 23px titles, captions, about, project text
-- 19px interface, summaries, credit, info (18px on the mobile frame is the same token)
+One size for the whole site: 23px, line-height 29px. Hierarchy comes from spacing.

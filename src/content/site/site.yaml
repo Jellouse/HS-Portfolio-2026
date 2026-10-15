@@ -14,7 +14,7 @@ socials:
   - label: Instagram
   - label: LinkedIn
 todo:
-  - "TODO: add the Humansize Instagram URL. The pill label is @Humansize."
-  - "TODO: add the LinkedIn URL."
+  - "TODO: add the Humansize Instagram URL. The header shows the label until then."
+  - "TODO: add the LinkedIn URL. The header shows the label until then."
   - "TODO: after December 2026, update the Tokyo clock and the about line about being based in Tokyo."
-  - "TODO: set SITE_URL when the production domain is final. The design typeface is ABC Areal. The site uses Geist until those font files are added."
+  - "TODO: set SITE_URL when the production domain is final."

@@ -16,13 +16,11 @@ const { left, leftAlt, right, rightAlt } = Astro.props;
   <BlurImage
     src={resolveImage(left)}
     alt={leftAlt}
-    sizes="(min-width: 760px) 267px, calc(50vw - 26px)"
-    cover
+    sizes="(min-width: 760px) 550px, calc(100vw - 40px)"
   />
   <BlurImage
     src={resolveImage(right)}
     alt={rightAlt}
-    sizes="(min-width: 760px) 267px, calc(50vw - 26px)"
-    cover
+    sizes="(min-width: 760px) 550px, calc(100vw - 40px)"
   />
 </div>

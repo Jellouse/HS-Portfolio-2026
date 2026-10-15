@@ -56,6 +56,11 @@ export default config({
         cover: imageField('Cover'),
         coverAlt: fields.text({ label: 'Cover alt text' }),
         coverFrame: frame,
+        rounded: fields.checkbox({
+          label: 'Rounded image',
+          defaultValue: true,
+          description: 'Turn off for a square frame with a little padding.',
+        }),
         credits: fields.array(
           fields.object({
             label: fields.text({ label: 'Label' }),

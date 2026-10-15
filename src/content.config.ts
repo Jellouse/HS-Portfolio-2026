@@ -64,6 +64,7 @@ const projects = defineCollection({
     cover: z.string().optional(),
     coverAlt: z.string().optional(),
     coverFrame: frame.default('full'),
+    rounded: z.boolean().default(true),
     credits: z.array(creditSchema).default([]),
     info: z.array(infoSchema).default([]),
     blocks: z.array(blockSchema).default([]),

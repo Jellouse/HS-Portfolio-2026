@@ -1,11 +1,9 @@
 ---
-import '@fontsource-variable/geist/wght.css';
 import '../styles/global.css';
 import Footer from '../components/Footer.astro';
-import GridView from '../components/GridView.astro';
 import Header from '../components/Header.astro';
 import Seo from '../components/Seo.astro';
-import { getProjects, getSite } from '../lib/content';
+import { getSite } from '../lib/content';
 import type { ImageMetadata } from 'astro';
 
 interface Props {
@@ -18,7 +16,6 @@ interface Props {
 
 const { title, description, image, type, jsonLd } = Astro.props;
 const site = await getSite();
-const projects = await getProjects();
 ---
 
 <html lang="en">
@@ -33,11 +30,19 @@ const projects = await getProjects();
     </script>
   </head>
   <body>
+    <svg class="squircle-def" width="0" height="0" aria-hidden="true">
+      <defs>
+        <clipPath id="squircle" clipPathUnits="objectBoundingBox">
+          <path
+            d="M0.5,0 C0.85,0 1,0.15 1,0.5 C1,0.85 0.85,1 0.5,1 C0.15,1 0,0.85 0,0.5 C0,0.15 0.15,0 0.5,0 Z"
+          />
+        </clipPath>
+      </defs>
+    </svg>
     <Header site={site} />
     <main id="content">
       <slot />
     </main>
-    <GridView projects={projects} />
     <Footer site={site} />
     <script is:inline>
       (function () {
@@ -57,22 +62,6 @@ const projects = await getProjects();
         tick();
         setInterval(tick, 30000);
 
-        var hero = document.querySelector('.hero');
-        var pill = document.querySelector('.pill');
-        if (hero && pill && 'IntersectionObserver' in window) {
-          var update = function (center) {
-            pill.classList.toggle('is-center', center);
-          };
-          update(true);
-          var observer = new IntersectionObserver(
-            function (entries) {
-              update(entries[0].isIntersecting);
-            },
-            { threshold: 0.2 },
-          );
-          observer.observe(hero);
-        }
-
         document.querySelectorAll('.frame img').forEach(function (img) {
           var mark = function () {
             img.classList.add('is-ready');
@@ -81,29 +70,19 @@ const projects = await getProjects();
           else img.addEventListener('load', mark, { once: true });
         });
 
-        var grid = document.getElementById('grid-toggle');
-        if (grid) {
-          grid.addEventListener('change', function () {
-            if (grid.checked) {
-              var first = document.querySelector('#project-grid a');
-              if (first) first.focus();
-            }
-          });
-        }
-
-        document.querySelectorAll('[data-close-menu]').forEach(function (el) {
-          el.addEventListener('click', function () {
-            document.querySelectorAll('details.menu').forEach(function (menu) {
-              menu.removeAttribute('open');
-            });
+        document.querySelectorAll('.contact').forEach(function (el) {
+          var button = el.querySelector('.contact-label');
+          if (!button) return;
+          button.addEventListener('click', function () {
+            if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+            el.classList.toggle('is-open');
           });
         });
 
         document.addEventListener('keydown', function (event) {
           if (event.key !== 'Escape') return;
-          if (grid && grid.checked) grid.checked = false;
-          document.querySelectorAll('details[open]').forEach(function (menu) {
-            menu.removeAttribute('open');
+          document.querySelectorAll('.contact.is-open').forEach(function (el) {
+            el.classList.remove('is-open');
           });
         });
       })();

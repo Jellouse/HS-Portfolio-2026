@@ -34,7 +34,7 @@ const title = `${project.data.caption} · Humansize`;
   type="article"
   jsonLd={projectJsonLd(project, pageUrl)}
 >
-  <article class="project">
+  <article class:list={['project', { 'is-plain': project.data.rounded === false }]} data-slug={project.id}>
     <ProjectHero title={project.data.caption} />
     <Blocks blocks={project.data.blocks} />
     <div class="meta">

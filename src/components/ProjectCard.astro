@@ -9,7 +9,7 @@ interface Props {
 }
 
 const { project, priority = false } = Astro.props;
-const { caption, summary, cover, coverAlt, coverFrame } = project.data;
+const { caption, summary, cover, coverAlt, coverFrame, rounded } = project.data;
 if (!cover || !coverAlt) throw new Error(`${project.id} is missing a cover`);
 const image = resolveImage(cover);
 const sizes = {
@@ -21,9 +21,9 @@ const sizes = {
 const text = summary.replace(/\s+/g, ' ').trim();
 ---
 
-<article class="card" data-frame={coverFrame}>
+<article class:list={['card', { 'is-plain': rounded === false }]} data-frame={coverFrame}>
   <a href={`/work/${project.id}`}>
-    <BlurImage src={image} alt={coverAlt} sizes={sizes} priority={priority} />
+    <BlurImage src={image} alt={coverAlt} sizes={sizes} priority={priority} plain={rounded === false} />
   </a>
   <a class="caption" href={`/work/${project.id}`}>{caption}</a>
   <p class="summary">{text}</p>
