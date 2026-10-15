@@ -4,10 +4,10 @@ import { readInput, startInput } from './input';
 
 const S = {
   stretch: 3.45,
-  height: 1.2,
+  height: 2.5,
   minW: 0.1,
   maxW: 8,
-  minH: 0.2,
+  minH: 0.1,
   maxH: 4,
   independence: 0.76,
   randomness: 0.5,
@@ -15,6 +15,7 @@ const S = {
   softness: 1,
 };
 const COUNT = 5;
+const REST = 25; // rest face height, % of the red box, so 4x fills it
 const FACE = `<g><path d="M60.9844 0C94.665 2.50437e-05 121.969 40.5453 121.969 90.5605C121.969 134.795 100.612 171.621 72.375 179.543V179.323C96.0654 171.722 113.794 140.903 113.794 104.04C113.794 61.4697 90.1516 26.9594 60.9873 26.959C31.8228 26.959 8.17983 61.4695 8.17969 104.04C8.17969 140.901 25.9058 171.717 49.5938 179.321V179.543C21.3571 171.621 6.24157e-07 134.795 0 90.5605C9.09239e-05 40.5453 27.3037 4.56074e-06 60.9844 0Z"/><ellipse cx="34.0536" cy="106.354" rx="18.2489" ry="41.324"/><ellipse cx="87.9208" cy="106.354" rx="18.2489" ry="41.324"/><ellipse cx="61.2954" cy="165.106" rx="15.2954" ry="6.91183"/></g>`;
 
 const rnd = (i: number, k: number) => {
@@ -91,7 +92,7 @@ export function mountFaces(host: HTMLElement) {
   const paint = (u: number, v: number, t: number) => {
     layout(u, v, t).forEach((f, k) => {
       els[k].style.flexGrow = f.w.toFixed(4);
-      els[k].style.height = `${(f.h * 100 * 0.5).toFixed(3)}%`;
+      els[k].style.height = `${(f.h * REST).toFixed(3)}%`;
     });
   };
 

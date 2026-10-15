@@ -441,8 +441,13 @@ body:has(.hero) .site-header {
 }
 
 .peeps-row {
+  /* spans the full red box height (box is ~3.52x the static mark) so tall faces have room */
   position: absolute;
-  inset: 0;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 352%;
+  transform: translateY(-50%);
   display: flex;
   align-items: center;
 }
