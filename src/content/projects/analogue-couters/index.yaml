@@ -1,4 +1,4 @@
-title: Analogue
+title: Analogue Store
 caption: Analogue, 2025
 year: 2025
 order: 3
@@ -6,7 +6,6 @@ published: true
 summary: >-
   A new store for Analogue Amsterdam on the Zeedijk, built entirely from
   aluminium extrusion.
-cover: /src/content/projects/analogue-couters/cover.jpg
 coverVideo: /media/projects/analogue-couters/coverVideo.mp4
 coverAlt: Analogue store on Zeedijk in Amsterdam
 coverFrame: wide
