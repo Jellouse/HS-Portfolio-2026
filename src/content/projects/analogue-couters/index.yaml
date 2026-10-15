@@ -7,6 +7,7 @@ summary: >-
   A new store for Analogue Amsterdam on the Zeedijk, built entirely from
   aluminium extrusion.
 cover: /src/content/projects/analogue-couters/cover.jpg
+coverVideo: /media/projects/analogue-couters/coverVideo.mp4
 coverAlt: Analogue store on Zeedijk in Amsterdam
 coverFrame: wide
 coverFlush: false
