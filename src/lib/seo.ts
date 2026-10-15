@@ -1,4 +1,4 @@
-import type { ProjectEntry, SiteData } from './content';
+import { plainText, type ProjectEntry, type SiteData } from './content';
 
 export function homeJsonLd(site: SiteData, pageUrl: string) {
   const personId = `${pageUrl}#johann-schnettker`;
@@ -38,7 +38,7 @@ export function projectJsonLd(
     '@type': 'CreativeWork',
     name: project.data.title,
     headline: project.data.caption,
-    description: project.data.summary.replace(/\s+/g, ' ').trim(),
+    description: plainText(project.data.summary),
     url: pageUrl,
     ...(project.data.year ? { dateCreated: String(project.data.year) } : {}),
     ...(imageUrl ? { image: imageUrl } : {}),

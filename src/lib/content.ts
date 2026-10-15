@@ -27,6 +27,44 @@ export async function getProjects(): Promise<ProjectEntry[]> {
   return published;
 }
 
+function inlineLink(): RegExp {
+  return /\[([^\]\n]+)\]\(([^)\s]+)\)/g;
+}
+
+function escapeHtml(value: string): string {
+  return value
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;');
+}
+
+function safeHref(value: string): string | null {
+  if (/^https?:\/\//i.test(value)) return value;
+  if (/^mailto:/i.test(value)) return value;
+  if (value.startsWith('/') && !value.startsWith('//')) return value;
+  return null;
+}
+
+export function plainText(text: string): string {
+  return text.replace(inlineLink(), '$1').replace(/\s+/g, ' ').trim();
+}
+
+export function renderInline(text: string): string {
+  let html = '';
+  let last = 0;
+  for (const match of text.matchAll(inlineLink())) {
+    const index = match.index ?? 0;
+    html += escapeHtml(text.slice(last, index));
+    const href = safeHref(match[2]);
+    const label = escapeHtml(match[1]);
+    html += href ? `<a href="${escapeHtml(href)}">${label}</a>` : escapeHtml(match[0]);
+    last = index + match[0].length;
+  }
+  html += escapeHtml(text.slice(last));
+  return html;
+}
+
 export function paragraphs(text: string): string[] {
   return text
     .split(/\n\s*\n/)

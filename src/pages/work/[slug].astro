@@ -3,7 +3,7 @@ import Blocks from '../../components/Blocks.astro';
 import Credits from '../../components/Credits.astro';
 import ProjectHero from '../../components/ProjectHero.astro';
 import Base from '../../layouts/Base.astro';
-import { absoluteUrl, getProjects, type ProjectEntry } from '../../lib/content';
+import { absoluteUrl, getProjects, plainText, type ProjectEntry } from '../../lib/content';
 import { resolveImage } from '../../lib/images';
 import { projectJsonLd } from '../../lib/seo';
 
@@ -20,7 +20,7 @@ interface Props {
 }
 
 const { project } = Astro.props;
-const summary = project.data.summary.replace(/\s+/g, ' ').trim();
+const summary = plainText(project.data.summary);
 const image = project.data.cover ? resolveImage(project.data.cover) : undefined;
 const pageUrl = absoluteUrl(Astro.site, `/work/${project.id}`);
 const title = `${project.data.caption} · Humansize`;

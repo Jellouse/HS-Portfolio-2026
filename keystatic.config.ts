@@ -51,7 +51,7 @@ export default config({
         summary: fields.text({
           label: 'Summary',
           multiline: true,
-          description: 'Two or three sentences for the homepage.',
+          description: 'Two or three sentences for the homepage. A link is [label](https://...).',
         }),
         cover: imageField('Cover'),
         coverAlt: fields.text({ label: 'Cover alt text' }),
@@ -89,7 +89,11 @@ export default config({
               label: 'Text',
               schema: {
                 heading: fields.text({ label: 'Heading' }),
-                text: fields.text({ label: 'Text', multiline: true }),
+                text: fields.text({
+                  label: 'Text',
+                  multiline: true,
+                  description: 'A link is [label](https://...).',
+                }),
               },
             },
             image: {
@@ -153,9 +157,16 @@ export default config({
           description: 'IANA name, used for the clock. Example: Asia/Tokyo',
         }),
         place: fields.text({ label: 'Place label', description: 'Example: Tokyo' }),
-        about: fields.array(fields.text({ label: 'Paragraph', multiline: true }), {
-          label: 'About',
-        }),
+        about: fields.array(
+          fields.text({
+            label: 'Paragraph',
+            multiline: true,
+            description: 'A link is [label](https://...).',
+          }),
+          {
+            label: 'About',
+          },
+        ),
         socials: fields.array(
           fields.object({
             label: fields.text({ label: 'Label' }),
