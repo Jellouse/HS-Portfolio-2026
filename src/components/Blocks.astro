@@ -1,6 +1,7 @@
 ---
 import ImageBlock from './ImageBlock.astro';
 import ImagePair from './ImagePair.astro';
+import ProcessBlock from './ProcessBlock.astro';
 import TextBlock from './TextBlock.astro';
 import type { ProjectEntry } from '../lib/content';
 
@@ -20,6 +21,9 @@ const { blocks } = Astro.props;
       return (
         <ImageBlock src={block.value.src} alt={block.value.alt} frame={block.value.frame} />
       );
+    }
+    if (block.discriminant === 'process') {
+      return <ProcessBlock images={block.value.images} />;
     }
     return (
       <ImagePair

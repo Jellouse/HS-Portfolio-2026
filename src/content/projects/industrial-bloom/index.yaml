@@ -44,5 +44,16 @@ blocks:
       src: /src/content/projects/industrial-bloom/vase-3.jpg
       alt: Industrial Bloom vase
       frame: medium
+  - discriminant: process
+    value:
+      images:
+        - src: /src/content/projects/industrial-bloom/vase-1.jpg
+          alt: Industrial Bloom vase
+        - src: /src/content/projects/industrial-bloom/vase-2.jpg
+          alt: Industrial Bloom vase
+        - src: /src/content/projects/industrial-bloom/vase-round.jpg
+          alt: Industrial Bloom round vase
+        - src: /src/content/projects/industrial-bloom/vase-3.jpg
+          alt: Industrial Bloom vase
 todo:
-  - "TODO: confirm edition sizes and any process photos that should sit with the renders."
+  - "TODO: confirm edition sizes. The process block reuses the vase renders until a dedicated process set exists."

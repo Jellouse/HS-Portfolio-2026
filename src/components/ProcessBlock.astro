@@ -1,0 +1,32 @@
+---
+import BlurImage from './BlurImage.astro';
+import { resolveImage } from '../lib/images';
+
+interface Photo {
+  src: string;
+  alt: string;
+}
+
+interface Props {
+  images: Photo[];
+}
+
+const { images } = Astro.props;
+---
+
+{
+  images.length > 0 && (
+    <section class="process">
+      <h2 class="process-label">Process</h2>
+      <div class="process-grid">
+        {images.map((image) => (
+          <BlurImage
+            src={resolveImage(image.src)}
+            alt={image.alt}
+            sizes="(min-width: 760px) 206px, calc(43vw - 20px)"
+          />
+        ))}
+      </div>
+    </section>
+  )
+}

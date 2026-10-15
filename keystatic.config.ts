@@ -112,6 +112,21 @@ export default config({
                 rightAlt: fields.text({ label: 'Right alt text' }),
               },
             },
+            process: {
+              label: 'Process',
+              schema: {
+                images: fields.array(
+                  fields.object({
+                    src: imageField('Image'),
+                    alt: fields.text({ label: 'Alt text' }),
+                  }),
+                  {
+                    label: 'Photos',
+                    itemLabel: (props) => props.fields.alt.value || 'Photo',
+                  },
+                ),
+              },
+            },
           },
           { label: 'Blocks' },
         ),

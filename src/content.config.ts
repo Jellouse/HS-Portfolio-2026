@@ -30,10 +30,25 @@ const pairBlock = z.object({
   }),
 });
 
+const processBlock = z.object({
+  discriminant: z.literal('process'),
+  value: z.object({
+    images: z
+      .array(
+        z.object({
+          src: z.string(),
+          alt: z.string(),
+        }),
+      )
+      .default([]),
+  }),
+});
+
 export const blockSchema = z.discriminatedUnion('discriminant', [
   textBlock,
   imageBlock,
   pairBlock,
+  processBlock,
 ]);
 
 const creditSchema = z.object({

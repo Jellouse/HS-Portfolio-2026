@@ -477,6 +477,30 @@ body:has(.hero) .site-header {
   margin: 0 auto 28px;
 }
 
+.process {
+  width: min(100%, var(--measure));
+  margin: 200px auto 80px;
+}
+
+.process-label {
+  margin: 0 0 128px;
+  font-size: 23px;
+  font-weight: 400;
+  line-height: 29px;
+  letter-spacing: var(--track);
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.process-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  align-items: start;
+  width: min(420px, 86%);
+  margin: 0 auto;
+}
+
 .meta {
   display: grid;
   grid-template-columns: 1fr;
