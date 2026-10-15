@@ -504,10 +504,6 @@ body:has(.project) .site-header {
   letter-spacing: var(--track);
 }
 
-.caption-years {
-  color: var(--muted);
-}
-
 .project-summary {
   width: min(100%, var(--measure));
   margin: 29px auto 0;

@@ -13,6 +13,8 @@ const { project, priority = false } = Astro.props;
 const { caption, cover, coverAlt, coverVideo, coverFrame, coverFlush, rounded } = project.data;
 if (!coverVideo && (!cover || !coverAlt)) throw new Error(`${project.id} is missing a cover`);
 const years = yearRange(project.data.year, project.data.yearEnd);
+const base = caption.replace(/,\s*\d{4}(\s*\u2013\s*\d{4})?\s*$/, '');
+const label = years ? `${base}, ${years}` : caption;
 const image = cover ? resolveImage(cover) : undefined;
 const sizes = {
   full: '(min-width: 1440px) 1120px, (min-width: 760px) 80vw, 100vw',
@@ -44,5 +46,5 @@ const sizes = {
       />
     )}
   </a>
-  <a class="caption" href={`/work/${project.id}`}>{caption}{years && <span class="caption-years"> {years}</span>}</a>
+  <a class="caption" href={`/work/${project.id}`}>{label}</a>
 </article>

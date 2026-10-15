@@ -79,7 +79,6 @@ export function absoluteUrl(site: URL | undefined, path: string): string {
 
 export function yearRange(start?: number | null, end?: number | null): string | undefined {
   if (start == null) return end == null ? undefined : String(end);
-  if (end == null) return `${start} \u2013`;
-  if (end === start) return String(start);
+  if (end == null || end === start) return String(start);
   return `${start} \u2013 ${end}`;
 }
