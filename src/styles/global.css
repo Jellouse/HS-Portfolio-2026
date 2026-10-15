@@ -678,15 +678,44 @@ body:has(.project) .site-header {
 }
 
 .site-footer {
-  width: calc(100% - 40px);
-  margin: 48px auto 72px;
+  width: min(var(--card), calc(100% - 40px));
+  margin: 0 auto 20px;
+  border-top: 1px solid var(--line);
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+  overflow: hidden;
+  font-size: var(--text-body);
+  line-height: var(--lh-body);
+}
+
+.footer-text {
+  width: min(100%, var(--measure));
+  margin: 0 auto;
+  padding-top: 56px;
   text-align: left;
 }
 
-.site-footer p {
-  margin: 0 0 10px;
+.footer-text p {
+  margin: 0 0 29px;
 }
 
+.footer-text p:last-child {
+  margin-bottom: 0;
+}
+
+/* Room above the faces for full-height stretch, then crop them at the card's bottom edge. */
+.footer-faces {
+  padding-top: 38%;
+}
+
+.footer-faces .peeps {
+  width: 100%;
+  margin-bottom: -6%;
+}
+
+.footer-faces .peeps-static :is(path, ellipse),
+.footer-faces .peeps-row svg {
+  fill: var(--red);
+}
 
 .not-found {
   min-height: 100svh;
@@ -861,9 +890,6 @@ body:has(.project) .site-header {
   }
 
   body:has(.hero) .site-header.page-grid,
-  .site-footer.page-grid {
-    width: min(100%, 1440px);
-  }
 
   .site-header.page-grid {
     align-items: start;
@@ -954,9 +980,6 @@ body:has(.project) .site-header {
     margin-right: 0;
   }
 
-  .site-footer.page-grid > p {
-    grid-column: 3 / 7;
-  }
 }
 
 .grid-overlay {
