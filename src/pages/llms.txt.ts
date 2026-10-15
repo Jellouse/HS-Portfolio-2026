@@ -1,6 +1,8 @@
 import type { APIRoute } from 'astro';
 import { absoluteUrl, getProjects, getSite, plainText } from '../lib/content';
 
+export const prerender = true;
+
 export const GET: APIRoute = async ({ site }) => {
   const settings = await getSite();
   const projects = await getProjects();

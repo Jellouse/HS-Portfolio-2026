@@ -1,5 +1,20 @@
 import { config, fields, collection, singleton } from '@keystatic/core';
 
+const repo = 'Jellouse/HS-Portfolio-2026';
+
+// `npm run dev` writes files locally. A production build commits through GitHub.
+// KEYSTATIC_STORAGE=local or KEYSTATIC_STORAGE=github overrides that, on both
+// the admin UI and the API. No branchPrefix: any prefix is allowed, and the
+// branch menu opens on the repository default branch (main).
+function storage() {
+  const selected = import.meta.env.KEYSTATIC_STORAGE;
+  if (selected === 'local') return { kind: 'local' as const };
+  if (selected === 'github' || import.meta.env.PROD) {
+    return { kind: 'github' as const, repo };
+  }
+  return { kind: 'local' as const };
+}
+
 const imageDirectory = 'src/content/projects';
 const imagePublicPath = '/src/content/projects';
 
@@ -23,7 +38,7 @@ function imageField(label: string) {
 }
 
 export default config({
-  storage: { kind: 'local' },
+  storage: storage(),
   ui: {
     brand: { name: 'Humansize' },
     navigation: ['projects', '---', 'site'],
@@ -80,35 +95,35 @@ export default config({
           {
             text: {
               label: 'Text',
-              schema: {
+              schema: fields.object({
                 heading: fields.text({ label: 'Heading' }),
                 text: fields.text({
                   label: 'Text',
                   multiline: true,
                   description: 'A link is [label](https://...).',
                 }),
-              },
+              }),
             },
             image: {
               label: 'Image',
-              schema: {
+              schema: fields.object({
                 src: imageField('Image'),
                 alt: fields.text({ label: 'Alt text' }),
                 frame,
-              },
+              }),
             },
             pair: {
               label: 'Image pair',
-              schema: {
+              schema: fields.object({
                 left: imageField('Left image'),
                 leftAlt: fields.text({ label: 'Left alt text' }),
                 right: imageField('Right image'),
                 rightAlt: fields.text({ label: 'Right alt text' }),
-              },
+              }),
             },
             process: {
               label: 'Process',
-              schema: {
+              schema: fields.object({
                 images: fields.array(
                   fields.object({
                     src: imageField('Image'),
@@ -119,7 +134,7 @@ export default config({
                     itemLabel: (props) => props.fields.alt.value || 'Photo',
                   },
                 ),
-              },
+              }),
             },
           },
           { label: 'Blocks' },

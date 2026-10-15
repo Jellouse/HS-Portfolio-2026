@@ -1,5 +1,7 @@
 import type { APIRoute } from 'astro';
 
+export const prerender = true;
+
 export const GET: APIRoute = ({ site }) => {
   const origin = site?.href ?? 'https://humansize.studio/';
   const body = `User-agent: *\nAllow: /\n\nSitemap: ${new URL('sitemap-index.xml', origin).href}\n`;
