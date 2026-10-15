@@ -1029,8 +1029,8 @@ html.show-grid .grid-overlay .page-grid {
   }
 }
 
-/* Text reveal: a quick blur-to-sharp as text enters. Scroll-linked where supported, so it
-   moves at the reader's scroll speed and is sharp once the text is 15% into the viewport.
+/* Text reveal: a quick blur-to-sharp per visual line as text enters.
+   Scroll-linked where supported; otherwise a 250ms fallback with a tiny stagger.
    Never touches the faces or the mark. */
 @keyframes text-in {
   from {
@@ -1040,9 +1040,15 @@ html.show-grid .grid-overlay .page-grid {
   }
 }
 
+/* inline-block so transform applies; whitespace stays outside the spans, so wrapping is unchanged */
+.is-split .reveal-word {
+  display: inline-block;
+  text-decoration: inherit;
+}
+
 @media (prefers-reduced-motion: no-preference) {
   @supports (animation-timeline: view()) {
-    :is(.about p, .text-block p, .footer-text p, .caption, .project-summary, .info-list li, .project-hero h1) {
+    .is-split .reveal-word {
       animation: text-in linear both;
       animation-timeline: view();
       animation-range: cover 0px cover 15vh;
@@ -1050,21 +1056,24 @@ html.show-grid .grid-overlay .page-grid {
   }
 
   @supports not (animation-timeline: view()) {
-    .reveal-pending {
+    .reveal-pending .reveal-word {
       opacity: 0;
       filter: blur(6px);
       transform: translateY(4px);
     }
 
-    .reveal-in {
+    .reveal-in .reveal-word {
       transition:
-        opacity 250ms ease-out,
-        filter 250ms ease-out,
-        transform 250ms ease-out;
+        opacity 250ms ease-out calc(var(--line, 0) * 30ms),
+        filter 250ms ease-out calc(var(--line, 0) * 30ms),
+        transform 250ms ease-out calc(var(--line, 0) * 30ms);
+    }
+
+    .reveal-now .reveal-word {
+      transition: none;
     }
   }
 
-  /* Text that appears on demand: Tokyo time and the contact menu items. */
   .who:hover .time,
   .who:focus-within .time,
   .who.is-open .time,
