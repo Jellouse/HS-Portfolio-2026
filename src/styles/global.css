@@ -994,3 +994,31 @@ html.show-grid .grid-overlay .page-grid {
   z-index: 1;
   -webkit-tap-highlight-color: transparent;
 }
+
+/* Cross-page transition: the small project mark grows into the homepage mark.
+   Native cross-document view transitions, so page scripts load as usual;
+   browsers without support just change page. */
+@view-transition {
+  navigation: auto;
+}
+
+.hero .mark,
+.project-mark .mark {
+  view-transition-name: hs-mark;
+}
+
+::view-transition-group(hs-mark) {
+  animation-duration: 450ms;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 180ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  @view-transition {
+    navigation: none;
+  }
+}
