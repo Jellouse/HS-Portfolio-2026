@@ -11,12 +11,13 @@ coverFrame: wide
 coverFlush: false
 rounded: true
 info:
-  - label: Ralisation
-    value: Johann Schnettker
+  - label: Realisation
+    value: Humansize
   - label: Year
     value: '2025'
   - label: Client
-    value: '[Analogue](analogueshop.com)'
+    value: Analogue
+    href: analogueshop.com
   - label: Place
     value: Zeedijk, Amsterdam
 blocks:
