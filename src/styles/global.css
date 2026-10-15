@@ -426,9 +426,32 @@ body:has(.hero) .site-header {
 }
 
 .peeps {
-  display: block;
+  position: relative;
   width: 54.9%;
+}
+
+.peeps-static {
+  display: block;
+  width: 100%;
   height: auto;
+}
+
+.peeps.is-live .peeps-static {
+  visibility: hidden;
+}
+
+.peeps-row {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+}
+
+.peeps-row svg {
+  flex: 1 1 0;
+  min-width: 0;
+  overflow: visible;
+  fill: #f8f8f8;
 }
 
 .frame img {
