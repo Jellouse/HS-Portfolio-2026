@@ -1,0 +1,49 @@
+---
+export const prerender = true;
+
+import Blocks from '../../components/Blocks.astro';
+import Info from '../../components/Info.astro';
+import Mark from '../../components/Mark.astro';
+import ProjectHero from '../../components/ProjectHero.astro';
+import Base from '../../layouts/Base.astro';
+import { absoluteUrl, getProjects, plainText, type ProjectEntry } from '../../lib/content';
+import { resolveImage } from '../../lib/images';
+import { projectJsonLd } from '../../lib/seo';
+
+export async function getStaticPaths() {
+  const projects = await getProjects();
+  return projects.map((project) => ({
+    params: { slug: project.id },
+    props: { project },
+  }));
+}
+
+interface Props {
+  project: ProjectEntry;
+}
+
+const { project } = Astro.props;
+const summary = plainText(project.data.summary);
+const image = project.data.cover ? resolveImage(project.data.cover) : undefined;
+const pageUrl = absoluteUrl(Astro.site, `/work/${project.id}`);
+const title = `${project.data.caption} · Humansize`;
+---
+
+<Base
+  title={title}
+  description={summary}
+  image={image}
+  type="article"
+  jsonLd={projectJsonLd(project, pageUrl)}
+>
+  <article class:list={['project', 'page-grid', { 'is-plain': project.data.rounded === false }]} data-slug={project.id}>
+    <p class="project-mark">
+      <a href="/" aria-label="Humansize">
+        <Mark />
+      </a>
+    </p>
+    <ProjectHero title={project.data.caption} />
+    <Blocks blocks={project.data.blocks} />
+    <Info items={project.data.info} />
+  </article>
+</Base>

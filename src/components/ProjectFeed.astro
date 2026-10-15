@@ -1,0 +1,19 @@
+---
+import About from './About.astro';
+import LeadCard from './LeadCard.astro';
+import ProjectCard from './ProjectCard.astro';
+import type { ProjectEntry } from '../lib/content';
+
+interface Props {
+  projects: ProjectEntry[];
+  about: string[];
+}
+
+const { projects, about } = Astro.props;
+---
+
+<div class="feed page-grid">
+  <LeadCard />
+  <About paragraphs={about} />
+  {projects.map((project, index) => <ProjectCard project={project} priority={index === 0} />)}
+</div>

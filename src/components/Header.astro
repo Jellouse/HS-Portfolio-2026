@@ -1,0 +1,44 @@
+---
+import type { SiteData } from '../lib/content';
+
+interface Props {
+  site: SiteData;
+}
+
+const { site } = Astro.props;
+const hrefFor = (label: string) =>
+  site.socials.find((item) => item.label.toLowerCase() === label.toLowerCase())?.href;
+
+const menu = [
+  { label: 'Linkedin', href: hrefFor('LinkedIn'), quiet: true },
+  { label: 'Instagram', href: hrefFor('Instagram'), quiet: false },
+  { label: 'Email', href: `mailto:${site.email}`, quiet: true },
+];
+---
+
+<a class="skip" href="#content">Skip to content</a>
+
+<header class="site-header page-grid">
+  <div class="who">
+    <a href="/">{site.name}</a>
+    <p class="time" data-tokyo-time data-place={site.place} data-timezone={site.timezone}>
+      {site.place}
+    </p>
+  </div>
+  <div class="contact">
+    <button class="contact-label" type="button">@Humansize</button>
+    <div class="contact-menu">
+      {
+        menu.map((item) =>
+          item.href ? (
+            <a class:list={{ 'is-quiet': item.quiet }} href={item.href}>
+              {item.label}
+            </a>
+          ) : (
+            <span class:list={{ 'is-quiet': item.quiet }}>{item.label}</span>
+          ),
+        )
+      }
+    </div>
+  </div>
+</header>

@@ -1,0 +1,60 @@
+title: Industrial Bloom
+caption: Industrial Bloom, 2026
+year: 2026
+order: 1
+published: true
+summary: >
+  Industrial Bloom is a series of aluminium vases.
+  Simple forms and textures that make any plant silhouette even more striking.
+  The shop is at worksurface.co.
+cover: /src/content/projects/industrial-bloom/ib-full.jpg
+coverAlt: Industrial Bloom
+coverFrame: full
+coverFlush: true
+info:
+  - label: Design
+    value: Johann Schnettker
+  - label: Year
+    value: "2026"
+  - label: Material
+    value: Aluminium
+  - label: Shop
+    value: worksurface.co
+    href: https://worksurface.co/
+blocks:
+  - discriminant: text
+    value:
+      text: |
+        A series of vases accentuating the contrast between nature and industry.
+
+        Designed to pay homage to every type of plant or flower.
+  - discriminant: image
+    value:
+      src: /src/content/projects/industrial-bloom/ib-full.jpg
+      alt: Industrial Bloom
+      frame: full
+      flush: true
+  - discriminant: pair
+    value:
+      left: /src/content/projects/industrial-bloom/vase-2.jpg
+      leftAlt: Industrial Bloom vase
+      right: /src/content/projects/industrial-bloom/vase-round.jpg
+      rightAlt: Industrial Bloom round vase
+  - discriminant: image
+    value:
+      src: /src/content/projects/industrial-bloom/vase-3.jpg
+      alt: Industrial Bloom vase
+      frame: medium
+  - discriminant: process
+    value:
+      images:
+        - src: /src/content/projects/industrial-bloom/vase-1.jpg
+          alt: Industrial Bloom vase
+        - src: /src/content/projects/industrial-bloom/vase-2.jpg
+          alt: Industrial Bloom vase
+        - src: /src/content/projects/industrial-bloom/vase-round.jpg
+          alt: Industrial Bloom round vase
+        - src: /src/content/projects/industrial-bloom/vase-3.jpg
+          alt: Industrial Bloom vase
+todo:
+  - "TODO: confirm edition sizes. The process block reuses the vase renders until a dedicated process set exists."

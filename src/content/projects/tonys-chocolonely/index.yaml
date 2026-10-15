@@ -1,0 +1,41 @@
+title: Tony's Chocolonely
+caption: Tony's Chocolonely, 2025
+year: 2025
+order: 4
+published: true
+summary: >
+  Tony's Chocolonely called us for a new website.
+  Their branding has no rules, and so many rules.
+  It grew on me.
+cover: /src/content/projects/tonys-chocolonely/cover.jpg
+coverAlt: Tony's Chocolonely
+coverFrame: medium
+rounded: false
+info:
+  - label: Design
+    value: Johann Schnettker
+  - label: Role
+    value: Website
+  - label: With
+    value: Analogue and Build
+  - label: Year
+    value: "2025"
+  - label: Client
+    value: Tony's Chocolonely
+blocks:
+  - discriminant: text
+    value:
+      text: |
+        Tony's Chocolonely called us for a new website. Such a great company to work with. Their branding has no rules, and so many rules. It grew on me.
+  - discriminant: image
+    value:
+      src: /src/content/projects/tonys-chocolonely/cover.jpg
+      alt: Tony's Chocolonely
+      frame: wide
+  - discriminant: image
+    value:
+      src: /src/content/projects/tonys-chocolonely/archive.jpg
+      alt: Tony's Chocolonely website
+      frame: wide
+todo:
+  - "TODO: the summary is shortened from the archive text. Confirm the 2025 year and the full credit list."

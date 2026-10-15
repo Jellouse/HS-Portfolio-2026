@@ -1,0 +1,14 @@
+---
+import { renderInline } from '../lib/content';
+
+interface Props {
+  paragraphs: string[];
+}
+
+const { paragraphs } = Astro.props;
+---
+
+<section class="about" id="about">
+  <h2 class="sr-only">About</h2>
+  {paragraphs.map((paragraph) => <p set:html={renderInline(paragraph)} />)}
+</section>

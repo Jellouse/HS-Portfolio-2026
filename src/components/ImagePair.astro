@@ -1,0 +1,26 @@
+---
+import BlurImage from './BlurImage.astro';
+import { resolveImage } from '../lib/images';
+
+interface Props {
+  left: string;
+  leftAlt: string;
+  right: string;
+  rightAlt: string;
+}
+
+const { left, leftAlt, right, rightAlt } = Astro.props;
+---
+
+<div class="pair">
+  <BlurImage
+    src={resolveImage(left)}
+    alt={leftAlt}
+    sizes="(min-width: 760px) 552px, calc(100vw - 40px)"
+  />
+  <BlurImage
+    src={resolveImage(right)}
+    alt={rightAlt}
+    sizes="(min-width: 760px) 552px, calc(100vw - 40px)"
+  />
+</div>

@@ -1,0 +1,42 @@
+---
+import ImageBlock from './ImageBlock.astro';
+import ImagePair from './ImagePair.astro';
+import ProcessBlock from './ProcessBlock.astro';
+import TextBlock from './TextBlock.astro';
+import type { ProjectEntry } from '../lib/content';
+
+interface Props {
+  blocks: ProjectEntry['data']['blocks'];
+}
+
+const { blocks } = Astro.props;
+---
+
+{
+  blocks.map((block) => {
+    if (block.discriminant === 'text') {
+      return <TextBlock heading={block.value.heading} text={block.value.text} />;
+    }
+    if (block.discriminant === 'image') {
+      return (
+        <ImageBlock
+          src={block.value.src}
+          alt={block.value.alt}
+          frame={block.value.frame}
+          flush={block.value.flush}
+        />
+      );
+    }
+    if (block.discriminant === 'process') {
+      return <ProcessBlock images={block.value.images} />;
+    }
+    return (
+      <ImagePair
+        left={block.value.left}
+        leftAlt={block.value.leftAlt}
+        right={block.value.right}
+        rightAlt={block.value.rightAlt}
+      />
+    );
+  })
+}

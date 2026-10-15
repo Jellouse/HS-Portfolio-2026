@@ -1,0 +1,35 @@
+---
+import BlurImage from './BlurImage.astro';
+import { resolveImage } from '../lib/images';
+import type { ProjectEntry } from '../lib/content';
+
+interface Props {
+  project: ProjectEntry;
+  priority?: boolean;
+}
+
+const { project, priority = false } = Astro.props;
+const { caption, cover, coverAlt, coverFrame, coverFlush, rounded } = project.data;
+if (!cover || !coverAlt) throw new Error(`${project.id} is missing a cover`);
+const image = resolveImage(cover);
+const sizes = {
+  full: '(min-width: 1440px) 1120px, (min-width: 760px) 80vw, 100vw',
+  wide: '(min-width: 1440px) 836px, (min-width: 760px) 60vw, 100vw',
+  medium: '(min-width: 1440px) 552px, (min-width: 760px) 40vw, 100vw',
+  narrow: '(min-width: 1440px) 410px, (min-width: 760px) 30vw, 100vw',
+}[coverFrame];
+---
+
+<article class:list={['card', { 'is-plain': rounded === false }]} data-frame={coverFrame}>
+  <a href={`/work/${project.id}`}>
+    <BlurImage
+      src={image}
+      alt={coverAlt}
+      sizes={sizes}
+      priority={priority}
+      plain={rounded === false}
+      flush={coverFlush === true}
+    />
+  </a>
+  <a class="caption" href={`/work/${project.id}`}>{caption}</a>
+</article>

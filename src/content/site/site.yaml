@@ -1,0 +1,19 @@
+name: Johann Schnettker
+studio: Humansize
+email: schnettker.johann@gmail.com
+intro: Humansize is the studio of Johann Schnettker. I design things you can look at, click through and walk into, like 3D renders and artwork, websites built in Framer, and retail spaces.
+timezone: Asia/Tokyo
+place: Tokyo
+about:
+  - Humansize is the studio of Johann Schnettker. I design things you can look at, click through and walk into, like 3D renders and artwork, websites built in Framer, and retail spaces.
+  - Most projects move between all three. A brand gets its online home and the shop it opens, or a product is shown in 3D before it exists. Because I also do branding, prototyping and 3D printing, an idea can go from sketch to screen to object in one pair of hands.
+  - "Before starting Humansize I spent five years at [Analogue](/work/analogue) and Build in Amsterdam. There I worked on sites for [Tony's Chocolonely](/work/tonys-chocolonely), [Atomic](/work/atomic), Suitsupply, Vitra, Mammut and Mollie, and built physical stores along the way."
+  - Currently in Tokyo, back in Europe from December. Open to new projects.
+socials:
+  - label: Instagram
+  - label: LinkedIn
+todo:
+  - "TODO: add the Humansize Instagram URL. The header shows the label until then."
+  - "TODO: add the LinkedIn URL. The header shows the label until then."
+  - "TODO: after December 2026, update the Tokyo clock and the about line about being based in Tokyo."
+  - "TODO: set SITE_URL when the production domain is final."
