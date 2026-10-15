@@ -66,6 +66,7 @@
   --radius: 31px;
   --radius-sm: 15px;
   --pad: 20px;
+  --mark-stretch-max: 1.35;
   color: var(--ink);
   background: var(--bg);
   font-family: 'ABC Areal', 'Helvetica Neue', Helvetica, Arial, sans-serif;

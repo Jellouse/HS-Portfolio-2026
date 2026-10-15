@@ -131,7 +131,11 @@ const site = await getSite();
             if (!fine.matches || reduce.matches || event.pointerType === 'touch') return;
             var distance = Math.abs(event.clientX - window.innerWidth / 2);
             var reach = Math.min(1, distance / (window.innerWidth / 2));
-            target = 1 + 0.12 * reach * reach;
+            var max = parseFloat(
+              getComputedStyle(document.documentElement).getPropertyValue('--mark-stretch-max'),
+            );
+            if (!max || max < 1) max = 1.35;
+            target = 1 + (max - 1) * reach * reach;
             wake();
           });
 
