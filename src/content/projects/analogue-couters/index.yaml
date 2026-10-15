@@ -53,6 +53,99 @@ blocks:
       src: /src/content/projects/analogue-couters/blocks/5/value/src.png
       frame: full
       flush: false
+  - discriminant: text
+    value:
+      text: >-
+        I took it from CAD to finished counters. Every connection and tolerance
+        was worked out before the parts were ordered. Then came hundreds of 3D
+        printed pieces, countless tapped holes, and plenty of taking things
+        apart and putting them back together. Extrusion is unforgiving, and
+        everything has to go together in exactly the right order.
+  - discriminant: image
+    value:
+      src: /src/content/projects/analogue-couters/blocks/7/value/src.jpg
+      frame: full
+      flush: false
+  - discriminant: image
+    value:
+      src: /src/content/projects/analogue-couters/blocks/8/value/src.jpg
+      frame: full
+      flush: false
+  - discriminant: image
+    value:
+      src: /src/content/projects/analogue-couters/blocks/9/value/src.jpg
+      frame: full
+      flush: false
+  - discriminant: image
+    value:
+      src: /src/content/projects/analogue-couters/blocks/10/value/src.jpg
+      frame: full
+      flush: false
+  - discriminant: pair
+    value:
+      left: /src/content/projects/analogue-couters/blocks/11/value/left.jpg
+      right: /src/content/projects/analogue-couters/blocks/11/value/right.jpg
+  - discriminant: text
+    value:
+      text: >-
+        The second room gives back to the photographers who shoot with these
+        cameras. It's a gallery of extrusion, steel cables and 3D printed parts
+        that holds their prints in mid-air.
+  - discriminant: pair
+    value:
+      left: /src/content/projects/analogue-couters/blocks/13/value/left.jpg
+      right: /src/content/projects/analogue-couters/blocks/13/value/right.jpg
+  - discriminant: process
+    value:
+      images:
+        - src: >-
+            /src/content/projects/analogue-couters/blocks/14/value/images/0/src.jpg
+          flush: false
+        - src: >-
+            /src/content/projects/analogue-couters/blocks/14/value/images/1/src.jpg
+          flush: false
+        - src: >-
+            /src/content/projects/analogue-couters/blocks/14/value/images/2/src.jpg
+          flush: false
+        - src: >-
+            /src/content/projects/analogue-couters/blocks/14/value/images/3/src.jpg
+          flush: false
+        - src: >-
+            /src/content/projects/analogue-couters/blocks/14/value/images/4/src.jpg
+          flush: false
+        - src: >-
+            /src/content/projects/analogue-couters/blocks/14/value/images/5/src.jpg
+          flush: false
+        - src: >-
+            /src/content/projects/analogue-couters/blocks/14/value/images/6/src.jpg
+          flush: false
+        - src: >-
+            /src/content/projects/analogue-couters/blocks/14/value/images/7/src.jpg
+          flush: false
+        - src: >-
+            /src/content/projects/analogue-couters/blocks/14/value/images/8/src.jpg
+          flush: false
+        - src: >-
+            /src/content/projects/analogue-couters/blocks/14/value/images/9/src.jpg
+          flush: false
+        - src: >-
+            /src/content/projects/analogue-couters/blocks/14/value/images/10/src.jpg
+          flush: false
+        - src: >-
+            /src/content/projects/analogue-couters/blocks/14/value/images/11/src.jpg
+          flush: false
+        - src: >-
+            /src/content/projects/analogue-couters/blocks/14/value/images/12/src.jpg
+          flush: false
+        - src: >-
+            /src/content/projects/analogue-couters/blocks/14/value/images/13/src.jpg
+          flush: false
+        - src: >-
+            /src/content/projects/analogue-couters/blocks/14/value/images/14/src.jpg
+          flush: false
+        - src: >-
+            /src/content/projects/analogue-couters/blocks/14/value/images/15/src.jpg
+          flush: false
 todo:
   - >-
     TODO: add more photographs of the vitrines, the milk glass and the gallery
