@@ -368,6 +368,23 @@ body:has(.hero) .site-header {
   .lead {
     clip-path: url('#squircle');
   }
+
+  .frame video {
+    clip-path: url('#squircle');
+  }
+}
+
+.frame img,
+.frame video {
+  corner-shape: inherit;
+}
+
+.frame.is-plain video,
+.is-plain .frame video,
+.frame.is-flush video {
+  border-radius: 0;
+  corner-shape: unset;
+  clip-path: none;
 }
 
 .frame.is-plain,
@@ -676,12 +693,14 @@ body:has(.project) .site-header {
 
   .frame,
   .lead,
-  .frame img {
+  .frame img,
+  .frame video {
     border-radius: var(--radius);
   }
 
   .project .frame,
-  .project .frame img {
+  .project .frame img,
+  .project .frame video {
     border-radius: var(--radius-sm);
   }
 
