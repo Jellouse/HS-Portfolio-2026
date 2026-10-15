@@ -287,12 +287,12 @@ body:has(.hero) .site-header {
 
 .contact-menu {
   position: absolute;
-  top: -36px;
+  top: calc(-1 * var(--lh-body));
   right: 0;
   display: none;
   flex-direction: column;
   align-items: flex-end;
-  gap: 7px;
+  gap: 0;
 }
 
 .contact:hover .contact-menu,
@@ -310,7 +310,7 @@ body:has(.hero) .site-header {
 .contact-menu a,
 .contact-menu span {
   display: block;
-  line-height: 29px;
+  line-height: var(--lh-body);
   white-space: nowrap;
   opacity: 1;
 }
