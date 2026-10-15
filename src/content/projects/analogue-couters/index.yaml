@@ -1,0 +1,60 @@
+title: Analogue
+caption: Analogue, 2025
+year: 2025
+order: 3
+published: true
+summary: >-
+  A new store for Analogue Amsterdam on the Zeedijk, built entirely from
+  aluminium extrusion.
+cover: /src/content/projects/analogue-couters/cover.jpg
+coverAlt: Analogue store on Zeedijk in Amsterdam
+coverFrame: wide
+coverFlush: false
+rounded: true
+info:
+  - label: Ralisation
+    value: Johann Schnettker
+  - label: Year
+    value: '2025'
+  - label: Client
+    value: Analogue
+  - label: Place
+    value: Zeedijk, Amsterdam
+blocks:
+  - discriminant: text
+    value:
+      text: >-
+        At its centre are three large rolling vitrines with stainless steel
+        panelling, a glass worksurface and backlit milk glass, so the cameras
+        sit in the best possible light.
+  - discriminant: image
+    value:
+      src: /src/content/projects/analogue-couters/blocks/1/value/src.png
+      alt: Analogue store on Zeedijk in Amsterdam
+      frame: wide
+      flush: false
+  - discriminant: image
+    value:
+      src: /src/content/projects/analogue-couters/blocks/2/value/src.png
+      frame: full
+      flush: false
+  - discriminant: image
+    value:
+      src: /src/content/projects/analogue-couters/blocks/3/value/src.png
+      frame: full
+      flush: false
+  - discriminant: image
+    value:
+      src: /src/content/projects/analogue-couters/blocks/4/value/src.png
+      frame: full
+      flush: false
+  - discriminant: image
+    value:
+      src: /src/content/projects/analogue-couters/blocks/5/value/src.png
+      frame: full
+      flush: false
+todo:
+  - >-
+    TODO: add more photographs of the vitrines, the milk glass and the gallery
+    room.
+  - 'TODO: confirm collaborators beyond the design and build.'
