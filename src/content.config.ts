@@ -15,7 +15,7 @@ const imageBlock = z.object({
   discriminant: z.literal('image'),
   value: z.object({
     src: z.string(),
-    alt: z.string(),
+    alt: z.string().default(''),
     frame: frame.default('full'),
     flush: z.boolean().default(false),
   }),
@@ -25,9 +25,9 @@ const pairBlock = z.object({
   discriminant: z.literal('pair'),
   value: z.object({
     left: z.string(),
-    leftAlt: z.string(),
+    leftAlt: z.string().default(''),
     right: z.string(),
-    rightAlt: z.string(),
+    rightAlt: z.string().default(''),
   }),
 });
 
@@ -38,7 +38,7 @@ const processBlock = z.object({
       .array(
         z.object({
           src: z.string(),
-          alt: z.string(),
+          alt: z.string().default(''),
           flush: z.boolean().default(false),
         }),
       )
