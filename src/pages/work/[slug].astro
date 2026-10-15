@@ -6,7 +6,7 @@ import Info from '../../components/Info.astro';
 import Mark from '../../components/Mark.astro';
 import ProjectHero from '../../components/ProjectHero.astro';
 import Base from '../../layouts/Base.astro';
-import { absoluteUrl, getProjects, plainText, type ProjectEntry } from '../../lib/content';
+import { yearRange, absoluteUrl, getProjects, plainText, type ProjectEntry } from '../../lib/content';
 import { resolveImage } from '../../lib/images';
 import { projectJsonLd } from '../../lib/seo';
 
@@ -26,6 +26,15 @@ const { project } = Astro.props;
 const summary = plainText(project.data.summary);
 const image = project.data.cover ? resolveImage(project.data.cover) : undefined;
 const pageUrl = absoluteUrl(Astro.site, `/work/${project.id}`);
+const years = yearRange(project.data.year, project.data.yearEnd);
+const info = (() => {
+  const items = [...project.data.info];
+  if (!years) return items;
+  const at = items.findIndex((item) => item.label.trim().toLowerCase() === 'year');
+  const line = { label: 'Year', value: years };
+  if (at === -1) return [...items, line];
+  return items.filter((item, i) => i === at || item.label.trim().toLowerCase() !== 'year').map((item, i) => (i === at ? line : item));
+})();
 const title = `${project.data.caption} · Humansize`;
 ---
 
@@ -42,8 +51,8 @@ const title = `${project.data.caption} · Humansize`;
         <Mark />
       </a>
     </p>
-    <ProjectHero title={project.data.caption} />
+    <ProjectHero title={project.data.caption} summary={project.data.summary} />
     <Blocks blocks={project.data.blocks} />
-    <Info items={project.data.info} />
+    <Info items={info} />
   </article>
 </Base>

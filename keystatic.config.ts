@@ -82,7 +82,8 @@ export default config({
           label: 'Caption',
           description: 'Homepage line under the image. Example: Atomic Ski, 2026',
         }),
-        year: fields.integer({ label: 'Year' }),
+        year: fields.integer({ label: 'Start year' }),
+        yearEnd: fields.integer({ label: 'End year', description: 'Leave empty for ongoing' }),
         order: fields.integer({ label: 'Order', validation: { isRequired: true } }),
         published: fields.checkbox({
           label: 'Published',
@@ -92,7 +93,7 @@ export default config({
         summary: fields.text({
           label: 'Summary',
           multiline: true,
-          description: 'Two or three sentences for the homepage. A link is [label](https://...).',
+          description: 'Two or three sentences shown under the title on the project page. A link is [label](https://...).',
         }),
         cover: imageField('Cover'),
         coverVideo: videoField(

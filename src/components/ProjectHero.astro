@@ -1,11 +1,20 @@
 ---
+import { paragraphs, renderInline } from '../lib/content';
+
 interface Props {
   title: string;
+  summary?: string;
 }
 
-const { title } = Astro.props;
+const { title, summary } = Astro.props;
+const parts = summary && summary.trim() ? paragraphs(summary) : [];
 ---
 
 <header class="project-hero">
   <h1>{title}</h1>
+  {parts.length > 0 && (
+    <div class="summary project-summary">
+      {parts.map((paragraph) => <p set:html={renderInline(paragraph)} />)}
+    </div>
+  )}
 </header>

@@ -504,6 +504,27 @@ body:has(.project) .site-header {
   letter-spacing: var(--track);
 }
 
+.caption-years {
+  color: var(--muted);
+}
+
+.project-summary {
+  width: min(100%, var(--measure));
+  margin: 29px auto 0;
+  font-size: var(--text-body);
+  line-height: var(--lh-body);
+  letter-spacing: var(--track);
+  text-align: left;
+}
+
+.project-summary p {
+  margin: 0 0 29px;
+}
+
+.project-summary p:last-child {
+  margin-bottom: 0;
+}
+
 .text-block {
   width: min(100%, var(--measure));
   margin: 0 auto 80px;

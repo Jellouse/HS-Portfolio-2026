@@ -76,3 +76,10 @@ export function absoluteUrl(site: URL | undefined, path: string): string {
   const origin = site ?? new URL('https://humansize.studio');
   return new URL(path, origin).href;
 }
+
+export function yearRange(start?: number | null, end?: number | null): string | undefined {
+  if (start == null) return end == null ? undefined : String(end);
+  if (end == null) return `${start} \u2013`;
+  if (end === start) return String(start);
+  return `${start} \u2013 ${end}`;
+}

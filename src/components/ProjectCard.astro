@@ -2,7 +2,7 @@
 import BlurImage from './BlurImage.astro';
 import VideoFrame from './VideoFrame.astro';
 import { resolveImage } from '../lib/images';
-import type { ProjectEntry } from '../lib/content';
+import { yearRange, type ProjectEntry } from '../lib/content';
 
 interface Props {
   project: ProjectEntry;
@@ -12,6 +12,7 @@ interface Props {
 const { project, priority = false } = Astro.props;
 const { caption, cover, coverAlt, coverVideo, coverFrame, coverFlush, rounded } = project.data;
 if (!coverVideo && (!cover || !coverAlt)) throw new Error(`${project.id} is missing a cover`);
+const years = yearRange(project.data.year, project.data.yearEnd);
 const image = cover ? resolveImage(cover) : undefined;
 const sizes = {
   full: '(min-width: 1440px) 1120px, (min-width: 760px) 80vw, 100vw',
@@ -43,5 +44,5 @@ const sizes = {
       />
     )}
   </a>
-  <a class="caption" href={`/work/${project.id}`}>{caption}</a>
+  <a class="caption" href={`/work/${project.id}`}>{caption}{years && <span class="caption-years"> {years}</span>}</a>
 </article>
