@@ -80,7 +80,7 @@ const projects = defineCollection({
   }),
   schema: z.object({
     title: z.string(),
-    caption: z.string(),
+    caption: z.string().optional(),
     year: z.number().int().optional(),
     yearEnd: z.number().int().nullish(),
     order: z.number().int(),

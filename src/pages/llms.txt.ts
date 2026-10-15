@@ -1,3 +1,4 @@
+import { projectLabel } from '../lib/content';
 import type { APIRoute } from 'astro';
 import { absoluteUrl, getProjects, getSite, plainText } from '../lib/content';
 
@@ -22,7 +23,7 @@ export const GET: APIRoute = async ({ site }) => {
     ...projects.flatMap((project) => {
       const summary = plainText(project.data.summary);
       return [
-        `- [${project.data.caption}](${absoluteUrl(site, `/work/${project.id}`)}): ${summary}`,
+        `- [${projectLabel(project.data)}](${absoluteUrl(site, `/work/${project.id}`)}): ${summary}`,
       ];
     }),
     '',

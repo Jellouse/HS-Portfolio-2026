@@ -78,10 +78,6 @@ export default config({
       columns: ['title', 'year', 'published'],
       schema: {
         title: fields.slug({ name: { label: 'Title' } }),
-        caption: fields.text({
-          label: 'Caption',
-          description: 'Homepage line under the image. Example: Atomic Ski, 2026',
-        }),
         year: fields.integer({ label: 'Start year' }),
         yearEnd: fields.integer({ label: 'End year', description: 'Leave empty for ongoing' }),
         order: fields.integer({ label: 'Order', validation: { isRequired: true } }),

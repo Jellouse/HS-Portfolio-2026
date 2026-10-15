@@ -1,3 +1,4 @@
+import { projectLabel } from './content';
 import { plainText, type ProjectEntry, type SiteData } from './content';
 
 export function homeJsonLd(site: SiteData, pageUrl: string) {
@@ -37,7 +38,7 @@ export function projectJsonLd(
     '@context': 'https://schema.org',
     '@type': 'CreativeWork',
     name: project.data.title,
-    headline: project.data.caption,
+    headline: projectLabel(project.data),
     description: plainText(project.data.summary),
     url: pageUrl,
     ...(project.data.year ? { dateCreated: String(project.data.year) } : {}),

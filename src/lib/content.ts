@@ -77,6 +77,11 @@ export function absoluteUrl(site: URL | undefined, path: string): string {
   return new URL(path, origin).href;
 }
 
+export function projectLabel(data: { title: string; year?: number | null; yearEnd?: number | null }): string {
+  const years = yearRange(data.year, data.yearEnd);
+  return years ? `${data.title}, ${years}` : data.title;
+}
+
 export function yearRange(start?: number | null, end?: number | null): string | undefined {
   if (start == null) return end == null ? undefined : String(end);
   if (end == null || end === start) return String(start);
