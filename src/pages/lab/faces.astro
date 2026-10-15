@@ -30,9 +30,9 @@ const base = [1, 1, 1, 1, 1, 1, 1, 1, 1];
   </main>
   <aside class="panel">
     <div class="modes" role="tablist">
-      <button data-mode="focus" class="on">Focus</button>
+      <button data-mode="focus">Focus</button>
       <button data-mode="wave">Wave</button>
-      <button data-mode="tilt">Tilt</button>
+      <button data-mode="tilt" class="on">Tilt</button>
       <button data-mode="look">Look</button>
       <button data-mode="split">Split</button>
     </div>
@@ -62,8 +62,8 @@ const base = [1, 1, 1, 1, 1, 1, 1, 1, 1];
     const rnd = (i, k) => { const x = Math.sin(i * 127.1 + k * 311.7) * 43758.5453; return x - Math.floor(x); };
     const ALL = ['focus','wave','tilt','look','split'];
     const D = {
-      stretch: { label: 'Width stretch', min: 0, max: 4, step: .05, v: 2, modes: ALL },
-      height: { label: 'Height stretch', min: 0, max: 2, step: .05, v: .8, modes: ALL },
+      stretch: { label: 'Width stretch', min: 0, max: 4, step: .05, v: 3.45, modes: ALL },
+      height: { label: 'Height stretch', min: 0, max: 2, step: .05, v: 1.2, modes: ALL },
       radius: { label: 'Radius (faces)', min: .3, max: 6, step: .1, v: 1.5, modes: ['focus','look'] },
       sharpness: { label: 'Sharpness', min: .5, max: 6, step: .1, v: 2, modes: ['focus','look','split'] },
       wavelength: { label: 'Wave length (faces)', min: 1, max: 14, step: .5, v: 4, modes: ['wave'] },
@@ -72,12 +72,12 @@ const base = [1, 1, 1, 1, 1, 1, 1, 1, 1];
       maxW: { label: 'Max width (x base)', min: 1, max: 9, step: .1, v: 8, modes: ALL },
       minH: { label: 'Min height (x base)', min: .1, max: 1, step: .05, v: .2, modes: ALL },
       maxH: { label: 'Max height (x base)', min: 1, max: 4, step: .1, v: 4, modes: ALL },
-      independence: { label: 'Independence', min: 0, max: 1, step: .01, v: 0, modes: ALL },
-      randomness: { label: 'Randomness', min: 0, max: 1, step: .01, v: .2, modes: ALL },
-      speed: { label: 'Idle speed', min: .1, max: 3, step: .05, v: 1, modes: ALL },
+      independence: { label: 'Independence', min: 0, max: 1, step: .01, v: 0.76, modes: ALL },
+      randomness: { label: 'Randomness', min: 0, max: 1, step: .01, v: 0.5, modes: ALL },
+      speed: { label: 'Idle speed', min: .1, max: 3, step: .05, v: 0.2, modes: ALL },
     };
     const S = Object.fromEntries(Object.entries(D).map(([k, d]) => [k, d.v]));
-    let mode = 'focus';
+    let mode = 'tilt';
     const reduce = matchMedia('(prefers-reduced-motion: reduce)');
     const fine = matchMedia('(hover: hover) and (pointer: fine)');
     const row = document.getElementById('row');
