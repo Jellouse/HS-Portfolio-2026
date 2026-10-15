@@ -2,13 +2,13 @@
 // The stretch is 0 at the edges of the hover area and rises smoothly toward the centre,
 // and the mark follows with a time-based lerp, so entering or leaving never jumps.
 const MAX = 0.15; // max stretch along one axis
+const ZONE = 120; // px around the mark where it reacts
 const TAU = 90; // follow time constant in ms
 
 export function initMarkHover() {
   const fine = window.matchMedia('(hover: hover) and (pointer: fine)');
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
   document.querySelectorAll<SVGElement>('.project-mark .mark').forEach((mark) => {
-    const hit = (mark.closest('a') as HTMLElement | null) ?? (mark as unknown as HTMLElement);
     let tx = 1;
     let ty = 1;
     let x = 1;
@@ -36,25 +36,24 @@ export function initMarkHover() {
       raf = requestAnimationFrame(step);
     };
 
-    hit.addEventListener('pointermove', (e) => {
+    // Proximity zone around the mark: zero on and inside the mark, zero at the zone's
+    // outer edge, peaking smoothly in between. Direction comes from the mark's centre.
+    window.addEventListener('pointermove', (e) => {
       if (!fine.matches || reduce.matches || e.pointerType !== 'mouse') return;
-      // normalised offset inside the hover area: 0 at the centre, 1 at the edges
-      const r = hit.getBoundingClientRect();
-      const nx = (e.clientX - (r.left + r.width / 2)) / (r.width / 2);
-      const ny = (e.clientY - (r.top + r.height / 2)) / (r.height / 2);
-      const len = Math.hypot(nx, ny);
-      const d = Math.min(1, len);
-      const k = 1 - d * d * (3 - 2 * d); // smoothstep falloff
-      // directional only: wider when the cursor is to the side, taller when above or below,
-      // area kept constant so there is no overall zoom; fades in away from the exact centre
-      const ax = len ? Math.abs(nx) / len : 0;
-      const ay = len ? Math.abs(ny) / len : 0;
-      const s = MAX * k * (ax - ay) * Math.min(1, len / 0.3);
+      const r = mark.getBoundingClientRect();
+      const ox = Math.max(r.left - e.clientX, 0, e.clientX - r.right);
+      const oy = Math.max(r.top - e.clientY, 0, e.clientY - r.bottom);
+      const t = Math.min(1, Math.hypot(ox, oy) / ZONE);
+      const k = 16 * t * t * (1 - t) * (1 - t); // 0 at 0 and 1, 1 at 0.5
+      const nx = e.clientX - (r.left + r.width / 2);
+      const ny = e.clientY - (r.top + r.height / 2);
+      const len = Math.hypot(nx, ny) || 1;
+      const s = MAX * k * (Math.abs(nx) - Math.abs(ny)) / len;
       tx = 1 + s;
       ty = 1 / (1 + s);
       wake();
     });
-    hit.addEventListener('pointerleave', () => {
+    document.documentElement.addEventListener('pointerleave', () => {
       tx = 1;
       ty = 1;
       wake();
