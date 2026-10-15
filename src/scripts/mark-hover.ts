@@ -1,7 +1,7 @@
 // Desktop only: the small header mark stretches toward the cursor while hovered.
 // The stretch is 0 at the edges of the hover area and rises smoothly toward the centre,
 // and the mark follows with a time-based lerp, so entering or leaving never jumps.
-const MAX = 0.15; // extra scale at the centre
+const MAX = 0.15; // max stretch along one axis
 const TAU = 90; // follow time constant in ms
 
 export function initMarkHover() {
@@ -45,10 +45,13 @@ export function initMarkHover() {
       const len = Math.hypot(nx, ny);
       const d = Math.min(1, len);
       const k = 1 - d * d * (3 - 2 * d); // smoothstep falloff
-      const ax = len ? Math.abs(nx) / len : 0.5;
-      const ay = len ? Math.abs(ny) / len : 0.5;
-      tx = 1 + MAX * k * (0.5 + 0.5 * ax);
-      ty = 1 + MAX * k * (0.5 + 0.5 * ay);
+      // directional only: wider when the cursor is to the side, taller when above or below,
+      // area kept constant so there is no overall zoom; fades in away from the exact centre
+      const ax = len ? Math.abs(nx) / len : 0;
+      const ay = len ? Math.abs(ny) / len : 0;
+      const s = MAX * k * (ax - ay) * Math.min(1, len / 0.3);
+      tx = 1 + s;
+      ty = 1 / (1 + s);
       wake();
     });
     hit.addEventListener('pointerleave', () => {
