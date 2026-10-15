@@ -87,6 +87,12 @@ export default config({
         cover: imageField('Cover'),
         coverAlt: fields.text({ label: 'Cover alt text' }),
         coverFrame: frame,
+        coverFlush: fields.checkbox({
+          label: 'Flush cover',
+          defaultValue: false,
+          description:
+            'White edges. The homepage image has no rounded corners and no padding.',
+        }),
         rounded: fields.checkbox({
           label: 'Rounded image',
           defaultValue: true,
@@ -126,6 +132,12 @@ export default config({
                 src: imageField('Image'),
                 alt: fields.text({ label: 'Alt text' }),
                 frame,
+                flush: fields.checkbox({
+                  label: 'Flush',
+                  defaultValue: false,
+                  description:
+                    'White edges. No rounded corners and no padding.',
+                }),
               }),
             },
             pair: {

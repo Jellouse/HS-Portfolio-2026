@@ -8,9 +8,10 @@ interface Props {
   sizes: string;
   priority?: boolean;
   plain?: boolean;
+  flush?: boolean;
 }
 
-const { src, alt, sizes, priority = false, plain = false } = Astro.props;
+const { src, alt, sizes, priority = false, plain = false, flush = false } = Astro.props;
 const widths = [...new Set([480, 768, 1100, 1600, 2000, src.width])].filter(
   (width) => width <= src.width,
 );
@@ -22,7 +23,7 @@ const placeholder = await getImage({
 });
 ---
 
-<div class:list={['frame', { 'is-plain': plain }]} style={`background-image:url('${placeholder.src}')`}>
+<div class:list={['frame', { 'is-plain': plain, 'is-flush': flush }]} style={`background-image:url('${placeholder.src}')`}>
   <Image
     src={src}
     alt={alt}

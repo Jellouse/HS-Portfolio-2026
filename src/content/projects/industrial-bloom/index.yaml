@@ -7,9 +7,10 @@ summary: >
   Industrial Bloom is a series of aluminium vases.
   Simple forms and textures that make any plant silhouette even more striking.
   The shop is at worksurface.co.
-cover: /src/content/projects/industrial-bloom/cover.jpg
+cover: /src/content/projects/industrial-bloom/ib-full.jpg
 coverAlt: Industrial Bloom
 coverFrame: full
+coverFlush: true
 info:
   - label: Design
     value: Johann Schnettker
@@ -29,9 +30,10 @@ blocks:
         Designed to pay homage to every type of plant or flower.
   - discriminant: image
     value:
-      src: /src/content/projects/industrial-bloom/vase-1.jpg
-      alt: Industrial Bloom vase
-      frame: narrow
+      src: /src/content/projects/industrial-bloom/ib-full.jpg
+      alt: Industrial Bloom
+      frame: full
+      flush: true
   - discriminant: pair
     value:
       left: /src/content/projects/industrial-bloom/vase-2.jpg

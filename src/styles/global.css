@@ -383,6 +383,13 @@ body:has(.hero) .site-header {
   border-radius: 0;
 }
 
+.frame.is-flush,
+.frame.is-flush img {
+  border-radius: 0;
+  corner-shape: unset;
+  clip-path: none;
+}
+
 .frame {
   position: relative;
   overflow: hidden;
@@ -683,6 +690,15 @@ body:has(.project) .site-footer {
   .card.is-plain .frame,
   .project.is-plain .frame {
     border-radius: 0;
+  }
+
+  .frame.is-flush,
+  .project .frame.is-flush,
+  .frame.is-flush img,
+  .project .frame.is-flush img {
+    border-radius: 0;
+    corner-shape: unset;
+    clip-path: none;
   }
 
   .caption {

@@ -19,7 +19,12 @@ const { blocks } = Astro.props;
     }
     if (block.discriminant === 'image') {
       return (
-        <ImageBlock src={block.value.src} alt={block.value.alt} frame={block.value.frame} />
+        <ImageBlock
+          src={block.value.src}
+          alt={block.value.alt}
+          frame={block.value.frame}
+          flush={block.value.flush}
+        />
       );
     }
     if (block.discriminant === 'process') {

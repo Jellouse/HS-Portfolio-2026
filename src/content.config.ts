@@ -17,6 +17,7 @@ const imageBlock = z.object({
     src: z.string(),
     alt: z.string(),
     frame: frame.default('full'),
+    flush: z.boolean().default(false),
   }),
 });
 
@@ -74,6 +75,7 @@ const projects = defineCollection({
     cover: z.string().optional(),
     coverAlt: z.string().optional(),
     coverFrame: frame.default('full'),
+    coverFlush: z.boolean().default(false),
     rounded: z.boolean().default(true),
     info: z.array(infoSchema).default([]),
     blocks: z.array(blockSchema).default([]),
