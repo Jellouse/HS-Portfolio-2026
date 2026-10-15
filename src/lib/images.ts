@@ -17,3 +17,13 @@ export function resolveImage(src: string): ImageMetadata {
   }
   return image;
 }
+
+const collator = new Intl.Collator('en', { numeric: true, sensitivity: 'base' });
+
+/** All images in src/content/projects/<slug>/process/, natural-sorted by file name. */
+export function processFolderImages(slug: string): string[] {
+  const prefix = `/src/content/projects/${slug}/process/`;
+  return Object.keys(images)
+    .filter((key) => key.startsWith(prefix))
+    .sort((a, b) => collator.compare(a.slice(prefix.length), b.slice(prefix.length)));
+}

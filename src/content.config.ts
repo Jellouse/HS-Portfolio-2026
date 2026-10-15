@@ -93,6 +93,7 @@ const projects = defineCollection({
     coverFlush: z.boolean().default(false),
     rounded: z.boolean().default(true),
     info: z.array(infoSchema).default([]),
+    processFromFolder: z.boolean().default(false),
     blocks: z.array(blockSchema).default([]),
     todo: z.array(z.string()).default([]),
   }),

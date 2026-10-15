@@ -5,12 +5,21 @@ import ProcessBlock from './ProcessBlock.astro';
 import TextBlock from './TextBlock.astro';
 import VideoBlock from './VideoBlock.astro';
 import type { ProjectEntry } from '../lib/content';
+import { processFolderImages } from '../lib/images';
 
 interface Props {
   blocks: ProjectEntry['data']['blocks'];
+  slug?: string;
+  processFromFolder?: boolean;
 }
 
-const { blocks } = Astro.props;
+const { blocks, slug, processFromFolder = false } = Astro.props;
+const folder =
+  processFromFolder && slug
+    ? processFolderImages(slug).map((src) => ({ src, alt: '', flush: false }))
+    : [];
+const useFolder = folder.length > 0;
+const hasProcessBlock = blocks.some((b) => b.discriminant === 'process');
 ---
 
 {
@@ -41,7 +50,7 @@ const { blocks } = Astro.props;
       );
     }
     if (block.discriminant === 'process') {
-      return <ProcessBlock images={block.value.images} />;
+      return <ProcessBlock images={useFolder ? folder : block.value.images} />;
     }
     return (
       <ImagePair
@@ -53,3 +62,4 @@ const { blocks } = Astro.props;
     );
   })
 }
+{useFolder && !hasProcessBlock && <ProcessBlock images={folder} />}
