@@ -464,9 +464,13 @@ body:has(.hero) .site-header {
 }
 
 .peeps-row svg {
-  flex: 1 1 0;
-  min-width: 0;
+  position: absolute;
+  left: 0;
+  top: calc(50% - var(--rest) / 2);
+  height: var(--rest);
   overflow: visible;
+  transform-origin: 0 50%;
+  will-change: transform;
   fill: #f8f8f8;
 }
 

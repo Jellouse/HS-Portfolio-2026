@@ -87,12 +87,29 @@ export function mountFaces(host: HTMLElement) {
   });
   host.appendChild(row);
   host.classList.add('is-live');
+  row.style.setProperty('--rest', `${REST}%`);
   startInput();
 
+  // Sub-pixel transforms only: no layout widths, no rounding. Faces are laid edge to edge
+  // from the left, each scaled from its left-middle point, so the row stays filled and centred.
+  let rowW = row.clientWidth;
+  new ResizeObserver(() => {
+    rowW = row.clientWidth;
+    els.forEach((el) => (el.style.width = `${rowW / COUNT}px`));
+  }).observe(row);
+  els.forEach((el) => (el.style.width = `${rowW / COUNT}px`));
+  const last: string[] = [];
+
   const paint = (u: number, v: number, t: number) => {
+    const base = rowW / COUNT;
+    let x = 0;
     layout(u, v, t).forEach((f, k) => {
-      els[k].style.flexGrow = f.w.toFixed(4);
-      els[k].style.height = `${(f.h * REST).toFixed(3)}%`;
+      const tf = `translate3d(${x}px,0,0) scale(${f.w},${f.h})`;
+      x += f.w * base;
+      if (tf !== last[k]) {
+        els[k].style.transform = tf;
+        last[k] = tf;
+      }
     });
   };
 

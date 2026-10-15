@@ -7,6 +7,7 @@ let lastMouse = -Infinity;
 let tilt: Pos | null = null;
 let base: { g: number; b: number } | null = null;
 let started = false;
+let lastTilt = 0;
 
 const TILT_RANGE = 30; // degrees from the starting pose to reach the edge
 const clamp = (x: number) => Math.max(0, Math.min(1, x));
@@ -16,8 +17,11 @@ function onOrientation(e: DeviceOrientationEvent) {
   if (!base) base = { g: e.gamma, b: e.beta };
   const u = clamp(0.5 + (e.gamma - base.g) / (2 * TILT_RANGE));
   const v = clamp(0.5 + (e.beta - base.b) / (2 * TILT_RANGE));
-  // light smoothing only, to take the sensor jitter out
-  tilt = tilt ? { u: tilt.u + (u - tilt.u) * 0.5, v: tilt.v + (v - tilt.v) * 0.5 } : { u, v };
+  // time-based low-pass (about 80 ms) to take the sensor jitter out
+  const now = performance.now();
+  const a = tilt ? 1 - Math.exp(-(now - lastTilt) / 80) : 1;
+  lastTilt = now;
+  tilt = tilt ? { u: tilt.u + (u - tilt.u) * a, v: tilt.v + (v - tilt.v) * a } : { u, v };
   window.dispatchEvent(new CustomEvent('hs:tilt', { detail: tilt }));
 }
 
