@@ -50,7 +50,7 @@
   --ink: #000;
   --muted: rgba(0, 0, 0, 0.4);
   --bg: #fff;
-  --bg-mobile: #f8f8f8;
+  --bg-mobile: #fff;
   --red: #b70606;
   --line: #d6d6d6;
   --text-title: 23px;
@@ -170,9 +170,24 @@ a:has(img) {
   text-decoration: none;
 }
 
+:focus {
+  outline: none;
+}
+
 :focus-visible {
-  outline: 2px solid var(--ink);
-  outline-offset: 3px;
+  outline: 1px solid currentColor;
+  outline-offset: 4px;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+a:active,
+button:active,
+summary:active {
+  outline: none;
+  background: none;
 }
 
 .sr-only {
@@ -367,11 +382,7 @@ body:has(.hero) .site-header {
 @supports not (corner-shape: squircle) {
   .frame,
   .lead {
-    clip-path: url('#squircle');
-  }
-
-  .frame video {
-    clip-path: url('#squircle');
+    overflow: hidden;
   }
 }
 
