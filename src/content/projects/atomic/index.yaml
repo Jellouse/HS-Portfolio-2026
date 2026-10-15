@@ -4,13 +4,14 @@ year: 2026
 order: 2
 published: true
 summary: >
-  It started with the Boot Hub, a vision we set months ago and hoped to carry across the whole site one day.
-  Now it does.
-  Web design, motion and 3D, all built around tension and ski nets.
-cover: /src/content/projects/atomic/boot.png
+  It started with the Boot Hub, a vision we set months ago and hoped to carry
+  across the whole site one day. Now it does. Web design, motion and 3D, all
+  built around tension and ski nets.
+cover: /src/content/projects/atomic/cover.jpg
 coverAlt: Atomic Ski
 coverFrame: narrow
 coverFlush: true
+rounded: true
 info:
   - label: Design
     value: Humansize
@@ -19,7 +20,7 @@ info:
   - label: With
     value: Analogue
   - label: Year
-    value: "2026"
+    value: '2026'
   - label: Client
     value: Atomic
   - label: Site
@@ -28,20 +29,24 @@ info:
 blocks:
   - discriminant: text
     value:
-      text: |
-        It started with the Boot Hub, a vision we set months ago and hoped to carry across the whole site one day. Now it does. Web design, motion and 3D, all built around tension and ski nets.
+      text: >
+        It started with the Boot Hub, a vision we set months ago and hoped to
+        carry across the whole site one day. Now it does. Web design, motion and
+        3D, all built around tension and ski nets.
   - discriminant: image
     value:
-      src: /src/content/projects/atomic/web.jpg
+      src: /src/content/projects/atomic/blocks/1/value/src.jpg
       alt: Atomic Ski website
       frame: full
+      flush: false
   - discriminant: process
     value:
       images:
-        - src: /src/content/projects/atomic/archive.jpg
+        - src: /src/content/projects/atomic/blocks/2/value/images/0/src.jpg
           alt: Atomic Ski, 3D work for goggles, boots and skis
-        - src: /src/content/projects/atomic/boot.png
+          flush: false
+        - src: /src/content/projects/atomic/blocks/2/value/images/1/src.png
           alt: Atomic Ski
           flush: true
 todo:
-  - "The line about campaigns with Analogue is not in the project-page mock."
+  - The line about campaigns with Analogue is not in the project-page mock.
