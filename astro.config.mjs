@@ -11,7 +11,14 @@ const site =
 // is only wired up for `astro dev`, where it writes content back into git.
 const isDev = process.argv.includes('dev');
 
-const integrations = [sitemap()];
+const integrations = [
+  sitemap({
+    filter: (page) => {
+      const path = new URL(page).pathname.replace(/\/$/, '') || '/';
+      return path !== '/work' && path !== '/projects' && path !== '/all';
+    },
+  }),
+];
 
 if (isDev) {
   const [{ default: react }, { default: keystatic }] = await Promise.all([
@@ -24,5 +31,10 @@ if (isDev) {
 export default defineConfig({
   site,
   output: 'static',
+  redirects: {
+    '/work': '/',
+    '/projects': '/',
+    '/all': '/',
+  },
   integrations,
 });

@@ -6,11 +6,10 @@ import type { ProjectEntry } from '../lib/content';
 interface Props {
   project: ProjectEntry;
   priority?: boolean;
-  overview?: boolean;
 }
 
-const { project, priority = false, overview = false } = Astro.props;
-const { caption, listCaption, summary, cover, coverAlt, coverFrame, rounded } = project.data;
+const { project, priority = false } = Astro.props;
+const { caption, summary, cover, coverAlt, coverFrame, rounded } = project.data;
 if (!cover || !coverAlt) throw new Error(`${project.id} is missing a cover`);
 const image = resolveImage(cover);
 const sizes = {
@@ -20,13 +19,12 @@ const sizes = {
   narrow: '(min-width: 760px) 420px, 100vw',
 }[coverFrame];
 const text = summary.replace(/\s+/g, ' ').trim();
-const label = listCaption || caption;
 ---
 
 <article class:list={['card', { 'is-plain': rounded === false }]} data-frame={coverFrame}>
   <a href={`/work/${project.id}`}>
     <BlurImage src={image} alt={coverAlt} sizes={sizes} priority={priority} plain={rounded === false} />
   </a>
-  <a class="caption" href={`/work/${project.id}`}>{overview ? label : caption}</a>
-  {overview ? null : <p class="summary">{text}</p>}
+  <a class="caption" href={`/work/${project.id}`}>{caption}</a>
+  <p class="summary">{text}</p>
 </article>

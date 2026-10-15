@@ -41,10 +41,6 @@ export default config({
           label: 'Caption',
           description: 'Homepage line under the image. Example: Atomic Ski, 2026',
         }),
-        listCaption: fields.text({
-          label: 'Overview title',
-          description: 'Centered title on /work. Leave empty to use the caption.',
-        }),
         year: fields.integer({ label: 'Year' }),
         order: fields.integer({ label: 'Order', validation: { isRequired: true } }),
         published: fields.checkbox({
