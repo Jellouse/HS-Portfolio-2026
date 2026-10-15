@@ -678,17 +678,15 @@ body:has(.project) .site-header {
 }
 
 .site-footer {
-  width: min(var(--card), calc(100% - 40px));
-  margin: 0 auto 20px;
+  width: 100%;
+  margin: 0;
   border-top: 1px solid var(--line);
-  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
-  overflow: hidden;
   font-size: var(--text-body);
   line-height: var(--lh-body);
 }
 
 .footer-text {
-  width: min(100%, var(--measure));
+  width: min(calc(100% - 40px), var(--measure));
   margin: 0 auto;
   padding-top: 56px;
   text-align: left;
@@ -702,19 +700,43 @@ body:has(.project) .site-header {
   margin-bottom: 0;
 }
 
-/* Room above the faces for full-height stretch, then crop them at the card's bottom edge. */
+/* The faces span the full width edge to edge. Their box is as tall as the full stretch
+   range (4x the rest height), so nothing is ever cropped. Same proportions as the homepage
+   red box: rest height = 1.3x a face's base width, base width = 1/5 of the row. */
 .footer-faces {
-  padding-top: 38%;
+  position: relative;
+  aspect-ratio: 100 / 104;
+  pointer-events: none;
 }
 
 .footer-faces .peeps {
+  position: absolute;
+  inset: 0;
   width: 100%;
-  margin-bottom: -6%;
+  transform: none;
+}
+
+.footer-faces .peeps-static {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.footer-faces .peeps-row {
+  top: 0;
+  height: 100%;
+  transform: none;
 }
 
 .footer-faces .peeps-static :is(path, ellipse),
 .footer-faces .peeps-row svg {
   fill: var(--red);
+}
+
+@media (min-width: 760px) {
+  .footer-text {
+    margin-left: 33%;
+  }
 }
 
 .not-found {
