@@ -132,6 +132,7 @@ summary:hover {
 }
 
 a:hover:has(img),
+a:hover:has(video),
 .site-header a:hover,
 .site-header button:hover {
   opacity: 1;
