@@ -7,9 +7,10 @@ summary: >
   It started with the Boot Hub, a vision we set months ago and hoped to carry across the whole site one day.
   Now it does.
   Web design, motion and 3D, all built around tension and ski nets.
-cover: /src/content/projects/atomic/cover.jpg
+cover: /src/content/projects/atomic/boot.png
 coverAlt: Atomic Ski
 coverFrame: narrow
+coverFlush: true
 info:
   - label: Design
     value: Humansize
@@ -39,7 +40,8 @@ blocks:
       images:
         - src: /src/content/projects/atomic/archive.jpg
           alt: Atomic Ski, 3D work for goggles, boots and skis
-        - src: /src/content/projects/atomic/cover.jpg
+        - src: /src/content/projects/atomic/boot.png
           alt: Atomic Ski
+          flush: true
 todo:
   - "The line about campaigns with Analogue is not in the project-page mock."

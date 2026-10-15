@@ -39,6 +39,7 @@ const processBlock = z.object({
         z.object({
           src: z.string(),
           alt: z.string(),
+          flush: z.boolean().default(false),
         }),
       )
       .default([]),

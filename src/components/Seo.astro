@@ -20,6 +20,7 @@ const og = image
       fit: 'cover',
       format: 'jpeg',
       quality: 75,
+      background: '#ffffff',
     })
   : null;
 const ogUrl = og ? new URL(og.src, Astro.site).href : undefined;

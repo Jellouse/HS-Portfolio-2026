@@ -91,7 +91,7 @@ export default config({
           label: 'Flush cover',
           defaultValue: false,
           description:
-            'White edges. The homepage image has no rounded corners and no padding.',
+            'White or transparent edges. The homepage image has no rounded corners and no padding.',
         }),
         rounded: fields.checkbox({
           label: 'Rounded image',
@@ -136,7 +136,7 @@ export default config({
                   label: 'Flush',
                   defaultValue: false,
                   description:
-                    'White edges. No rounded corners and no padding.',
+                    'White or transparent edges. No rounded corners and no padding.',
                 }),
               }),
             },
@@ -156,6 +156,12 @@ export default config({
                   fields.object({
                     src: imageField('Image'),
                     alt: fields.text({ label: 'Alt text' }),
+                    flush: fields.checkbox({
+                      label: 'Flush',
+                      defaultValue: false,
+                      description:
+                        'White or transparent edges. No rounded corners and no padding.',
+                    }),
                   }),
                   {
                     label: 'Photos',

@@ -5,6 +5,7 @@ import { resolveImage } from '../lib/images';
 interface Photo {
   src: string;
   alt: string;
+  flush?: boolean;
 }
 
 interface Props {
@@ -24,6 +25,7 @@ const { images } = Astro.props;
             src={resolveImage(image.src)}
             alt={image.alt}
             sizes="(min-width: 760px) 268px, calc((100vw - 56px) / 2)"
+            flush={image.flush === true}
           />
         ))}
       </div>
