@@ -768,7 +768,9 @@ body:has(.project) .site-header {
   }
 
   .card[data-frame='narrow'] > a:first-child {
-    grid-column: 3 / 6;
+    grid-column: 3 / 7;
+    justify-self: center;
+    width: calc((100% - 3 * var(--gutter)) * 0.75 + 2 * var(--gutter));
   }
 
   .about,
