@@ -68,6 +68,10 @@ const base = [1, 1, 1, 1, 1, 1, 1, 1, 1];
       sharpness: { label: 'Sharpness', min: .5, max: 6, step: .1, v: 2, modes: ['focus','look','split'] },
       wavelength: { label: 'Wave length (faces)', min: 1, max: 14, step: .5, v: 4, modes: ['wave'] },
       eyes: { label: 'Eye shift', min: 0, max: 30, step: 1, v: 14, modes: ['look'] },
+      minW: { label: 'Min width (x base)', min: .05, max: 1, step: .05, v: .1, modes: ALL },
+      maxW: { label: 'Max width (x base)', min: 1, max: 9, step: .1, v: 8, modes: ALL },
+      minH: { label: 'Min height (x base)', min: .1, max: 1, step: .05, v: .2, modes: ALL },
+      maxH: { label: 'Max height (x base)', min: 1, max: 4, step: .1, v: 4, modes: ALL },
       independence: { label: 'Independence', min: 0, max: 1, step: .01, v: 0, modes: ALL },
       randomness: { label: 'Randomness', min: 0, max: 1, step: .01, v: .2, modes: ALL },
       speed: { label: 'Idle speed', min: .1, max: 3, step: .05, v: 1, modes: ALL },
@@ -140,10 +144,27 @@ const base = [1, 1, 1, 1, 1, 1, 1, 1, 1];
         }
         lw *= (1 + I * (f.gain - 1)) * (1 - I + I * f.dir);
         h *= (1 + I * (f.gain - 1)) * (1 - I + I * f.hdir);
-        f.el.style.flexGrow = Math.exp(lw + j * .5).toFixed(4);
-        f.el.style.height = (40 * Math.exp(h + j * .2)).toFixed(3) + '%';
+        f.w = Math.exp(lw + j * .5);
+        const hm = Math.min(S.maxH, Math.max(S.minH, Math.exp(h + j * .2)));
+        f.el.style.height = (40 * hm).toFixed(3) + '%';
         f.ft.style.transform = ex || ey ? `translate(${ex.toFixed(2)}px, ${ey.toFixed(2)}px)` : '';
       }
+      // widths as multiples of base width (row / N), sum must be N; clamp and redistribute leftover
+      const lo = S.minW, hi = Math.max(S.minW, S.maxW);
+      const fixed = new Array(N).fill(null);
+      for (let it = 0; it < N + 1; it++) {
+        let rem = N, free = 0;
+        faces.forEach((f, k) => { if (fixed[k] !== null) rem -= fixed[k]; else free += f.w; });
+        if (free <= 0) break;
+        let changed = false;
+        faces.forEach((f, k) => {
+          if (fixed[k] !== null) return;
+          const w = f.w * rem / free;
+          if (w < lo) { fixed[k] = lo; changed = true; } else if (w > hi) { fixed[k] = hi; changed = true; }
+        });
+        if (!changed) { faces.forEach((f, k) => { if (fixed[k] === null) fixed[k] = f.w * rem / free; }); break; }
+      }
+      faces.forEach((f, k) => { const w = fixed[k] ?? f.w; f.el.style.flexGrow = w.toFixed(4); }); // flex rescales to fit if limits are infeasible
     }
     function frame(now) {
       if (!reduce.matches) {
