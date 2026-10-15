@@ -39,7 +39,11 @@ export default config({
         title: fields.slug({ name: { label: 'Title' } }),
         caption: fields.text({
           label: 'Caption',
-          description: 'Shown under the image. Example: Atomic Ski, 2026',
+          description: 'Homepage line under the image. Example: Atomic Ski, 2026',
+        }),
+        listCaption: fields.text({
+          label: 'Overview title',
+          description: 'Centered title on /work. Leave empty to use the caption.',
         }),
         year: fields.integer({ label: 'Year' }),
         order: fields.integer({ label: 'Order', validation: { isRequired: true } }),

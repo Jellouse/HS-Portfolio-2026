@@ -17,6 +17,8 @@ export const GET: APIRoute = async ({ site }) => {
     ...settings.about.flatMap((paragraph) => [paragraph, '']),
     '## Projects',
     '',
+    `All projects: ${absoluteUrl(site, '/work')}`,
+    '',
     ...projects.flatMap((project) => {
       const summary = project.data.summary.replace(/\s+/g, ' ').trim();
       return [

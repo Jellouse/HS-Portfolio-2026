@@ -5,6 +5,7 @@ Portfolio for Johann Schnettker. Static Astro site, content in the repo, Keystat
 ## Architecture
 
 - `src/pages/index.astro` is the homepage. The work is the page. The first project peeks above the fold.
+- `src/pages/work/index.astro` is the projects overview. Each project is its image and a centered title, with no description.
 - `src/pages/work/[slug].astro` builds every published project from its block list. New projects do not need a new page.
 - `src/content.config.ts` is the typed schema. `keystatic.config.ts` edits the same files. Keep the two in step.
 - `src/components/` holds the UI. Header, Mark, ProjectFeed, ProjectCard, About, ProjectHero, TextBlock, ImageBlock, ImagePair, Credits, Info, Footer.

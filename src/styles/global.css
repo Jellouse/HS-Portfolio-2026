@@ -378,6 +378,20 @@ body:has(.hero) .site-header {
   transition: opacity 0.45s ease;
 }
 
+.overview {
+  padding: 64px var(--pad) 40px;
+}
+
+.overview .card {
+  margin-bottom: 0;
+}
+
+.overview .caption {
+  margin-top: 140px;
+  margin-bottom: 240px;
+  text-align: center;
+}
+
 .caption {
   display: block;
   margin-top: 22px;
