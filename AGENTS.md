@@ -22,7 +22,7 @@ Portfolio for Johann Schnettker. Static Astro site, content in the repo, Keystat
 
 1. `npm run dev` and open `/keystatic`, or duplicate a project folder.
 2. Set title, caption (`Name, Year`), order, summary (two or three sentences), cover, alt text, credits (role, name, optional URL), and blocks.
-3. Blocks are `text`, `image`, `pair`, or `process`. `process` is an optional centred PROCESS label and a two-column grid of photos. That is the whole project page.
+3. Blocks are `text`, `image`, `pair`, or `process`. `process` is an optional centred Process label and a two-column grid of photos. That is the whole project page.
 4. Leave `published` off until the cover image and alt text exist.
 5. Put unknowns in `todo`. Those notes are not rendered.
 6. Update `src/pages/llms.txt.ts` only if you want a line the generator does not already build. It reads the collection.
