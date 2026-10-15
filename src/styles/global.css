@@ -315,8 +315,14 @@ body:has(.hero) .site-header {
   opacity: 1;
 }
 
-.contact-menu .is-quiet {
-  opacity: 0.4;
+.contact-menu a,
+.contact-menu span {
+  color: var(--muted);
+}
+
+.contact-menu a:hover,
+.contact-menu a:active {
+  color: var(--ink);
 }
 
 .contact-menu a:hover {
