@@ -49,6 +49,9 @@ function genuineTap() {
   return ok;
 }
 
+// The native switch is a draggable control: a drag that starts on it can be taken as a
+// thumb swipe instead of a page scroll. touch-action hands every pan back to the browser,
+// so scrolls always win and only clean taps reach the switch.
 function attachIOS(host: HTMLElement) {
   if (host.querySelector(':scope > [data-haptic-overlay]')) return;
   if (getComputedStyle(host).position === 'static') host.style.position = 'relative';
@@ -59,7 +62,7 @@ function attachIOS(host: HTMLElement) {
   sw.setAttribute('aria-hidden', 'true');
   sw.tabIndex = -1;
   sw.style.cssText =
-    'position:absolute;inset:0;width:100%;height:100%;margin:0;padding:0;border:0;-webkit-appearance:switch;appearance:auto;opacity:0;cursor:inherit;';
+    'position:absolute;inset:0;width:100%;height:100%;margin:0;padding:0;border:0;-webkit-appearance:switch;appearance:auto;opacity:0;z-index:0;cursor:inherit;touch-action:pan-x pan-y pinch-zoom;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;';
   sw.addEventListener('click', (e) => {
     e.stopPropagation();
     if (!genuineTap()) {

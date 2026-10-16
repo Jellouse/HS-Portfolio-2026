@@ -1002,7 +1002,7 @@ html.show-grid .grid-overlay .page-grid {
 
 /* Invisible haptic switch over links and buttons on iOS. Never visible. */
 [data-haptic-overlay] {
-  z-index: 1;
+  z-index: 0;
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -1100,4 +1100,12 @@ html.show-grid .grid-overlay .page-grid {
   .contact-menu > :nth-child(3) {
     animation-delay: 60ms;
   }
+}
+
+/* iOS haptics: the invisible switch over tappable cards stays under the media, so a
+   long-press on an image or video reaches it and shows the native save menu. */
+[data-haptic] :is(.frame, img, video),
+[data-haptic] a:has(.frame, img, video) {
+  position: relative;
+  z-index: 1;
 }
