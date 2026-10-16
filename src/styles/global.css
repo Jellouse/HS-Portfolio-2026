@@ -947,13 +947,14 @@ body:has(.project) .site-header {
     margin-right: 0;
   }
 
+  /* all project text shares the summary's measure and left edge */
   .project.page-grid > .text-block,
   .project.page-grid > .info {
-    grid-column: 3 / 7;
-    width: auto;
+    grid-column: 1 / -1;
+    width: min(100%, var(--measure));
     max-width: none;
-    margin-left: 0;
-    margin-right: 0;
+    margin-left: auto;
+    margin-right: auto;
   }
 
   .site-footer.page-grid > p {
