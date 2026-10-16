@@ -15,7 +15,9 @@ const { src, poster, label, plain = false, flush = false, priority = false } = A
 const posterImage = poster
   ? await getImage({ src: poster, width: Math.min(poster.width, 2000), format: 'webp' })
   : undefined;
-const type = src.toLowerCase().endsWith('.webm') ? 'video/webm' : 'video/mp4';
+// local paths (/media/...) or full URLs (Cloudflare R2); ignore any query string
+const ext = src.toLowerCase().split(/[?#]/)[0].split('.').pop();
+const type = ext === 'webm' ? 'video/webm' : ext === 'mov' ? 'video/quicktime' : 'video/mp4';
 ---
 
 <div class:list={['frame', 'is-video', { 'is-plain': plain, 'is-flush': flush }]}>

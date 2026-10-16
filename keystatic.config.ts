@@ -1,3 +1,4 @@
+import { withUpload } from './src/lib/VideoUrlInput';
 import { config, fields, collection, singleton } from '@keystatic/core';
 
 const repo = 'Jellouse/HS-Portfolio-2026';
@@ -45,14 +46,14 @@ const frame = fields.select({
   defaultValue: 'full',
 });
 
-// Videos are not processed by Astro. They live under public/ and are served as-is.
+// Videos: a URL (Cloudflare R2, uploaded with the button) or an older local path under
+// /media/projects/. Not processed by Astro, served as-is.
 function videoField(label: string, description?: string) {
-  return fields.file({
+  const field = fields.text({
     label,
-    description,
-    directory: 'public/media/projects',
-    publicPath: '/media/projects/',
+    description: [description, 'Upload with the button, or paste a URL.'].filter(Boolean).join(' '),
   });
+  return { ...field, Input: withUpload(field.Input as any) };
 }
 
 function imageField(label: string) {
@@ -94,7 +95,7 @@ export default config({
         cover: imageField('Cover'),
         coverVideo: videoField(
           'Cover video',
-          'Optional mp4 or webm. Plays muted on a loop instead of the cover image, which becomes the poster. Keep it under 15 MB.',
+          'Optional mp4 or webm. Plays muted on a loop instead of the cover image, which becomes the poster. Keep it short; H.264 MP4 plays everywhere.',
         ),
         coverAlt: fields.text({ label: 'Cover alt text' }),
         coverFrame: frame,
@@ -160,7 +161,7 @@ export default config({
             video: {
               label: 'Video',
               schema: fields.object({
-                src: videoField('Video', 'mp4 or webm. Plays muted on a loop. Keep it under 15 MB.'),
+                src: videoField('Video', 'mp4 or webm. Plays muted on a loop. Keep it short; H.264 MP4 plays everywhere.'),
                 poster: imageField('Poster'),
                 alt: fields.text({ label: 'Label', description: 'Optional description of the video.' }),
                 frame,

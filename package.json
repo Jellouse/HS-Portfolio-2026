@@ -15,6 +15,8 @@
     "@astrojs/react": "^7.0.1",
     "@astrojs/sitemap": "^3.7.4",
     "@astrojs/vercel": "^8.2.11",
+    "@aws-sdk/client-s3": "^3.1152.0",
+    "@aws-sdk/s3-request-presigner": "^3.1152.0",
     "@keystatic/astro": "^6.0.0",
     "@keystatic/core": "^0.6.9",
     "astro": "^5.14.1",
