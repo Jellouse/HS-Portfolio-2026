@@ -2,7 +2,7 @@
 // and follows with a time-based lerp, so it never jumps.
 const MAX = 0.15; // max stretch along one axis
 const ZONE = 120; // px around the mark where it reacts
-const TAU = 90; // follow time constant in ms
+const TAU = 120; // follow time constant in ms
 
 export function initMarkHover() {
   const fine = window.matchMedia('(hover: hover) and (pointer: fine)');
