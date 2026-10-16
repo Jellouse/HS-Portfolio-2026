@@ -2,7 +2,7 @@
 // Only for people with push access to the repo: the caller sends the GitHub token that
 // Keystatic already holds in their browser, and we check it against GitHub.
 import type { APIRoute } from 'astro';
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand, ListObjectsV2Command } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 export const prerender = false;
@@ -13,6 +13,11 @@ const TYPES: Record<string, string> = {
   'video/webm': 'webm',
   'video/quicktime': 'mov',
 };
+
+// Stay inside Cloudflare R2's free tier (10 GB): cap single files and the whole bucket.
+const MAX_FILE = 200 * 1024 * 1024;
+const MAX_BUCKET = 8 * 1024 * 1024 * 1024;
+const mb = (n: number) => `${Math.round(n / 1024 / 1024)} MB`;
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } });
@@ -33,7 +38,12 @@ export const POST: APIRoute = async ({ request }) => {
   const repo = await gh.json();
   if (!repo.permissions?.push) return json({ error: 'No write access to the site.' }, 403);
 
-  const { name = '', type = '', folder = '' } = await request.json().catch(() => ({}));
+  const { name = '', type = '', folder = '', size = 0 } = await request.json().catch(() => ({}));
+  const bytes = Number(size);
+  if (!Number.isFinite(bytes) || bytes <= 0) return json({ error: 'Could not read the file size.' }, 400);
+  if (bytes > MAX_FILE) {
+    return json({ error: `This video is ${mb(bytes)}. The limit is 200 MB, so please export it smaller.` }, 413);
+  }
   const ext = TYPES[type] ?? (String(name).toLowerCase().match(/\.(mp4|webm|mov)$/)?.[1] ?? '');
   if (!ext) return json({ error: 'Use an mp4, webm or mov file.' }, 400);
   const base =
@@ -52,9 +62,25 @@ export const POST: APIRoute = async ({ request }) => {
     endpoint: `https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
     credentials: { accessKeyId: R2_ACCESS_KEY_ID, secretAccessKey: R2_SECRET_ACCESS_KEY },
   });
+  // total bucket size, so we never leave the free tier
+  let used = 0;
+  let ContinuationToken: string | undefined;
+  do {
+    const page = await s3.send(new ListObjectsV2Command({ Bucket: R2_BUCKET, ContinuationToken }));
+    for (const o of page.Contents ?? []) used += o.Size ?? 0;
+    ContinuationToken = page.IsTruncated ? page.NextContinuationToken : undefined;
+  } while (ContinuationToken);
+  if (used + bytes > MAX_BUCKET) {
+    return json(
+      { error: `Video storage is nearly full (${mb(used)} of 8 GB used). Remove old videos in Cloudflare R2 first.` },
+      507,
+    );
+  }
+
+  // ContentLength is signed, so a different (bigger) file can't be uploaded with this URL
   const uploadUrl = await getSignedUrl(
     s3,
-    new PutObjectCommand({ Bucket: R2_BUCKET, Key: key, ContentType: contentType, CacheControl: 'public, max-age=31536000, immutable' }),
+    new PutObjectCommand({ Bucket: R2_BUCKET, Key: key, ContentType: contentType, ContentLength: bytes, CacheControl: 'public, max-age=31536000, immutable' }),
     { expiresIn: 3600 },
   );
   return json({ uploadUrl, contentType, publicUrl: `${String(R2_PUBLIC_URL).replace(/\/$/, '')}/${key}` });

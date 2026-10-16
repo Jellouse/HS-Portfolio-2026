@@ -8,11 +8,16 @@ export function isHevcRisk(file: File) {
   return /\.mov$/i.test(file.name) || file.type === 'video/quicktime';
 }
 
+export const MAX_VIDEO_BYTES = 200 * 1024 * 1024;
+
 export async function uploadVideo(file: File, folder: string, onProgress: (p: number) => void) {
+  if (file.size > MAX_VIDEO_BYTES) {
+    throw new Error(`This video is ${Math.round(file.size / 1024 / 1024)} MB. The limit is 200 MB, so please export it smaller.`);
+  }
   const res = await fetch('/api/video-upload', {
     method: 'POST',
     headers: { 'content-type': 'application/json', authorization: `Bearer ${cmsToken()}` },
-    body: JSON.stringify({ name: file.name, type: file.type, folder }),
+    body: JSON.stringify({ name: file.name, type: file.type, folder, size: file.size }),
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.error || `Upload not allowed (${res.status})`);
