@@ -1,6 +1,6 @@
 // Interactive row of faces (Tilt mode from /lab/faces, fixed settings).
 // Faces always touch and fill the row; each frame is a pure function of the input position.
-import { readInput, startInput } from './input';
+import { readInput, startInput, tiltWaiting } from './input';
 
 const S = {
   stretch: 3.45,
@@ -115,7 +115,8 @@ export function mountFaces(host: HTMLElement) {
 
   paint(0.5, 0.5, 0);
   const frame = (now: number) => {
-    if (!reduce.matches) {
+    // reduced motion, or iOS before tilt permission: hold the rest layout
+    if (!reduce.matches && !tiltWaiting()) {
       const t = (now / 1000) * S.speed;
       const p = readInput(now) ?? {
         u: 0.5 + 0.48 * Math.sin(t * 0.5) * Math.cos(t * 0.17),

@@ -8,6 +8,7 @@ let tilt: Pos | null = null;
 let base: { g: number; b: number } | null = null;
 let started = false;
 let lastTilt = 0;
+let waiting = false;
 
 const TILT_RANGE = 30; // degrees from the starting pose to reach the edge
 const clamp = (x: number) => Math.max(0, Math.min(1, x));
@@ -25,7 +26,10 @@ function onOrientation(e: DeviceOrientationEvent) {
   window.dispatchEvent(new CustomEvent('hs:tilt', { detail: tilt }));
 }
 
+let listening = false;
 function listenTilt() {
+  if (listening) return;
+  listening = true;
   window.addEventListener('deviceorientation', onOrientation);
 }
 
@@ -39,17 +43,38 @@ export function startInput() {
   });
   const DOE = (window as any).DeviceOrientationEvent;
   if (!DOE) return;
-  if (typeof DOE.requestPermission === 'function') {
-    // iOS: ask quietly on the first tap, the system prompt is the only UI
-    const ask = () => {
-      DOE.requestPermission()
-        .then((state: string) => state === 'granted' && listenTilt())
-        .catch(() => {});
-    };
-    window.addEventListener('pointerup', ask, { once: true });
-  } else {
-    listenTilt();
+  if (typeof DOE.requestPermission !== 'function' || window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    listenTilt(); // Android, desktop and others: no prompt, unchanged
+    return;
   }
+  // iOS: only ask when the faces or the mark are tapped, remember the answer this session.
+  const KEY = 'hs-tilt';
+  const saved = sessionStorage.getItem(KEY);
+  if (saved === 'denied') return;
+  waiting = true;
+  if (saved === 'granted') {
+    // already granted earlier this session: listen directly, no prompt if events arrive
+    listenTilt();
+    window.addEventListener('deviceorientation', () => (waiting = false), { once: true });
+  }
+  const ask = (e: Event) => {
+    if (!waiting || tilt) return;
+    if (!(e.target as Element | null)?.closest?.('.peeps, .mark, .project-mark')) return;
+    // same gesture as the tap; navigation is not blocked
+    DOE.requestPermission()
+      .then((state: string) => {
+        sessionStorage.setItem(KEY, state === 'granted' ? 'granted' : 'denied');
+        waiting = false;
+        if (state === 'granted') listenTilt();
+      })
+      .catch(() => {});
+  };
+  document.addEventListener('click', ask, true);
+}
+
+/** iOS before permission: callers should rest still instead of animating. */
+export function tiltWaiting() {
+  return waiting && !tilt;
 }
 
 /** Live position, or null when the caller should fall back to its simulated cursor. */
