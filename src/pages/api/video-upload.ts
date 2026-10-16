@@ -19,6 +19,12 @@ const MAX_FILE = 200 * 1024 * 1024;
 const MAX_BUCKET = 8 * 1024 * 1024 * 1024;
 const mb = (n: number) => `${Math.round(n / 1024 / 1024)} MB`;
 
+// R2_PUBLIC_URL may be set without a scheme (e.g. "x.workers.dev"); always return an absolute URL
+const publicBase = (v: string) => {
+  const base = String(v).trim().replace(/\/+$/, '');
+  return /^https?:\/\//i.test(base) ? base : `https://${base}`;
+};
+
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } });
 
@@ -86,5 +92,5 @@ export const POST: APIRoute = async ({ request }) => {
     new PutObjectCommand({ Bucket: R2_BUCKET, Key: key, ContentType: contentType, ContentLength: bytes, CacheControl: 'public, max-age=31536000, immutable' }),
     { expiresIn: 3600 },
   );
-  return json({ uploadUrl, contentType, publicUrl: `${String(R2_PUBLIC_URL).replace(/\/$/, '')}/${key}` });
+  return json({ uploadUrl, contentType, publicUrl: `${publicBase(R2_PUBLIC_URL)}/${key}` });
 };
