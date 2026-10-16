@@ -1,3 +1,4 @@
+import React from 'react';
 // Keystatic input for video slots: the normal URL/path text input plus an
 // "Upload video" button that sends the file straight to R2 and fills in the URL.
 import { useRef, useState, type ReactNode } from 'react';
