@@ -57,9 +57,12 @@ export const POST: APIRoute = async ({ request }) => {
   const key = `projects/${dir}/${base}-${Date.now().toString(36)}.${ext}`;
   const contentType = type || (ext === 'mov' ? 'video/quicktime' : `video/${ext}`);
 
+  // bucket jurisdiction: 'eu' unless R2_JURISDICTION says otherwise ('default' = no jurisdiction)
+  const jurisdiction = String(env.R2_JURISDICTION ?? 'eu').trim().toLowerCase() || 'eu';
+  const jurisdictionHost = jurisdiction === 'default' ? '' : `.${jurisdiction}`;
   const s3 = new S3Client({
     region: 'auto',
-    endpoint: `https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+    endpoint: `https://${R2_ACCOUNT_ID}${jurisdictionHost}.r2.cloudflarestorage.com`,
     credentials: { accessKeyId: R2_ACCESS_KEY_ID, secretAccessKey: R2_SECRET_ACCESS_KEY },
   });
   // total bucket size, so we never leave the free tier

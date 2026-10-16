@@ -8,6 +8,7 @@ workers_dev = true
 [[r2_buckets]]
 binding = "MEDIA"
 bucket_name = "humansize-media"
+jurisdiction = "eu"
 
 # 300 requests per minute per IP, per Cloudflare location
 [[ratelimits]]
