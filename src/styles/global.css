@@ -72,8 +72,10 @@
   --ease-in-out-expo: cubic-bezier(0.65, 0, 0.15, 1);
   --ease-out-quad: cubic-bezier(0.25, 0.46, 0.45, 0.94);
   --ease-in-quad: cubic-bezier(0.55, 0.085, 0.68, 0.53);
+  --page-bg: var(--bg);
   color: var(--ink);
-  background: var(--bg);
+  background: var(--page-bg);
+  color-scheme: light;
   font-family: 'ABC Areal', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 23px;
   line-height: 29px;
@@ -96,8 +98,9 @@
   box-sizing: border-box;
 }
 
-html {
-  background: var(--bg);
+html,
+body {
+  background: var(--page-bg);
 }
 
 body {
@@ -709,12 +712,7 @@ body:has(.project) .site-header {
 
 @media (max-width: 759px) {
   :root {
-    background: var(--bg-mobile);
-  }
-
-  html,
-  body {
-    background: var(--bg-mobile);
+    --page-bg: var(--bg-mobile);
   }
 
   .hero {
@@ -728,9 +726,8 @@ body:has(.project) .site-header {
     height: 100%;
   }
 
-  html:has(.hero),
-  body:has(.hero) {
-    background: var(--bg);
+  :root:has(.hero) {
+    --page-bg: var(--bg);
   }
 
   .hero .mark {
@@ -1023,14 +1020,35 @@ html.show-grid .grid-overlay .page-grid {
   animation-timing-function: var(--ease-out-expo);
 }
 
+/* Page change: the old page stays fully opaque underneath and the new page fades in on
+   top with normal blending. The default crossfade fades both and adds them with
+   plus-lighter, which Safari can render brighter than the page (an HDR-like flash). */
+::view-transition {
+  background: var(--page-bg, var(--bg));
+}
+
+::view-transition-image-pair(root) {
+  isolation: auto;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  mix-blend-mode: normal;
+}
+
 ::view-transition-old(root) {
-  animation-duration: 250ms;
-  animation-timing-function: var(--ease-in-quad);
+  animation: none;
+  opacity: 1;
 }
 
 ::view-transition-new(root) {
-  animation-duration: 300ms;
-  animation-timing-function: var(--ease-out-quad);
+  animation: vt-in 300ms var(--ease-out-quad) both;
+}
+
+@keyframes vt-in {
+  from {
+    opacity: 0;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
