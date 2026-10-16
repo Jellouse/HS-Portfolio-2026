@@ -1,0 +1,19 @@
+# Serves the R2 video bucket with a per-visitor rate limit.
+# Deploy: cd workers/media && npx wrangler deploy
+name = "humansize-media"
+main = "src/index.js"
+compatibility_date = "2026-10-01"
+workers_dev = true
+
+[[r2_buckets]]
+binding = "MEDIA"
+bucket_name = "humansize-media"
+
+# 300 requests per minute per IP, per Cloudflare location
+[[ratelimits]]
+name = "PER_IP"
+namespace_id = "1001"
+
+  [ratelimits.simple]
+  limit = 300
+  period = 60
