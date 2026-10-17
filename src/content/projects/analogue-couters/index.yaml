@@ -5,7 +5,8 @@ published: true
 summary: >-
   A new store for Analogue Amsterdam on the Zeedijk, built entirely from
   aluminium extrusion.
-coverVideo: https://humansize-media.schnettker-johann.workers.dev/projects/analogue-couters/cover-mvaoawdg.mp4
+coverVideo: >-
+  https://humansize-media.schnettker-johann.workers.dev/projects/analogue-couters/cover-mvaoawdg.mp4
 coverAlt: Analogue store on Zeedijk in Amsterdam
 coverFrame: wide
 coverFlush: false
@@ -24,7 +25,8 @@ processFromFolder: false
 blocks:
   - discriminant: video
     value:
-      src: https://humansize-media.schnettker-johann.workers.dev/projects/analogue-couters/cover-mvaoawdg.mp4
+      src: >-
+        https://humansize-media.schnettker-johann.workers.dev/projects/analogue-couters/cover-mvaoawdg.mp4
       frame: full
       flush: false
   - discriminant: text
@@ -101,54 +103,62 @@ blocks:
     value:
       left: /src/content/projects/analogue-couters/blocks/14/value/left.jpg
       right: /src/content/projects/analogue-couters/blocks/14/value/right.jpg
+  - discriminant: image
+    value:
+      src: /src/content/projects/analogue-couters/blocks/15/value/src.jpeg
+      frame: full
+      flush: false
   - discriminant: process
     value:
       images:
         - src: >-
-            /src/content/projects/analogue-couters/blocks/15/value/images/0/src.jpg
+            /src/content/projects/analogue-couters/blocks/16/value/images/0/src.jpg
           flush: false
         - src: >-
-            /src/content/projects/analogue-couters/blocks/15/value/images/1/src.jpg
+            /src/content/projects/analogue-couters/blocks/16/value/images/1/src.jpg
           flush: false
         - src: >-
-            /src/content/projects/analogue-couters/blocks/15/value/images/2/src.jpg
+            /src/content/projects/analogue-couters/blocks/16/value/images/2/src.jpg
           flush: false
         - src: >-
-            /src/content/projects/analogue-couters/blocks/15/value/images/3/src.jpg
+            /src/content/projects/analogue-couters/blocks/16/value/images/3/src.jpg
           flush: false
         - src: >-
-            /src/content/projects/analogue-couters/blocks/15/value/images/4/src.jpg
+            /src/content/projects/analogue-couters/blocks/16/value/images/4/src.jpg
           flush: false
         - src: >-
-            /src/content/projects/analogue-couters/blocks/15/value/images/5/src.jpg
+            /src/content/projects/analogue-couters/blocks/16/value/images/5/src.jpg
           flush: false
         - src: >-
-            /src/content/projects/analogue-couters/blocks/15/value/images/6/src.jpg
+            /src/content/projects/analogue-couters/blocks/16/value/images/6/src.jpg
           flush: false
         - src: >-
-            /src/content/projects/analogue-couters/blocks/15/value/images/7/src.jpg
+            /src/content/projects/analogue-couters/blocks/16/value/images/7/src.jpg
           flush: false
         - src: >-
-            /src/content/projects/analogue-couters/blocks/15/value/images/8/src.jpg
+            /src/content/projects/analogue-couters/blocks/16/value/images/8/src.jpg
           flush: false
         - src: >-
-            /src/content/projects/analogue-couters/blocks/15/value/images/9/src.jpg
+            /src/content/projects/analogue-couters/blocks/16/value/images/9/src.jpg
           flush: false
         - src: >-
-            /src/content/projects/analogue-couters/blocks/15/value/images/10/src.jpg
+            /src/content/projects/analogue-couters/blocks/16/value/images/10/src.jpg
           flush: false
         - src: >-
-            /src/content/projects/analogue-couters/blocks/15/value/images/11/src.jpg
+            /src/content/projects/analogue-couters/blocks/16/value/images/11/src.jpg
           flush: false
         - src: >-
-            /src/content/projects/analogue-couters/blocks/15/value/images/12/src.jpg
+            /src/content/projects/analogue-couters/blocks/16/value/images/12/src.jpg
           flush: false
         - src: >-
-            /src/content/projects/analogue-couters/blocks/15/value/images/13/src.jpg
+            /src/content/projects/analogue-couters/blocks/16/value/images/13/src.jpg
           flush: false
         - src: >-
-            /src/content/projects/analogue-couters/blocks/15/value/images/14/src.jpg
+            /src/content/projects/analogue-couters/blocks/16/value/images/14/src.jpg
           flush: false
         - src: >-
-            /src/content/projects/analogue-couters/blocks/15/value/images/15/src.jpg
+            /src/content/projects/analogue-couters/blocks/16/value/images/15/src.jpg
+          flush: false
+        - src: >-
+            /src/content/projects/analogue-couters/blocks/16/value/images/16/src.jpeg
           flush: false
