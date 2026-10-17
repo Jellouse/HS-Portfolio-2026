@@ -56,11 +56,16 @@ function videoField(label: string, description?: string) {
   return { ...field, Input: withUpload(field.Input as any) };
 }
 
-function imageField(label: string) {
+function imageField(
+  label: string,
+  opts?: { required?: boolean; description?: string },
+) {
   return fields.image({
     label,
     directory: imageDirectory,
     publicPath: imagePublicPath,
+    ...(opts?.description ? { description: opts.description } : {}),
+    ...(opts?.required ? { validation: { isRequired: true as const } } : {}),
   });
 }
 
@@ -78,7 +83,12 @@ export default config({
       format: { data: 'yaml' },
       columns: ['title', 'year', 'published'],
       schema: {
-        title: fields.slug({ name: { label: 'Title' } }),
+        title: fields.slug({
+          name: {
+            label: 'Title',
+            validation: { isRequired: true, length: { min: 1 } },
+          },
+        }),
         year: fields.integer({ label: 'Start year' }),
         yearEnd: fields.integer({ label: 'End year', description: 'Leave empty for ongoing' }),
         order: fields.integer({ label: 'Order', validation: { isRequired: true } }),
@@ -91,13 +101,22 @@ export default config({
           label: 'Summary',
           multiline: true,
           description: 'Two or three sentences shown under the title on the project page. A link is [label](https://...).',
+          validation: { isRequired: true, length: { min: 1 } },
         }),
-        cover: imageField('Cover'),
+        cover: imageField('Cover', {
+          required: true,
+          description:
+            'Required for the homepage card. Also used as the poster when a cover video is set. (The build allows cover video alone, but Keystatic cannot express that OR rule.)',
+        }),
         coverVideo: videoField(
           'Cover video',
           'Optional mp4 or webm. Plays muted on a loop instead of the cover image, which becomes the poster. Keep it short; H.264 MP4 plays everywhere.',
         ),
-        coverAlt: fields.text({ label: 'Cover alt text' }),
+        coverAlt: fields.text({
+          label: 'Cover alt text',
+          description: 'Required. Alt for the cover image, or the accessible label for a cover video.',
+          validation: { isRequired: true, length: { min: 1 } },
+        }),
         coverFrame: frame,
         coverFlush: fields.checkbox({
           label: 'Flush cover',
@@ -112,8 +131,14 @@ export default config({
         }),
         info: fields.array(
           fields.object({
-            label: fields.text({ label: 'Key' }),
-            value: fields.text({ label: 'Value' }),
+            label: fields.text({
+              label: 'Key',
+              validation: { isRequired: true, length: { min: 1 } },
+            }),
+            value: fields.text({
+              label: 'Value',
+              validation: { isRequired: true, length: { min: 1 } },
+            }),
             href: fields.text({
               label: 'Link',
               description: 'Optional. The value is underlined.',
@@ -141,14 +166,18 @@ export default config({
                   label: 'Text',
                   multiline: true,
                   description: 'A link is [label](https://...).',
+                  validation: { isRequired: true, length: { min: 1 } },
                 }),
               }),
             },
             image: {
               label: 'Image',
               schema: fields.object({
-                src: imageField('Image'),
-                alt: fields.text({ label: 'Alt text' }),
+                src: imageField('Image', { required: true }),
+                alt: fields.text({
+                  label: 'Alt text',
+                  description: 'Optional. Empty is allowed; fill it when the image needs a description.',
+                }),
                 frame,
                 flush: fields.checkbox({
                   label: 'Flush',
@@ -176,10 +205,16 @@ export default config({
             pair: {
               label: 'Image pair',
               schema: fields.object({
-                left: imageField('Left image'),
-                leftAlt: fields.text({ label: 'Left alt text' }),
-                right: imageField('Right image'),
-                rightAlt: fields.text({ label: 'Right alt text' }),
+                left: imageField('Left image', { required: true }),
+                leftAlt: fields.text({
+                  label: 'Left alt text',
+                  description: 'Optional.',
+                }),
+                right: imageField('Right image', { required: true }),
+                rightAlt: fields.text({
+                  label: 'Right alt text',
+                  description: 'Optional.',
+                }),
               }),
             },
             process: {
@@ -187,8 +222,11 @@ export default config({
               schema: fields.object({
                 images: fields.array(
                   fields.object({
-                    src: imageField('Image'),
-                    alt: fields.text({ label: 'Alt text' }),
+                    src: imageField('Image', { required: true }),
+                    alt: fields.text({
+                      label: 'Alt text',
+                      description: 'Optional.',
+                    }),
                     flush: fields.checkbox({
                       label: 'Flush',
                       defaultValue: false,
@@ -215,25 +253,46 @@ export default config({
       path: 'src/content/site/site',
       format: { data: 'yaml' },
       schema: {
-        name: fields.text({ label: 'Name' }),
-        studio: fields.text({ label: 'Studio' }),
-        email: fields.text({ label: 'Email' }),
+        name: fields.text({
+          label: 'Name',
+          validation: { isRequired: true, length: { min: 1 } },
+        }),
+        studio: fields.text({
+          label: 'Studio',
+          validation: { isRequired: true, length: { min: 1 } },
+        }),
+        email: fields.text({
+          label: 'Email',
+          validation: {
+            isRequired: true,
+            length: { min: 1 },
+            pattern: {
+              regex: /.+@.+\..+/,
+              message: 'Use a valid email address.',
+            },
+          },
+        }),
         intro: fields.markdoc.inline({
           label: 'Intro',
           description:
-            'Footer line and the page description. Use the link mark for a name that has a project page, such as /work/atomic.',
+            'Footer line and the page description. Use the link mark for a name that has a project page, such as /work/atomic. Required by the build; markdoc fields cannot set isRequired.',
           options: inlineLink,
         }),
         timezone: fields.text({
           label: 'Timezone',
           description: 'IANA name, used for the clock. Example: Asia/Tokyo',
+          validation: { isRequired: true, length: { min: 1 } },
         }),
-        place: fields.text({ label: 'Place label', description: 'Example: Tokyo' }),
+        place: fields.text({
+          label: 'Place label',
+          description: 'Example: Tokyo',
+          validation: { isRequired: true, length: { min: 1 } },
+        }),
         about: fields.array(
           fields.markdoc.inline({
             label: 'Paragraph',
             description:
-              'Use the link mark for a name that has a project page. Leave other names as text.',
+              'Use the link mark for a name that has a project page. Leave other names as text. Markdoc fields cannot set isRequired.',
             options: inlineLink,
           }),
           {
@@ -242,7 +301,10 @@ export default config({
         ),
         socials: fields.array(
           fields.object({
-            label: fields.text({ label: 'Label' }),
+            label: fields.text({
+              label: 'Label',
+              validation: { isRequired: true, length: { min: 1 } },
+            }),
             href: fields.text({ label: 'URL' }),
           }),
           { label: 'Socials', itemLabel: (props) => props.fields.label.value || 'Link' },
