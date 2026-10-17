@@ -3,55 +3,118 @@ year: 2026
 order: 1
 published: true
 summary: >
-  Industrial Bloom is a series of aluminium vases.
-  Simple forms and textures that make any plant silhouette even more striking.
-  The shop is at worksurface.co.
-cover: /src/content/projects/industrial-bloom/ib-full.jpg
+  Industrial Bloom is a series of aluminium vases. Simple forms and textures
+  that make any plant silhouette even more striking. The shop is at
+  worksurface.co.
 coverAlt: Industrial Bloom
 coverFrame: full
 coverFlush: true
+rounded: true
 info:
   - label: Design
     value: Johann Schnettker
   - label: Year
-    value: "2026"
+    value: '2026'
   - label: Material
     value: Aluminium
   - label: Shop
     value: worksurface.co
     href: https://worksurface.co/
+processFromFolder: true
 blocks:
-  - discriminant: text
-    value:
-      text: |
-        A series of vases accentuating the contrast between nature and industry.
-
-        Designed to pay homage to every type of plant or flower.
   - discriminant: image
     value:
-      src: /src/content/projects/industrial-bloom/ib-full.jpg
+      src: /src/content/projects/industrial-bloom/blocks/0/value/src.jpg
       alt: Industrial Bloom
       frame: full
-      flush: true
-  - discriminant: pair
-    value:
-      left: /src/content/projects/industrial-bloom/vase-2.jpg
-      leftAlt: Industrial Bloom vase
-      right: /src/content/projects/industrial-bloom/vase-round.jpg
-      rightAlt: Industrial Bloom round vase
+      flush: false
   - discriminant: image
     value:
-      src: /src/content/projects/industrial-bloom/vase-3.jpg
-      alt: Industrial Bloom vase
-      frame: medium
+      src: /src/content/projects/industrial-bloom/blocks/1/value/src.jpg
+      frame: full
+      flush: false
+  - discriminant: video
+    value:
+      src: >-
+        https://humansize-media.schnettker-johann.workers.dev/projects/industrial-bloom/untitled3-mvcgnkky.mov
+      frame: full
+      flush: false
+  - discriminant: image
+    value:
+      src: /src/content/projects/industrial-bloom/blocks/3/value/src.jpg
+      frame: full
+      flush: false
+  - discriminant: image
+    value:
+      src: /src/content/projects/industrial-bloom/blocks/4/value/src.jpg
+      frame: full
+      flush: false
+  - discriminant: image
+    value:
+      src: /src/content/projects/industrial-bloom/blocks/5/value/src.jpg
+      frame: full
+      flush: false
+  - discriminant: image
+    value:
+      src: /src/content/projects/industrial-bloom/blocks/6/value/src.jpg
+      frame: full
+      flush: false
+  - discriminant: image
+    value:
+      src: /src/content/projects/industrial-bloom/blocks/7/value/src.jpg
+      frame: full
+      flush: false
+  - discriminant: image
+    value:
+      src: /src/content/projects/industrial-bloom/blocks/8/value/src.jpg
+      frame: full
+      flush: false
+  - discriminant: image
+    value:
+      src: /src/content/projects/industrial-bloom/blocks/9/value/src.jpg
+      frame: full
+      flush: false
+  - discriminant: image
+    value:
+      src: /src/content/projects/industrial-bloom/blocks/10/value/src.jpg
+      frame: full
+      flush: false
+  - discriminant: image
+    value:
+      src: /src/content/projects/industrial-bloom/blocks/11/value/src.jpg
+      frame: full
+      flush: false
+  - discriminant: image
+    value:
+      src: /src/content/projects/industrial-bloom/blocks/12/value/src.jpg
+      frame: full
+      flush: false
+  - discriminant: image
+    value:
+      src: /src/content/projects/industrial-bloom/blocks/13/value/src.jpg
+      frame: full
+      flush: false
+  - discriminant: image
+    value:
+      src: /src/content/projects/industrial-bloom/blocks/14/value/src.jpg
+      frame: full
+      flush: false
   - discriminant: process
     value:
       images:
-        - src: /src/content/projects/industrial-bloom/vase-1.jpg
+        - src: >-
+            /src/content/projects/industrial-bloom/blocks/15/value/images/0/src.jpg
           alt: Industrial Bloom vase
-        - src: /src/content/projects/industrial-bloom/vase-2.jpg
+          flush: false
+        - src: >-
+            /src/content/projects/industrial-bloom/blocks/15/value/images/1/src.jpg
           alt: Industrial Bloom vase
-        - src: /src/content/projects/industrial-bloom/vase-round.jpg
+          flush: false
+        - src: >-
+            /src/content/projects/industrial-bloom/blocks/15/value/images/2/src.jpg
           alt: Industrial Bloom round vase
-        - src: /src/content/projects/industrial-bloom/vase-3.jpg
+          flush: false
+        - src: >-
+            /src/content/projects/industrial-bloom/blocks/15/value/images/3/src.jpg
           alt: Industrial Bloom vase
+          flush: false
