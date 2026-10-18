@@ -1,6 +1,6 @@
 // Shrink images in the Keystatic admin before they enter form state / GitHub commits.
 // Max 3200px long edge; JPEG q0.82; keep PNG only when pixels have alpha.
-import { type ReactNode } from 'react';
+import React, { type ReactNode } from 'react';
 
 const MAX = 3200;
 const JPEG_Q = 0.82;
