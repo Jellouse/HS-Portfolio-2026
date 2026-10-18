@@ -1,6 +1,9 @@
 title: Analogue AF1
+year: 2024
+yearEnd: 2026
 published: false
-summary: Product development and rendering for a brand new, high end film camera,
+summary: >-
+  Product development and rendering for a brand new, high end film camera,
   developed in house at Analogue.
 cover: /src/content/projects/analogue-af1/cover.jpg
 coverAlt: Black Analogue AF1 film camera from the front
@@ -8,31 +11,35 @@ coverFrame: wide
 coverFlush: false
 rounded: true
 info:
-- label: Client
-  value: Analogue
+  - label: With
+    value: Analogue (Julian Mollema, Ralph Tilon)
+  - label: Role
+    value: 3D rendering & animation
 processFromFolder: false
 blocks:
-- discriminant: pair
-  value:
-    left: /src/content/projects/analogue-af1/blocks/0/value/left.jpg
-    leftAlt: Black Analogue AF1 film camera from the front
-    right: /src/content/projects/analogue-af1/blocks/0/value/right.jpg
-    rightAlt: Analogue AF1 camera surrounded by splashing water
-- discriminant: video
-  value:
-    src: https://humansize-media.schnettker-johann.workers.dev/projects/analogue-af1/analogue-af1-1-mvd42svq.mp4
-    alt: Animation of the Analogue AF1 camera turning in the dark
-    frame: full
-    flush: false
-- discriminant: video
-  value:
-    src: https://humansize-media.schnettker-johann.workers.dev/projects/analogue-af1/analogue-af1-2-mvd42um0.mp4
-    alt: Glowing particles floating on a black background
-    frame: full
-    flush: false
-- discriminant: pair
-  value:
-    left: /src/content/projects/analogue-af1/blocks/3/value/left.jpg
-    leftAlt: Analogue AF1 cameras from several angles on a black background
-    right: /src/content/projects/analogue-af1/blocks/3/value/right.jpg
-    rightAlt: Back of the Analogue AF1 camera next to a Kodak film roll
+  - discriminant: video
+    value:
+      src: >-
+        https://humansize-media.schnettker-johann.workers.dev/projects/analogue-af1/analogue-af1-1-mvd42svq.mp4
+      alt: Animation of the Analogue AF1 camera turning in the dark
+      frame: full
+      flush: false
+  - discriminant: pair
+    value:
+      left: /src/content/projects/analogue-af1/blocks/1/value/left.jpg
+      leftAlt: Black Analogue AF1 film camera from the front
+      right: /src/content/projects/analogue-af1/blocks/1/value/right.jpg
+      rightAlt: Analogue AF1 camera surrounded by splashing water
+  - discriminant: video
+    value:
+      src: >-
+        https://humansize-media.schnettker-johann.workers.dev/projects/analogue-af1/analogue-af1-2-mvd42um0.mp4
+      alt: Glowing particles floating on a black background
+      frame: full
+      flush: false
+  - discriminant: pair
+    value:
+      left: /src/content/projects/analogue-af1/blocks/3/value/left.jpg
+      leftAlt: Analogue AF1 cameras from several angles on a black background
+      right: /src/content/projects/analogue-af1/blocks/3/value/right.jpg
+      rightAlt: Back of the Analogue AF1 camera next to a Kodak film roll
