@@ -37,28 +37,28 @@ blocks:
         sit in the best possible light.
   - discriminant: image
     value:
-      src: /src/content/projects/analogue-couters/blocks/2/value/src.png
+      src: /src/content/projects/analogue-couters/blocks/2/value/src.jpg
       alt: Analogue store on Zeedijk in Amsterdam
       frame: wide
       flush: false
   - discriminant: image
     value:
-      src: /src/content/projects/analogue-couters/blocks/3/value/src.png
+      src: /src/content/projects/analogue-couters/blocks/3/value/src.jpg
       frame: full
       flush: false
   - discriminant: image
     value:
-      src: /src/content/projects/analogue-couters/blocks/4/value/src.png
+      src: /src/content/projects/analogue-couters/blocks/4/value/src.jpg
       frame: full
       flush: false
   - discriminant: image
     value:
-      src: /src/content/projects/analogue-couters/blocks/5/value/src.png
+      src: /src/content/projects/analogue-couters/blocks/5/value/src.jpg
       frame: full
       flush: false
   - discriminant: image
     value:
-      src: /src/content/projects/analogue-couters/blocks/6/value/src.png
+      src: /src/content/projects/analogue-couters/blocks/6/value/src.jpg
       frame: full
       flush: false
   - discriminant: text

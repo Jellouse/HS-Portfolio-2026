@@ -1,4 +1,5 @@
 import { withUpload } from './src/lib/VideoUrlInput';
+import { withImageOptimize } from './src/lib/image-field-optimize';
 import { config, fields, collection, singleton } from '@keystatic/core';
 
 const repo = 'Jellouse/HS-Portfolio-2026';
@@ -60,13 +61,15 @@ function imageField(
   label: string,
   opts?: { required?: boolean; description?: string },
 ) {
-  return fields.image({
+  const field = fields.image({
     label,
     directory: imageDirectory,
     publicPath: imagePublicPath,
     ...(opts?.description ? { description: opts.description } : {}),
     ...(opts?.required ? { validation: { isRequired: true as const } } : {}),
   });
+  // Compress in the browser before the file enters form state / the GitHub commit.
+  return { ...field, Input: withImageOptimize(field.Input as any) };
 }
 
 export default config({

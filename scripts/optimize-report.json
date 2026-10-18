@@ -1,0 +1,28 @@
+{
+  "beforeMB": 121.69,
+  "afterMB": 40.79,
+  "beforeFiles": 218,
+  "afterFiles": 218,
+  "renames": [
+    {
+      "from": "/src/content/projects/analogue-couters/blocks/2/value/src.png",
+      "to": "/src/content/projects/analogue-couters/blocks/2/value/src.jpg"
+    },
+    {
+      "from": "/src/content/projects/analogue-couters/blocks/3/value/src.png",
+      "to": "/src/content/projects/analogue-couters/blocks/3/value/src.jpg"
+    },
+    {
+      "from": "/src/content/projects/analogue-couters/blocks/4/value/src.png",
+      "to": "/src/content/projects/analogue-couters/blocks/4/value/src.jpg"
+    },
+    {
+      "from": "/src/content/projects/analogue-couters/blocks/5/value/src.png",
+      "to": "/src/content/projects/analogue-couters/blocks/5/value/src.jpg"
+    },
+    {
+      "from": "/src/content/projects/analogue-couters/blocks/6/value/src.png",
+      "to": "/src/content/projects/analogue-couters/blocks/6/value/src.jpg"
+    }
+  ]
+}

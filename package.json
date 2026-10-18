@@ -10,7 +10,8 @@
     "test:touch-guard": "node tests/touch-scroll-guard.mjs",
     "test:scroll": "node tests/mobile-scroll.spec.mjs",
     "test": "npm run test:touch-guard && npm run test:scroll",
-    "test:preview-images": "node tests/preview-images.spec.mjs"
+    "test:preview-images": "node tests/preview-images.spec.mjs",
+    "optimize:images": "node scripts/optimize-content-images.mjs"
   },
   "engines": {
     "node": ">=22"
