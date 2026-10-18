@@ -728,7 +728,8 @@ body:has(.project) .site-header {
   width: 100%;
 }
 
-.process-grid > .frame {
+.process-grid > .frame,
+.pair > .frame {
   width: 100%;
   min-width: 0;
 }
@@ -997,6 +998,24 @@ body:has(.project) .site-header {
 
   .lead {
     border-radius: var(--radius);
+  }
+
+  /* Image pair: side by side with equal heights (cover). Stacked below 760. */
+  .pair {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
+  }
+
+  .pair > .frame {
+    height: 100%;
+    align-self: stretch;
+  }
+
+  .pair > .frame img {
+    width: 100%;
+    height: auto;
+    min-height: 100%;
+    object-fit: cover;
   }
 
   .peeps {
