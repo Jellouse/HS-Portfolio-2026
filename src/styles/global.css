@@ -301,20 +301,32 @@ body:has(.hero) .site-header {
   line-height: 29px;
 }
 
+/* Always in layout so opacity can fade both ways (no display:none snap). */
 .contact-menu {
   position: absolute;
   top: calc(-1 * var(--lh-body));
   right: 0;
-  display: none;
+  display: flex;
   flex-direction: column;
   align-items: flex-end;
   gap: 0;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity 150ms ease,
+    visibility 0s linear 150ms;
 }
 
 .contact:hover .contact-menu,
 .contact:focus-within .contact-menu,
 .contact.is-open .contact-menu {
-  display: flex;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition:
+    opacity 150ms ease,
+    visibility 0s linear 0s;
 }
 
 .contact:hover .contact-label,
@@ -328,8 +340,8 @@ body:has(.hero) .site-header {
   display: block;
   line-height: var(--lh-body);
   white-space: nowrap;
-  opacity: 1;
   filter: none;
+  transform: none;
 }
 
 .contact-menu a,
@@ -344,10 +356,6 @@ body:has(.hero) .site-header {
 .contact-menu a:hover,
 .contact-menu a:active {
   color: var(--ink);
-}
-
-.contact-menu a:hover {
-  opacity: 1;
 }
 
 .hero {
@@ -792,7 +800,12 @@ body:has(.project) .site-header {
 
   body:has(.hero) .contact:hover:not(.is-open) .contact-menu,
   body:has(.hero) .contact:focus-within:not(.is-open) .contact-menu {
-    display: none;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition:
+      opacity 150ms ease,
+      visibility 0s linear 150ms;
   }
 
   body:has(.hero) .contact:hover:not(.is-open) .contact-label,
@@ -1171,30 +1184,9 @@ html.show-grid .grid-overlay .page-grid {
     }
   }
 
-  /* Menu stagger: opacity + translate only — no blur (colour fade is separate).
-     Tokyo time: no enter animation; opacity transition alone so leave can run. */
-  @keyframes menu-in {
-    from {
-      opacity: 0;
-      transform: translateY(4px);
-    }
-  }
-
-  .contact:hover .contact-menu > *,
-  .contact:focus-within .contact-menu > *,
-  .contact.is-open .contact-menu > * {
-    animation: menu-in 300ms var(--ease-out-expo) both;
-    filter: none;
-  }
-
-  .contact-menu > :nth-child(2) {
-    animation-delay: 30ms;
-  }
-
-  .contact-menu > :nth-child(3) {
-    animation-delay: 60ms;
-  }
-
+  /* Menu + Tokyo time: opacity transition only — no keyframes, no translate, no blur. */
+  .contact-menu,
+  .contact-menu > *,
   .who .time,
   .who:hover .time,
   .who:focus-within .time,
