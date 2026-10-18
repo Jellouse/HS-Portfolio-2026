@@ -12,7 +12,7 @@ coverFlush: false
 rounded: true
 info:
   - label: With
-    value: Analogue (Julian Mollema, Ralph Tilon)
+    value: Analogue
   - label: Role
     value: 3D rendering & animation
 processFromFolder: false
