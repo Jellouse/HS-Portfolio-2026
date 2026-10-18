@@ -22,9 +22,16 @@ blocks:
       alt: Two phones showing the Atomic online store with a ski jacket
       frame: full
       flush: false
+  - discriminant: text
+    value:
+      heading: See better, Ski better
+      text: >-
+        Key visuals for our first project with Atomic, a campaign website all
+        around ski goggles. Finished with butter smooth interactions
+        complimenting sharp 3D renders.
   - discriminant: image
     value:
-      src: /src/content/projects/atomic-campaigns/blocks/1/value/src.jpg
+      src: /src/content/projects/atomic-campaigns/blocks/2/value/src.jpg
       alt: >-
         Laptop on a perforated metal surface showing an Atomic goggle page with
         a green grid
@@ -32,55 +39,55 @@ blocks:
       flush: false
   - discriminant: image
     value:
-      src: /src/content/projects/atomic-campaigns/blocks/2/value/src.jpg
+      src: /src/content/projects/atomic-campaigns/blocks/3/value/src.jpg
       alt: Close-up 3D render of a black ski goggle lens
       frame: full
       flush: false
   - discriminant: image
     value:
-      src: /src/content/projects/atomic-campaigns/blocks/3/value/src.jpg
+      src: /src/content/projects/atomic-campaigns/blocks/4/value/src.jpg
       alt: Atomic goggle billboard above a busy ski resort street
       frame: full
       flush: false
   - discriminant: image
     value:
-      src: /src/content/projects/atomic-campaigns/blocks/4/value/src.jpg
+      src: /src/content/projects/atomic-campaigns/blocks/5/value/src.jpg
       alt: Phones showing the Atomic goggle field of view feature
       frame: full
       flush: false
   - discriminant: image
     value:
-      src: /src/content/projects/atomic-campaigns/blocks/5/value/src.jpg
+      src: /src/content/projects/atomic-campaigns/blocks/6/value/src.jpg
       alt: Atomic goggle poster in a frame on a dark building facade
       frame: full
       flush: false
   - discriminant: image
     value:
-      src: /src/content/projects/atomic-campaigns/blocks/6/value/src.jpg
+      src: /src/content/projects/atomic-campaigns/blocks/7/value/src.jpg
       alt: Close-up of a goggle strap with the word Livefit
       frame: full
       flush: false
   - discriminant: image
     value:
-      src: /src/content/projects/atomic-campaigns/blocks/7/value/src.jpg
+      src: /src/content/projects/atomic-campaigns/blocks/8/value/src.jpg
       alt: Red Atomic ski goggle on a dark background
       frame: full
       flush: false
   - discriminant: image
     value:
-      src: /src/content/projects/atomic-campaigns/blocks/8/value/src.jpg
+      src: /src/content/projects/atomic-campaigns/blocks/9/value/src.jpg
       alt: Stack of Atomic goggles in different lens colours
       frame: full
       flush: false
   - discriminant: image
     value:
-      src: /src/content/projects/atomic-campaigns/blocks/9/value/src.jpg
+      src: /src/content/projects/atomic-campaigns/blocks/10/value/src.jpg
       alt: Fan of Atomic goggles seen from the front
       frame: full
       flush: false
   - discriminant: image
     value:
-      src: /src/content/projects/atomic-campaigns/blocks/10/value/src.jpg
+      src: /src/content/projects/atomic-campaigns/blocks/11/value/src.jpg
       alt: Row of Atomic goggles in different colours floating in an arc
       frame: full
       flush: false
@@ -115,25 +122,19 @@ blocks:
       flush: false
   - discriminant: image
     value:
-      src: /src/content/projects/atomic-campaigns/blocks/15/value/src.jpg
+      src: /src/content/projects/atomic-campaigns/blocks/16/value/src.jpg
       alt: Row of Atomic ski boots in grey, black and beige
       frame: full
       flush: false
   - discriminant: image
     value:
-      src: /src/content/projects/atomic-campaigns/blocks/16/value/src.jpg
+      src: /src/content/projects/atomic-campaigns/blocks/17/value/src.jpg
       alt: Two white Atomic ski boots from the back and the side
       frame: full
       flush: false
   - discriminant: image
     value:
-      src: /src/content/projects/atomic-campaigns/blocks/17/value/src.jpg
-      alt: Red Atomic ski boot shell seen from below
-      frame: full
-      flush: false
-  - discriminant: image
-    value:
       src: /src/content/projects/atomic-campaigns/blocks/18/value/src.jpg
-      alt: Red Atomic ski boot on a white background
+      alt: Red Atomic ski boot shell seen from below
       frame: full
       flush: false
