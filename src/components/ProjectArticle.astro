@@ -3,7 +3,7 @@ import Blocks from './Blocks.astro';
 import Info from './Info.astro';
 import Mark from './Mark.astro';
 import ProjectHero from './ProjectHero.astro';
-import { projectLabel, yearRange, type ProjectEntry } from '../lib/content';
+import { yearRange, type ProjectEntry } from '../lib/content';
 
 interface Props {
   project: ProjectEntry;
@@ -33,7 +33,7 @@ const info = (() => {
       <Mark />
     </a>
   </p>
-  <ProjectHero title={projectLabel(project.data)} summary={project.data.summary} />
+  <ProjectHero title={project.data.title} years={years} summary={project.data.summary} />
   <Blocks
     blocks={project.data.blocks}
     slug={project.id}

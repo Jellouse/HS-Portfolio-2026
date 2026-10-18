@@ -106,9 +106,18 @@ export function absoluteUrl(site: URL | undefined, path: string): string {
   return new URL(path, origin).href;
 }
 
-export function projectLabel(data: { title: string; year?: number | null; yearEnd?: number | null }): string {
+export function projectTitleParts(data: {
+  title: string;
+  year?: number | null;
+  yearEnd?: number | null;
+}): { title: string; years?: string } {
   const years = yearRange(data.year, data.yearEnd);
-  return years ? `${data.title}, ${years}` : data.title;
+  return years ? { title: data.title, years } : { title: data.title };
+}
+
+export function projectLabel(data: { title: string; year?: number | null; yearEnd?: number | null }): string {
+  const { title, years } = projectTitleParts(data);
+  return years ? `${title}, ${years}` : title;
 }
 
 export function yearRange(start?: number | null, end?: number | null): string | undefined {

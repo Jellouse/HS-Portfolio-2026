@@ -48,7 +48,8 @@
 
 :root {
   --ink: #000;
-  --muted: rgba(0, 0, 0, 0.4);
+  --ink-40: rgba(0, 0, 0, 0.4);
+  --muted: var(--ink-40);
   --bg: #fff;
   --bg-mobile: #fff;
   --red: #b70606;
@@ -585,6 +586,11 @@ body:has(.hero) .site-header {
 .js .frame img.is-ready {
   opacity: 1;
   transition: opacity 300ms var(--ease-out);
+}
+
+/* Year after a project title: 40% ink; size inherits from the title/caption. */
+.project-year {
+  color: var(--ink-40);
 }
 
 .caption {
