@@ -37,6 +37,7 @@ blocks:
     value:
       src: >-
         https://humansize-media.schnettker-johann.workers.dev/projects/industrial-bloom/untitled3-mvcgnkky-mvd3ga1e.mp4
+      poster: /src/content/projects/industrial-bloom/blocks/2/value/poster.jpg
       frame: full
       flush: false
   - discriminant: image
