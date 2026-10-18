@@ -1,6 +1,6 @@
 ---
 import BlurImage from './BlurImage.astro';
-import { resolveImage } from '../lib/images';
+import { resolveImageSource } from '../lib/images';
 
 interface Photo {
   src: string;
@@ -22,7 +22,7 @@ const { images } = Astro.props;
       <div class="process-grid">
         {images.map((image) => (
           <BlurImage
-            src={resolveImage(image.src)}
+            src={resolveImageSource(image.src)}
             alt={image.alt}
             sizes="(min-width: 760px) 268px, calc((100vw - 56px) / 2)"
             flush={image.flush === true}

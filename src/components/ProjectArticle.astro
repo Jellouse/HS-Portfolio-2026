@@ -1,0 +1,44 @@
+---
+import Blocks from './Blocks.astro';
+import Info from './Info.astro';
+import Mark from './Mark.astro';
+import ProjectHero from './ProjectHero.astro';
+import { projectLabel, yearRange, type ProjectEntry } from '../lib/content';
+
+interface Props {
+  project: ProjectEntry;
+  processFolderSrcs?: string[];
+}
+
+const { project, processFolderSrcs } = Astro.props;
+const years = yearRange(project.data.year, project.data.yearEnd);
+const info = (() => {
+  const items = [...project.data.info];
+  if (!years) return items;
+  const at = items.findIndex((item) => item.label.trim().toLowerCase() === 'year');
+  const line = { label: 'Year', value: years };
+  if (at === -1) return [...items, line];
+  return items
+    .filter((item, i) => i === at || item.label.trim().toLowerCase() !== 'year')
+    .map((item, i) => (i === at ? line : item));
+})();
+---
+
+<article
+  class:list={['project', 'page-grid', { 'is-plain': project.data.rounded === false }]}
+  data-slug={project.id}
+>
+  <p class="project-mark">
+    <a href="/" aria-label="Humansize">
+      <Mark />
+    </a>
+  </p>
+  <ProjectHero title={projectLabel(project.data)} summary={project.data.summary} />
+  <Blocks
+    blocks={project.data.blocks}
+    slug={project.id}
+    processFromFolder={project.data.processFromFolder}
+    processFolderSrcs={processFolderSrcs}
+  />
+  <Info items={info} />
+</article>

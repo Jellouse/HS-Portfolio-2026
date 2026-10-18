@@ -8,9 +8,10 @@ interface Props {
   image?: ImageMetadata;
   type?: 'website' | 'article';
   jsonLd?: unknown;
+  noindex?: boolean;
 }
 
-const { title, description, image, type = 'website', jsonLd } = Astro.props;
+const { title, description, image, type = 'website', jsonLd, noindex = false } = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const og = image
   ? await getImage({
@@ -25,13 +26,17 @@ const og = image
   : null;
 const ogUrl = og ? new URL(og.src, Astro.site).href : undefined;
 const json = jsonLd
-  ? JSON.stringify(jsonLd).replace(/</g, '\\u003c')
+  ? JSON.stringify(jsonLd).replace(/</g, '\u003c')
   : '';
 ---
 
 <title>{title}</title>
 <meta name="description" content={description} />
-<link rel="canonical" href={canonical.href} />
+{noindex ? (
+  <meta name="robots" content="noindex, nofollow" />
+) : (
+  <link rel="canonical" href={canonical.href} />
+)}
 <meta property="og:title" content={title} />
 <meta property="og:description" content={description} />
 <meta property="og:type" content={type} />

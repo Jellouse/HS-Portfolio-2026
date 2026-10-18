@@ -4,7 +4,7 @@ import type { ImageMetadata } from 'astro';
 
 interface Props {
   src: string;
-  poster?: ImageMetadata;
+  poster?: ImageMetadata | string;
   label?: string | null;
   plain?: boolean;
   flush?: boolean;
@@ -12,9 +12,14 @@ interface Props {
 }
 
 const { src, poster, label, plain = false, flush = false, priority = false } = Astro.props;
-const posterImage = poster
-  ? await getImage({ src: poster, width: Math.min(poster.width, 2000), format: 'webp' })
-  : undefined;
+let posterSrc: string | undefined;
+if (typeof poster === 'string') {
+  posterSrc = poster;
+} else if (poster) {
+  posterSrc = (
+    await getImage({ src: poster, width: Math.min(poster.width, 2000), format: 'webp' })
+  ).src;
+}
 // local paths (/media/...) or full URLs (Cloudflare R2); ignore any query string
 const ext = src.toLowerCase().split(/[?#]/)[0].split('.').pop();
 const type = ext === 'webm' ? 'video/webm' : ext === 'mov' ? 'video/quicktime' : 'video/mp4';
@@ -27,7 +32,7 @@ const type = ext === 'webm' ? 'video/webm' : ext === 'mov' ? 'video/quicktime' :
     loop
     playsinline
     preload={priority ? 'auto' : 'metadata'}
-    poster={posterImage?.src}
+    poster={posterSrc}
     aria-label={label || undefined}
     data-autoplay
   >

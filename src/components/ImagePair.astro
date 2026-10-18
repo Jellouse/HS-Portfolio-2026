@@ -1,6 +1,6 @@
 ---
 import BlurImage from './BlurImage.astro';
-import { resolveImage } from '../lib/images';
+import { resolveImageSource } from '../lib/images';
 
 interface Props {
   left: string;
@@ -14,12 +14,12 @@ const { left, leftAlt, right, rightAlt } = Astro.props;
 
 <div class="pair fade-in">
   <BlurImage
-    src={resolveImage(left)}
+    src={resolveImageSource(left)}
     alt={leftAlt}
     sizes="(min-width: 760px) 552px, calc(100vw - 40px)"
   />
   <BlurImage
-    src={resolveImage(right)}
+    src={resolveImageSource(right)}
     alt={rightAlt}
     sizes="(min-width: 760px) 552px, calc(100vw - 40px)"
   />

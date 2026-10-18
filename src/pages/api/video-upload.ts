@@ -4,10 +4,10 @@
 import type { APIRoute } from 'astro';
 import { S3Client, PutObjectCommand, ListObjectsV2Command } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { cmsTokenFromRequest, hasRepoPushAccess } from '../../lib/cms-auth';
 
 export const prerender = false;
 
-const REPO = 'Jellouse/HS-Portfolio-2026';
 const TYPES: Record<string, string> = {
   'video/mp4': 'mp4',
   'video/webm': 'webm',
@@ -35,14 +35,20 @@ export const POST: APIRoute = async ({ request }) => {
     return json({ error: 'Video storage is not set up yet (R2 env vars missing).' }, 500);
   }
 
-  const token = request.headers.get('authorization')?.replace(/^Bearer\s+/i, '');
+  const token = cmsTokenFromRequest(request);
   if (!token) return json({ error: 'Not signed in to the CMS.' }, 401);
-  const gh = await fetch(`https://api.github.com/repos/${REPO}`, {
-    headers: { authorization: `Bearer ${token}`, accept: 'application/vnd.github+json', 'user-agent': 'humansize' },
-  });
-  if (!gh.ok) return json({ error: 'GitHub session not valid. Sign in to the CMS again.' }, 401);
-  const repo = await gh.json();
-  if (!repo.permissions?.push) return json({ error: 'No write access to the site.' }, 403);
+  if (!(await hasRepoPushAccess(token))) {
+    // Mirror the old split: invalid token vs no push. Re-check with a cheap user call only when needed.
+    const probe = await fetch('https://api.github.com/user', {
+      headers: {
+        authorization: `Bearer ${token}`,
+        accept: 'application/vnd.github+json',
+        'user-agent': 'humansize',
+      },
+    });
+    if (!probe.ok) return json({ error: 'GitHub session not valid. Sign in to the CMS again.' }, 401);
+    return json({ error: 'No write access to the site.' }, 403);
+  }
 
   const { name = '', type = '', folder = '', size = 0 } = await request.json().catch(() => ({}));
   const bytes = Number(size);

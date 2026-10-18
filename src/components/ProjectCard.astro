@@ -1,7 +1,7 @@
 ---
 import BlurImage from './BlurImage.astro';
 import VideoFrame from './VideoFrame.astro';
-import { resolveImage } from '../lib/images';
+import { resolveImageSource } from '../lib/images';
 import { projectLabel, type ProjectEntry } from '../lib/content';
 
 interface Props {
@@ -13,7 +13,7 @@ const { project, priority = false } = Astro.props;
 const { cover, coverAlt, coverVideo, coverFrame, coverFlush, rounded } = project.data;
 if (!coverVideo && (!cover || !coverAlt)) throw new Error(`${project.id} is missing a cover`);
 const label = projectLabel(project.data);
-const image = cover ? resolveImage(cover) : undefined;
+const image = cover ? resolveImageSource(cover) : undefined;
 const sizes = {
   full: '(min-width: 1440px) 1120px, (min-width: 760px) 80vw, 100vw',
   wide: '(min-width: 1440px) 836px, (min-width: 760px) 60vw, 100vw',

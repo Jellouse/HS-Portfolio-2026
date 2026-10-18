@@ -3,7 +3,7 @@ import { Image, getImage } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
 
 interface Props {
-  src: ImageMetadata;
+  src: ImageMetadata | string;
   alt: string;
   sizes: string;
   priority?: boolean;
@@ -12,25 +12,43 @@ interface Props {
 }
 
 const { src, alt, sizes, priority = false, plain = false, flush = false } = Astro.props;
-const widths = [...new Set([480, 768, 1100, 1600, 2000, src.width])].filter(
-  (width) => width <= src.width,
-);
-const placeholder = await getImage({
-  src,
-  width: 24,
-  format: 'webp',
-  quality: 40,
-});
+const remote = typeof src === 'string';
+const widths = remote
+  ? []
+  : [...new Set([480, 768, 1100, 1600, 2000, src.width])].filter((width) => width <= src.width);
+const placeholder = remote
+  ? null
+  : await getImage({
+      src,
+      width: 24,
+      format: 'webp',
+      quality: 40,
+    });
 ---
 
-<div class:list={['frame', { 'is-plain': plain, 'is-flush': flush }]} style={`background-image:url('${placeholder.src}')`}>
-  <Image
-    src={src}
-    alt={alt}
-    widths={widths}
-    sizes={sizes}
-    loading={priority ? 'eager' : 'lazy'}
-    decoding="async"
-    fetchpriority={priority ? 'high' : 'auto'}
-  />
-</div>
+{
+  remote ? (
+    <div class:list={['frame', { 'is-plain': plain, 'is-flush': flush }]}>
+      <img
+        src={src}
+        alt={alt}
+        sizes={sizes}
+        loading={priority ? 'eager' : 'lazy'}
+        decoding="async"
+        fetchpriority={priority ? 'high' : 'auto'}
+      />
+    </div>
+  ) : (
+    <div class:list={['frame', { 'is-plain': plain, 'is-flush': flush }]} style={`background-image:url('${placeholder!.src}')`}>
+      <Image
+        src={src}
+        alt={alt}
+        widths={widths}
+        sizes={sizes}
+        loading={priority ? 'eager' : 'lazy'}
+        decoding="async"
+        fetchpriority={priority ? 'high' : 'auto'}
+      />
+    </div>
+  )
+}

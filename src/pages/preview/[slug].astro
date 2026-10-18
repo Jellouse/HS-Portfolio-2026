@@ -1,0 +1,62 @@
+---
+export const prerender = false;
+
+import ProjectArticle from '../../components/ProjectArticle.astro';
+import Base from '../../layouts/Base.astro';
+import { cmsTokenFromRequest, hasRepoPushAccess } from '../../lib/cms-auth';
+import { projectLabel, plainText } from '../../lib/content';
+import { setPreviewImageRef, tryResolveImage } from '../../lib/images';
+import {
+  listProcessFolderFromGitHub,
+  loadPreviewProject,
+  normalizePreviewRef,
+} from '../../lib/preview';
+
+const slug = Astro.params.slug;
+if (!slug || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/i.test(slug)) {
+  return new Response('Not found', {
+    status: 404,
+    headers: { 'Cache-Control': 'private, no-store', 'X-Robots-Tag': 'noindex, nofollow' },
+  });
+}
+
+const token = cmsTokenFromRequest(Astro.request);
+if (!token || !(await hasRepoPushAccess(token))) {
+  return new Response('Not found', {
+    status: 404,
+    headers: { 'Cache-Control': 'private, no-store', 'X-Robots-Tag': 'noindex, nofollow' },
+  });
+}
+
+const ref = normalizePreviewRef(Astro.url.searchParams.get('branch'));
+setPreviewImageRef(ref);
+
+const project = await loadPreviewProject(slug, token, ref);
+if (!project) {
+  setPreviewImageRef(null);
+  return new Response('Not found', {
+    status: 404,
+    headers: { 'Cache-Control': 'private, no-store', 'X-Robots-Tag': 'noindex, nofollow' },
+  });
+}
+
+let processFolderSrcs: string[] | undefined;
+if (project.data.processFromFolder) {
+  const fromGitHub = await listProcessFolderFromGitHub(slug, token, ref);
+  processFolderSrcs = fromGitHub.length ? fromGitHub : undefined;
+}
+
+Astro.response.headers.set('Cache-Control', 'private, no-store');
+Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
+
+const summary = plainText(project.data.summary);
+const title = `${projectLabel(project.data)} · Preview · Humansize`;
+const coverMeta = project.data.cover ? tryResolveImage(project.data.cover) : undefined;
+const unpublished = project.data.published === false;
+const badge = unpublished ? 'Preview, unpublished' : 'Preview';
+---
+
+<Base title={title} description={summary} image={coverMeta} type="article" noindex>
+  <p class="preview-badge">{badge}</p>
+  <ProjectArticle project={project} processFolderSrcs={processFolderSrcs} />
+</Base>

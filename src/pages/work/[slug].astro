@@ -2,12 +2,9 @@
 import { projectLabel } from '../../lib/content';
 export const prerender = true;
 
-import Blocks from '../../components/Blocks.astro';
-import Info from '../../components/Info.astro';
-import Mark from '../../components/Mark.astro';
-import ProjectHero from '../../components/ProjectHero.astro';
+import ProjectArticle from '../../components/ProjectArticle.astro';
 import Base from '../../layouts/Base.astro';
-import { yearRange, absoluteUrl, getProjects, plainText, type ProjectEntry } from '../../lib/content';
+import { absoluteUrl, getProjects, plainText, type ProjectEntry } from '../../lib/content';
 import { resolveImage } from '../../lib/images';
 import { projectJsonLd } from '../../lib/seo';
 
@@ -27,15 +24,6 @@ const { project } = Astro.props;
 const summary = plainText(project.data.summary);
 const image = project.data.cover ? resolveImage(project.data.cover) : undefined;
 const pageUrl = absoluteUrl(Astro.site, `/work/${project.id}`);
-const years = yearRange(project.data.year, project.data.yearEnd);
-const info = (() => {
-  const items = [...project.data.info];
-  if (!years) return items;
-  const at = items.findIndex((item) => item.label.trim().toLowerCase() === 'year');
-  const line = { label: 'Year', value: years };
-  if (at === -1) return [...items, line];
-  return items.filter((item, i) => i === at || item.label.trim().toLowerCase() !== 'year').map((item, i) => (i === at ? line : item));
-})();
 const title = `${projectLabel(project.data)} · Humansize`;
 ---
 
@@ -46,18 +34,5 @@ const title = `${projectLabel(project.data)} · Humansize`;
   type="article"
   jsonLd={projectJsonLd(project, pageUrl)}
 >
-  <article class:list={['project', 'page-grid', { 'is-plain': project.data.rounded === false }]} data-slug={project.id}>
-    <p class="project-mark">
-      <a href="/" aria-label="Humansize">
-        <Mark />
-      </a>
-    </p>
-    <ProjectHero title={projectLabel(project.data)} summary={project.data.summary} />
-    <Blocks
-      blocks={project.data.blocks}
-      slug={project.id}
-      processFromFolder={project.data.processFromFolder}
-    />
-    <Info items={info} />
-  </article>
+  <ProjectArticle project={project} />
 </Base>

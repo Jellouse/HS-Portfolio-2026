@@ -12,9 +12,10 @@ interface Props {
   image?: ImageMetadata;
   type?: 'website' | 'article';
   jsonLd?: unknown;
+  noindex?: boolean;
 }
 
-const { title, description, image, type, jsonLd } = Astro.props;
+const { title, description, image, type, jsonLd, noindex = false } = Astro.props;
 const site = await getSite();
 ---
 
@@ -26,7 +27,7 @@ const site = await getSite();
     <meta name="google-site-verification" content="M6eRTJDg2gB4PMiLKpzNVeRX6jugbsgeBjGd_0ci2V4" />
     <link rel="icon" href="/favicon.png" type="image/png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <Seo title={title} description={description} image={image} type={type} jsonLd={jsonLd} />
+    <Seo title={title} description={description} image={image} type={type} jsonLd={jsonLd} noindex={noindex} />
     <script is:inline>
       document.documentElement.classList.add('js');
       (function () {

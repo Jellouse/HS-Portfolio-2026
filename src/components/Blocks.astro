@@ -11,13 +11,15 @@ interface Props {
   blocks: ProjectEntry['data']['blocks'];
   slug?: string;
   processFromFolder?: boolean;
+  /** When set (live preview), use these paths instead of the build-time process/ glob. */
+  processFolderSrcs?: string[];
 }
 
-const { blocks, slug, processFromFolder = false } = Astro.props;
-const folder =
-  processFromFolder && slug
-    ? processFolderImages(slug).map((src) => ({ src, alt: '', flush: false }))
-    : [];
+const { blocks, slug, processFromFolder = false, processFolderSrcs } = Astro.props;
+const folderSrcs =
+  processFolderSrcs ??
+  (processFromFolder && slug ? processFolderImages(slug) : []);
+const folder = folderSrcs.map((src) => ({ src, alt: '', flush: false }));
 const useFolder = folder.length > 0;
 const hasProcessBlock = blocks.some((b) => b.discriminant === 'process');
 ---

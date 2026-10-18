@@ -116,7 +116,11 @@ export default defineConfig({
     sitemap({
       filter: (page) => {
         const path = new URL(page).pathname.replace(/\/$/, '') || '/';
-        return path !== '/work' && path !== '/projects' && path !== '/all' && path !== '/keystatic-upload';
+        if (path === '/work' || path === '/projects' || path === '/all' || path === '/keystatic-upload') {
+          return false;
+        }
+        if (path === '/preview' || path.startsWith('/preview/')) return false;
+        return true;
       },
     }),
     react(),
