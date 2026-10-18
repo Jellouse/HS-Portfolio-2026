@@ -694,14 +694,16 @@ body:has(.project) .site-header {
 }
 
 .footer-text {
-  /* Fill the band above the faces; centre the copy in that band. */
+  /* Centre the copy between the section top and the VISIBLE top of the faces at rest.
+     The 2x box is min(52vw, 60svh); at rest soft-clamped scale is ~0.75 of --rest (50%),
+     so visible height is about 0.38 of the box. */
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   box-sizing: border-box;
   height: 100%;
-  padding-bottom: min(52vw, 60svh);
+  padding-bottom: calc(min(52vw, 60svh) * 0.38);
   display: flex;
   flex-direction: column;
   justify-content: safe center;
@@ -720,8 +722,8 @@ body:has(.project) .site-header {
   margin-bottom: 0;
 }
 
-/* Faces pinned to the bottom edge. Height is the 2x-cap aspect ratio, but capped so a
-   short viewport still fits text + faces inside 100svh (no overflow, no empty gap below). */
+/* 2x stretch box pinned to the section bottom. At rest, faces are half that tall and
+   sit on the bottom edge (transform-origin bottom); stretch grows upward into the box. */
 .footer-faces {
   position: absolute;
   left: 0;
@@ -747,14 +749,27 @@ body:has(.project) .site-header {
 
 .footer-faces .peeps-static {
   position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
+  left: 0;
+  right: 0;
+  top: auto;
+  bottom: 0;
+  width: 100%;
+  height: 50%; /* matches --rest for maxH=2 */
+  transform: none;
 }
 
 .footer-faces .peeps-row {
   top: 0;
   height: 100%;
   transform: none;
+}
+
+/* Resting height = --rest (50%); anchored to the bottom so empty stretch room is above. */
+.footer-faces .peeps-row svg {
+  top: auto;
+  bottom: 0;
+  height: var(--rest);
+  transform-origin: 0 100%;
 }
 
 .footer-faces .peeps-static :is(path, ellipse),
