@@ -30,7 +30,6 @@ blocks:
   - discriminant: image
     value:
       src: /src/content/projects/atomic/blocks/0/value/src.jpg
-      alt: Atomic Ski website
       frame: full
       flush: false
   - discriminant: image
@@ -56,11 +55,6 @@ blocks:
   - discriminant: image
     value:
       src: /src/content/projects/atomic/blocks/5/value/src.jpg
-      frame: full
-      flush: false
-  - discriminant: image
-    value:
-      src: /src/content/projects/atomic/blocks/6/value/src.jpg
       frame: full
       flush: false
   - discriminant: process
