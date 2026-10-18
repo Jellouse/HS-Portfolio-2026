@@ -1,12 +1,12 @@
 import type { ImageMetadata } from 'astro';
-import { githubRawUrl } from './github-content';
+import { contentPathFromSrc } from './github-content';
 
 const images = import.meta.glob<ImageMetadata>(
   '/src/content/projects/**/*.{jpg,jpeg,png,webp,avif}',
   { eager: true, import: 'default' },
 );
 
-/** When set (preview SSR), missing build images fall back to GitHub raw URLs. */
+/** When set (preview SSR), missing build images use the auth image proxy. */
 let previewRef: string | null = null;
 
 export function setPreviewImageRef(ref: string | null) {
@@ -30,11 +30,25 @@ export function resolveImage(src: string): ImageMetadata {
   return image;
 }
 
-/** Local ImageMetadata when present; otherwise a raw GitHub URL in preview mode. */
+/** Authenticated CMS preview proxy (browser sends Keystatic cookie / Bearer). */
+export function previewImageProxyUrl(src: string, ref: string): string {
+  const path = contentPathFromSrc(src);
+  const params = new URLSearchParams({ path, branch: ref });
+  return `/api/preview-image?${params}`;
+}
+
+/**
+ * Local ImageMetadata on the static site.
+ * In CMS preview SSR, Astro's /_image endpoint 404s on this deploy, so return the
+ * already-built /_astro URL (or an auth proxy for files not in this build).
+ */
 export function resolveImageSource(src: string): ImageMetadata | string {
   const local = tryResolveImage(src);
-  if (local) return local;
-  if (previewRef) return githubRawUrl(src, previewRef);
+  if (local) {
+    if (previewRef) return local.src;
+    return local;
+  }
+  if (previewRef) return previewImageProxyUrl(src, previewRef);
   throw new Error(
     `Missing image ${src}. Files on disk: ${Object.keys(images).join(', ')}`,
   );

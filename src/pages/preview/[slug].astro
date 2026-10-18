@@ -5,7 +5,7 @@ import ProjectArticle from '../../components/ProjectArticle.astro';
 import Base from '../../layouts/Base.astro';
 import { cmsTokenFromRequest, hasRepoPushAccess } from '../../lib/cms-auth';
 import { projectLabel, plainText } from '../../lib/content';
-import { setPreviewImageRef, tryResolveImage } from '../../lib/images';
+import { setPreviewImageRef } from '../../lib/images';
 import {
   listProcessFolderFromGitHub,
   loadPreviewProject,
@@ -51,12 +51,13 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
 
 const summary = plainText(project.data.summary);
 const title = `${projectLabel(project.data)} · Preview · Humansize`;
-const coverMeta = project.data.cover ? tryResolveImage(project.data.cover) : undefined;
+// Skip Astro ImageMetadata → /_image for OG: that endpoint 404s on this deploy,
+// and preview is noindex anyway.
 const unpublished = project.data.published === false;
 const badge = unpublished ? 'Preview, unpublished' : 'Preview';
 ---
 
-<Base title={title} description={summary} image={coverMeta} type="article" noindex>
+<Base title={title} description={summary} type="article" noindex>
   <p class="preview-badge">{badge}</p>
   <ProjectArticle project={project} processFolderSrcs={processFolderSrcs} />
 </Base>
