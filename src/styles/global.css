@@ -72,6 +72,10 @@
   --ease-in-out-expo: cubic-bezier(0.65, 0, 0.15, 1);
   --ease-out-quad: cubic-bezier(0.25, 0.46, 0.45, 0.94);
   --ease-in-quad: cubic-bezier(0.55, 0.085, 0.68, 0.53);
+  /* Emil Kowalski UI curves — aliases over the site tokens above */
+  --ease-out: var(--ease-out-expo);
+  --ease-in-out: var(--ease-in-out-expo);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
   --page-bg: var(--bg);
   color: var(--ink);
   background: var(--page-bg);
@@ -274,6 +278,7 @@ body:has(.hero) .site-header {
   white-space: nowrap;
   opacity: 0;
   pointer-events: none;
+  transition: opacity 150ms ease;
 }
 
 .who:hover .time,
@@ -326,6 +331,10 @@ body:has(.hero) .site-header {
 .contact-menu a,
 .contact-menu span {
   color: var(--muted);
+}
+
+.contact-menu a {
+  transition: color 160ms ease;
 }
 
 .contact-menu a:hover,
@@ -511,7 +520,7 @@ body:has(.hero) .site-header {
 
 .js .frame img.is-ready {
   opacity: 1;
-  transition: opacity 0.45s ease;
+  transition: opacity 300ms var(--ease-out);
 }
 
 .caption {
@@ -995,6 +1004,61 @@ html.show-grid .grid-overlay .page-grid {
 
   .js .frame img {
     opacity: 1;
+  }
+}
+
+/* Quiet press + hover feedback (Emil): transform/opacity/color only.
+   No press scale on media cards — keeps native press-and-hold save.
+   Hover motion gated to fine pointers; reduced-motion drops transforms. */
+.caption,
+.contact-label,
+.site-header .who > a,
+.project-mark a,
+.about a,
+.text-block a,
+.summary a,
+.info-list a,
+.site-footer a,
+.not-found a {
+  transition:
+    opacity 160ms ease,
+    color 160ms ease,
+    transform 160ms var(--ease-out);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .caption:active,
+  .contact-label:active,
+  .site-header .who > a:active,
+  .project-mark a:active,
+  .about a:active,
+  .text-block a:active,
+  .summary a:active,
+  .info-list a:active,
+  .site-footer a:active,
+  .not-found a:active {
+    transform: scale(0.97);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .caption,
+  .contact-label,
+  .site-header .who > a,
+  .project-mark a,
+  .about a,
+  .text-block a,
+  .summary a,
+  .info-list a,
+  .site-footer a,
+  .not-found a,
+  .contact-menu a,
+  .who .time {
+    transition-property: opacity, color;
+  }
+
+  .js .frame img.is-ready {
+    transition: opacity 200ms ease;
   }
 }
 
