@@ -22,7 +22,7 @@ const sizes = {
 }[coverFrame];
 ---
 
-<article class:list={['card', { 'is-plain': rounded === false }]} data-frame={coverFrame}>
+<article class:list={['card', 'fade-in', { 'is-plain': rounded === false }]} data-frame={coverFrame}>
   <a href={`/work/${project.id}`}>
     {coverVideo ? (
       <VideoFrame

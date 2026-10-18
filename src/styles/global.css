@@ -334,10 +334,14 @@ body:has(.hero) .site-header {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  /* Closing: fade options out immediately */
+  /* Grow out of @Humansize (bottom-right toward the label) */
+  transform: scale(0.95);
+  transform-origin: 100% 100%;
+  /* Closing: shrink + fade out immediately */
   transition:
     opacity 150ms ease,
-    visibility 0s linear 150ms;
+    visibility 0s linear 150ms,
+    transform 200ms var(--ease-out);
 }
 
 .contact:hover .contact-menu,
@@ -346,10 +350,12 @@ body:has(.hero) .site-header {
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
-  /* Opening: wait for label to leave, then fade options in */
+  transform: scale(1);
+  /* Opening: wait for label, then fade + grow in */
   transition:
     opacity 150ms ease 150ms,
-    visibility 0s linear 150ms;
+    visibility 0s linear 150ms,
+    transform 200ms var(--ease-out) 150ms;
 }
 
 .contact-menu a,
@@ -385,6 +391,22 @@ body:has(.hero) .site-header {
   .contact:focus-within .contact-menu,
   .contact.is-open .contact-menu {
     transition-delay: 0s;
+  }
+
+  .contact-menu,
+  .contact:hover .contact-menu,
+  .contact:focus-within .contact-menu,
+  .contact.is-open .contact-menu {
+    transform: none;
+  }
+
+  body:has(.hero) .contact-menu,
+  body:has(.hero) .contact:hover .contact-menu,
+  body:has(.hero) .contact:focus-within .contact-menu,
+  body:has(.hero) .contact.is-open .contact-menu,
+  body:has(.hero) .contact:hover:not(.is-open) .contact-menu,
+  body:has(.hero) .contact:focus-within:not(.is-open) .contact-menu {
+    transform: translateX(-50%);
   }
 }
 
@@ -825,7 +847,14 @@ body:has(.project) .site-header {
     right: auto;
     left: 50%;
     align-items: center;
-    transform: translateX(-50%);
+    transform: translateX(-50%) scale(0.95);
+    transform-origin: 50% 100%;
+  }
+
+  body:has(.hero) .contact:hover .contact-menu,
+  body:has(.hero) .contact:focus-within .contact-menu,
+  body:has(.hero) .contact.is-open .contact-menu {
+    transform: translateX(-50%) scale(1);
   }
 
   body:has(.hero) .contact:hover:not(.is-open) .contact-menu,
@@ -833,10 +862,12 @@ body:has(.project) .site-header {
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
+    transform: translateX(-50%) scale(0.95);
     /* same as closed: options leave immediately */
     transition:
       opacity 150ms ease,
-      visibility 0s linear 150ms;
+      visibility 0s linear 150ms,
+      transform 200ms var(--ease-out);
   }
 
   body:has(.hero) .contact:hover:not(.is-open) .contact-label,
@@ -1116,6 +1147,53 @@ html.show-grid .grid-overlay .page-grid {
 
   .js .frame img.is-ready {
     transition: opacity 200ms ease;
+  }
+}
+
+
+/* Scroll fade: opacity only. Hidden only after JS marks .fade-ready and skips first-viewport items.
+   No transition on hide (avoids a 1→0 flash when .fade-ready lands); only animate reveal. */
+.js.fade-ready .fade-in:not(.is-in) {
+  opacity: 0;
+  transition: none;
+}
+
+.js.fade-ready .fade-in.is-in {
+  opacity: 1;
+  transition: opacity 400ms var(--ease-out);
+}
+
+/* Homepage cards use display:contents on desktop — fade their grid children instead. */
+@media (min-width: 760px) {
+  .js.fade-ready .card.fade-in:not(.is-in) {
+    opacity: 1; /* contents box itself isn't painted */
+  }
+
+  .js.fade-ready .card.fade-in:not(.is-in) > * {
+    opacity: 0;
+    transition: none;
+  }
+
+  .js.fade-ready .card.fade-in.is-in > * {
+    opacity: 1;
+    transition: opacity 400ms var(--ease-out);
+  }
+}
+
+/* Don't double-fade: while the block is still hidden, keep images opaque (parent hides them). */
+.js.fade-ready .fade-in:not(.is-in) .frame img {
+  opacity: 1;
+  transition: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .js.fade-ready .fade-in,
+  .js.fade-ready .fade-in:not(.is-in),
+  .js.fade-ready .fade-in.is-in,
+  .js.fade-ready .card.fade-in:not(.is-in) > *,
+  .js.fade-ready .card.fade-in.is-in > * {
+    opacity: 1;
+    transition: none;
   }
 }
 

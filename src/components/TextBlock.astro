@@ -9,7 +9,7 @@ interface Props {
 const { text, heading } = Astro.props;
 ---
 
-<section class="text-block">
+<section class="text-block fade-in">
   {heading && <h2>{heading}</h2>}
   {paragraphs(text).map((paragraph) => <p set:html={renderInline(paragraph)} />)}
 </section>

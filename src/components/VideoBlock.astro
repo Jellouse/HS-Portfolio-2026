@@ -14,6 +14,6 @@ const { src, poster, label, frame = 'full', flush = false } = Astro.props;
 const posterImage = poster ? resolveImage(poster) : undefined;
 ---
 
-<figure class="image-block video-block" data-frame={frame}>
+<figure class="image-block video-block fade-in" data-frame={frame}>
   <VideoFrame src={src} poster={posterImage} label={label} flush={flush} />
 </figure>
