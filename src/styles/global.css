@@ -72,6 +72,10 @@
   --ease-in-out-expo: cubic-bezier(0.65, 0, 0.15, 1);
   --ease-out-quad: cubic-bezier(0.25, 0.46, 0.45, 0.94);
   --ease-in-quad: cubic-bezier(0.55, 0.085, 0.68, 0.53);
+  /* Emil Kowalski UI curves — aliases over the site tokens above */
+  --ease-out: var(--ease-out-expo);
+  --ease-in-out: var(--ease-in-out-expo);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
   --page-bg: var(--bg);
   color: var(--ink);
   background: var(--page-bg);
@@ -274,10 +278,14 @@ body:has(.hero) .site-header {
   white-space: nowrap;
   opacity: 0;
   pointer-events: none;
+  /* Opacity only — no animation — so mouseleave/is-open removal can fade out. */
+  transition: opacity 150ms ease;
+  filter: none;
 }
 
 .who:hover .time,
-.who:focus-within .time {
+.who:focus-within .time,
+.who.is-open .time {
   opacity: 1;
 }
 
@@ -286,33 +294,62 @@ body:has(.hero) .site-header {
   text-align: right;
 }
 
+/* Sequenced menu: label out → options in on open; reverse on close.
+   Each state carries the delay for the element that is arriving.
+   Label stays in flow (visibility:hidden) so the hover hit area never collapses. */
 .contact-label {
   display: block;
   padding: 0;
   font: inherit;
   line-height: 29px;
+  opacity: 1;
+  visibility: visible;
+  /* Closing: wait for options to leave, then fade label in */
+  transition:
+    opacity 150ms ease 150ms,
+    visibility 0s linear 150ms,
+    transform 160ms var(--ease-out);
+}
+
+.contact:hover .contact-label,
+.contact:focus-within .contact-label,
+.contact.is-open .contact-label {
+  opacity: 0;
+  visibility: hidden;
+  /* Opening: fade label out immediately */
+  transition:
+    opacity 150ms ease,
+    visibility 0s linear 150ms,
+    transform 160ms var(--ease-out);
 }
 
 .contact-menu {
   position: absolute;
   top: calc(-1 * var(--lh-body));
   right: 0;
-  display: none;
+  display: flex;
   flex-direction: column;
   align-items: flex-end;
   gap: 0;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  /* Closing: fade options out immediately */
+  transition:
+    opacity 150ms ease,
+    visibility 0s linear 150ms;
 }
 
 .contact:hover .contact-menu,
 .contact:focus-within .contact-menu,
 .contact.is-open .contact-menu {
-  display: flex;
-}
-
-.contact:hover .contact-label,
-.contact:focus-within .contact-label,
-.contact.is-open .contact-label {
-  visibility: hidden;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  /* Opening: wait for label to leave, then fade options in */
+  transition:
+    opacity 150ms ease 150ms,
+    visibility 0s linear 150ms;
 }
 
 .contact-menu a,
@@ -320,7 +357,8 @@ body:has(.hero) .site-header {
   display: block;
   line-height: var(--lh-body);
   white-space: nowrap;
-  opacity: 1;
+  filter: none;
+  transform: none;
 }
 
 .contact-menu a,
@@ -328,13 +366,26 @@ body:has(.hero) .site-header {
   color: var(--muted);
 }
 
+.contact-menu a {
+  transition: color 160ms ease;
+}
+
 .contact-menu a:hover,
 .contact-menu a:active {
   color: var(--ink);
 }
 
-.contact-menu a:hover {
-  opacity: 1;
+@media (prefers-reduced-motion: reduce) {
+  .contact-label,
+  .contact:hover .contact-label,
+  .contact:focus-within .contact-label,
+  .contact.is-open .contact-label,
+  .contact-menu,
+  .contact:hover .contact-menu,
+  .contact:focus-within .contact-menu,
+  .contact.is-open .contact-menu {
+    transition-delay: 0s;
+  }
 }
 
 .hero {
@@ -511,7 +562,7 @@ body:has(.hero) .site-header {
 
 .js .frame img.is-ready {
   opacity: 1;
-  transition: opacity 0.45s ease;
+  transition: opacity 300ms var(--ease-out);
 }
 
 .caption {
@@ -779,12 +830,24 @@ body:has(.project) .site-header {
 
   body:has(.hero) .contact:hover:not(.is-open) .contact-menu,
   body:has(.hero) .contact:focus-within:not(.is-open) .contact-menu {
-    display: none;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    /* same as closed: options leave immediately */
+    transition:
+      opacity 150ms ease,
+      visibility 0s linear 150ms;
   }
 
   body:has(.hero) .contact:hover:not(.is-open) .contact-label,
   body:has(.hero) .contact:focus-within:not(.is-open) .contact-label {
+    opacity: 1;
     visibility: visible;
+    /* same as closed: label returns after options leave */
+    transition:
+      opacity 150ms ease 150ms,
+      visibility 0s linear 150ms,
+      transform 160ms var(--ease-out);
   }
 
   .feed {
@@ -998,6 +1061,64 @@ html.show-grid .grid-overlay .page-grid {
   }
 }
 
+/* Quiet press + hover feedback (Emil): transform/opacity/color only.
+   No press scale on media cards — keeps native press-and-hold save.
+   Hover motion gated to fine pointers; reduced-motion drops transforms. */
+.caption,
+.site-header .who > a,
+.project-mark a,
+.about a,
+.text-block a,
+.summary a,
+.info-list a,
+.site-footer a,
+.not-found a {
+  transition:
+    opacity 160ms ease,
+    color 160ms ease,
+    transform 160ms var(--ease-out);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .caption:active,
+  .contact-label:active,
+  .site-header .who > a:active,
+  .project-mark a:active,
+  .about a:active,
+  .text-block a:active,
+  .summary a:active,
+  .info-list a:active,
+  .site-footer a:active,
+  .not-found a:active {
+    transform: scale(0.97);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .caption,
+  .site-header .who > a,
+  .project-mark a,
+  .about a,
+  .text-block a,
+  .summary a,
+  .info-list a,
+  .site-footer a,
+  .not-found a,
+  .contact-menu a,
+  .who .time {
+    transition-property: opacity, color;
+  }
+
+  .contact-label {
+    transition-property: opacity, visibility, transform;
+    transition-delay: 0s;
+  }
+
+  .js .frame img.is-ready {
+    transition: opacity 200ms ease;
+  }
+}
+
 /* Invisible haptic switch over links and buttons on iOS. Never visible. */
 [data-haptic-overlay] {
   z-index: 0;
@@ -1103,21 +1224,15 @@ html.show-grid .grid-overlay .page-grid {
     }
   }
 
+  /* Menu + Tokyo time: opacity transition only — no keyframes, no translate, no blur. */
+  .contact-menu,
+  .contact-menu > *,
+  .who .time,
   .who:hover .time,
   .who:focus-within .time,
-  .who.is-open .time,
-  .contact:hover .contact-menu > *,
-  .contact:focus-within .contact-menu > *,
-  .contact.is-open .contact-menu > * {
-    animation: text-in 300ms var(--ease-out-expo) both;
-  }
-
-  .contact-menu > :nth-child(2) {
-    animation-delay: 30ms;
-  }
-
-  .contact-menu > :nth-child(3) {
-    animation-delay: 60ms;
+  .who.is-open .time {
+    animation: none;
+    filter: none;
   }
 }
 
