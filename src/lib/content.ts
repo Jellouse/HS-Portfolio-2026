@@ -10,13 +10,35 @@ export async function getSite(): Promise<SiteData> {
   return entry.data;
 }
 
+async function getProjectOrderSlugs(): Promise<string[]> {
+  const entry = await getEntry('projectOrder', 'project-order');
+  return entry?.data.projects ?? [];
+}
+
+/** Homepage / feed order from the Project order singleton. Missing slugs go last by year, then title. */
+export function sortProjectsByOrder<T extends { id: string; data: { title: string; year?: number | null } }>(
+  projects: T[],
+  order: string[],
+): T[] {
+  const index = new Map(order.map((slug, i) => [slug, i]));
+  return [...projects].sort((a, b) => {
+    const ai = index.has(a.id) ? index.get(a.id)! : Number.POSITIVE_INFINITY;
+    const bi = index.has(b.id) ? index.get(b.id)! : Number.POSITIVE_INFINITY;
+    if (ai !== bi) return ai - bi;
+    const ay = a.data.year ?? Number.NEGATIVE_INFINITY;
+    const by = b.data.year ?? Number.NEGATIVE_INFINITY;
+    if (ay !== by) return by - ay;
+    return a.data.title.localeCompare(b.data.title);
+  });
+}
+
 export async function getProjects(): Promise<ProjectEntry[]> {
   const all = await getCollection('projects');
-  const published = all
-    .filter((project) => project.data.published)
-    .sort((a, b) => a.data.order - b.data.order);
+  const published = all.filter((project) => project.data.published);
+  const order = await getProjectOrderSlugs();
+  const sorted = sortProjectsByOrder(published, order);
 
-  for (const project of published) {
+  for (const project of sorted) {
     if (!project.data.coverVideo && (!project.data.cover || !project.data.coverAlt)) {
       throw new Error(
         `${project.id} is published and needs cover and coverAlt, or a cover video.`,
@@ -24,7 +46,14 @@ export async function getProjects(): Promise<ProjectEntry[]> {
     }
   }
 
-  return published;
+  return sorted;
+}
+
+/** All projects (including drafts), same order as the CMS list. */
+export async function getAllProjectsOrdered(): Promise<ProjectEntry[]> {
+  const all = await getCollection('projects');
+  const order = await getProjectOrderSlugs();
+  return sortProjectsByOrder(all, order);
 }
 
 function inlineLink(): RegExp {

@@ -73,7 +73,7 @@ export default config({
   storage: storage(),
   ui: {
     brand: { name: 'Humansize' },
-    navigation: ['projects', '---', 'site'],
+    navigation: ['projects', 'projectOrder', '---', 'site'],
   },
   collections: {
     projects: collection({
@@ -91,7 +91,6 @@ export default config({
         }),
         year: fields.integer({ label: 'Start year' }),
         yearEnd: fields.integer({ label: 'End year', description: 'Leave empty for ongoing' }),
-        order: fields.integer({ label: 'Order', validation: { isRequired: true } }),
         published: fields.checkbox({
           label: 'Published',
           defaultValue: true,
@@ -248,6 +247,26 @@ export default config({
     }),
   },
   singletons: {
+    projectOrder: singleton({
+      label: 'Project order',
+      path: 'src/content/site/project-order',
+      format: { data: 'yaml' },
+      schema: {
+        projects: fields.array(
+          fields.relationship({
+            label: 'Project',
+            collection: 'projects',
+            validation: { isRequired: true },
+          }),
+          {
+            label: 'Projects',
+            description:
+              'Drag to set the homepage order. Projects not in this list still appear, at the end (newer year first).',
+            itemLabel: (props) => props.value ?? 'Select a project',
+          },
+        ),
+      },
+    }),
     site: singleton({
       label: 'Site',
       path: 'src/content/site/site',

@@ -83,7 +83,6 @@ const projects = defineCollection({
     caption: z.string().optional(),
     year: z.number().int().optional(),
     yearEnd: z.number().int().nullish(),
-    order: z.number().int(),
     published: z.boolean().default(true),
     summary: z.string(),
     cover: z.string().optional(),
@@ -124,4 +123,14 @@ const site = defineCollection({
   }),
 });
 
-export const collections = { projects, site };
+const projectOrder = defineCollection({
+  loader: glob({
+    pattern: 'project-order.yaml',
+    base: './src/content/site',
+  }),
+  schema: z.object({
+    projects: z.array(z.string()).default([]),
+  }),
+});
+
+export const collections = { projects, site, projectOrder };

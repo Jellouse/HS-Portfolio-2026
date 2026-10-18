@@ -3,13 +3,14 @@
 // holds in this browser (the keystatic-gh-access-token cookie that the
 // Keystatic admin itself reads client-side). No secrets ship with the page.
 // All dropped files go into src/content/projects/<slug>/process/ in one commit.
-import { getCollection } from 'astro:content';
+import { getAllProjectsOrdered } from '../lib/content';
 
 export const prerender = true;
 
-const projects = (await getCollection('projects'))
-  .sort((a, b) => a.data.order - b.data.order)
-  .map((p) => ({ slug: p.id, title: p.data.title }));
+const projects = (await getAllProjectsOrdered()).map((p) => ({
+  slug: p.id,
+  title: p.data.title,
+}));
 const repo = 'Jellouse/HS-Portfolio-2026';
 const branch = 'main';
 ---
