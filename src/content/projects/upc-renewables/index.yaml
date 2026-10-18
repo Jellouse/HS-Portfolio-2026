@@ -48,7 +48,7 @@ blocks:
 - discriminant: video
   value:
     src: https://humansize-media.schnettker-johann.workers.dev/projects/upc-renewables/upc-renewables-5-mvd42lqk.mp4
-    alt: Map of Italy on the UPC Renewables history page
+    alt: Animated map on the UPC Renewables history page
     frame: full
     flush: false
 - discriminant: video
@@ -66,7 +66,7 @@ blocks:
 - discriminant: video
   value:
     src: https://humansize-media.schnettker-johann.workers.dev/projects/upc-renewables/upc-renewables-8-mvd42qff.mp4
-    alt: Phone showing a map of Italy in front of wind turbines on green hills
+    alt: Phone screen with UPC Renewables facts in front of wind turbines on green hills
     frame: full
     flush: false
 - discriminant: image
