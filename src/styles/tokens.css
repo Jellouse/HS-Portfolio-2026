@@ -1,0 +1,104 @@
+@font-face {
+  font-family: 'ABC Areal';
+  src: url('/fonts/ABCAreal-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'ABC Areal';
+  src: url('/fonts/ABCAreal-RegularItalic.woff2') format('woff2');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'ABC Areal';
+  src: url('/fonts/ABCAreal-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'ABC Areal';
+  src: url('/fonts/ABCAreal-MediumItalic.woff2') format('woff2');
+  font-weight: 500;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'ABC Areal';
+  src: url('/fonts/ABCAreal-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'ABC Areal';
+  src: url('/fonts/ABCAreal-BoldItalic.woff2') format('woff2');
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+
+:root {
+  --ink: #000;
+  --muted: rgba(0, 0, 0, 0.4);
+  --bg: #fff;
+  --bg-mobile: #fff;
+  --red: #b70606;
+  --line: #d6d6d6;
+  --text-title: 23px;
+  --text-body: 23px;
+  --track: -0.02em;
+  --lh-title: 29px;
+  --lh-body: 29px;
+  --cols: 8;
+  --margin: 160px;
+  --gutter: 16px;
+  --measure: 550px;
+  --card: 1120px;
+  --radius: 31px;
+  --radius-sm: 15px;
+  --pad: 20px;
+  --mark-stretch-max: 1.35;
+  /* easing, after s-p.studio */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out-expo: cubic-bezier(0.65, 0, 0.15, 1);
+  --ease-out-quad: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --ease-in-quad: cubic-bezier(0.55, 0.085, 0.68, 0.53);
+  /* Emil Kowalski UI curves — aliases over the site tokens above */
+  --ease-out: var(--ease-out-expo);
+  --ease-in-out: var(--ease-in-out-expo);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+  --page-bg: var(--bg);
+  color: var(--ink);
+  background: var(--page-bg);
+  color-scheme: light;
+  font-family: 'ABC Areal', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 23px;
+  line-height: 29px;
+  letter-spacing: var(--track);
+  font-weight: 400;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Below the 1440 frame, keep the 1120px track until the side space would drop under 20px. */
+@media (max-width: 1439px) {
+  :root {
+    --margin: clamp(20px, calc((100vw - 1120px) / 2), 160px);
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+

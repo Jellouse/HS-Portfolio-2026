@@ -7,9 +7,10 @@
     "dev": "ASTRO_TELEMETRY_DISABLED=1 astro dev",
     "build": "ASTRO_TELEMETRY_DISABLED=1 astro build",
     "preview": "ASTRO_TELEMETRY_DISABLED=1 astro preview",
+    "test": "npm run test:touch-guard && npm run test:scroll",
     "test:touch-guard": "node tests/touch-scroll-guard.mjs",
     "test:scroll": "node tests/mobile-scroll.spec.mjs",
-    "test": "npm run test:touch-guard && npm run test:scroll"
+    "test:scroll:live": "BASE_URL=https://humansize.de node tests/mobile-scroll.spec.mjs"
   },
   "engines": {
     "node": ">=22"

@@ -1,0 +1,251 @@
+/* Quiet press + hover feedback (Emil): transform/opacity/color only.
+   No press scale on media cards — keeps native press-and-hold save.
+   Hover motion gated to fine pointers; reduced-motion drops transforms. */
+.caption,
+.site-header .who > a,
+.project-mark a,
+.about a,
+.text-block a,
+.summary a,
+.info-list a,
+.site-footer a,
+.not-found a {
+  transition:
+    opacity 160ms ease,
+    color 160ms ease,
+    transform 160ms var(--ease-out);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .caption:active,
+  .contact-label:active,
+  .site-header .who > a:active,
+  .project-mark a:active,
+  .about a:active,
+  .text-block a:active,
+  .summary a:active,
+  .info-list a:active,
+  .site-footer a:active,
+  .not-found a:active {
+    transform: scale(0.97);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .caption,
+  .site-header .who > a,
+  .project-mark a,
+  .about a,
+  .text-block a,
+  .summary a,
+  .info-list a,
+  .site-footer a,
+  .not-found a,
+  .contact-menu a,
+  .who .time {
+    transition-property: opacity, color;
+  }
+
+  .contact-label {
+    transition-property: opacity, visibility, transform;
+    transition-delay: 0s;
+  }
+
+  .js .frame img.is-ready {
+    transition: opacity 200ms ease;
+  }
+}
+
+
+/* Scroll fade: opacity only. Hidden only after JS marks .fade-ready and skips first-viewport items.
+   No transition on hide (avoids a 1→0 flash when .fade-ready lands); only animate reveal. */
+.js.fade-ready .fade-in:not(.is-in) {
+  opacity: 0;
+  transition: none;
+}
+
+.js.fade-ready .fade-in.is-in {
+  opacity: 1;
+  transition: opacity 400ms var(--ease-out);
+}
+
+/* Homepage cards use display:contents on desktop — fade their grid children instead. */
+@media (min-width: 760px) {
+  .js.fade-ready .card.fade-in:not(.is-in) {
+    opacity: 1; /* contents box itself isn't painted */
+  }
+
+  .js.fade-ready .card.fade-in:not(.is-in) > * {
+    opacity: 0;
+    transition: none;
+  }
+
+  .js.fade-ready .card.fade-in.is-in > * {
+    opacity: 1;
+    transition: opacity 400ms var(--ease-out);
+  }
+}
+
+/* Don't double-fade: while the block is still hidden, keep images opaque (parent hides them). */
+.js.fade-ready .fade-in:not(.is-in) .frame img {
+  opacity: 1;
+  transition: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .js.fade-ready .fade-in,
+  .js.fade-ready .fade-in:not(.is-in),
+  .js.fade-ready .fade-in.is-in,
+  .js.fade-ready .card.fade-in:not(.is-in) > *,
+  .js.fade-ready .card.fade-in.is-in > * {
+    opacity: 1;
+    transition: none;
+  }
+}
+
+/* Invisible haptic label over links and buttons on iOS. Never visible. */
+[data-haptic-overlay] {
+  z-index: 0;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+/* Cross-page transition: the small project mark grows into the homepage mark.
+   Native cross-document view transitions, so page scripts load as usual;
+   browsers without support just change page. */
+@view-transition {
+  navigation: auto;
+}
+
+.hero .mark,
+.project-mark .mark {
+  view-transition-name: hs-mark;
+}
+
+::view-transition-group(hs-mark) {
+  animation-duration: 500ms;
+  animation-timing-function: var(--ease-out-expo);
+}
+
+/* Page change: the old page stays fully opaque underneath and the new page fades in on
+   top with normal blending. The default crossfade fades both and adds them with
+   plus-lighter, which Safari can render brighter than the page (an HDR-like flash). */
+::view-transition {
+  background: var(--page-bg, var(--bg));
+}
+
+::view-transition-image-pair(root) {
+  isolation: auto;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  mix-blend-mode: normal;
+}
+
+::view-transition-old(root) {
+  animation: none;
+  opacity: 1;
+}
+
+::view-transition-new(root) {
+  animation: vt-in 300ms var(--ease-out-quad) both;
+}
+
+@keyframes vt-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  @view-transition {
+    navigation: none;
+  }
+}
+
+/* Text reveal: a quick blur-to-sharp per visual line as text enters.
+   Scroll-linked where supported; otherwise a 400ms fallback with a tiny stagger.
+   Never touches the faces or the mark. */
+@keyframes text-in {
+  from {
+    opacity: 0;
+    filter: blur(4px);
+    transform: translateY(4px);
+  }
+}
+
+/* inline-block so transform applies; whitespace stays outside the spans, so wrapping is unchanged */
+.is-split .reveal-word {
+  display: inline-block;
+  text-decoration: inherit;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .is-split .reveal-word {
+      animation: text-in linear both;
+      animation-timeline: view();
+      animation-range: cover 0px cover 15vh;
+    }
+  }
+
+  @supports not (animation-timeline: view()) {
+    .reveal-pending .reveal-word {
+      opacity: 0;
+      filter: blur(4px);
+      transform: translateY(4px);
+    }
+
+    .reveal-in .reveal-word {
+      transition:
+        opacity 400ms var(--ease-out-expo) calc(var(--line, 0) * 30ms),
+        filter 400ms var(--ease-out-expo) calc(var(--line, 0) * 30ms),
+        transform 400ms var(--ease-out-expo) calc(var(--line, 0) * 30ms);
+    }
+
+    .reveal-now .reveal-word {
+      transition: none;
+    }
+  }
+
+  /* Menu + Tokyo time: opacity transition only — no keyframes, no translate, no blur. */
+  .contact-menu,
+  .contact-menu > *,
+  .who .time,
+  .who:hover .time,
+  .who:focus-within .time,
+  .who.is-open .time {
+    animation: none;
+    filter: none;
+  }
+}
+
+/* iOS haptics: label overlay stays under media and captions. Media keeps native
+   press-and-hold save; caption stays a real link. The gap hits the label, which
+   is scroll-transparent (the hidden switch never sits under the finger). */
+[data-haptic] :is(.frame, img, video),
+[data-haptic] a:has(.frame, img, video),
+[data-haptic] .caption {
+  position: relative;
+  z-index: 1;
+}
+
+
+/* CMS live preview marker — quiet, grey, out of the way. */
+.preview-badge {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  z-index: 40;
+  margin: 0;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #8a8a8a;
+  font-size: 13px;
+  line-height: 16px;
+  letter-spacing: 0;
+  pointer-events: none;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.06);
+}

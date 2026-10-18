@@ -1,91 +1,67 @@
 # Humansize
 
-Portfolio for Johann Schnettker. Static Astro site, content in the repo. Keystatic edits that content locally, and on the deployed site through GitHub.
+Portfolio for Johann Schnettker (humansize.de). Static Astro site; content lives in the repo. Keystatic edits it locally and on the deploy via GitHub.
 
-## Architecture
+## Map
 
-- `src/pages/index.astro` is the homepage. The work is the page. The first project peeks above the fold.
-- `src/pages/work/[slug].astro` builds every published project from its block list. New projects do not need a new page. The mark at the top returns to the homepage.
-- `src/content.config.ts` is the typed schema. `keystatic.config.ts` edits the same files. Keep the two in step.
-- `src/components/` holds the UI. Header, Mark, ProjectFeed, ProjectCard, About, ProjectHero, TextBlock, ImageBlock, ImagePair, Info, Footer.
-- Images live next to their project and go through `astro:assets` (`src/lib/images.ts`, `BlurImage.astro`).
-- `@astrojs/vercel` is the adapter. `output` stays `static`. Pages and the `llms.txt` and `robots.txt` endpoints export `prerender = true`. `@keystatic/astro` injects `/keystatic` with `prerender: false`. The API is `src/pages/api/keystatic/[...params].ts` (`prerender = false`). CMS project preview is `src/pages/preview/[slug].astro` (`prerender = false`): Keystatic `previewUrl` opens it; the route checks the Keystatic GitHub cookie (or `Authorization: Bearer`) for push access to this repo, reads the entry live from GitHub, and sends `noindex` plus `Cache-Control: private, no-store`. The integration would inject the same path, so `astro.config.mjs` drops that inject. On Vercel, Astro's `request.url` host is localhost, and Keystatic builds the GitHub `redirect_uri` from that URL. The route rebuilds it from `x-forwarded-host` and `x-forwarded-proto`, falling back to `host`. Leave Vercel's output directory empty so the adapter can publish both.
+| Path | Role |
+| --- | --- |
+| `src/pages/index.astro` | Homepage / work feed |
+| `src/pages/work/[slug].astro` | Published project pages (static) |
+| `src/pages/preview/[slug].astro` | CMS live preview (SSR, auth) |
+| `src/pages/api/keystatic/[...params].ts` | Keystatic GitHub OAuth + API |
+| `src/pages/api/video-upload.ts` | R2 presign for CMS video upload |
+| `src/content.config.ts` | Astro content schema |
+| `keystatic.config.ts` | CMS schema + `previewUrl` |
+| `src/lib/` | content, images, preview, cms-auth, seo |
+| `src/components/` | UI blocks |
+| `src/scripts/` | haptics, chrome, scroll-fade, text-reveal, faces, input |
+| `src/styles/` | `global.css` imports `tokens.css`, `layout.css`, `motion.css` |
+| `tests/` | touch-scroll guard + iPhone swipe scroll test |
+| `.cursor/skills/verify-humansize/` | Agent verification skill + feature map |
 
-## Where content lives
+Adapter: `@astrojs/vercel`, `output: 'static'`. Keystatic admin and preview/API routes set `prerender = false`. Leave Vercel output directory empty.
 
-- Site copy, email, about, socials: `src/content/site/site.yaml`
-- One folder per project: `src/content/projects/<slug>/index.yaml` plus images in that folder
-- Image paths in YAML are absolute from the repo, like `/src/content/projects/atomic/cover.jpg`
+## Locks (do not break)
 
-## Add a project
+- **Mobile scroll.** Never put `<input type=checkbox switch>` under the finger (WebKit 321591). Use a `<label>` overlay with a `visibility:hidden` switch. No non-passive touch listeners on content. No `touch-action: none` on cards or captions. `npm test` must stay green before merge.
+- **Native press-and-hold save** on images/videos (media stacked above haptic label).
+- **WebHaptics** on taps (iOS label→switch; Android `vibrate`).
+- **No bright flash** on view transitions.
+- **Faces / little-man tilt** only after a tap on iOS (permission).
+- **Menu** stays grey, turns black on hover; sequenced opacity (+ subtle grow), no blur.
+- **`prefers-reduced-motion`** honoured.
+- **Whole-px font sizes.** One type size: 23px / 29px line-height.
+- **Drafts** stay out of static builds (`published: false`). Preview route is the only way to see them on the live origin.
+- **Voice:** plain, short, no em dashes, no colon-reveals / "X, not Y" in new copy. Email `schnettker.johann@gmail.com` only. Tony's Chocolonely (with h and apostrophe). Bodil: scans exist; Johann sculpts, does not scan.
 
-1. `npm run dev` and open `/keystatic`, or duplicate a project folder.
-2. Set title, caption (`Name, Year`), order, summary (two or three sentences), cover, alt text, info lines (`Key: Value`, optional link on the value), and blocks. Leave out unknown info lines.
-3. Blocks are `text`, `image`, `pair`, or `process`. `process` is an optional centred Process label and a two-column grid of photos. The project page ends with a centred Info label and the info list, aligned to the image column.
-4. Leave `published` off until the cover image and alt text exist.
-5. Put unknowns in `todo`. Those notes are not rendered.
-6. Update `src/pages/llms.txt.ts` only if you want a line the generator does not already build. It reads the collection.
+## CMS
 
-## Keystatic storage
+- Projects: `src/content/projects/<slug>/index.yaml` + images. Required for publish: cover (+ alt) or cover video, summary.
+- Site: `src/content/site/site.yaml`. Order: `project-order.yaml`.
+- Storage: local in `npm run dev`; GitHub on production. Override with `KEYSTATIC_STORAGE`.
+- Preview button uses `previewUrl: /preview/{slug}?branch={branch}`. Access = Keystatic cookie `keystatic-gh-access-token` or `Authorization: Bearer`, plus GitHub `permissions.push` on `Jellouse/HS-Portfolio-2026`. Response: `noindex`, `Cache-Control: private, no-store`. Excluded from sitemap / robots / llms project list.
+- Video upload: R2; 200 MB/file, ~8 GB bucket cap. Same push-access check.
+- After deploy, hard-refresh `/keystatic` if the Preview control is missing.
 
-`keystatic.config.ts` picks the storage kind from the environment.
+## Motion taste
 
-- `npm run dev` uses local storage and writes the YAML in this repo.
-- A production build uses GitHub storage on `Jellouse/HS-Portfolio-2026`.
-- `KEYSTATIC_STORAGE=local` or `KEYSTATIC_STORAGE=github` overrides that. Restart `npm run dev` after changing it. Leave it unset on Vercel.
-
-No `branchPrefix` is set, so a prefix is allowed and `main` and `v1` both stay selectable. The branch menu opens on the repository default branch, which is `main`. After this work is merged, edit `main`. Until then, choose `v1` in the menu, or open `/keystatic/branch/v1`.
-
-### One-time GitHub setup
-
-Keystatic's Create GitHub App screen writes the secrets into a local `.env`, and it only finishes that callback in development. Run it once on your machine, with the deployed origin filled in, then copy the values into Vercel. Do not commit `.env`.
-
-1. Deploy the site and note the public origin, with no trailing slash. Use the stable production host. GitHub matches the OAuth callback exactly, and a per-deployment preview URL changes on every build.
-2. From the repo, run `KEYSTATIC_STORAGE=github npm run dev`.
-3. Open `http://127.0.0.1:4321/keystatic`.
-4. On the setup screen, set Deployed URL to the public origin. Leave the organization field empty while the repo is on the user account.
-5. Choose Create GitHub App. Name the app, then install it on `Jellouse/HS-Portfolio-2026` and grant that repository.
-6. Keystatic returns to the admin UI and appends four variables to `.env`:
-   - `KEYSTATIC_GITHUB_CLIENT_ID`
-   - `KEYSTATIC_GITHUB_CLIENT_SECRET`
-   - `KEYSTATIC_SECRET`
-   - `PUBLIC_KEYSTATIC_GITHUB_APP_SLUG`
-7. In the Vercel project, add those four for Production and Preview. Keep `KEYSTATIC_SECRET` as the long value Keystatic generated.
-8. Redeploy. Astro inlines `PUBLIC_KEYSTATIC_GITHUB_APP_SLUG` at build time.
-9. Open `https://<origin>/keystatic` on the deploy and sign in with a GitHub account that can write to the repo.
-10. Pick the branch. Use `main` once this work has merged. Use `v1` while the site still ships from `v1`.
-
-If GitHub says the redirect URI is not registered, add this callback on the GitHub App and save:
-
-`https://<origin>/api/keystatic/github/oauth/callback`
-
-The local setup adds that callback when Deployed URL is filled in. Add another callback only for a host you actually sign in from.
-
-A save commits through the GitHub App. Vercel rebuilds the static pages from that commit.
+Quiet only. Opacity / transform / color. No upward flourish, no blur on UI chrome. Scroll fade ~400ms `--ease-out`. Menu grow from ~0.95→1, ~200ms. Link press-scale 0.97 on fine pointers.
 
 ## Commands
 
-- `npm run dev` local site and CMS at `/keystatic` (local storage)
-- `KEYSTATIC_STORAGE=github npm run dev` local CMS in GitHub mode, for the one-time app setup
-- `npm run build` static pages plus the Keystatic server routes
-- `npm run preview` serve the build
-- `npm test` must pass before any merge: static touch-scroll guard plus iPhone WebKit swipe scroll test
-- `npm run test:touch-guard` / `npm run test:scroll` run each part alone. For live: `BASE_URL=https://humansize.de npm run test:scroll`
+| Script | What it does |
+| --- | --- |
+| `npm run dev` | Local site + CMS (`/keystatic`, local storage) |
+| `npm run build` | Static pages + serverless Keystatic/preview routes |
+| `npm run preview` | Not supported with the Vercel adapter; use `npm test` or deploy |
+| `npm test` | **Must pass before merge:** touch-scroll static guard + iPhone swipe scroll |
+| `npm run test:touch-guard` | Fail on `passive:false` touch listeners / `touch-action:none` / switch-under-finger |
+| `npm run test:scroll` | Real touch swipes (image, gap, caption, project page). Live: `BASE_URL=https://humansize.de npm run test:scroll` |
+| `KEYSTATIC_STORAGE=github npm run dev` | One-time GitHub App setup only |
 
-Set `SITE_URL` to the production origin (no trailing slash). On Vercel it falls back to `VERCEL_PROJECT_PRODUCTION_URL`.
+`SITE_URL` = production origin, no trailing slash (else `VERCEL_PROJECT_PRODUCTION_URL`).
 
-## House rules
+## Content notes
 
-- Mobile scroll is sacred. Never put an `<input type=checkbox switch>` under the finger (WebKit 321591): use a label overlay with a visibility:hidden switch. No non-passive touch listeners on content. No `touch-action: none` on cards or captions. `npm test` must stay green.
-- Johann's voice is plain, direct, and short. No fluff.
-- No em dashes.
-- No colon reveals and no "X, not Y" constructions in new copy. The about text is an exception: keep it verbatim.
-- Email is `schnettker.johann@gmail.com` only.
-- Do not invent clients, numbers, quotes, or credits. Mark gaps as `TODO` in the content file.
-- Bodil Ouédraogo: the scans already exist. Johann makes sculptures from them. He does not do the scanning.
-- The design typeface is ABC Areal, self-hosted from `public/fonts`.
-- Spell Tony's Chocolonely with the h and the apostrophe.
-
-## Type scale
-
-One size for the whole site: 23px, line-height 29px. Hierarchy comes from spacing.
+Framer-era drafts may sit unpublished in `src/content/projects/*` (`published: false`). They must not appear in the feed, sitemap, or llms project list. Use CMS Preview to review them.
