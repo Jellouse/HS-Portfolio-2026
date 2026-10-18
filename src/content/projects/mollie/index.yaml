@@ -1,0 +1,54 @@
+title: Mollie
+published: true
+summary: This is when I first heard the word "unicorn" and what it meant in a business
+  setting. A company worth over 1 billion dollars. With this kind of scale comes also
+  the need for bigger offices. Mollie rented out a large space in a classic canal-side
+  building and was then looking for someone to help them with the wayfinding. This
+  project went from concept to final production and taught me a lot. How many times
+  do you check print files? One more time.
+cover: /src/content/projects/mollie/cover.jpg
+coverAlt: Mollie office stickers with space themes next to a black notebook
+coverFrame: wide
+coverFlush: false
+rounded: true
+info:
+- label: Client
+  value: Mollie
+- label: Role
+  value: Signage and product design
+processFromFolder: false
+blocks:
+- discriminant: pair
+  value:
+    left: /src/content/projects/mollie/blocks/0/value/left.jpg
+    leftAlt: Mollie office stickers with space themes next to a black notebook
+    right: /src/content/projects/mollie/blocks/0/value/right.jpg
+    rightAlt: Pluto room sign next to a glass door in the Mollie office
+- discriminant: pair
+  value:
+    left: /src/content/projects/mollie/blocks/1/value/left.jpg
+    leftAlt: Hand flipping a Moon room sign to claim the room
+    right: /src/content/projects/mollie/blocks/1/value/right.jpg
+    rightAlt: Large Growth lettering on a wall behind plants
+- discriminant: pair
+  value:
+    left: /src/content/projects/mollie/blocks/2/value/left.jpg
+    leftAlt: Floor directory with a wooden marker on First Floor
+    right: /src/content/projects/mollie/blocks/2/value/right.jpg
+    rightAlt: Floor directory next to a glass door with a Mercury room sign
+- discriminant: pair
+  value:
+    left: /src/content/projects/mollie/blocks/3/value/left.jpg
+    leftAlt: Person next to a blue sign in a corridor, with a second corridor photo
+      beside it
+    right: /src/content/projects/mollie/blocks/3/value/right.jpg
+    rightAlt: Technical drawing of round, square and slim hanging signs
+- discriminant: image
+  value:
+    src: /src/content/projects/mollie/blocks/4/value/src.jpg
+    alt: Technical drawing of the Founders Club sign with handwritten notes
+    frame: full
+    flush: false
+todo:
+- Year unknown. The Framer site shows no year for this project.
+- Imported from humansize.framer.website.

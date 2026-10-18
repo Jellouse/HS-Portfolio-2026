@@ -1,0 +1,43 @@
+title: Vitra Chairfinder
+published: true
+summary: The legendary German furniture production company, bringing timeless designs
+  to the broader population. I've worked on the design of an innovative platform centered
+  around an interactive questionnaire helping you to find your perfect office chair.
+  A concept which since has been adopted by various other industries.
+cover: /src/content/projects/vitra-chairfinder/cover.jpg
+coverAlt: Vitra Office Chair Finder welcome screen and chair overview in two browser
+  windows
+coverFrame: wide
+coverFlush: false
+rounded: true
+info:
+- label: Client
+  value: Vitra
+- label: Role
+  value: Web design
+processFromFolder: false
+blocks:
+- discriminant: pair
+  value:
+    left: /src/content/projects/vitra-chairfinder/blocks/0/value/left.jpg
+    leftAlt: Vitra Office Chair Finder welcome screen and chair overview in two browser
+      windows
+    right: /src/content/projects/vitra-chairfinder/blocks/0/value/right.jpg
+    rightAlt: Browser window with a grid of Vitra office chairs and a sitting time
+      slider
+- discriminant: video
+  value:
+    src: https://humansize-media.schnettker-johann.workers.dev/projects/vitra-chairfinder/vitra-chairfinder-1-mvd41o69.mp4
+    alt: Screen recording of the Vitra Office Chair Finder, from the welcome screen
+      to a chair detail page
+    frame: full
+    flush: false
+- discriminant: video
+  value:
+    src: https://humansize-media.schnettker-johann.workers.dev/projects/vitra-chairfinder/vitra-chairfinder-2-mvd41pxs.mp4
+    alt: Phone showing the Vitra Office Chair Finder chair grid
+    frame: full
+    flush: false
+todo:
+- Year unknown. The Framer site shows no year for this project.
+- Imported from humansize.framer.website.

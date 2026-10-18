@@ -1,0 +1,55 @@
+title: The Post
+published: true
+summary: A Dutch ad agency looking for a super-simple down to earth branding. But
+  simplicity is often easier said than done.
+cover: /src/content/projects/the-post/cover.jpg
+coverAlt: White The Post sign on a textured wall
+coverFrame: wide
+coverFlush: false
+rounded: true
+info:
+- label: Client
+  value: The Post
+- label: Role
+  value: Branding
+processFromFolder: false
+blocks:
+- discriminant: pair
+  value:
+    left: /src/content/projects/the-post/blocks/0/value/left.jpg
+    leftAlt: White The Post sign on a textured wall
+    right: /src/content/projects/the-post/blocks/0/value/right.jpg
+    rightAlt: The Post poster in a bus shelter
+- discriminant: video
+  value:
+    src: https://humansize-media.schnettker-johann.workers.dev/projects/the-post/the-post-1-mvd43wpz.mp4
+    alt: Monitor showing The Post brand identity
+    frame: full
+    flush: false
+- discriminant: image
+  value:
+    src: /src/content/projects/the-post/blocks/2/value/src.jpg
+    alt: Shop window with The Post posters in pill-shaped frames
+    frame: full
+    flush: false
+- discriminant: video
+  value:
+    src: https://humansize-media.schnettker-johann.workers.dev/projects/the-post/the-post-3-mvd43z3q.mp4
+    alt: Laptop on a ledge in an Amsterdam street showing The Post
+    frame: full
+    flush: false
+- discriminant: video
+  value:
+    src: https://humansize-media.schnettker-johann.workers.dev/projects/the-post/the-post-4-mvd441jt.mp4
+    alt: Woman on the phone inside the pill shape of The Post logo
+    frame: full
+    flush: false
+- discriminant: video
+  value:
+    src: https://humansize-media.schnettker-johann.workers.dev/projects/the-post/the-post-5-mvd443cn.mp4
+    alt: Hands typing on a laptop showing The Post
+    frame: full
+    flush: false
+todo:
+- Year unknown. The Framer site shows no year for this project.
+- Imported from humansize.framer.website.

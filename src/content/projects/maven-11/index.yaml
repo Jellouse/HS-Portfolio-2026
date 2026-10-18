@@ -1,0 +1,38 @@
+title: Maven 11
+published: true
+summary: Right in the middle of the emergence of crypto currency, Maven 11, a new
+  hedgefund emerged and was looking for an exciting brand identity and website that
+  reflects their tech-forward stance and attention to detail.
+cover: /src/content/projects/maven-11/cover.jpg
+coverAlt: Phone showing a Maven 11 page that reads Keep updated
+coverFrame: wide
+coverFlush: false
+rounded: true
+info:
+- label: Client
+  value: Maven 11
+- label: Role
+  value: Branding, web design and 3D rendering
+processFromFolder: false
+blocks:
+- discriminant: video
+  value:
+    src: https://humansize-media.schnettker-johann.workers.dev/projects/maven-11/maven-11-0-mvd42yp4.mp4
+    alt: Abstract shapes in black, white and light blue
+    frame: full
+    flush: false
+- discriminant: video
+  value:
+    src: https://humansize-media.schnettker-johann.workers.dev/projects/maven-11/maven-11-1-mvd430ne.mp4
+    alt: Maven 11 poster in a dark window that reads We Partner With Brave Outliers
+    frame: full
+    flush: false
+- discriminant: image
+  value:
+    src: /src/content/projects/maven-11/blocks/2/value/src.jpg
+    alt: Phone showing a Maven 11 page that reads Keep updated
+    frame: full
+    flush: false
+todo:
+- Year unknown. The Framer site shows no year for this project.
+- Imported from humansize.framer.website.

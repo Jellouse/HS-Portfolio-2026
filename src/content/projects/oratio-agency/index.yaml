@@ -1,0 +1,63 @@
+title: Oratio Agency
+published: true
+summary: Oratio agency helps American companies of any size, industry or level of
+  experience to gain a hold in the European e-commerce market. Mostly focussed on
+  Amazon, the identity shines in a bright orange. To contrast the nature of this sales-y
+  colour, we've made bold choices on the typography to retain a high-end look.
+cover: /src/content/projects/oratio-agency/cover.jpg
+coverAlt: Overview of the Oratio brand identity
+coverFrame: wide
+coverFlush: false
+rounded: true
+info:
+- label: Client
+  value: Oratio Agency
+- label: Role
+  value: Branding, web design and print
+processFromFolder: false
+blocks:
+- discriminant: pair
+  value:
+    left: /src/content/projects/oratio-agency/blocks/0/value/left.jpg
+    leftAlt: Overview of the Oratio brand identity
+    right: /src/content/projects/oratio-agency/blocks/0/value/right.jpg
+    rightAlt: Oratio logo on a white block in dramatic light
+- discriminant: pair
+  value:
+    left: /src/content/projects/oratio-agency/blocks/1/value/left.jpg
+    leftAlt: Orange Oratio sign on a stone wall
+    right: /src/content/projects/oratio-agency/blocks/1/value/right.jpg
+    rightAlt: Person wearing a polo with the line We keep good company
+- discriminant: pair
+  value:
+    left: /src/content/projects/oratio-agency/blocks/2/value/left.jpg
+    leftAlt: Oratio print layouts with the line Growth solution
+    right: /src/content/projects/oratio-agency/blocks/2/value/right.jpg
+    rightAlt: Oratio website section In the Public Eye on a dark keyboard
+- discriminant: pair
+  value:
+    left: /src/content/projects/oratio-agency/blocks/3/value/left.jpg
+    leftAlt: Laptop showing the Oratio website with the line Growth solution
+    right: /src/content/projects/oratio-agency/blocks/3/value/right.jpg
+    rightAlt: Phone showing the Oratio logo and a red chair
+- discriminant: video
+  value:
+    src: https://humansize-media.schnettker-johann.workers.dev/projects/oratio-agency/oratio-agency-4-mvd43l3c.mp4
+    alt: Oratio website opening with the logo on orange
+    frame: full
+    flush: false
+- discriminant: video
+  value:
+    src: https://humansize-media.schnettker-johann.workers.dev/projects/oratio-agency/oratio-agency-5-mvd43nt0.mp4
+    alt: Hand holding a tablet showing the Oratio website
+    frame: full
+    flush: false
+- discriminant: video
+  value:
+    src: https://humansize-media.schnettker-johann.workers.dev/projects/oratio-agency/oratio-agency-6-mvd43pkc.mp4
+    alt: Laptop on dark rock showing the Oratio website
+    frame: full
+    flush: false
+todo:
+- Year unknown. The Framer site shows no year for this project.
+- Imported from humansize.framer.website.

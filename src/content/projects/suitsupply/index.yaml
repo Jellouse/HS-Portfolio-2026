@@ -1,0 +1,71 @@
+title: Suitsupply
+published: true
+summary: Suitsupply is a Dutch suit company, headquartered in Amsterdam. I've worked
+  on various Photoshoots, Newsletter production and automation, Campaigns and Website.
+cover: /src/content/projects/suitsupply/cover.jpg
+coverAlt: Desktop monitor showing the Suitsupply website with a model and a camel
+  in the desert
+coverFrame: wide
+coverFlush: false
+rounded: true
+info:
+- label: Client
+  value: Suitsupply
+- label: Role
+  value: Animation, physical advertising and product photography
+processFromFolder: false
+blocks:
+- discriminant: pair
+  value:
+    left: /src/content/projects/suitsupply/blocks/0/value/left.jpg
+    leftAlt: Desktop monitor showing the Suitsupply website with a model and a camel
+      in the desert
+    right: /src/content/projects/suitsupply/blocks/0/value/right.jpg
+    rightAlt: Suitsupply billboard with a model and a llama, with a woman walking
+      past
+- discriminant: pair
+  value:
+    left: /src/content/projects/suitsupply/blocks/1/value/left.jpg
+    leftAlt: Suitsupply billboard with a model and a llama on a building
+    right: /src/content/projects/suitsupply/blocks/1/value/right.jpg
+    rightAlt: Model in a checked jacket and sunglasses lying on white fur next to
+      a sheep
+- discriminant: video
+  value:
+    src: https://humansize-media.schnettker-johann.workers.dev/projects/suitsupply/suitsupply-2-mvd41shw.mp4
+    alt: Suitsupply Look Builder animation dressing a model in shirts and trousers
+    frame: full
+    flush: false
+- discriminant: image
+  value:
+    src: /src/content/projects/suitsupply/blocks/3/value/src.jpg
+    alt: Suitsupply poster with a model and a goat in an underground station
+    frame: full
+    flush: false
+- discriminant: video
+  value:
+    src: https://humansize-media.schnettker-johann.workers.dev/projects/suitsupply/suitsupply-4-mvd41v2a.mp4
+    alt: Suitsupply Look Builder pages on the website
+    frame: full
+    flush: false
+- discriminant: image
+  value:
+    src: /src/content/projects/suitsupply/blocks/5/value/src.jpg
+    alt: Terrace Tower construction billboard in front of an office building
+    frame: full
+    flush: false
+- discriminant: pair
+  value:
+    left: /src/content/projects/suitsupply/blocks/6/value/left.jpg
+    leftAlt: White leather sneakers in close-up next to a collage of product shots
+    right: /src/content/projects/suitsupply/blocks/6/value/right.jpg
+    rightAlt: Linen trousers in close-up next to a full-length shot of the model
+- discriminant: pair
+  value:
+    left: /src/content/projects/suitsupply/blocks/7/value/left.jpg
+    leftAlt: Pleated linen trousers in close-up next to a detail of brown loafers
+    right: /src/content/projects/suitsupply/blocks/7/value/right.jpg
+    rightAlt: White leather sneaker from the side next to a close-up of its laces
+todo:
+- Year unknown. The Framer site shows no year for this project.
+- Imported from humansize.framer.website.

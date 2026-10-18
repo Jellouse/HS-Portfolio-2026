@@ -1,0 +1,38 @@
+title: Noapé
+published: true
+summary: Noapé is a small startup that stands at the intersection between a traditional
+  rosé and a modern art gallery.
+cover: /src/content/projects/noape/cover.jpg
+coverAlt: Noapé rosé bottle with a colourful label on a black background
+coverFrame: wide
+coverFlush: false
+rounded: true
+info:
+- label: Client
+  value: Noapé
+- label: Role
+  value: Product design, product photography and 3D rendering
+processFromFolder: false
+blocks:
+- discriminant: pair
+  value:
+    left: /src/content/projects/noape/blocks/0/value/left.jpg
+    leftAlt: Noapé rosé bottle with a colourful label on a black background
+    right: /src/content/projects/noape/blocks/0/value/right.jpg
+    rightAlt: Hand holding a Noapé rosé bottle sideways
+- discriminant: pair
+  value:
+    left: /src/content/projects/noape/blocks/1/value/left.jpg
+    leftAlt: Open book with a photo of a motorcycle on a pink background
+    right: /src/content/projects/noape/blocks/1/value/right.jpg
+    rightAlt: Hands laying a Noapé bottle on a white table
+- discriminant: pair
+  value:
+    left: /src/content/projects/noape/blocks/2/value/left.jpg
+    leftAlt: Noapé bottle with a red label next to a close-up of a silver-capped bottle
+    right: /src/content/projects/noape/blocks/2/value/right.jpg
+    rightAlt: Noapé bottle seen from above next to a bottle with a pattern on the
+      glass
+todo:
+- Year unknown. The Framer site shows no year for this project.
+- Imported from humansize.framer.website.

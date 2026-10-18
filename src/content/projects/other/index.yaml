@@ -1,0 +1,56 @@
+title: Other
+published: false
+summary: Projects that I either just had a small part in or are non-commercial / personal
+cover: /src/content/projects/other/cover.jpg
+coverAlt: 3D render of black and red cylinders
+coverFrame: wide
+coverFlush: false
+rounded: true
+info: []
+processFromFolder: false
+blocks:
+- discriminant: pair
+  value:
+    left: /src/content/projects/other/blocks/0/value/left.jpg
+    leftAlt: 3D render of black and red cylinders
+    right: /src/content/projects/other/blocks/0/value/right.jpg
+    rightAlt: Grey 3D render of a spaceship
+- discriminant: pair
+  value:
+    left: /src/content/projects/other/blocks/1/value/left.jpg
+    leftAlt: Golden 3D render of a spaceship
+    right: /src/content/projects/other/blocks/1/value/right.jpg
+    rightAlt: Collage of spaceship renders
+- discriminant: video
+  value:
+    src: https://humansize-media.schnettker-johann.workers.dev/projects/other/other-2-mvd44617.mp4
+    alt: Opto logo animation on dark blue
+    frame: full
+    flush: false
+- discriminant: video
+  value:
+    src: https://humansize-media.schnettker-johann.workers.dev/projects/other/other-3-mvd447n8.mp4
+    alt: Animation of the line We build digital flagship
+    frame: full
+    flush: false
+- discriminant: pair
+  value:
+    left: /src/content/projects/other/blocks/4/value/left.jpg
+    leftAlt: Blue side table with an exhibition catalogue on a rug
+    right: /src/content/projects/other/blocks/4/value/right.jpg
+    rightAlt: Collage of photos of a blue side table
+- discriminant: pair
+  value:
+    left: /src/content/projects/other/blocks/5/value/left.jpg
+    leftAlt: Plywood cabinet holding hi-fi equipment with plants on top
+    right: /src/content/projects/other/blocks/5/value/right.jpg
+    rightAlt: Plywood stool in front of a radiator
+- discriminant: image
+  value:
+    src: /src/content/projects/other/blocks/6/value/src.jpg
+    alt: Wooden dining table with a laptop by a window
+    frame: full
+    flush: false
+todo:
+- Year unknown. The Framer site shows no year for this project.
+- Imported from humansize.framer.website.

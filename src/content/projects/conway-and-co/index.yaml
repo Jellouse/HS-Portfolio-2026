@@ -1,0 +1,95 @@
+title: Conway & Co
+published: true
+summary: Conway & Co is a consultancy firm specialised in helping businesses create
+  a smart and up to date technological backbone for their company. We've communicated
+  this in the branding as well as the website using simple shapes and strong colours,
+  as well as Helvetica as a typeface. These elements combined make for a visually
+  pleasing identity while also communicating Conway & Co's essential values.
+cover: /src/content/projects/conway-and-co/cover.jpg
+coverAlt: Brushed metal Conway & Co sign on a white wall
+coverFrame: wide
+coverFlush: false
+rounded: true
+info:
+- label: Client
+  value: Conway & Co
+- label: Role
+  value: Branding
+processFromFolder: false
+blocks:
+- discriminant: video
+  value:
+    src: https://humansize-media.schnettker-johann.workers.dev/projects/conway-and-co/conway-and-co-0-mvd433ay.mp4
+    alt: Scrolling animation of the Conway & Co website
+    frame: full
+    flush: false
+- discriminant: image
+  value:
+    src: /src/content/projects/conway-and-co/blocks/1/value/src.jpg
+    alt: Brushed metal Conway & Co sign on a white wall
+    frame: full
+    flush: false
+- discriminant: pair
+  value:
+    left: /src/content/projects/conway-and-co/blocks/2/value/left.jpg
+    leftAlt: Conway & Co sign as a wireframe and as a render on a dark wall
+    right: /src/content/projects/conway-and-co/blocks/2/value/right.jpg
+    rightAlt: Collage of Conway & Co print pieces with the line Seamless selling
+- discriminant: pair
+  value:
+    left: /src/content/projects/conway-and-co/blocks/3/value/left.jpg
+    leftAlt: Conway & Co box with the words Seamless selling in yellow
+    right: /src/content/projects/conway-and-co/blocks/3/value/right.jpg
+    rightAlt: Dark event hall with Conway & Co screens on the walls
+- discriminant: pair
+  value:
+    left: /src/content/projects/conway-and-co/blocks/4/value/left.jpg
+    leftAlt: Large stage screen with the Conway & Co logo and coloured squares
+    right: /src/content/projects/conway-and-co/blocks/4/value/right.jpg
+    rightAlt: Collage of Conway & Co brand pieces including a meeting room sign
+- discriminant: video
+  value:
+    src: https://humansize-media.schnettker-johann.workers.dev/projects/conway-and-co/conway-and-co-5-mvd43677.mp4
+    alt: Hands opening a Conway & Co package
+    frame: full
+    flush: false
+- discriminant: image
+  value:
+    src: /src/content/projects/conway-and-co/blocks/6/value/src.jpg
+    alt: Overview of the Conway & Co brand identity
+    frame: full
+    flush: false
+- discriminant: pair
+  value:
+    left: /src/content/projects/conway-and-co/blocks/7/value/left.jpg
+    leftAlt: Hand holding a Conway & Co business card
+    right: /src/content/projects/conway-and-co/blocks/7/value/right.jpg
+    rightAlt: Conway & Co business cards spread on a dark surface
+- discriminant: pair
+  value:
+    left: /src/content/projects/conway-and-co/blocks/8/value/left.jpg
+    leftAlt: Two red Conway & Co reports titled Keeping up with China
+    right: /src/content/projects/conway-and-co/blocks/8/value/right.jpg
+    rightAlt: Two laptops showing the Conway & Co website with dotted circles
+- discriminant: pair
+  value:
+    left: /src/content/projects/conway-and-co/blocks/9/value/left.jpg
+    leftAlt: Conway & Co Insights page on desktop and mobile
+    right: /src/content/projects/conway-and-co/blocks/9/value/right.jpg
+    rightAlt: Three laptops showing the Conway & Co Insights pages
+- discriminant: video
+  value:
+    src: https://humansize-media.schnettker-johann.workers.dev/projects/conway-and-co/conway-and-co-10-mvd438vj.mp4
+    alt: Monitor showing an orange Conway & Co page
+    frame: full
+    flush: false
+- discriminant: image
+  value:
+    src: /src/content/projects/conway-and-co/blocks/11/value/src.jpg
+    alt: Phone showing the Conway & Co page Technology is the growth engine of your
+      company
+    frame: full
+    flush: false
+todo:
+- Year unknown. The Framer site shows no year for this project.
+- Imported from humansize.framer.website.

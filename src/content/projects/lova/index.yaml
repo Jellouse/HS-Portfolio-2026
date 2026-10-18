@@ -1,0 +1,44 @@
+title: Lova
+published: true
+summary: A Brazilian café looking for a welcoming branding, strategy and website.
+  To showcase this work I've created 3D renders for the case study as well as developed
+  the website in HTML and CSS. (This was before ChatGPT)
+cover: /src/content/projects/lova/cover.jpg
+coverAlt: Tablet with large Lova lettering lying in sand
+coverFrame: wide
+coverFlush: false
+rounded: true
+info:
+- label: Client
+  value: Lova
+- label: Role
+  value: Branding, web design, print and 3D rendering
+processFromFolder: false
+blocks:
+- discriminant: video
+  value:
+    src: https://humansize-media.schnettker-johann.workers.dev/projects/lova/lova-0-mvd43d60.mp4
+    alt: Tablet floating in blue water
+    frame: full
+    flush: false
+- discriminant: video
+  value:
+    src: https://humansize-media.schnettker-johann.workers.dev/projects/lova/lova-1-mvd43eqv.mp4
+    alt: Animation of light moving over sand
+    frame: full
+    flush: false
+- discriminant: video
+  value:
+    src: https://humansize-media.schnettker-johann.workers.dev/projects/lova/lova-2-mvd43h1f.mp4
+    alt: Lova logo animation with a bouncing dot
+    frame: full
+    flush: false
+- discriminant: image
+  value:
+    src: /src/content/projects/lova/blocks/3/value/src.jpg
+    alt: Tablet with large Lova lettering lying in sand
+    frame: full
+    flush: false
+todo:
+- Year unknown. The Framer site shows no year for this project.
+- Imported from humansize.framer.website.

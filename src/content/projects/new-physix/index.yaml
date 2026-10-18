@@ -1,0 +1,40 @@
+title: New Physix
+published: true
+summary: New Physix is a Dutch supplement company. We've created visuals for them
+  which instantly communicate the value of their products. (containing a balanced
+  amount of essential vitamins as found in fruit, veg & nuts)
+cover: /src/content/projects/new-physix/cover.jpg
+coverAlt: New Physix supplement jar balanced on a piece of wood with an almond on
+  top
+coverFrame: wide
+coverFlush: false
+rounded: true
+info:
+- label: Client
+  value: New Physix
+- label: Role
+  value: 3D rendering
+processFromFolder: false
+blocks:
+- discriminant: pair
+  value:
+    left: /src/content/projects/new-physix/blocks/0/value/left.jpg
+    leftAlt: New Physix supplement jar balanced on a piece of wood with an almond
+      on top
+    right: /src/content/projects/new-physix/blocks/0/value/right.jpg
+    rightAlt: Walnut balanced on a pear with capsules on top, on a green background
+- discriminant: pair
+  value:
+    left: /src/content/projects/new-physix/blocks/1/value/left.jpg
+    leftAlt: New Physix jar balanced with walnuts on stone
+    right: /src/content/projects/new-physix/blocks/1/value/right.jpg
+    rightAlt: New Physix jar tilted above strawberries, blackberries and pears
+- discriminant: image
+  value:
+    src: /src/content/projects/new-physix/blocks/2/value/src.jpg
+    alt: New Physix jar with walnuts, almonds and blackberries on wood
+    frame: full
+    flush: false
+todo:
+- Year unknown. The Framer site shows no year for this project.
+- Imported from humansize.framer.website.

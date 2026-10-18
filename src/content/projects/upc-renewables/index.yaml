@@ -1,0 +1,80 @@
+title: UPC Renewables
+published: true
+summary: '"Coal" is used in Germany as slang for "Money".. Not with these guys! The
+  future is renewable and they know it. UPC Renewables is a global company with a
+  focus on bringing renewables to rural regions in Asia. Where the impact on human
+  lives is immediate and the most important. We reflected their spirit for adventure
+  in their brand identity and website.'
+cover: /src/content/projects/upc-renewables/cover.jpg
+coverAlt: Overview of UPC Renewables website pages
+coverFrame: wide
+coverFlush: false
+rounded: true
+info:
+- label: Client
+  value: UPC Renewables
+processFromFolder: false
+blocks:
+- discriminant: video
+  value:
+    src: https://humansize-media.schnettker-johann.workers.dev/projects/upc-renewables/upc-renewables-0-mvd429g3.mp4
+    alt: Wind turbine silhouetted against a dark blue sky
+    frame: full
+    flush: false
+- discriminant: video
+  value:
+    src: https://humansize-media.schnettker-johann.workers.dev/projects/upc-renewables/upc-renewables-1-mvd42chz.mp4
+    alt: Laptop showing the UPC Renewables tagline Dream. Develop.
+    frame: full
+    flush: false
+- discriminant: video
+  value:
+    src: https://humansize-media.schnettker-johann.workers.dev/projects/upc-renewables/upc-renewables-2-mvd42etk.mp4
+    alt: Ring of project photos around the words Over 80 Developments
+    frame: full
+    flush: false
+- discriminant: video
+  value:
+    src: https://humansize-media.schnettker-johann.workers.dev/projects/upc-renewables/upc-renewables-3-mvd42hcf.mp4
+    alt: UPC Renewables navigation menu over a misty wind turbine
+    frame: full
+    flush: false
+- discriminant: video
+  value:
+    src: https://humansize-media.schnettker-johann.workers.dev/projects/upc-renewables/upc-renewables-4-mvd42j70.mp4
+    alt: Animated list of brand values with Professional highlighted
+    frame: full
+    flush: false
+- discriminant: video
+  value:
+    src: https://humansize-media.schnettker-johann.workers.dev/projects/upc-renewables/upc-renewables-5-mvd42lqk.mp4
+    alt: Map of Italy on the UPC Renewables history page
+    frame: full
+    flush: false
+- discriminant: video
+  value:
+    src: https://humansize-media.schnettker-johann.workers.dev/projects/upc-renewables/upc-renewables-6-mvd42o77.mp4
+    alt: Wind turbine framed in a dark wall panel with the line Powering Asia by nature
+    frame: full
+    flush: false
+- discriminant: pair
+  value:
+    left: /src/content/projects/upc-renewables/blocks/7/value/left.jpg
+    leftAlt: Overview of UPC Renewables website pages
+    right: /src/content/projects/upc-renewables/blocks/7/value/right.jpg
+    rightAlt: Orange leather UPC logo patch on a white jacket
+- discriminant: video
+  value:
+    src: https://humansize-media.schnettker-johann.workers.dev/projects/upc-renewables/upc-renewables-8-mvd42qff.mp4
+    alt: Phone showing a map of Italy in front of wind turbines on green hills
+    frame: full
+    flush: false
+- discriminant: image
+  value:
+    src: /src/content/projects/upc-renewables/blocks/9/value/src.jpg
+    alt: UPC Renewables business card resting on tree bark
+    frame: full
+    flush: false
+todo:
+- Year unknown. The Framer site shows no year for this project.
+- Imported from humansize.framer.website.

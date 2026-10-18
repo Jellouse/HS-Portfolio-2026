@@ -1,0 +1,63 @@
+title: Stellar Development
+published: true
+summary: Stellar Development is renting out a sustainably interconnected system of
+  warehouses and logistic centers. The company is focussed on sustainable practices
+  as well as efficiency. The brand identity was based on flocks of birds and fish
+  building a system greater than the sum of its parts.
+cover: /src/content/projects/stellar-development/cover.jpg
+coverAlt: The line A connected system that adapts to its environment
+coverFrame: wide
+coverFlush: false
+rounded: true
+info:
+- label: Client
+  value: Stellar Development
+- label: Role
+  value: Branding, photography and physical advertising
+processFromFolder: false
+blocks:
+- discriminant: pair
+  value:
+    left: /src/content/projects/stellar-development/blocks/0/value/left.jpg
+    leftAlt: The line A connected system that adapts to its environment
+    right: /src/content/projects/stellar-development/blocks/0/value/right.jpg
+    rightAlt: Swarm of white dots on black
+- discriminant: video
+  value:
+    src: https://humansize-media.schnettker-johann.workers.dev/projects/stellar-development/stellar-development-1-mvd43rk4.mp4
+    alt: Swarm of dots forming the name Hydra Utrecht
+    frame: full
+    flush: false
+- discriminant: image
+  value:
+    src: /src/content/projects/stellar-development/blocks/2/value/src.jpg
+    alt: Stellar Development logo inside a cloud of white dots
+    frame: full
+    flush: false
+- discriminant: video
+  value:
+    src: https://humansize-media.schnettker-johann.workers.dev/projects/stellar-development/stellar-development-3-mvd43ttc.mp4
+    alt: Animation of dots drifting on black
+    frame: full
+    flush: false
+- discriminant: image
+  value:
+    src: /src/content/projects/stellar-development/blocks/4/value/src.jpg
+    alt: Timber wall and white steel beams against a blue sky
+    frame: full
+    flush: false
+- discriminant: pair
+  value:
+    left: /src/content/projects/stellar-development/blocks/5/value/left.jpg
+    leftAlt: Timber and steel construction with two people on the building site
+    right: /src/content/projects/stellar-development/blocks/5/value/right.jpg
+    rightAlt: Stellar Development billboard on a timber frame
+- discriminant: image
+  value:
+    src: /src/content/projects/stellar-development/blocks/6/value/src.jpg
+    alt: Stellar Development billboard by a road that reads We develop destinations
+    frame: full
+    flush: false
+todo:
+- Year unknown. The Framer site shows no year for this project.
+- Imported from humansize.framer.website.

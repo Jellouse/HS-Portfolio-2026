@@ -1,0 +1,27 @@
+title: Artis Royal Zoo
+published: true
+summary: As the oldest zoo in the Netherlands and located just a few minutes from
+  my house, this project holds a special place in my heart. A large part of the zoo's
+  customers are of course schools. We created a seamless booking experience especially
+  designed for managing large groups of students.
+cover: /src/content/projects/artis-royal-zoo/cover.jpg
+coverAlt: Artis booking start screen with a red panda
+coverFrame: wide
+coverFlush: false
+rounded: true
+info:
+- label: Client
+  value: Artis Royal Zoo
+- label: Role
+  value: Interface design and web design
+processFromFolder: false
+blocks:
+- discriminant: pair
+  value:
+    left: /src/content/projects/artis-royal-zoo/blocks/0/value/left.jpg
+    leftAlt: Artis booking start screen with a red panda
+    right: /src/content/projects/artis-royal-zoo/blocks/0/value/right.jpg
+    rightAlt: Artis booking step to choose a location, next to a giraffe photo
+todo:
+- Year unknown. The Framer site shows no year for this project.
+- Imported from humansize.framer.website.
