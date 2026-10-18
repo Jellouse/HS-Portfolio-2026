@@ -1,9 +1,13 @@
 // Light haptic tick on real taps of links and buttons, touch devices only.
-// iOS 26.5+ only buzzes when a real tap lands on an <input type=checkbox switch>,
-// so each host gets an invisible switch on top. The switch's click is only
-// replayed on the host after a genuine tap: under 10px of movement, under
-// 500ms, no scroll in between, not cancelled. Anything else is swallowed.
-// Android uses navigator.vibrate on the host's own (native) click.
+//
+// iOS only buzzes for a trusted activation of <input type=checkbox switch>.
+// A switch under the finger eats vertical pans (WebKit 321591); touch-action
+// does not help. So the switch stays visibility:hidden inside a <label> that
+// covers the host: pans hit the label (scroll-transparent), taps forward to
+// the switch for the tick. Media and captions sit above the label so
+// press-and-hold save and caption hits stay native.
+//
+// Android uses navigator.vibrate on the host's own click.
 
 const TARGETS = 'a[href], button, summary, [role="button"]';
 const MOVE_PX = 10;
@@ -14,7 +18,6 @@ const isIOS =
   (/iPad|iPhone|iPod/.test(navigator.userAgent) ||
     (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1));
 
-// One shared record of the current touch, fed by capture listeners.
 let touch: { x: number; y: number; t: number; sy: number; sx: number; bad: boolean } | null = null;
 const opts = { capture: true, passive: true } as const;
 window.addEventListener(
@@ -45,33 +48,67 @@ function genuineTap() {
     Date.now() - touch.t < MAX_MS &&
     Math.abs(scrollY - touch.sy) < 1 &&
     Math.abs(scrollX - touch.sx) < 1;
-  touch = null; // one tap, one replay
+  touch = null;
   return ok;
 }
 
-// The native switch is a draggable control: a drag that starts on it can be taken as a
-// thumb swipe instead of a page scroll. touch-action hands every pan back to the browser,
-// so scrolls always win and only clean taps reach the switch.
 function attachIOS(host: HTMLElement) {
   if (host.querySelector(':scope > [data-haptic-overlay]')) return;
   if (getComputedStyle(host).position === 'static') host.style.position = 'relative';
+
+  const label = document.createElement('label');
+  label.setAttribute('data-haptic-overlay', '');
+  label.setAttribute('aria-hidden', 'true');
+  // Label is scroll-transparent on iOS; never put the switch under the finger.
+  label.style.cssText =
+    'position:absolute;inset:0;z-index:0;margin:0;padding:0;border:0;cursor:inherit;touch-action:manipulation;-webkit-tap-highlight-color:transparent;';
+
   const sw = document.createElement('input');
   sw.type = 'checkbox';
   sw.setAttribute('switch', '');
-  sw.setAttribute('data-haptic-overlay', '');
-  sw.setAttribute('aria-hidden', 'true');
   sw.tabIndex = -1;
-  sw.style.cssText =
-    'position:absolute;inset:0;width:100%;height:100%;margin:0;padding:0;border:0;-webkit-appearance:switch;appearance:auto;opacity:0;z-index:0;cursor:inherit;touch-action:pan-x pan-y pinch-zoom;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;';
-  sw.addEventListener('click', (e) => {
-    e.stopPropagation();
+  // visibility:hidden keeps it out of hit-testing (WebKit 321591).
+  sw.style.cssText = 'position:absolute;width:1px;height:1px;margin:0;padding:0;border:0;visibility:hidden;';
+  // Label re-dispatches to the switch; stop that copy bubbling back into host handlers.
+  sw.addEventListener('click', (e) => e.stopPropagation());
+
+  label.appendChild(sw);
+
+  // Gap taps land on the label (media/caption are stacked above). Replay a real host click
+  // only for a genuine tap so a scroll that ends on the label does not navigate.
+  let replaying = false;
+  label.addEventListener('click', (e) => {
     if (!genuineTap()) {
-      e.preventDefault(); // no toggle, no navigation
+      e.preventDefault();
       return;
     }
-    host.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+    const link = host.matches(TARGETS)
+      ? host
+      : host.querySelector<HTMLElement>(TARGETS);
+    if (!link || link === label) return;
+    replaying = true;
+    link.click();
+    replaying = false;
   });
-  host.appendChild(sw);
+
+  // Taps on media/caption (above the label) never hit the label. Trigger the switch
+  // during that user gesture so the tick still fires, without putting it under the finger.
+  host.addEventListener(
+    'click',
+    (e) => {
+      if (replaying) return;
+      if (e.target === label || label.contains(e.target as Node)) return;
+      if (touch?.bad) return;
+      try {
+        sw.click();
+      } catch {
+        /* ignore */
+      }
+    },
+    true,
+  );
+
+  host.appendChild(label);
 }
 
 function attachAndroid(host: HTMLElement) {
@@ -83,17 +120,13 @@ function attachAndroid(host: HTMLElement) {
 if (window.matchMedia('(pointer: coarse)').matches && (isIOS || typeof navigator.vibrate === 'function')) {
   const attach = isIOS ? attachIOS : attachAndroid;
 
-  // Project cards have two links (cover and caption). Make the whole card one
-  // host so a tap anywhere ticks once, then follow the cover link. Skipped
-  // where the card is display: contents (wide grid), since it has no box.
+  // One host per project card so a tap in the image–caption gap ticks once and opens
+  // the project. Skipped where the card is display:contents (no box of its own).
   document.querySelectorAll<HTMLElement>('.card').forEach((card) => {
     const link = card.querySelector<HTMLAnchorElement>('a[href]');
     if (!link || getComputedStyle(card).display === 'contents') return;
     card.setAttribute('data-haptic', '');
     card.querySelectorAll('a[href]').forEach((a) => a.setAttribute('data-no-haptic', ''));
-    card.addEventListener('click', (e) => {
-      if (e.target === card) link.click();
-    });
   });
 
   const scan = (root: ParentNode) => {

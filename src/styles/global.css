@@ -1197,10 +1197,11 @@ html.show-grid .grid-overlay .page-grid {
   }
 }
 
-/* Invisible haptic switch over links and buttons on iOS. Never visible. */
+/* Invisible haptic label over links and buttons on iOS. Never visible. */
 [data-haptic-overlay] {
   z-index: 0;
   -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
 /* Cross-page transition: the small project mark grows into the homepage mark.
@@ -1314,10 +1315,12 @@ html.show-grid .grid-overlay .page-grid {
   }
 }
 
-/* iOS haptics: the invisible switch over tappable cards stays under the media, so a
-   long-press on an image or video reaches it and shows the native save menu. */
+/* iOS haptics: label overlay stays under media and captions. Media keeps native
+   press-and-hold save; caption stays a real link. The gap hits the label, which
+   is scroll-transparent (the hidden switch never sits under the finger). */
 [data-haptic] :is(.frame, img, video),
-[data-haptic] a:has(.frame, img, video) {
+[data-haptic] a:has(.frame, img, video),
+[data-haptic] .caption {
   position: relative;
   z-index: 1;
 }

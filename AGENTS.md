@@ -69,11 +69,14 @@ A save commits through the GitHub App. Vercel rebuilds the static pages from tha
 - `KEYSTATIC_STORAGE=github npm run dev` local CMS in GitHub mode, for the one-time app setup
 - `npm run build` static pages plus the Keystatic server routes
 - `npm run preview` serve the build
+- `npm test` must pass before any merge: static touch-scroll guard plus iPhone WebKit swipe scroll test
+- `npm run test:touch-guard` / `npm run test:scroll` run each part alone. For live: `BASE_URL=https://humansize.de npm run test:scroll`
 
 Set `SITE_URL` to the production origin (no trailing slash). On Vercel it falls back to `VERCEL_PROJECT_PRODUCTION_URL`.
 
 ## House rules
 
+- Mobile scroll is sacred. Never put an `<input type=checkbox switch>` under the finger (WebKit 321591): use a label overlay with a visibility:hidden switch. No non-passive touch listeners on content. No `touch-action: none` on cards or captions. `npm test` must stay green.
 - Johann's voice is plain, direct, and short. No fluff.
 - No em dashes.
 - No colon reveals and no "X, not Y" constructions in new copy. The about text is an exception: keep it verbatim.

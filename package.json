@@ -6,7 +6,10 @@
   "scripts": {
     "dev": "ASTRO_TELEMETRY_DISABLED=1 astro dev",
     "build": "ASTRO_TELEMETRY_DISABLED=1 astro build",
-    "preview": "ASTRO_TELEMETRY_DISABLED=1 astro preview"
+    "preview": "ASTRO_TELEMETRY_DISABLED=1 astro preview",
+    "test:touch-guard": "node tests/touch-scroll-guard.mjs",
+    "test:scroll": "node tests/mobile-scroll.spec.mjs",
+    "test": "npm run test:touch-guard && npm run test:scroll"
   },
   "engines": {
     "node": ">=22"
@@ -22,5 +25,8 @@
     "astro": "^5.14.1",
     "react": "^19.3.1",
     "react-dom": "^19.3.1"
+  },
+  "devDependencies": {
+    "playwright": "^1.64.1"
   }
 }
