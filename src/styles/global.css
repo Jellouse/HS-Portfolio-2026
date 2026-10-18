@@ -759,13 +759,108 @@ body:has(.project) .site-header {
 }
 
 .site-footer {
-  width: calc(100% - 40px);
-  margin: 48px auto 72px;
-  text-align: left;
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  height: 100svh;
+  max-height: 100vh;
+  max-height: 100svh;
+  overflow: hidden;
 }
 
-.site-footer p {
-  margin: 0 0 10px;
+/* Text band above the faces; page-grid + footer-text share the about column. */
+.footer-copy {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  box-sizing: border-box;
+  height: 100%;
+  padding-bottom: calc(min(52vw, 60svh) * 0.38);
+  display: flex;
+  flex-direction: column;
+  justify-content: safe center;
+  overflow: hidden;
+}
+
+.footer-copy .page-grid {
+  /* Do not force width:100% — on desktop .page-grid is min(100%, 1440px) centered, same as .about. */
+  box-sizing: border-box;
+  padding-inline: var(--pad);
+}
+
+/* Same width token as .about on mobile. */
+.footer-text {
+  width: min(100%, var(--card));
+  margin: 0 auto;
+  box-sizing: border-box;
+  text-align: left;
+  font-size: 23px;
+  line-height: 29px;
+}
+
+.footer-text p {
+  margin: 0 0 29px;
+}
+
+.footer-text p:last-child {
+  margin-bottom: 0;
+}
+
+/* Faces pinned to the bottom edge; rest height half of a 2x stretch box. */
+.footer-faces {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  aspect-ratio: 100 / 52;
+  max-height: min(52vw, 60svh);
+  height: auto;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.footer-faces .peeps {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  transform: none;
+}
+
+.footer-faces .peeps-static {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: auto;
+  bottom: 0;
+  width: 100%;
+  height: 50%;
+  transform: none;
+}
+
+.footer-faces .peeps-row {
+  top: 0;
+  height: 100%;
+  transform: none;
+}
+
+.footer-faces .peeps-row svg {
+  top: auto;
+  bottom: 0;
+  height: var(--rest);
+  transform-origin: 0 100%;
+}
+
+.footer-faces .peeps-static :is(path, ellipse),
+.footer-faces .peeps-row svg {
+  fill: var(--red);
 }
 
 
@@ -956,13 +1051,17 @@ body:has(.project) .site-header {
     padding-inline: var(--margin);
   }
 
-  body:has(.hero) .site-header.page-grid,
-  .site-footer.page-grid {
+  /* Header stays full page-grid width. Do not remove — footer must not shrink it. */
+  body:has(.hero) .site-header.page-grid {
     width: min(100%, 1440px);
   }
 
   .site-header.page-grid {
     align-items: start;
+  }
+
+  .footer-copy .page-grid {
+    padding-inline: var(--margin);
   }
 
   .site-header .who {
@@ -1015,7 +1114,8 @@ body:has(.project) .site-header {
   }
 
   .about,
-  .card > .caption {
+  .card > .caption,
+  .footer-text {
     grid-column: 3 / 7;
     width: auto;
     margin-left: 0;
@@ -1051,9 +1151,6 @@ body:has(.project) .site-header {
     margin-right: auto;
   }
 
-  .site-footer.page-grid > p {
-    grid-column: 3 / 7;
-  }
 }
 
 .grid-overlay {
