@@ -516,7 +516,7 @@ body:has(.hero) .site-header {
 
 .caption {
   display: block;
-  margin-top: 20px;
+  margin-top: 100px;
   margin-bottom: 247px;
   font-size: 23px;
   line-height: 29px;
@@ -848,7 +848,7 @@ body:has(.project) .site-header {
   }
 
   .caption {
-    margin-top: 20px;
+    margin-top: 100px;
     margin-bottom: 247px;
     text-align: center;
   }
