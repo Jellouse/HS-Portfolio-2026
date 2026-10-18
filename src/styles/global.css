@@ -1459,3 +1459,13 @@ html.show-grid .grid-overlay .page-grid {
   pointer-events: none;
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.06);
 }
+
+/* Tiny Lenis: desktop wheel/trackpad only (see smooth-scroll.ts). */
+html.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+html.lenis.lenis-stopped {
+  overflow: clip;
+}
+
