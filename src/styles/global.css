@@ -278,11 +278,14 @@ body:has(.hero) .site-header {
   white-space: nowrap;
   opacity: 0;
   pointer-events: none;
+  /* Opacity only — no animation — so mouseleave/is-open removal can fade out. */
   transition: opacity 150ms ease;
+  filter: none;
 }
 
 .who:hover .time,
-.who:focus-within .time {
+.who:focus-within .time,
+.who.is-open .time {
   opacity: 1;
 }
 
@@ -326,6 +329,7 @@ body:has(.hero) .site-header {
   line-height: var(--lh-body);
   white-space: nowrap;
   opacity: 1;
+  filter: none;
 }
 
 .contact-menu a,
@@ -1167,13 +1171,20 @@ html.show-grid .grid-overlay .page-grid {
     }
   }
 
-  .who:hover .time,
-  .who:focus-within .time,
-  .who.is-open .time,
+  /* Menu stagger: opacity + translate only — no blur (colour fade is separate).
+     Tokyo time: no enter animation; opacity transition alone so leave can run. */
+  @keyframes menu-in {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+  }
+
   .contact:hover .contact-menu > *,
   .contact:focus-within .contact-menu > *,
   .contact.is-open .contact-menu > * {
-    animation: text-in 300ms var(--ease-out-expo) both;
+    animation: menu-in 300ms var(--ease-out-expo) both;
+    filter: none;
   }
 
   .contact-menu > :nth-child(2) {
@@ -1182,6 +1193,14 @@ html.show-grid .grid-overlay .page-grid {
 
   .contact-menu > :nth-child(3) {
     animation-delay: 60ms;
+  }
+
+  .who .time,
+  .who:hover .time,
+  .who:focus-within .time,
+  .who.is-open .time {
+    animation: none;
+    filter: none;
   }
 }
 
