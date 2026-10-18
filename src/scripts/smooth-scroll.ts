@@ -3,8 +3,8 @@
 
 import Lenis from 'lenis';
 
-/** Single tuning knob. Higher → closer to native. ~0.12–0.15 = barely smoothed. */
-export const SMOOTH_LERP = 0.14;
+/** Single tuning knob. Higher → closer to native. ~0.3 = barely noticeable (was 0.14, too strong). */
+export const SMOOTH_LERP = 0.3;
 
 let lenis: Lenis | null = null;
 let wired = false;
