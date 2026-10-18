@@ -5,7 +5,7 @@ summary: >
   Industrial Bloom is a series of aluminium vases. Simple forms and textures
   that make any plant silhouette even more striking. The shop is at
   worksurface.co.
-cover: /src/content/projects/industrial-bloom/ib-full.jpg
+cover: /src/content/projects/industrial-bloom/cover.jpg
 coverAlt: Industrial Bloom
 coverFrame: full
 coverFlush: true
@@ -36,7 +36,7 @@ blocks:
   - discriminant: video
     value:
       src: >-
-        https://humansize-media.schnettker-johann.workers.dev/projects/industrial-bloom/untitled3-mvcgnkky.mov
+        https://humansize-media.schnettker-johann.workers.dev/projects/industrial-bloom/untitled3-mvcgnkky-mvd3ga1e.mp4
       frame: full
       flush: false
   - discriminant: image
