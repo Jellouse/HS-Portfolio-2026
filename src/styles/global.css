@@ -680,15 +680,22 @@ body:has(.project) .site-header {
 .site-footer {
   width: 100%;
   margin: 0;
-  border-top: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  /* 100vh fallback, then 100svh so iOS address-bar resize does not jump */
+  height: 100vh;
+  height: 100svh;
   font-size: var(--text-body);
   line-height: var(--lh-body);
 }
 
 .footer-text {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   width: min(calc(100% - 40px), var(--measure));
   margin: 0 auto;
-  padding-top: 56px;
   text-align: left;
 }
 
@@ -705,6 +712,7 @@ body:has(.project) .site-header {
    red box: rest height = 1.3x a face's base width, base width = 1/5 of the row. */
 .footer-faces {
   position: relative;
+  flex: 0 0 auto;
   aspect-ratio: 100 / 52;
   pointer-events: none;
 }
