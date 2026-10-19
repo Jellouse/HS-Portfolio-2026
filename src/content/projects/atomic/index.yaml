@@ -8,7 +8,7 @@ summary: >
   built around tension and ski nets.
 cover: /src/content/projects/atomic/cover.jpg
 coverAlt: Atomic Ski
-coverFrame: narrow
+coverFrame: medium
 coverFlush: true
 rounded: true
 info:
