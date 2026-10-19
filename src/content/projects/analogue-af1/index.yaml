@@ -26,6 +26,7 @@ blocks:
       flush: false
   - discriminant: pair
     value:
+      layout: stack
       left: /src/content/projects/analogue-af1/blocks/1/value/left.jpg
       leftAlt: Black Analogue AF1 film camera from the front
       right: /src/content/projects/analogue-af1/blocks/1/value/right.jpg
@@ -39,6 +40,7 @@ blocks:
       flush: false
   - discriminant: pair
     value:
+      layout: pair
       left: /src/content/projects/analogue-af1/blocks/3/value/left.jpg
       leftAlt: Analogue AF1 cameras from several angles on a black background
       right: /src/content/projects/analogue-af1/blocks/3/value/right.jpg
@@ -50,6 +52,7 @@ blocks:
       flush: false
   - discriminant: pair
     value:
+      layout: pair
       left: /src/content/projects/analogue-af1/blocks/5/value/left.jpg
       right: /src/content/projects/analogue-af1/blocks/5/value/right.jpg
   - discriminant: image
