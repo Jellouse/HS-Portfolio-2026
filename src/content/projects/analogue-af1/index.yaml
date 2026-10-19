@@ -43,3 +43,12 @@ blocks:
       leftAlt: Analogue AF1 cameras from several angles on a black background
       right: /src/content/projects/analogue-af1/blocks/3/value/right.jpg
       rightAlt: Back of the Analogue AF1 camera next to a Kodak film roll
+  - discriminant: image
+    value:
+      src: /src/content/projects/analogue-af1/blocks/4/value/src.jpg
+      frame: full
+      flush: false
+  - discriminant: pair
+    value:
+      left: /src/content/projects/analogue-af1/blocks/5/value/left.jpg
+      right: /src/content/projects/analogue-af1/blocks/5/value/right.jpg
