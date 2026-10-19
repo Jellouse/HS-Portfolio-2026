@@ -6,6 +6,7 @@ import TextBlock from './TextBlock.astro';
 import VideoBlock from './VideoBlock.astro';
 import type { ProjectEntry } from '../lib/content';
 import { processFolderImages } from '../lib/images';
+import { resolveProcessFolderForRender } from '../lib/project-blocks.mjs';
 
 interface Props {
   blocks: ProjectEntry['data']['blocks'];
@@ -16,11 +17,16 @@ interface Props {
 }
 
 const { blocks, slug, processFromFolder = false, processFolderSrcs } = Astro.props;
-const folderSrcs =
+const rawFolderSrcs =
   processFolderSrcs ??
   (processFromFolder && slug ? processFolderImages(slug) : []);
+const folderSrcs = resolveProcessFolderForRender(
+  Boolean(processFromFolder),
+  rawFolderSrcs,
+  blocks,
+);
 const folder = folderSrcs.map((src) => ({ src, alt: '', flush: false }));
-const useFolder = folder.length > 0;
+const useFolder = Boolean(processFromFolder) && folder.length > 0;
 const hasProcessBlock = blocks.some((b) => b.discriminant === 'process');
 ---
 

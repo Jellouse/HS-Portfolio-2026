@@ -67,11 +67,6 @@ blocks:
       flush: false
   - discriminant: image
     value:
-      src: /src/content/projects/industrial-bloom/blocks/8/value/src.jpg
-      frame: full
-      flush: false
-  - discriminant: image
-    value:
       src: /src/content/projects/industrial-bloom/blocks/9/value/src.jpg
       frame: full
       flush: false
