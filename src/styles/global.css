@@ -411,7 +411,14 @@ body:has(.hero) .site-header {
   }
 }
 
+.hero:has(.mark-blob:not([hidden])),
+.hero:has([data-hero-variant="blob"]:not([hidden])) {
+  /* Resting stretch is in the SVG; pointer only nudges a little */
+  --mark-stretch-max: 1.18;
+}
+
 .hero {
+
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -435,6 +442,26 @@ body:has(.hero) .site-header {
   transform: translateX(-50%) scaleX(var(--mark-scale, 1));
   transform-origin: center center;
 }
+
+.hero-variant {
+  position: absolute;
+  inset: 0;
+}
+
+.hero-variant[hidden] {
+  display: none !important;
+}
+
+/* Blob: same little-man paths, sized and stretched to read like the mockup splat. */
+.hero .mark-blob {
+  --mark-scale: 1;
+  top: 48%;
+  /* Wide viewBox already encodes resting stretch; width sets on-screen size */
+  width: min(520px, 48vw);
+  transform: translate(-50%, -50%) scaleX(var(--mark-scale));
+  overflow: visible;
+}
+
 
 .feed {
   position: relative;
@@ -908,6 +935,13 @@ body:has(.project) .site-header {
   .hero .mark {
     top: 17svh;
     width: 33vw;
+  }
+
+  .hero .mark-blob {
+    --mark-scale: 1;
+    top: 26svh;
+    width: min(340px, 82vw);
+    transform: translate(-50%, 0) scaleX(var(--mark-scale));
   }
 
   body:has(.hero) .site-header {

@@ -1,6 +1,7 @@
 ---
 export const prerender = true;
 
+import HeroBlob from '../components/HeroBlob.astro';
 import Mark from '../components/Mark.astro';
 import ProjectFeed from '../components/ProjectFeed.astro';
 import Base from '../layouts/Base.astro';
@@ -23,10 +24,31 @@ const description = plainText(site.intro);
   jsonLd={homeJsonLd(site, pageUrl)}
 >
   <h1 class="sr-only">{site.name}, {site.studio}</h1>
-  <section class="hero" aria-label="Humansize">
+  <section class="hero" aria-label="Humansize" data-hero-root>
     <div class="mark-wrap">
-      <Mark />
+      {/* Blob is default. ?hero=gradient keeps the old little-man gradient for compare. */}
+      <div class="hero-variant" data-hero-variant="blob">
+        <HeroBlob />
+      </div>
+      <div class="hero-variant" data-hero-variant="gradient" hidden>
+        <Mark />
+      </div>
     </div>
   </section>
   <ProjectFeed projects={projects} about={site.about} />
 </Base>
+
+<script>
+  import { initHeroBlob } from '../scripts/hero-blob';
+
+  const root = document.querySelector<HTMLElement>('[data-hero-root]');
+  if (root) {
+    const mode = new URLSearchParams(location.search).get('hero') === 'gradient' ? 'gradient' : 'blob';
+    root.dataset.hero = mode;
+    root.querySelectorAll<HTMLElement>('[data-hero-variant]').forEach((el) => {
+      const on = el.dataset.heroVariant === mode;
+      el.hidden = !on;
+    });
+    if (mode === 'blob') initHeroBlob(root);
+  }
+</script>
