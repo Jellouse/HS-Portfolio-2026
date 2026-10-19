@@ -45,11 +45,11 @@ blocks:
       src: /src/content/projects/industrial-bloom/blocks/3/value/src.jpg
       frame: full
       flush: false
-  - discriminant: image
+  - discriminant: pair
     value:
-      src: /src/content/projects/industrial-bloom/blocks/4/value/src.jpg
-      frame: full
-      flush: false
+      layout: pair
+      left: /src/content/projects/industrial-bloom/blocks/4/value/left.jpg
+      right: /src/content/projects/industrial-bloom/blocks/4/value/right.jpg
   - discriminant: image
     value:
       src: /src/content/projects/industrial-bloom/blocks/5/value/src.jpg
@@ -67,6 +67,11 @@ blocks:
       flush: false
   - discriminant: image
     value:
+      src: /src/content/projects/industrial-bloom/blocks/8/value/src.jpg
+      frame: full
+      flush: false
+  - discriminant: image
+    value:
       src: /src/content/projects/industrial-bloom/blocks/9/value/src.jpg
       frame: full
       flush: false
@@ -80,37 +85,22 @@ blocks:
       src: /src/content/projects/industrial-bloom/blocks/11/value/src.jpg
       frame: full
       flush: false
-  - discriminant: image
-    value:
-      src: /src/content/projects/industrial-bloom/blocks/12/value/src.jpg
-      frame: full
-      flush: false
-  - discriminant: image
-    value:
-      src: /src/content/projects/industrial-bloom/blocks/13/value/src.jpg
-      frame: full
-      flush: false
-  - discriminant: image
-    value:
-      src: /src/content/projects/industrial-bloom/blocks/14/value/src.jpg
-      frame: full
-      flush: false
   - discriminant: process
     value:
       images:
         - src: >-
-            /src/content/projects/industrial-bloom/blocks/15/value/images/0/src.jpg
+            /src/content/projects/industrial-bloom/blocks/12/value/images/0/src.jpg
           alt: Industrial Bloom vase
           flush: false
         - src: >-
-            /src/content/projects/industrial-bloom/blocks/15/value/images/1/src.jpg
+            /src/content/projects/industrial-bloom/blocks/12/value/images/1/src.jpg
           alt: Industrial Bloom vase
           flush: false
         - src: >-
-            /src/content/projects/industrial-bloom/blocks/15/value/images/2/src.jpg
+            /src/content/projects/industrial-bloom/blocks/12/value/images/2/src.jpg
           alt: Industrial Bloom round vase
           flush: false
         - src: >-
-            /src/content/projects/industrial-bloom/blocks/15/value/images/3/src.jpg
+            /src/content/projects/industrial-bloom/blocks/12/value/images/3/src.jpg
           alt: Industrial Bloom vase
           flush: false
