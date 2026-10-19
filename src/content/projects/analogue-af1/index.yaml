@@ -62,8 +62,3 @@ blocks:
       src: /src/content/projects/analogue-af1/blocks/7/value/src.jpg
       frame: full
       flush: false
-  - discriminant: image
-    value:
-      src: /src/content/projects/analogue-af1/blocks/8/value/src.jpg
-      frame: full
-      flush: false
