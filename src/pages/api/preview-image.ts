@@ -57,13 +57,19 @@ export const GET: APIRoute = async ({ request, url }) => {
   const ext = rawPath.split('.').pop()?.toLowerCase() || 'jpg';
   const type = TYPES[ext] || upstream.headers.get('content-type') || 'application/octet-stream';
   const body = await upstream.arrayBuffer();
+  const asDownload = url.searchParams.get('download') === '1' || url.searchParams.get('download') === 'true';
+  const filename = rawPath.split('/').pop() || `image.${ext}`;
+  const headers: Record<string, string> = {
+    'Content-Type': type,
+    'Cache-Control': 'private, max-age=300',
+    'X-Robots-Tag': 'noindex, nofollow',
+  };
+  if (asDownload) {
+    headers['Content-Disposition'] = `attachment; filename="${filename.replace(/"/g, '')}"`;
+  }
 
   return new Response(body, {
     status: 200,
-    headers: {
-      'Content-Type': type,
-      'Cache-Control': 'private, max-age=300',
-      'X-Robots-Tag': 'noindex, nofollow',
-    },
+    headers,
   });
 };

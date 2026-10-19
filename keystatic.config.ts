@@ -1,5 +1,5 @@
 import { withUpload } from './src/lib/VideoUrlInput';
-import { withImageOptimize } from './src/lib/image-field-optimize';
+import { withImageCms } from './src/lib/image-field-cms';
 import { config, fields, collection, singleton } from '@keystatic/core';
 
 const repo = 'Jellouse/HS-Portfolio-2026';
@@ -69,7 +69,7 @@ function imageField(
     ...(opts?.required ? { validation: { isRequired: true as const } } : {}),
   });
   // Compress in the browser before the file enters form state / the GitHub commit.
-  return { ...field, Input: withImageOptimize(field.Input as any) };
+  return { ...field, Input: withImageCms(field.Input as any) };
 }
 
 export default config({
@@ -209,6 +209,16 @@ export default config({
             pair: {
               label: 'Image pair',
               schema: fields.object({
+                layout: fields.select({
+                  label: 'Layout',
+                  description:
+                    'Stacked shows each photo as a normal full-width image block (same look and spacing as separate Image blocks). Keystatic cannot replace one block with two in the list, so this is the supported way to un-pair.',
+                  options: [
+                    { label: 'Side by side', value: 'pair' },
+                    { label: 'Stacked like two image blocks', value: 'stack' },
+                  ],
+                  defaultValue: 'pair',
+                }),
                 left: imageField('Left image', { required: true }),
                 leftAlt: fields.text({
                   label: 'Left alt text',

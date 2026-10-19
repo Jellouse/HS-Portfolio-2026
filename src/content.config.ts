@@ -35,6 +35,7 @@ const videoBlock = z.object({
 const pairBlock = z.object({
   discriminant: z.literal('pair'),
   value: z.object({
+    layout: z.enum(['pair', 'stack']).default('pair'),
     left: z.string(),
     leftAlt: z.string().default(''),
     right: z.string(),

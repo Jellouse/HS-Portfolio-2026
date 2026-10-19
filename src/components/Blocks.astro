@@ -60,6 +60,14 @@ const hasProcessBlock = blocks.some((b) => b.discriminant === 'process');
     if (block.discriminant === 'process') {
       return <ProcessBlock images={useFolder ? folder : block.value.images} />;
     }
+    if (block.value.layout === 'stack') {
+      return (
+        <>
+          <ImageBlock src={block.value.left} alt={block.value.leftAlt ?? ''} />
+          <ImageBlock src={block.value.right} alt={block.value.rightAlt ?? ''} />
+        </>
+      );
+    }
     return (
       <ImagePair
         left={block.value.left}
