@@ -11,8 +11,8 @@ export type HeroBlobDrift = {
 };
 
 export const heroBlobDrift: HeroBlobDrift = {
-  max: 48,
-  ease: 0.035,
+  max: 104,
+  ease: 0.04,
   idleAmp: 14,
   idleSpeed: 0.00028,
 };

@@ -13,7 +13,8 @@ const { projects, about } = Astro.props;
 ---
 
 <div class="feed page-grid">
-  <LeadCard />
+  {/* About first so bio peeks under the hero; peeps lead card follows. */}
   <About paragraphs={about} />
+  <LeadCard />
   {projects.map((project, index) => <ProjectCard project={project} priority={index === 0} />)}
 </div>

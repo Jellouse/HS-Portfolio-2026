@@ -418,11 +418,11 @@ body:has(.hero) .site-header {
 }
 
 .hero {
-
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-height: 100svh;
+  /* Tight hero: blob band, not a full-viewport spacer (bio peeks below) */
+  min-height: 0;
   padding: 72px var(--pad) 0;
 }
 
@@ -430,7 +430,7 @@ body:has(.hero) .site-header {
   position: relative;
   flex: 1;
   width: 100%;
-  min-height: 100svh;
+  min-height: 68svh;
 }
 
 .mark {
@@ -467,7 +467,7 @@ body:has(.hero) .site-header {
 .feed {
   position: relative;
   z-index: 1;
-  margin-top: -64px;
+  margin-top: -96px;
   padding: 0 var(--pad) 40px;
 }
 
@@ -919,14 +919,14 @@ body:has(.project) .site-header {
   }
 
   .hero {
-    height: 100svh;
+    height: auto;
     min-height: 0;
     padding: 0;
   }
 
   .mark-wrap {
-    min-height: 0;
-    height: 100%;
+    min-height: 58svh;
+    height: 58svh;
   }
 
   :root:has(.hero) {
@@ -946,7 +946,7 @@ body:has(.project) .site-header {
   }
 
   body:has(.hero) .site-header {
-    top: 72svh;
+    top: 62svh;
     flex-direction: column;
     align-items: center;
     text-align: center;
@@ -1019,7 +1019,12 @@ body:has(.project) .site-header {
   }
 
   .feed {
-    margin-top: -8svh;
+    margin-top: -14svh;
+  }
+
+  .about {
+    margin-top: 0;
+    margin-bottom: 96px;
   }
 }
 
@@ -1029,7 +1034,7 @@ body:has(.project) .site-header {
   }
 
   .mark-wrap {
-    min-height: 100svh;
+    min-height: 72svh;
   }
 
   .mark {
@@ -1064,8 +1069,12 @@ body:has(.project) .site-header {
   }
 
   .feed {
-    margin-top: -32px;
+    margin-top: -120px;
     padding-bottom: 80px;
+  }
+
+  .about {
+    margin-top: 0;
   }
 
   .frame,

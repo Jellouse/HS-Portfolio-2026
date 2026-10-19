@@ -15,14 +15,14 @@ export type HeroBlobDialValues = {
 };
 
 const DEFAULTS: HeroBlobDialValues = {
-  baseFrequency: 0.018,
-  scale: 62,
+  baseFrequency: 0.015,
+  scale: 111,
   blur: 2.2,
-  threshold: 3,
-  octaves: 3,
-  seed: 41,
-  driftMax: 48,
-  driftEase: 0.035,
+  threshold: 2,
+  octaves: 2,
+  seed: 48,
+  driftMax: 104,
+  driftEase: 0.04,
   colour: '#B70606',
 };
 

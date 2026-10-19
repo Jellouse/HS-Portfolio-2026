@@ -28,9 +28,8 @@
   <defs>
     <!--
       Map (Figma → SVG), clipToShape=false:
-        size≈100  → baseFrequency ≈ 1/(size*0.55) ≈ 0.018
-        radius≈100 → displace scale ≈ 55–70 at this viewBox; region pad ~radius%
-        then blur + discrete alpha (crisp gooey edges / mockup)
+        baked dials: freq 0.015 / scale 111 / blur 2.2 / thresh 2
+        octaves 2 / seed 48 / drift 104@0.04
     -->
     <filter
       id="hero-blob-texture"
@@ -43,16 +42,16 @@
     >
       <feTurbulence
         type="fractalNoise"
-        baseFrequency="0.018"
-        numOctaves="3"
-        seed="41"
+        baseFrequency="0.015"
+        numOctaves="2"
+        seed="48"
         result="noise"
       ></feTurbulence>
       <feOffset in="noise" dx="0" dy="0" result="shifted" data-blob-offset></feOffset>
       <feDisplacementMap
         in="SourceGraphic"
         in2="shifted"
-        scale="62"
+        scale="111"
         xChannelSelector="R"
         yChannelSelector="G"
         result="displaced"
@@ -60,7 +59,7 @@
       <!-- Soften fringe then hard-cut alpha → liquid/crisp edge (mockup) -->
       <feGaussianBlur in="displaced" stdDeviation="2.2" result="blurred"></feGaussianBlur>
       <feComponentTransfer in="blurred" result="goo">
-        <feFuncA type="discrete" tableValues="0 0 0 1 1 1 1 1"></feFuncA>
+        <feFuncA type="discrete" tableValues="0 0 1 1 1 1 1 1"></feFuncA>
       </feComponentTransfer>
       <feFlood flood-color="#B70606" result="red"></feFlood>
       <feComposite in="red" in2="goo" operator="in" result="flat"></feComposite>
