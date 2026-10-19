@@ -7,7 +7,7 @@ summary: >-
   developed in house at Analogue.
 cover: /src/content/projects/analogue-af1/cover.png
 coverAlt: Black Analogue AF1 film camera from the front
-coverFrame: wide
+coverFrame: medium
 coverFlush: false
 rounded: true
 info:
