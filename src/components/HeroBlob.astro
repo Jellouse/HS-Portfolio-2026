@@ -1,13 +1,14 @@
 ---
-/** Homepage hero mark: little-man paths with a Figma-style Texture
- *  (feTurbulence + feDisplacementMap). Clip-to-shape is off so distress spills.
- *  Tuned by eye to Johann's mockup (Figma Texture 100/100/100 was a hint only;
- *  he also rescaled). Gradient Mark stays via ?hero=gradient. */
+/** Homepage hero: Johann's face mark with Figma-style Texture.
+ *  Clip off + displace + blur + hard alpha threshold = crisp gooey melt,
+ *  spill droplets, inner eyes/mouth kept filled. Source proportions (no
+ *  horizontal stretch). Texture drifts via feOffset on pointer.
+ *  Gradient via ?hero=gradient. */
 ---
 
 <svg
   class="mark mark-blob"
-  viewBox="0 0 640 362"
+  viewBox="0 0 559 249"
   fill="none"
   aria-hidden="true"
   xmlns="http://www.w3.org/2000/svg"
@@ -16,48 +17,93 @@
 >
   <defs>
     <!--
-      Eye-matched to mockup: wide splat (~1.79), liquid lakes + bridges,
-      melt edges, loose droplets. Flat #B70606.
-      Resting scaleX baked into geometry so filter sees the final silhouette
-      (CSS scaleX was shredding noise). Isotropic low-freq + strong displace.
-      Oversized filter region = Clip to shape OFF.
-      feOffset: JS drifts the noise field toward the pointer.
-      Figma Size/Radius/Clip were hints only — numbers below are visual rescale.
+      Eye-matched to mockup (no extra scaleX — source 559×249 as-is):
+        1) low-freq displace → blur → discrete alpha = crisp gooey body
+        2) high-freq / high-scale spill pass for tendrils + droplets
+        3) oversized filter region (Clip OFF)
+      feOffset: JS shifts noise field only (shape does not move/scale).
     -->
     <filter
       id="hero-blob-texture"
-      x="-22%"
-      y="-40%"
-      width="144%"
-      height="180%"
+      x="-60%"
+      y="-80%"
+      width="220%"
+      height="260%"
       filterUnits="objectBoundingBox"
       color-interpolation-filters="sRGB"
     >
       <feTurbulence
         type="fractalNoise"
-        baseFrequency="0.0095"
+        baseFrequency="0.009"
         numOctaves="2"
-        seed="19"
+        seed="41"
         result="noise"
       ></feTurbulence>
       <feOffset in="noise" dx="0" dy="0" result="shifted" data-blob-offset></feOffset>
+
+      <!-- Body: chunky melt, strong blur → clean liquid edges -->
       <feDisplacementMap
         in="SourceGraphic"
         in2="shifted"
-        scale="148"
+        scale="105"
         xChannelSelector="R"
         yChannelSelector="G"
-        result="displaced"
+        result="dispMain"
       ></feDisplacementMap>
+      <feGaussianBlur in="dispMain" stdDeviation="4.5" result="blurMain"></feGaussianBlur>
+      <feComponentTransfer in="blurMain" result="gooMain">
+        <feFuncA type="discrete" tableValues="0 0 1 1 1 1 1"></feFuncA>
+      </feComponentTransfer>
+
+      <!-- Spill noise (higher freq) for thin strands / islands -->
+      <feTurbulence
+        type="fractalNoise"
+        baseFrequency="0.035"
+        numOctaves="2"
+        seed="7"
+        result="noiseSpill"
+      ></feTurbulence>
+      <feOffset in="noiseSpill" dx="0" dy="0" result="shiftedSpill" data-blob-offset-spill></feOffset>
+      <feDisplacementMap
+        in="SourceGraphic"
+        in2="shiftedSpill"
+        scale="48"
+        xChannelSelector="R"
+        yChannelSelector="G"
+        result="dispSpill"
+      ></feDisplacementMap>
+      <feGaussianBlur in="dispSpill" stdDeviation="0.9" result="blurSpill"></feGaussianBlur>
+      <feComponentTransfer in="blurSpill" result="gooSpill">
+        <feFuncA type="discrete" tableValues="0 0 0 0 1 1 1"></feFuncA>
+      </feComponentTransfer>
+
+      <feMerge result="goo">
+        <feMergeNode in="gooMain"></feMergeNode>
+        <feMergeNode in="gooSpill"></feMergeNode>
+      </feMerge>
+      <feFlood flood-color="#B70606" result="red"></feFlood>
+      <feComposite in="red" in2="goo" operator="in" result="flat"></feComposite>
       <feMerge>
-        <feMergeNode in="displaced"></feMergeNode>
+        <feMergeNode in="flat"></feMergeNode>
       </feMerge>
     </filter>
   </defs>
   <g filter="url(#hero-blob-texture)">
-    <g transform="translate(320 181) scale(3.7 1) translate(-85.5 -181)">
-      <path d="M85.5 85.9893C132.72 85.9893 171 147.773 171 223.988C171 299.62 133.304 361.041 86.583 361.977C127.229 361.04 160 307.456 160 241.49C160 174.94 126.645 120.99 85.5 120.99C44.3548 120.99 11 174.94 11 241.49C11 307.455 43.7706 361.039 84.416 361.977C37.6952 361.04 9.65114e-07 299.619 0 223.988C0.000106323 147.773 38.2797 85.9894 85.5 85.9893Z" fill="#B70606" stroke="#B70606" stroke-width="26" stroke-linejoin="round"></path>
-      <path d="M85 74.9883C97.7025 74.9882 108 58.199 108 37.4883C108 17.0629 97.9841 0.45381 85.5234 0C96.3272 0.451067 105 14.8234 105 32.4883C105 50.4375 96.0457 64.9883 85 64.9883C73.9543 64.9883 65 50.4375 65 32.4883C65 14.824 73.6723 0.451887 84.4756 0C72.0153 0.454514 62.0001 17.0634 62 37.4883C62 58.1991 72.2975 74.9883 85 74.9883Z" fill="#B70606" stroke="#B70606" stroke-width="10" stroke-linejoin="round"></path>
-    </g>
+    <path
+      d="M279.042 0C433.153 -6.7364e-06 558.085 58.867 558.085 131.482C558.085 182.171 497.209 226.158 408.028 248.102V245.562C476.807 225.284 522.552 189.272 522.552 148.225C522.552 84.8558 413.529 33.4854 279.042 33.4854C144.555 33.4854 35.5312 84.8557 35.5312 148.225C35.5314 189.275 81.2831 225.289 150.07 245.566V248.104C60.8819 226.162 0.000283291 182.174 0 131.482C-3.17412e-06 58.8671 124.931 0.000104863 279.042 0Z"
+      fill="#B70606"></path>
+    <ellipse cx="153.872" cy="149.482" rx="84.8098" ry="60.171" fill="#B70606"></ellipse>
+    <ellipse cx="404.224" cy="149.482" rx="84.8098" ry="60.171" fill="#B70606"></ellipse>
+    <ellipse cx="280.484" cy="235.027" rx="78.7657" ry="10.0642" fill="#B70606"></ellipse>
+    <!-- Far seeds → detached droplets after spill displace -->
+    <circle cx="-20" cy="120" r="4" fill="#B70606"></circle>
+    <circle cx="580" cy="130" r="3.5" fill="#B70606"></circle>
+    <circle cx="60" cy="-15" r="3" fill="#B70606"></circle>
+    <circle cx="500" cy="-12" r="3.2" fill="#B70606"></circle>
+    <circle cx="120" cy="270" r="3" fill="#B70606"></circle>
+    <circle cx="440" cy="275" r="3.4" fill="#B70606"></circle>
+    <circle cx="280" cy="-25" r="2.5" fill="#B70606"></circle>
+    <circle cx="-10" cy="220" r="2.8" fill="#B70606"></circle>
+    <circle cx="570" cy="210" r="2.6" fill="#B70606"></circle>
   </g>
 </svg>

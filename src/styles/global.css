@@ -413,8 +413,8 @@ body:has(.hero) .site-header {
 
 .hero:has(.mark-blob:not([hidden])),
 .hero:has([data-hero-variant="blob"]:not([hidden])) {
-  /* Resting stretch is in the SVG; pointer only nudges a little */
-  --mark-stretch-max: 1.18;
+  /* No horizontal shape stretch — texture moves, silhouette stays */
+  --mark-stretch-max: 1;
 }
 
 .hero {
@@ -456,9 +456,10 @@ body:has(.hero) .site-header {
 .hero .mark-blob {
   --mark-scale: 1;
   top: 48%;
-  /* Wide viewBox already encodes resting stretch; width sets on-screen size */
-  width: min(520px, 48vw);
-  transform: translate(-50%, -50%) scaleX(var(--mark-scale));
+  /* Source SVG proportions (559×249); no extra scaleX */
+  width: min(500px, 46vw);
+  height: auto;
+  transform: translate(-50%, -50%);
   overflow: visible;
 }
 
@@ -940,8 +941,8 @@ body:has(.project) .site-header {
   .hero .mark-blob {
     --mark-scale: 1;
     top: 26svh;
-    width: min(340px, 82vw);
-    transform: translate(-50%, 0) scaleX(var(--mark-scale));
+    width: min(340px, 88vw);
+    transform: translate(-50%, 0);
   }
 
   body:has(.hero) .site-header {

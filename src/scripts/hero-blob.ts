@@ -1,16 +1,20 @@
-// Drift the hero blob texture toward the pointer (desktop) or a quiet idle loop (touch).
-// No new permission prompts. Respects prefers-reduced-motion.
+// Move the hero blob *texture* toward the pointer (desktop) or a quiet idle
+// loop (touch). Shifts the feTurbulence noise field via feOffset — the SVG
+// silhouette does not translate or scale. No new permission prompts.
+// Respects prefers-reduced-motion.
 
-const MAX = 28; // feOffset px range inside the filter's noise field
-const EASE = 0.045; // slow chase
-const IDLE_AMP = 10;
-const IDLE_SPEED = 0.00035;
+const MAX = 48; // feOffset px into the noise field
+const EASE = 0.035; // slow chase
+const IDLE_AMP = 14;
+const IDLE_SPEED = 0.00028;
 
 export function initHeroBlob(root: ParentNode = document) {
   const svg = root.querySelector<SVGElement>('[data-hero-blob]');
   if (!svg) return;
-  const offset = svg.querySelector<SVGFEOffsetElement>('feOffset[data-blob-offset]');
-  if (!offset) return;
+  const offsets = Array.from(
+    svg.querySelectorAll<SVGFEOffsetElement>('feOffset[data-blob-offset], feOffset[data-blob-offset-spill]'),
+  );
+  if (!offsets.length) return;
 
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
   const fine = window.matchMedia('(hover: hover) and (pointer: fine)');
@@ -23,8 +27,14 @@ export function initHeroBlob(root: ParentNode = document) {
   let lastPointer = -Infinity;
 
   const paint = () => {
-    offset.setAttribute('dx', curX.toFixed(2));
-    offset.setAttribute('dy', curY.toFixed(2));
+    const dx = curX.toFixed(2);
+    const dy = curY.toFixed(2);
+    for (const offset of offsets) {
+      // Spill layer drifts a bit further for parallax in the texture
+      const k = offset.hasAttribute('data-blob-offset-spill') ? 1.35 : 1;
+      offset.setAttribute('dx', (curX * k).toFixed(2));
+      offset.setAttribute('dy', (curY * k).toFixed(2));
+    }
   };
 
   const tick = (now: number) => {
@@ -36,19 +46,14 @@ export function initHeroBlob(root: ParentNode = document) {
       return;
     }
 
-    // Idle when no recent pointer (mobile / parked cursor)
     if (!fine.matches || now - lastPointer > 1800) {
       tgtX = Math.sin(now * IDLE_SPEED) * IDLE_AMP;
-      tgtY = Math.cos(now * IDLE_SPEED * 0.85) * IDLE_AMP * 0.7;
+      tgtY = Math.cos(now * IDLE_SPEED * 0.85) * IDLE_AMP * 0.65;
     }
 
     curX += (tgtX - curX) * EASE;
     curY += (tgtY - curY) * EASE;
     paint();
-
-    if (Math.abs(tgtX - curX) < 0.05 && Math.abs(tgtY - curY) < 0.05 && now - lastPointer > 1800) {
-      // keep idle looping
-    }
     frame = requestAnimationFrame(tick);
   };
 
@@ -69,8 +74,9 @@ export function initHeroBlob(root: ParentNode = document) {
       lastPointer = performance.now();
       const nx = (event.clientX / window.innerWidth) * 2 - 1;
       const ny = (event.clientY / window.innerHeight) * 2 - 1;
+      // Noise field only — silhouette stays put
       tgtX = nx * MAX;
-      tgtY = ny * MAX * 0.75;
+      tgtY = ny * MAX * 0.7;
       wake();
     },
     { passive: true },

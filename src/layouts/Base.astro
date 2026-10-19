@@ -145,7 +145,8 @@ const site = await getSite();
         });
 
         var marks = Array.prototype.filter.call(document.querySelectorAll('.mark'), function (m) {
-          return !m.closest('[hidden]');
+          // Blob keeps source proportions; only gradient Mark stretches.
+          return !m.closest('[hidden]') && !m.classList.contains('mark-blob');
         });
         if (marks.length) {
           var fine = window.matchMedia('(hover: hover) and (pointer: fine)');
