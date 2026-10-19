@@ -1,20 +1,18 @@
-// Move the hero blob *texture* toward the pointer (desktop) or a quiet idle
-// loop (touch). Shifts the feTurbulence noise field via feOffset — the SVG
-// silhouette does not translate or scale. No new permission prompts.
+// Shift the Figma-Texture noise field toward the pointer (desktop) or a
+// quiet idle loop (touch). Only feOffset on the turbulence moves — the
+// SVG silhouette does not translate or scale. No new permission prompts.
 // Respects prefers-reduced-motion.
 
-const MAX = 48; // feOffset px into the noise field
-const EASE = 0.035; // slow chase
+const MAX = 48;
+const EASE = 0.035;
 const IDLE_AMP = 14;
 const IDLE_SPEED = 0.00028;
 
 export function initHeroBlob(root: ParentNode = document) {
   const svg = root.querySelector<SVGElement>('[data-hero-blob]');
   if (!svg) return;
-  const offsets = Array.from(
-    svg.querySelectorAll<SVGFEOffsetElement>('feOffset[data-blob-offset], feOffset[data-blob-offset-spill]'),
-  );
-  if (!offsets.length) return;
+  const offset = svg.querySelector<SVGFEOffsetElement>('feOffset[data-blob-offset]');
+  if (!offset) return;
 
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
   const fine = window.matchMedia('(hover: hover) and (pointer: fine)');
@@ -27,14 +25,8 @@ export function initHeroBlob(root: ParentNode = document) {
   let lastPointer = -Infinity;
 
   const paint = () => {
-    const dx = curX.toFixed(2);
-    const dy = curY.toFixed(2);
-    for (const offset of offsets) {
-      // Spill layer drifts a bit further for parallax in the texture
-      const k = offset.hasAttribute('data-blob-offset-spill') ? 1.35 : 1;
-      offset.setAttribute('dx', (curX * k).toFixed(2));
-      offset.setAttribute('dy', (curY * k).toFixed(2));
-    }
+    offset.setAttribute('dx', curX.toFixed(2));
+    offset.setAttribute('dy', curY.toFixed(2));
   };
 
   const tick = (now: number) => {
@@ -74,7 +66,6 @@ export function initHeroBlob(root: ParentNode = document) {
       lastPointer = performance.now();
       const nx = (event.clientX / window.innerWidth) * 2 - 1;
       const ny = (event.clientY / window.innerHeight) * 2 - 1;
-      // Noise field only — silhouette stays put
       tgtX = nx * MAX;
       tgtY = ny * MAX * 0.7;
       wake();
