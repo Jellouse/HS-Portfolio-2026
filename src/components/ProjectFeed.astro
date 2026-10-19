@@ -1,6 +1,5 @@
 ---
 import About from './About.astro';
-import LeadCard from './LeadCard.astro';
 import ProjectCard from './ProjectCard.astro';
 import type { ProjectEntry } from '../lib/content';
 
@@ -13,8 +12,6 @@ const { projects, about } = Astro.props;
 ---
 
 <div class="feed page-grid">
-  {/* About first so bio peeks under the hero; peeps lead card follows. */}
   <About paragraphs={about} />
-  <LeadCard />
   {projects.map((project, index) => <ProjectCard project={project} priority={index === 0} />)}
 </div>

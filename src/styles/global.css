@@ -421,8 +421,8 @@ body:has(.hero) .site-header {
   display: flex;
   flex-direction: column;
   align-items: center;
-  /* Tight hero: blob band, not a full-viewport spacer (bio peeks below) */
-  min-height: 0;
+  /* Full first viewport; bio peeks ~one line below */
+  min-height: 100svh;
   padding: 72px var(--pad) 0;
 }
 
@@ -430,7 +430,7 @@ body:has(.hero) .site-header {
   position: relative;
   flex: 1;
   width: 100%;
-  min-height: 68svh;
+  min-height: 100svh;
 }
 
 .mark {
@@ -455,8 +455,8 @@ body:has(.hero) .site-header {
 /* Blob: same little-man paths, sized and stretched to read like the mockup splat. */
 .hero .mark-blob {
   --mark-scale: 1;
-  top: 48%;
-  /* Source SVG proportions (559×249); no extra scaleX */
+  /* Align vertical centre with name/@Humansize row (header at 50svh) */
+  top: 50svh;
   width: min(500px, 46vw);
   height: auto;
   transform: translate(-50%, -50%);
@@ -467,7 +467,8 @@ body:has(.hero) .site-header {
 .feed {
   position: relative;
   z-index: 1;
-  margin-top: -96px;
+  /* ~one bio line peeks at the bottom edge */
+  margin-top: -36px;
   padding: 0 var(--pad) 40px;
 }
 
@@ -919,14 +920,14 @@ body:has(.project) .site-header {
   }
 
   .hero {
-    height: auto;
+    height: 100svh;
     min-height: 0;
     padding: 0;
   }
 
   .mark-wrap {
-    min-height: 58svh;
-    height: 58svh;
+    min-height: 0;
+    height: 100%;
   }
 
   :root:has(.hero) {
@@ -940,9 +941,9 @@ body:has(.project) .site-header {
 
   .hero .mark-blob {
     --mark-scale: 1;
-    top: 26svh;
+    top: 38svh;
     width: min(340px, 88vw);
-    transform: translate(-50%, 0);
+    transform: translate(-50%, -50%);
   }
 
   body:has(.hero) .site-header {
@@ -950,7 +951,7 @@ body:has(.project) .site-header {
     flex-direction: column;
     align-items: center;
     text-align: center;
-    transform: translateX(-50%);
+    transform: translate(-50%, -50%);
   }
 
   /* Fixed block: an open menu or time overlays the lines and hides what it covers. */
@@ -1019,7 +1020,7 @@ body:has(.project) .site-header {
   }
 
   .feed {
-    margin-top: -14svh;
+    margin-top: -32px;
   }
 
   .about {
@@ -1034,7 +1035,7 @@ body:has(.project) .site-header {
   }
 
   .mark-wrap {
-    min-height: 72svh;
+    min-height: 100svh;
   }
 
   .mark {
@@ -1069,7 +1070,7 @@ body:has(.project) .site-header {
   }
 
   .feed {
-    margin-top: -120px;
+    margin-top: -36px;
     padding-bottom: 80px;
   }
 
