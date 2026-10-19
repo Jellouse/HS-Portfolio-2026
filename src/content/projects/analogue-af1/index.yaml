@@ -15,7 +15,7 @@ info:
     value: Analogue
   - label: Role
     value: 3D rendering & animation
-processFromFolder: false
+processFromFolder: true
 blocks:
   - discriminant: video
     value:
@@ -52,3 +52,18 @@ blocks:
     value:
       left: /src/content/projects/analogue-af1/blocks/5/value/left.jpg
       right: /src/content/projects/analogue-af1/blocks/5/value/right.jpg
+  - discriminant: image
+    value:
+      src: /src/content/projects/analogue-af1/blocks/6/value/src.jpg
+      frame: full
+      flush: false
+  - discriminant: image
+    value:
+      src: /src/content/projects/analogue-af1/blocks/7/value/src.jpg
+      frame: full
+      flush: false
+  - discriminant: image
+    value:
+      src: /src/content/projects/analogue-af1/blocks/8/value/src.jpg
+      frame: full
+      flush: false
