@@ -40,6 +40,7 @@ const description = plainText(site.intro);
 
 <script>
   import { initHeroBlob } from '../scripts/hero-blob';
+  import { initHeroBlobDials } from '../scripts/hero-blob-dials';
 
   const root = document.querySelector<HTMLElement>('[data-hero-root]');
   if (root) {
@@ -49,6 +50,9 @@ const description = plainText(site.intro);
       const on = el.dataset.heroVariant === mode;
       el.hidden = !on;
     });
-    if (mode === 'blob') initHeroBlob(root);
+    if (mode === 'blob') {
+      initHeroBlob(root);
+      initHeroBlobDials(root);
+    }
   }
 </script>

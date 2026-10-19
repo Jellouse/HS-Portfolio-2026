@@ -3,10 +3,19 @@
 // SVG silhouette does not translate or scale. No new permission prompts.
 // Respects prefers-reduced-motion.
 
-const MAX = 48;
-const EASE = 0.035;
-const IDLE_AMP = 14;
-const IDLE_SPEED = 0.00028;
+export type HeroBlobDrift = {
+  max: number;
+  ease: number;
+  idleAmp: number;
+  idleSpeed: number;
+};
+
+export const heroBlobDrift: HeroBlobDrift = {
+  max: 48,
+  ease: 0.035,
+  idleAmp: 14,
+  idleSpeed: 0.00028,
+};
 
 export function initHeroBlob(root: ParentNode = document) {
   const svg = root.querySelector<SVGElement>('[data-hero-blob]');
@@ -38,13 +47,15 @@ export function initHeroBlob(root: ParentNode = document) {
       return;
     }
 
+    const { max, ease, idleAmp, idleSpeed } = heroBlobDrift;
+
     if (!fine.matches || now - lastPointer > 1800) {
-      tgtX = Math.sin(now * IDLE_SPEED) * IDLE_AMP;
-      tgtY = Math.cos(now * IDLE_SPEED * 0.85) * IDLE_AMP * 0.65;
+      tgtX = Math.sin(now * idleSpeed) * idleAmp;
+      tgtY = Math.cos(now * idleSpeed * 0.85) * idleAmp * 0.65;
     }
 
-    curX += (tgtX - curX) * EASE;
-    curY += (tgtY - curY) * EASE;
+    curX += (tgtX - curX) * ease;
+    curY += (tgtY - curY) * ease;
     paint();
     frame = requestAnimationFrame(tick);
   };
@@ -66,8 +77,8 @@ export function initHeroBlob(root: ParentNode = document) {
       lastPointer = performance.now();
       const nx = (event.clientX / window.innerWidth) * 2 - 1;
       const ny = (event.clientY / window.innerHeight) * 2 - 1;
-      tgtX = nx * MAX;
-      tgtY = ny * MAX * 0.7;
+      tgtX = nx * heroBlobDrift.max;
+      tgtY = ny * heroBlobDrift.max * 0.7;
       wake();
     },
     { passive: true },
