@@ -804,8 +804,6 @@ body:has(.project) .site-header {
   height: 100svh;
   max-height: 100vh;
   max-height: 100svh;
-  /* clip (not hidden): no scroll container, so the text reveal's view() timeline tracks the page */
-  overflow: clip;
 }
 
 /* Text band above the faces; page-grid + footer-text share the about column. */
@@ -820,8 +818,6 @@ body:has(.project) .site-header {
   display: flex;
   flex-direction: column;
   justify-content: safe center;
-  /* clip, not hidden: hidden makes a scroll container, which traps view() timelines */
-  overflow: clip;
 }
 
 .footer-copy .page-grid {
@@ -861,7 +857,6 @@ body:has(.project) .site-header {
   aspect-ratio: 100 / 52;
   max-height: min(52vw, 60svh);
   height: auto;
-  overflow: hidden;
   pointer-events: none;
 }
 
@@ -1464,13 +1459,6 @@ html.show-grid .grid-overlay .page-grid {
       animation: text-in linear both;
       animation-timeline: view();
       animation-range: cover 0px cover 15vh;
-    }
-
-    /* Footer is the last 100svh: its text never travels far, so play the reveal over its entry. */
-    .footer-text .is-split .reveal-word,
-    .footer-text.is-split .reveal-word,
-    .footer-text p.is-split .reveal-word {
-      animation-range: entry 0% entry 100%;
     }
   }
 
