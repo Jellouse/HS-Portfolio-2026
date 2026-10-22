@@ -24,7 +24,7 @@ const { project } = Astro.props;
 const summary = plainText(project.data.summary);
 const image = project.data.cover ? resolveImage(project.data.cover) : undefined;
 const pageUrl = absoluteUrl(Astro.site, `/work/${project.id}/`);
-const title = `${projectLabel(project.data)} · Humansize`;
+const title = `${project.data.seoTitle?.trim() || projectLabel(project.data)} · Humansize`;
 ---
 
 <Base

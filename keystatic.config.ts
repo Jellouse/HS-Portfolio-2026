@@ -101,6 +101,10 @@ export default config({
           defaultValue: true,
           description: 'Unpublished projects stay in the repo and off the site.',
         }),
+        seoTitle: fields.text({
+          label: 'SEO title',
+          description: 'Optional browser and search title; " · Humansize" is added. Empty uses the title and years.',
+        }),
         summary: fields.text({
           label: 'Summary',
           multiline: true,

@@ -2,10 +2,11 @@ title: Atomic Ski
 year: 2024
 yearEnd: 2026
 published: true
-summary: >
-  It started with the Boot Hub, a vision we set months ago and hoped to carry
-  across the whole site one day. Now it does. Web design, motion and 3D, all
-  built around tension and ski nets.
+seoTitle: Atomic Ski website, identity and web design, 2024 to 2026
+summary: >-
+  Identity refresh and web design for atomic.com, made with Analogue. It grew
+  out of the Boot Hub and became a visual language for the whole site, built
+  around tension and ski nets.
 cover: /src/content/projects/atomic/cover.jpg
 coverAlt: Atomic Ski
 coverFrame: medium
@@ -18,6 +19,8 @@ info:
     value: Web design, motion and 3D
   - label: With
     value: Analogue
+  - label: Development
+    value: OH-SO
   - label: Year
     value: '2026'
   - label: Client

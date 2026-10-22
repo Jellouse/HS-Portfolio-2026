@@ -127,15 +127,15 @@ try {
   // Process grid images (only published projects use process today; preview still SSR).
   {
     const page = await context.newPage();
-    const url = `${BASE}/preview/analogue-couters?branch=main`;
+    const url = `${BASE}/preview/analogue-counters/?branch=main`;
     const res = await page.goto(url, { waitUntil: 'networkidle', timeout: 120000 });
     if (!res || res.status() !== 200) {
       throw new Error(`couters preview HTTP ${res?.status()} — ${url}`);
     }
     await page.waitForSelector('main .process img, main img', { timeout: 30000 });
     const processCount = await page.locator('main .process img').count();
-    if (processCount < 1) throw new Error('analogue-couters preview: expected process images');
-    await assertImages(page, 'analogue-couters (incl. process)');
+    if (processCount < 1) throw new Error('analogue-counters preview: expected process images');
+    await assertImages(page, 'analogue-counters (incl. process)');
     await page.close();
   }
 
