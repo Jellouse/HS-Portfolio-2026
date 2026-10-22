@@ -23,7 +23,7 @@ const sizes = {
 ---
 
 <article class:list={['card', 'fade-in', { 'is-plain': rounded === false }]} data-frame={coverFrame}>
-  <a href={`/work/${project.id}`}>
+  <a href={`/work/${project.id}/`}>
     {coverVideo ? (
       <VideoFrame
         src={coverVideo}
@@ -44,7 +44,7 @@ const sizes = {
       />
     )}
   </a>
-  <a class="caption" href={`/work/${project.id}`}>
+  <a class="caption" href={`/work/${project.id}/`}>
     {title}{years ? <>, <span class="project-year">{years}</span></> : null}
   </a>
 </article>

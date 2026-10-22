@@ -1,10 +1,49 @@
 {
   "redirects": [
-    { "source": "/work", "destination": "/", "permanent": true },
-    { "source": "/work/", "destination": "/", "permanent": true },
-    { "source": "/projects", "destination": "/", "permanent": true },
-    { "source": "/projects/", "destination": "/", "permanent": true },
-    { "source": "/all", "destination": "/", "permanent": true },
-    { "source": "/all/", "destination": "/", "permanent": true }
+    {
+      "source": "/work/:slug([^/.]+)",
+      "destination": "/work/:slug/",
+      "permanent": true
+    },
+    {
+      "source": "/preview/:slug([^/.]+)",
+      "destination": "/preview/:slug/",
+      "permanent": true
+    },
+    {
+      "source": "/keystatic-upload",
+      "destination": "/keystatic-upload/",
+      "permanent": true
+    },
+    {
+      "source": "/work",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/work/",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/projects",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/projects/",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/all",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/all/",
+      "destination": "/",
+      "permanent": true
+    }
   ]
 }

@@ -2,8 +2,13 @@ import { projectLabel } from './content';
 import { positioning } from './positioning';
 import { plainText, type ProjectEntry, type SiteData } from './content';
 
+// Stable entity id: every project's creator points here.
+export const PERSON_ID = 'https://humansize.de/#johann-schnettker';
+
 export function homeJsonLd(site: SiteData, pageUrl: string) {
-  const personId = `${pageUrl}#johann-schnettker`;
+  const personId = PERSON_ID;
+  const sameAs = site.socials.map((s) => s.href).filter(Boolean);
+  const logo = new URL('/apple-touch-icon.png', pageUrl).href;
   const studioId = `${pageUrl}#humansize`;
   return {
     '@context': 'https://schema.org',
@@ -15,6 +20,8 @@ export function homeJsonLd(site: SiteData, pageUrl: string) {
         email: `mailto:${site.email}`,
         jobTitle: 'Designer',
         url: pageUrl,
+        image: logo,
+        sameAs,
         knowsAbout: [...positioning.services],
         worksFor: { '@id': studioId },
       },
@@ -24,6 +31,9 @@ export function homeJsonLd(site: SiteData, pageUrl: string) {
         name: site.studio,
         url: pageUrl,
         email: site.email,
+        image: logo,
+        logo,
+        sameAs,
         description: positioning.description,
         knowsAbout: [...positioning.services],
         hasOfferCatalog: {
@@ -54,10 +64,6 @@ export function projectJsonLd(
     url: pageUrl,
     ...(project.data.year ? { dateCreated: String(project.data.year) } : {}),
     ...(imageUrl ? { image: imageUrl } : {}),
-    creator: {
-      '@type': 'Person',
-      name: 'Johann Schnettker',
-      email: 'mailto:schnettker.johann@gmail.com',
-    },
+    creator: { '@id': PERSON_ID },
   };
 }
