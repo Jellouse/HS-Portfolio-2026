@@ -6,6 +6,18 @@ const images = import.meta.glob<ImageMetadata>(
   { eager: true, import: 'default' },
 );
 
+// Alt text for process-folder images: process/alts.json maps file name to alt.
+const folderAlts = import.meta.glob<Record<string, string>>('/src/content/projects/*/process/alts.json', {
+  eager: true,
+  import: 'default',
+});
+
+export function processFolderAlt(src: string): string {
+  const m = src.match(/^\/src\/content\/projects\/([^/]+)\/process\/([^/]+)$/);
+  if (!m) return '';
+  return folderAlts[`/src/content/projects/${m[1]}/process/alts.json`]?.[m[2]] ?? '';
+}
+
 /** When set (preview SSR), missing build images use the auth image proxy. */
 let previewRef: string | null = null;
 

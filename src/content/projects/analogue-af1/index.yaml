@@ -48,20 +48,25 @@ blocks:
   - discriminant: image
     value:
       src: /src/content/projects/analogue-af1/blocks/4/value/src.jpg
+      alt: "Render of the black camera on a dark gradient, Analogue AF1"
       frame: full
       flush: false
   - discriminant: pair
     value:
       layout: pair
       left: /src/content/projects/analogue-af1/blocks/5/value/left.jpg
+      leftAlt: "Render of the camera from six sides on white, Analogue AF1"
       right: /src/content/projects/analogue-af1/blocks/5/value/right.jpg
+      rightAlt: "Front render of the camera on light grey, Analogue AF1"
   - discriminant: image
     value:
       src: /src/content/projects/analogue-af1/blocks/6/value/src.jpg
+      alt: "Render of the lens elements spread out on blue, Analogue AF1"
       frame: full
       flush: false
   - discriminant: image
     value:
       src: /src/content/projects/analogue-af1/blocks/7/value/src.jpg
+      alt: "Website hero with the camera rising into frame, Analogue AF1"
       frame: full
       flush: false

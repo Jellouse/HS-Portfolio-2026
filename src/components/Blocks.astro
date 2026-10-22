@@ -5,7 +5,7 @@ import ProcessBlock from './ProcessBlock.astro';
 import TextBlock from './TextBlock.astro';
 import VideoBlock from './VideoBlock.astro';
 import type { ProjectEntry } from '../lib/content';
-import { processFolderImages } from '../lib/images';
+import { processFolderAlt, processFolderImages } from '../lib/images';
 import { resolveProcessFolderForRender } from '../lib/project-blocks.mjs';
 
 interface Props {
@@ -25,7 +25,7 @@ const folderSrcs = resolveProcessFolderForRender(
   rawFolderSrcs,
   blocks,
 );
-const folder = folderSrcs.map((src) => ({ src, alt: '', flush: false }));
+const folder = folderSrcs.map((src) => ({ src, alt: processFolderAlt(src), flush: false }));
 const useFolder = Boolean(processFromFolder) && folder.length > 0;
 const hasProcessBlock = blocks.some((b) => b.discriminant === 'process');
 // First two content images load eagerly; the rest lazy + async decode.

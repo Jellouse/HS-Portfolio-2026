@@ -30,31 +30,37 @@ blocks:
   - discriminant: image
     value:
       src: /src/content/projects/atomic/blocks/0/value/src.jpg
+      alt: "Magazine page design with skier portraits, Atomic Ski website"
       frame: full
       flush: false
   - discriminant: image
     value:
       src: /src/content/projects/atomic/blocks/1/value/src.jpg
+      alt: "Product overlay on a photo of a skier mid-jump, Atomic Ski website"
       frame: full
       flush: false
   - discriminant: image
     value:
       src: /src/content/projects/atomic/blocks/2/value/src.jpg
+      alt: "Mobile navigation menu over a blurred ski photo, Atomic Ski website"
       frame: full
       flush: false
   - discriminant: image
     value:
       src: /src/content/projects/atomic/blocks/3/value/src.jpg
+      alt: "Category menu next to a green ski goggle render, Atomic Ski website"
       frame: full
       flush: false
   - discriminant: image
     value:
       src: /src/content/projects/atomic/blocks/4/value/src.jpg
+      alt: "Factory video with chapter list over red ski production footage, Atomic Ski website"
       frame: full
       flush: false
   - discriminant: image
     value:
       src: /src/content/projects/atomic/blocks/5/value/src.jpg
+      alt: "Exploded view of ski boot parts on a grey background, Atomic Ski website"
       frame: full
       flush: false
   - discriminant: process
