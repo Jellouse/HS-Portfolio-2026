@@ -8,17 +8,18 @@ import Base from '../layouts/Base.astro';
 import { absoluteUrl, getProjects, getSite, plainText } from '../lib/content';
 import { resolveImage } from '../lib/images';
 import { homeJsonLd } from '../lib/seo';
+import { positioning } from '../lib/positioning';
 
 const site = await getSite();
 const projects = await getProjects();
 const cover = projects[0]?.data.cover;
 const image = cover ? resolveImage(cover) : undefined;
 const pageUrl = absoluteUrl(Astro.site, '/');
-const description = plainText(site.intro);
+const description = positioning.description;
 ---
 
 <Base
-  title={site.studio}
+  title={positioning.homeTitle}
   description={description}
   image={image}
   jsonLd={homeJsonLd(site, pageUrl)}

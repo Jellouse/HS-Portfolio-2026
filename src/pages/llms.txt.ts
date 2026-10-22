@@ -1,5 +1,6 @@
 import { projectLabel } from '../lib/content';
 import type { APIRoute } from 'astro';
+import { positioning } from '../lib/positioning';
 import { absoluteUrl, getProjects, getSite, plainText } from '../lib/content';
 
 export const prerender = true;
@@ -9,9 +10,13 @@ export const GET: APIRoute = async ({ site }) => {
   const projects = await getProjects();
   const home = absoluteUrl(site, '/');
   const lines = [
-    `# ${settings.studio}`,
+    `# ${positioning.homeTitle}`,
     '',
-    plainText(settings.intro),
+    `> ${positioning.description}`,
+    '',
+    '## Services',
+    '',
+    ...positioning.services.map((s) => `- ${s}`),
     '',
     `Email: ${settings.email}`,
     '',

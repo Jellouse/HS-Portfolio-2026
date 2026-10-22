@@ -1,4 +1,5 @@
 import { projectLabel } from './content';
+import { positioning } from './positioning';
 import { plainText, type ProjectEntry, type SiteData } from './content';
 
 export function homeJsonLd(site: SiteData, pageUrl: string) {
@@ -14,6 +15,7 @@ export function homeJsonLd(site: SiteData, pageUrl: string) {
         email: `mailto:${site.email}`,
         jobTitle: 'Designer',
         url: pageUrl,
+        knowsAbout: [...positioning.services],
         worksFor: { '@id': studioId },
       },
       {
@@ -22,7 +24,16 @@ export function homeJsonLd(site: SiteData, pageUrl: string) {
         name: site.studio,
         url: pageUrl,
         email: site.email,
-        description: plainText(site.intro),
+        description: positioning.description,
+        knowsAbout: [...positioning.services],
+        hasOfferCatalog: {
+          '@type': 'OfferCatalog',
+          name: 'Services',
+          itemListElement: positioning.services.map((name) => ({
+            '@type': 'Offer',
+            itemOffered: { '@type': 'Service', name },
+          })),
+        },
         founder: { '@id': personId },
       },
     ],
