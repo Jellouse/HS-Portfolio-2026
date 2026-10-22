@@ -1,6 +1,7 @@
 // Shrink images in the Keystatic admin before they enter form state / GitHub commits.
 // Max 3200px long edge; JPEG q0.82; keep PNG only when pixels have alpha.
-import React, { type ReactNode } from 'react';
+import React, { useState, type ReactNode } from 'react';
+import { TOO_BIG_MESSAGE, wouldExceed, startSaveBudgetIndicator } from './save-budget';
 
 const MAX = 3200;
 const JPEG_Q = 0.82;
@@ -87,14 +88,39 @@ export async function optimizeImageAsset(value: Asset): Promise<Asset> {
 }
 
 export function withImageOptimize(Input: (props: any) => ReactNode) {
+  startSaveBudgetIndicator();
   return function OptimizedImageInput(props: any) {
+    const [error, setError] = useState<string | null>(null);
     const onChange = (next: Asset | null) => {
       if (!next?.data) {
+        setError(null);
         props.onChange(next);
         return;
       }
-      void optimizeImageAsset(next).then((optimized) => props.onChange(optimized));
+      void optimizeImageAsset(next).then(async (optimized) => {
+        // Reject uploads that would make the next save too big for GitHub.
+        try {
+          const { exceeds } = await wouldExceed(optimized.data.byteLength, props.value?.data);
+          if (exceeds) {
+            setError(TOO_BIG_MESSAGE);
+            return;
+          }
+        } catch {
+          // estimate unavailable: let the upload through
+        }
+        setError(null);
+        props.onChange(optimized);
+      });
     };
-    return <Input {...props} onChange={onChange} />;
+    return (
+      <>
+        <Input {...props} onChange={onChange} />
+        {error ? (
+          <div role="alert" data-hs-save-budget-error style={{ marginTop: 8, color: '#b00020', fontSize: 13 }}>
+            {error}
+          </div>
+        ) : null}
+      </>
+    );
   };
 }

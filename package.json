@@ -13,7 +13,8 @@
     "test:preview-images": "node tests/preview-images.spec.mjs",
     "optimize:images": "node scripts/optimize-content-images.mjs",
     "test:keystatic": "node tests/keystatic-smoke.spec.mjs",
-    "test:project-images": "node tests/project-images.spec.mjs"
+    "test:project-images": "node tests/project-images.spec.mjs",
+    "postinstall": "node scripts/patch-keystatic.mjs"
   },
   "engines": {
     "node": ">=22"
