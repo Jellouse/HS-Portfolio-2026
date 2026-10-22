@@ -12,7 +12,9 @@ interface Props {
 }
 
 const { title, description, image, type = 'website', jsonLd, noindex = false } = Astro.props;
-const canonical = new URL(Astro.url.pathname, Astro.site);
+// Pages are canonical with a trailing slash (vercel.json 308s the bare form).
+const path = Astro.url.pathname;
+const canonical = new URL(path.endsWith('/') || /\.[a-z0-9]+$/i.test(path) ? path : `${path}/`, Astro.site);
 const og = image
   ? await getImage({
       src: image,

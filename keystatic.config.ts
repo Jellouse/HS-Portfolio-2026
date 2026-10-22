@@ -86,7 +86,7 @@ export default config({
       format: { data: 'yaml' },
       columns: ['title', 'year', 'published'],
       // Live SSR preview for signed-in editors with push access. {branch} is the CMS branch.
-      previewUrl: '/preview/{slug}?branch={branch}',
+      previewUrl: '/preview/{slug}/?branch={branch}',
       schema: {
         title: fields.slug({
           name: {

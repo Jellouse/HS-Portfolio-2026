@@ -28,6 +28,9 @@ const folderSrcs = resolveProcessFolderForRender(
 const folder = folderSrcs.map((src) => ({ src, alt: '', flush: false }));
 const useFolder = Boolean(processFromFolder) && folder.length > 0;
 const hasProcessBlock = blocks.some((b) => b.discriminant === 'process');
+// First two content images load eagerly; the rest lazy + async decode.
+let imageCount = 0;
+const eager = () => imageCount++ < 2;
 ---
 
 {
@@ -42,6 +45,7 @@ const hasProcessBlock = blocks.some((b) => b.discriminant === 'process');
           alt={block.value.alt}
           frame={block.value.frame}
           flush={block.value.flush}
+          priority={eager()}
         />
       );
     }
@@ -63,8 +67,8 @@ const hasProcessBlock = blocks.some((b) => b.discriminant === 'process');
     if (block.value.layout === 'stack') {
       return (
         <>
-          <ImageBlock src={block.value.left} alt={block.value.leftAlt ?? ''} />
-          <ImageBlock src={block.value.right} alt={block.value.rightAlt ?? ''} />
+          <ImageBlock src={block.value.left} alt={block.value.leftAlt ?? ''} priority={eager()} />
+          <ImageBlock src={block.value.right} alt={block.value.rightAlt ?? ''} priority={eager()} />
         </>
       );
     }
@@ -74,6 +78,8 @@ const hasProcessBlock = blocks.some((b) => b.discriminant === 'process');
         leftAlt={block.value.leftAlt}
         right={block.value.right}
         rightAlt={block.value.rightAlt}
+        leftPriority={eager()}
+        rightPriority={eager()}
       />
     );
   })

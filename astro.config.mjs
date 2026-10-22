@@ -3,6 +3,20 @@ import sitemap from '@astrojs/sitemap';
 import react from '@astrojs/react';
 import keystatic from '@keystatic/astro';
 import vercel from '@astrojs/vercel';
+import { execFileSync } from 'node:child_process';
+import { statSync } from 'node:fs';
+
+// Sitemap lastmod: last git commit touching the page's content, else file mtime, else build time.
+function lastModified(paths) {
+  try {
+    const out = execFileSync('git', ['log', '-1', '--format=%cI', '--', ...paths], { encoding: 'utf8' }).trim();
+    if (out) return new Date(out);
+  } catch {}
+  try {
+    return new Date(Math.max(...paths.map((p) => statSync(p).mtimeMs)));
+  } catch {}
+  return new Date();
+}
 
 const site =
   process.env.SITE_URL ||
@@ -114,6 +128,14 @@ export default defineConfig({
   },
   integrations: [
     sitemap({
+      serialize(item) {
+        const path = new URL(item.url).pathname;
+        const work = path.match(/^\/work\/([^/]+)\/?$/);
+        const paths = work
+          ? [`src/content/projects/${work[1]}`]
+          : ['src/content/site', 'src/content/projects', 'src/pages/index.astro'];
+        return { ...item, lastmod: lastModified(paths).toISOString() };
+      },
       filter: (page) => {
         const path = new URL(page).pathname.replace(/\/$/, '') || '/';
         if (path === '/work' || path === '/projects' || path === '/all' || path === '/keystatic-upload') {
