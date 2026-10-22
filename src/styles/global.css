@@ -411,10 +411,17 @@ body:has(.hero) .site-header {
   }
 }
 
+.hero:has(.mark-blob:not([hidden])),
+.hero:has([data-hero-variant="blob"]:not([hidden])) {
+  /* No horizontal shape stretch — texture moves, silhouette stays */
+  --mark-stretch-max: 1;
+}
+
 .hero {
   display: flex;
   flex-direction: column;
   align-items: center;
+  /* Full first viewport; bio peeks ~one line below */
   min-height: 100svh;
   padding: 72px var(--pad) 0;
 }
@@ -436,10 +443,32 @@ body:has(.hero) .site-header {
   transform-origin: center center;
 }
 
+.hero-variant {
+  position: absolute;
+  inset: 0;
+}
+
+.hero-variant[hidden] {
+  display: none !important;
+}
+
+/* Blob: same little-man paths, sized and stretched to read like the mockup splat. */
+.hero .mark-blob {
+  --mark-scale: 1;
+  /* Align vertical centre with name/@Humansize row (header at 50svh) */
+  top: 50svh;
+  width: min(500px, 46vw);
+  height: auto;
+  transform: translate(-50%, -50%);
+  overflow: visible;
+}
+
+
 .feed {
   position: relative;
   z-index: 1;
-  margin-top: -64px;
+  /* ~one bio line peeks at the bottom edge */
+  margin-top: -36px;
   padding: 0 var(--pad) 40px;
 }
 
@@ -910,12 +939,33 @@ body:has(.project) .site-header {
     width: 33vw;
   }
 
+  .hero .mark-blob {
+    --mark-scale: 1;
+    /* Mobile ref: ~73% wide, centre ~41.5svh */
+    top: 41.5svh;
+    width: 73vw;
+    transform: translate(-50%, -50%);
+  }
+
   body:has(.hero) .site-header {
-    top: 72svh;
+    /* ~150px under blob bottom → first name line ~72.5svh; stacked + centred */
+    top: 72.5svh;
     flex-direction: column;
     align-items: center;
     text-align: center;
+    gap: 0;
     transform: translateX(-50%);
+  }
+
+  body:has(.hero) .site-header .who,
+  body:has(.hero) .site-header .contact {
+    width: 100%;
+    text-align: center;
+  }
+
+  body:has(.hero) .site-header .contact-label {
+    display: block;
+    margin-inline: auto;
   }
 
   /* Fixed block: an open menu or time overlays the lines and hides what it covers. */
@@ -984,7 +1034,12 @@ body:has(.project) .site-header {
   }
 
   .feed {
-    margin-top: -8svh;
+    margin-top: -36px;
+  }
+
+  .about {
+    margin-top: 0;
+    margin-bottom: 96px;
   }
 }
 
@@ -1029,8 +1084,12 @@ body:has(.project) .site-header {
   }
 
   .feed {
-    margin-top: -32px;
+    margin-top: -36px;
     padding-bottom: 80px;
+  }
+
+  .about {
+    margin-top: 0;
   }
 
   .frame,
@@ -1464,4 +1523,78 @@ html.show-grid .grid-overlay .page-grid {
   letter-spacing: 0;
   pointer-events: none;
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.06);
+}
+
+
+/* Hero blob dials — only mounted when ?dials is in the URL */
+.hero-dials {
+  position: fixed;
+  right: 12px;
+  bottom: 12px;
+  z-index: 80;
+  width: 220px;
+  padding: 10px 10px 8px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+  font-size: 11px;
+  line-height: 14px;
+  color: #111;
+  backdrop-filter: blur(8px);
+}
+.hero-dials__title {
+  font-size: 11px;
+  line-height: 14px;
+  font-weight: 600;
+  margin: 0 0 6px;
+}
+.hero-dials__row {
+  display: grid;
+  grid-template-columns: 58px 1fr 36px;
+  gap: 4px;
+  align-items: center;
+  margin: 0 0 4px;
+}
+.hero-dials__label,
+.hero-dials__value {
+  font-size: 11px;
+  line-height: 14px;
+  white-space: nowrap;
+}
+.hero-dials__value {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: #444;
+}
+.hero-dials__input[type='range'] {
+  width: 100%;
+  margin: 0;
+  height: 14px;
+}
+.hero-dials__input[type='color'] {
+  width: 100%;
+  height: 18px;
+  padding: 0;
+  border: 0;
+  background: none;
+}
+.hero-dials__actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+}
+.hero-dials__btn {
+  flex: 1;
+  height: 24px;
+  padding: 0 6px;
+  border-radius: 4px;
+  border: 1px solid rgba(0, 0, 0, 0.16);
+  background: #fff;
+  font-size: 11px;
+  line-height: 14px;
+  cursor: pointer;
+}
+.hero-dials__btn:hover {
+  background: #f4f4f4;
 }

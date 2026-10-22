@@ -1,0 +1,80 @@
+---
+/**
+ * Homepage hero: Johann's face SVG + Figma Texture (edge distress).
+ *
+ * Figma Texture (help center / plugin API TextureEffect):
+ *   - Size X/Y (noiseSize): scale of the noise grain on each axis.
+ *     Larger size → coarser grain → lower feTurbulence baseFrequency.
+ *   - Radius: how far past the layer boundary the distress spreads
+ *     → feDisplacementMap scale + oversized filter region padding.
+ *   - Clip to shape OFF: texture may bleed outside the silhouette
+ *     (filter region > 100%; no clipPath).
+ * UI hint 100/100/100 was indication only; values below are after eye
+ * rescale to the mockup. Native 559×249 proportions — no scaleX stretch.
+ * Pointer shifts the noise field (feOffset), not the shape.
+ * Gradient Mark: ?hero=gradient.
+ */
+---
+
+<svg
+  class="mark mark-blob"
+  viewBox="0 0 559 249"
+  fill="none"
+  aria-hidden="true"
+  xmlns="http://www.w3.org/2000/svg"
+  data-hero-blob
+  overflow="visible"
+>
+  <defs>
+    <!--
+      Map (Figma → SVG), clipToShape=false:
+        baked dials: freq 0.015 / scale 111 / blur 2.2 / thresh 2
+        octaves 2 / seed 48 / drift 104@0.04
+    -->
+    <filter
+      id="hero-blob-texture"
+      x="-45%"
+      y="-55%"
+      width="190%"
+      height="210%"
+      filterUnits="objectBoundingBox"
+      color-interpolation-filters="sRGB"
+    >
+      <feTurbulence
+        type="fractalNoise"
+        baseFrequency="0.015"
+        numOctaves="2"
+        seed="48"
+        result="noise"
+      ></feTurbulence>
+      <feOffset in="noise" dx="0" dy="0" result="shifted" data-blob-offset></feOffset>
+      <feDisplacementMap
+        in="SourceGraphic"
+        in2="shifted"
+        scale="111"
+        xChannelSelector="R"
+        yChannelSelector="G"
+        result="displaced"
+      ></feDisplacementMap>
+      <!-- Soften fringe then hard-cut alpha → liquid/crisp edge (mockup) -->
+      <feGaussianBlur in="displaced" stdDeviation="2.2" result="blurred"></feGaussianBlur>
+      <feComponentTransfer in="blurred" result="goo">
+        <feFuncA type="discrete" tableValues="0 0 1 1 1 1 1 1"></feFuncA>
+      </feComponentTransfer>
+      <feFlood flood-color="#B70606" result="red"></feFlood>
+      <feComposite in="red" in2="goo" operator="in" result="flat"></feComposite>
+      <feMerge>
+        <feMergeNode in="flat"></feMergeNode>
+      </feMerge>
+    </filter>
+  </defs>
+  <g filter="url(#hero-blob-texture)">
+    <!-- Source: store attachment 01M58YEY… (outline + eyes + mouth) -->
+    <path
+      d="M279.042 0C433.153 -6.7364e-06 558.085 58.867 558.085 131.482C558.085 182.171 497.209 226.158 408.028 248.102V245.562C476.807 225.284 522.552 189.272 522.552 148.225C522.552 84.8558 413.529 33.4854 279.042 33.4854C144.555 33.4854 35.5312 84.8557 35.5312 148.225C35.5314 189.275 81.2831 225.289 150.07 245.566V248.104C60.8819 226.162 0.000283291 182.174 0 131.482C-3.17412e-06 58.8671 124.931 0.000104863 279.042 0Z"
+      fill="#B70606"></path>
+    <ellipse cx="153.872" cy="149.482" rx="84.8098" ry="60.171" fill="#B70606"></ellipse>
+    <ellipse cx="404.224" cy="149.482" rx="84.8098" ry="60.171" fill="#B70606"></ellipse>
+    <ellipse cx="280.484" cy="235.027" rx="78.7657" ry="10.0642" fill="#B70606"></ellipse>
+  </g>
+</svg>
