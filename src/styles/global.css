@@ -941,17 +941,31 @@ body:has(.project) .site-header {
 
   .hero .mark-blob {
     --mark-scale: 1;
-    top: 38svh;
-    width: min(340px, 88vw);
+    /* Mobile ref: ~73% wide, centre ~41.5svh */
+    top: 41.5svh;
+    width: 73vw;
     transform: translate(-50%, -50%);
   }
 
   body:has(.hero) .site-header {
-    top: 62svh;
+    /* ~150px under blob bottom → first name line ~72.5svh; stacked + centred */
+    top: 72.5svh;
     flex-direction: column;
     align-items: center;
     text-align: center;
-    transform: translate(-50%, -50%);
+    gap: 0;
+    transform: translateX(-50%);
+  }
+
+  body:has(.hero) .site-header .who,
+  body:has(.hero) .site-header .contact {
+    width: 100%;
+    text-align: center;
+  }
+
+  body:has(.hero) .site-header .contact-label {
+    display: block;
+    margin-inline: auto;
   }
 
   /* Fixed block: an open menu or time overlays the lines and hides what it covers. */
@@ -1020,7 +1034,7 @@ body:has(.project) .site-header {
   }
 
   .feed {
-    margin-top: -32px;
+    margin-top: -36px;
   }
 
   .about {
