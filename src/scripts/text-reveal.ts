@@ -4,7 +4,7 @@
 // each word against its own position, so a whole line reveals together; others get a 250ms
 // fallback staggered per line. Re-split on resize, restoring the original HTML first.
 const SELECTOR =
-  '.about p, .text-block p, .footer-text p, .caption, .project-summary, .info-list li, .project-hero h1';
+  '.about p, .text-block p, .caption, .project-summary, .info-list li, .project-hero h1';
 
 type Host = HTMLElement & { __revealHtml?: string };
 

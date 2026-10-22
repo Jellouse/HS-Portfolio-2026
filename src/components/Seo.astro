@@ -24,7 +24,12 @@ const og = image
       background: '#ffffff',
     })
   : null;
-const ogUrl = og ? new URL(og.src, Astro.site).href : undefined;
+// Homepage (and pages without a cover) share the animated blob-face GIF; frame 0 is the resting hero.
+const useBlob = Astro.url.pathname === '/' || !og;
+const ogUrl = useBlob ? new URL('/og/humansize-blob.gif', Astro.site).href : new URL(og!.src, Astro.site).href;
+const ogW = useBlob ? 1200 : og!.attributes.width ?? Math.min(1200, image!.width);
+const ogH = useBlob ? 630 : og!.attributes.height ?? Math.min(630, image!.height);
+const ogType = useBlob ? 'image/gif' : 'image/jpeg';
 const json = jsonLd
   ? JSON.stringify(jsonLd).replace(/</g, '\u003c')
   : '';
@@ -41,9 +46,14 @@ const json = jsonLd
 <meta property="og:description" content={description} />
 <meta property="og:type" content={type} />
 <meta property="og:url" content={canonical.href} />
-{ogUrl && <meta property="og:image" content={ogUrl} />}
-<meta name="twitter:card" content={ogUrl ? 'summary_large_image' : 'summary'} />
+<meta property="og:image" content={ogUrl} />
+<meta property="og:image:type" content={ogType} />
+<meta property="og:image:width" content={String(ogW)} />
+<meta property="og:image:height" content={String(ogH)} />
+<meta property="og:image:alt" content={title} />
+<meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content={title} />
 <meta name="twitter:description" content={description} />
-{ogUrl && <meta name="twitter:image" content={ogUrl} />}
+<meta name="twitter:image" content={ogUrl} />
+<meta name="twitter:image:alt" content={title} />
 {json && <script type="application/ld+json" set:html={json} />}
