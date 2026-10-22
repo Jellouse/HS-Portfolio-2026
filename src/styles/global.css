@@ -804,7 +804,8 @@ body:has(.project) .site-header {
   height: 100svh;
   max-height: 100vh;
   max-height: 100svh;
-  overflow: hidden;
+  /* clip (not hidden): no scroll container, so the text reveal's view() timeline tracks the page */
+  overflow: clip;
 }
 
 /* Text band above the faces; page-grid + footer-text share the about column. */
@@ -1463,6 +1464,13 @@ html.show-grid .grid-overlay .page-grid {
       animation: text-in linear both;
       animation-timeline: view();
       animation-range: cover 0px cover 15vh;
+    }
+
+    /* Footer is the last 100svh: its text never travels far, so play the reveal over its entry. */
+    .footer-text .is-split .reveal-word,
+    .footer-text.is-split .reveal-word,
+    .footer-text p.is-split .reveal-word {
+      animation-range: entry 0% entry 100%;
     }
   }
 

@@ -8,7 +8,7 @@ const site =
   process.env.SITE_URL ||
   (process.env.VERCEL_PROJECT_PRODUCTION_URL
     ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
-    : 'https://humansize.studio');
+    : 'https://humansize.de');
 
 // Inlined into the client and the server so both agree. `npm run dev` defaults
 // to local storage. Production defaults to GitHub. KEYSTATIC_STORAGE overrides.

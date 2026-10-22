@@ -17,7 +17,7 @@ Node 22.
 - Framework: Astro
 - Build command: `npm run build`
 - Output directory: leave this empty. `@astrojs/vercel` publishes the static pages and the Keystatic server routes. A custom `dist` directory drops `/keystatic`.
-- Set `SITE_URL` to the production origin when the domain is final. Example: `https://humansize.studio`
+- Set `SITE_URL` to the production origin when the domain is final. Example: `https://humansize.de`
 - `/keystatic` and `/api/keystatic` run on the server. Every other page is prerendered. The API route is `src/pages/api/keystatic/[...params].ts`. It rebuilds the request URL from `x-forwarded-host` and `x-forwarded-proto` (falling back to `host`) so the GitHub callback uses the public origin.
 
 `npm run dev` uses local storage. The production build uses GitHub storage. `KEYSTATIC_STORAGE=local` or `KEYSTATIC_STORAGE=github` overrides that. Leave `KEYSTATIC_STORAGE` unset on Vercel.

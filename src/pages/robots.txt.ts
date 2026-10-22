@@ -3,7 +3,7 @@ import type { APIRoute } from 'astro';
 export const prerender = true;
 
 export const GET: APIRoute = ({ site }) => {
-  const origin = site?.href ?? 'https://humansize.studio/';
+  const origin = site?.href ?? 'https://humansize.de/';
   const body = [
     'User-agent: *',
     'Allow: /',

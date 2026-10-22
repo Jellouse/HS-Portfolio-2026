@@ -102,7 +102,7 @@ export function paragraphs(text: string): string[] {
 }
 
 export function absoluteUrl(site: URL | undefined, path: string): string {
-  const origin = site ?? new URL('https://humansize.studio');
+  const origin = site ?? new URL('https://humansize.de');
   return new URL(path, origin).href;
 }
 
