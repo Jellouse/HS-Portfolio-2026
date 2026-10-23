@@ -87,6 +87,10 @@ const site = await getSite();
           addEventListener('load', post);
           post();
         }
+        // Esc inside a frame hands control back to the board.
+        addEventListener('keydown', function (e) {
+          if (e.key === 'Escape') parent.postMessage({ type: 'canvas-escape' }, '*');
+        });
         if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', apply);
         else apply();
       })();

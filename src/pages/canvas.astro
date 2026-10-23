@@ -45,7 +45,14 @@ const widths = [
       .frame-box { background: #fff; overflow: hidden; }
       .frame-box iframe { display: block; border: 0; width: 100%; height: 100%; background: #fff; }
       .group-label { position: absolute; color: #fff; font-size: 16px; line-height: 20px; white-space: nowrap; }
-      .is-panning iframe, body.space iframe, body.pinch iframe { pointer-events: none; }
+      /* Frames ignore the pointer so the board always pans and zooms. Interact mode
+         (button / I, or hold Alt/Option) hands the pointer to the frames; Esc turns it off. */
+      .frame-box iframe { pointer-events: none; }
+      body.interact .frame-box iframe, body.alt .frame-box iframe { pointer-events: auto; }
+      body.interact .frame-box, body.alt .frame-box { outline: 1px solid rgba(76, 141, 255, 0.6); outline-offset: 2px; }
+      .is-panning iframe, body.space iframe, body.pinch iframe { pointer-events: none !important; }
+      #interact { font: inherit; border: 0; cursor: pointer; position: fixed; left: 16px; bottom: 16px; padding: 4px 8px; border-radius: 4px; background: #000; color: #8a8a8a; font-size: 12px; line-height: 16px; user-select: none; }
+      body.interact #interact { color: #fff; }
       astro-dev-toolbar { display: none !important; }
       #zoom { position: fixed; right: 16px; bottom: 16px; padding: 4px 8px; border-radius: 4px; background: #000; color: #fff; font-size: 12px; line-height: 16px; user-select: none; }
     </style>
@@ -53,6 +60,7 @@ const widths = [
   <body>
     <div id="board"><div id="world"></div></div>
     <div id="zoom">100%</div>
+    <button id="interact" type="button" aria-pressed="false">Interact: off (I, or hold ⌥)</button>
     <script id="canvas-data" type="application/json" set:html={JSON.stringify({ pages, widths })} />
     <script>
       import { mountCanvas } from '../scripts/canvas';

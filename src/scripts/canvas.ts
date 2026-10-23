@@ -123,8 +123,25 @@ export function mountCanvas() {
   const actual = () => zoomAt(1, innerWidth / 2, innerHeight / 2);
 
   // iframe heights
+  // Interact mode: frames take the pointer only when on (button / I) or while Alt is held.
+  const hint = document.getElementById('interact') as HTMLButtonElement;
+  let interact = false;
+  const setInteract = (on: boolean) => {
+    interact = on;
+    document.body.classList.toggle('interact', on);
+    hint.textContent = `Interact: ${on ? 'on' : 'off'} (I, or hold ⌥)`;
+    hint.setAttribute('aria-pressed', String(on));
+    if (!on && document.activeElement instanceof HTMLIFrameElement) document.activeElement.blur();
+  };
+  hint.addEventListener('click', () => setInteract(!interact));
+  setInteract(false);
+  const setAlt = (on: boolean) => document.body.classList.toggle('alt', on);
+  addEventListener('blur', () => setAlt(false));
+  board.addEventListener('pointermove', (e) => { if (!e.altKey) setAlt(false); });
+
   addEventListener('message', (e) => {
     const d = e.data;
+    if (d && d.type === 'canvas-escape') { setInteract(false); setAlt(false); return; }
     if (!d || d.type !== 'canvas-height' || typeof d.h !== 'number') return;
     const f = frames.find((fr) => fr.iframe && fr.iframe.contentWindow === e.source);
     if (!f || Math.abs(f.h - d.h) < 2) return;
@@ -166,8 +183,7 @@ export function mountCanvas() {
       document.body.classList.add('pinch');
       return;
     }
-    const onFrame = (e.target as HTMLElement).closest('.frame-label');
-    if (onFrame && !space) return;
+    if ((e.target as HTMLElement).closest('.frame-label') && !space) return;
     panning = true;
     last = { x: e.clientX, y: e.clientY };
     board.classList.add('is-panning');
@@ -215,7 +231,10 @@ export function mountCanvas() {
 
   addEventListener('keydown', (e) => {
     if (e.target instanceof HTMLInputElement) return;
-    if (e.code === 'Space') {
+    if (e.key === 'Escape') setInteract(false);
+    else if ((e.key === 'i' || e.key === 'I') && !e.metaKey && !e.ctrlKey) setInteract(!interact);
+    else if (e.key === 'Alt') setAlt(true);
+    else if (e.code === 'Space') {
       space = true;
       document.body.classList.add('space');
       e.preventDefault();
@@ -225,6 +244,7 @@ export function mountCanvas() {
     else if (e.key === '1') actual();
   });
   addEventListener('keyup', (e) => {
+    if (e.key === 'Alt') setAlt(false);
     if (e.code === 'Space') {
       space = false;
       document.body.classList.remove('space');
