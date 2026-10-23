@@ -1,6 +1,6 @@
 // Interactive row of faces (Tilt mode from /lab/faces, fixed settings).
 // Faces always touch and fill the row; each frame is a pure function of the input position.
-import { readInput, startInput, tiltWaiting } from './input';
+import { readInput, startInput } from './input';
 
 const S = {
   stretch: 3.45,
@@ -75,6 +75,7 @@ export function mountFaces(host: HTMLElement) {
   const maxH = Number(host.dataset.maxH) || S.maxH;
   const rest = 100 / maxH;
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const fine = window.matchMedia('(hover: hover) and (pointer: fine)');
   const row = document.createElement('div');
   row.className = 'peeps-row';
   row.setAttribute('aria-hidden', 'true');
@@ -116,12 +117,13 @@ export function mountFaces(host: HTMLElement) {
 
   paint(0.5, 0.5, 0);
   const frame = (now: number) => {
-    // reduced motion, or iOS before tilt permission: hold the rest layout
-    if (!reduce.matches && !tiltWaiting()) {
+    // reduced motion: hold the rest layout. Touch: no tilt, a quieter self-running loop.
+    if (!reduce.matches) {
       const t = (now / 1000) * S.speed;
+      const k = fine.matches ? 1 : 0.6;
       const p = readInput(now) ?? {
-        u: 0.5 + 0.48 * Math.sin(t * 0.5) * Math.cos(t * 0.17),
-        v: 0.5 + 0.4 * Math.sin(t * 0.37 + 1),
+        u: 0.5 + 0.48 * k * Math.sin(t * 0.5) * Math.cos(t * 0.17),
+        v: 0.5 + 0.4 * k * Math.sin(t * 0.37 + 1),
       };
       paint(p.u, p.v, t);
     }
