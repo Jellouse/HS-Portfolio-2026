@@ -64,7 +64,7 @@
   --gutter: 16px;
   /* Grid: 10 cols, 160 margins, 16 gutters at 1440 (col = 97.6px). Main images and body
      copy share ONE centred span: 6 cols = 666px at 1440. Wider blocks (large image/pair blocks,
-     process grids, homepage wide cards) snap to --wide-span: 8 cols = 893px. */
+     homepage wide cards) snap to --wide-span: 8 cols = 893px. */
   --content-span: 6;
   --wide-span: 8;
   --col: calc((min(100vw, 1440px) - 2 * var(--margin) - (var(--cols) - 1) * var(--gutter)) / var(--cols));
@@ -1229,7 +1229,8 @@ body:has(.project) .site-header {
   }
 
   .project.page-grid > .image-block,
-  .project.page-grid > .pair {
+  .project.page-grid > .pair,
+  .project.page-grid > .process {
     grid-column: calc((var(--cols) - var(--content-span)) / 2 + 1) / span var(--content-span);
     width: auto;
     max-width: none;
@@ -1237,10 +1238,9 @@ body:has(.project) .site-header {
     margin-right: 0;
   }
 
-  /* Keystatic "Large" on image and pair blocks, and process grids: the wide span. */
+  /* Keystatic "Large" on image and pair blocks: the wide span. */
   .project.page-grid > .image-block[data-large],
-  .project.page-grid > .pair[data-large],
-  .project.page-grid > .process {
+  .project.page-grid > .pair[data-large] {
     grid-column: calc((var(--cols) - var(--wide-span)) / 2 + 1) / span var(--wide-span);
     width: auto;
     max-width: none;

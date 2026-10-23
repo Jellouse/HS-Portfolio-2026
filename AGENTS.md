@@ -104,8 +104,8 @@ One size for the whole site: 23px, line-height 29px. Hierarchy comes from spacin
 Defined as custom properties in `src/styles/global.css`:
 
 - **Desktop (≥760):** `--cols: 10`, `--margin: 160px` (it clamps down to 20px below 1440), `--gutter: 16px`, columns stretch (`--col` ≈ 97.6px at 1440).
-- **Content span:** main images and all body copy share ONE centred span, `--content-span: 6` (`--content-width` ≈ 666px at 1440, left edge 387). Image pairs default to it too. This covers case text, the summary and info, homepage about and captions, and the footer text.
-- **Wide span:** image and pair blocks with the Keystatic "Large" checkbox, process grids and homepage wide cards use `--wide-span: 8` (≈ 893px).
+- **Content span:** main images and all body copy share ONE centred span, `--content-span: 6` (`--content-width` ≈ 666px at 1440, left edge 387). Image pairs and process grids use it too. This covers case text, the summary and info, homepage about and captions, and the footer text.
+- **Wide span:** image and pair blocks with the Keystatic "Large" checkbox and homepage wide cards use `--wide-span: 8` (≈ 893px).
 - **Mobile/tablet (<760):** 4 cols, 20px margins, 16px gutters. Copy and images both take the full content width.
 - Don't add ad-hoc max-widths for these blocks; change the span tokens instead.
 - Press G to toggle the column overlay, in dev or on `/canvas` frames (`?canvas=1`). `?grid=1` also shows it.
