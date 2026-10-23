@@ -1699,3 +1699,18 @@ html.show-grid .grid-overlay .page-grid {
 .hero-dials__btn:hover {
   background: #f4f4f4;
 }
+
+/* The Tokyo time never shows behind an open @Humansize menu: it fades out with the
+   label (150ms) and fades back on close. */
+body .site-header:has(.contact.is-open) .who .time {
+  opacity: 0;
+  transition: opacity 150ms ease;
+}
+
+@media (hover: hover) {
+  body .site-header:has(.contact:hover) .who .time,
+  body .site-header:has(.contact:focus-within) .who .time {
+    opacity: 0;
+    transition: opacity 150ms ease;
+  }
+}
