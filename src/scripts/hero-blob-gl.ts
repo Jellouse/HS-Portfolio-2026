@@ -12,12 +12,12 @@ const VERT = `attribute vec2 a;varying vec2 v;void main(){v=a*.5+.5;gl_Position=
 
 // pass 1: displaced source alpha. p = user-space point of this pixel.
 const DISPLACE = `precision highp float;varying vec2 v;
-uniform sampler2D src,noise;uniform vec4 region,nreg;uniform vec2 off;uniform float scale;
+uniform sampler2D src,noise;uniform vec4 region,sreg,nreg;uniform vec2 off;uniform float scale;
 void main(){
   vec2 p=region.xy+v*region.zw;
   vec2 n=texture2D(noise,(p-off-nreg.xy)/nreg.zw).rg;
   vec2 q=p+scale*(n-.5);
-  vec2 uv=(q-region.xy)/region.zw;
+  vec2 uv=(q-sreg.xy)/sreg.zw;
   float a=(uv.x<0.||uv.y<0.||uv.x>1.||uv.y>1.)?0.:texture2D(src,uv).a;
   gl_FragColor=vec4(a,0.,0.,1.);
 }`;
@@ -156,6 +156,7 @@ export async function mountHeroBlobGL(svg: SVGSVGElement, opts: Opts) {
   let W = 0;
   let H = 0;
   let pxPerUnit = 1;
+  let out = region.slice();
   let LW = 1;
   let LH = 1;
   let srcTex: WebGLTexture | null = null;
@@ -170,22 +171,30 @@ export async function mountHeroBlobGL(svg: SVGSVGElement, opts: Opts) {
     const cssPerUnit = r.width / vb.width;
     const dpr = Math.min(window.devicePixelRatio || 1, 3);
     pxPerUnit = cssPerUnit * dpr;
-    W = Math.round(region[2] * pxPerUnit);
-    H = Math.round(region[3] * pxPerUnit);
+    // Output only where it can be seen: the filter region clipped to the host box. A canvas
+    // as wide as the whole filter region (190%) stuck out past the viewport and made the
+    // page scroll sideways; the SVG's own filter spill is ink overflow and never did.
+    const x0 = Math.max(region[0], vb.x + (hr.left - r.left) / cssPerUnit);
+    const x1 = Math.min(region[0] + region[2], vb.x + (hr.right - r.left) / cssPerUnit);
+    const y0 = Math.max(region[1], vb.y + (hr.top - r.top) / cssPerUnit);
+    const y1 = Math.min(region[1] + region[3], vb.y + (hr.bottom - r.top) / cssPerUnit);
+    out = [x0, y0, Math.max(1 / pxPerUnit, x1 - x0), Math.max(1 / pxPerUnit, y1 - y0)];
+    W = Math.floor(out[2] * pxPerUnit);
+    H = Math.floor(out[3] * pxPerUnit);
     canvas.width = W;
     canvas.height = H;
     Object.assign(canvas.style, {
       position: 'absolute',
-      left: `${r.left - hr.left + (region[0] - vb.x) * cssPerUnit}px`,
-      top: `${r.top - hr.top + (region[1] - vb.y) * cssPerUnit}px`,
-      width: `${region[2] * cssPerUnit}px`,
-      height: `${region[3] * cssPerUnit}px`,
+      left: `${r.left - hr.left + (out[0] - vb.x) * cssPerUnit}px`,
+      top: `${r.top - hr.top + (out[1] - vb.y) * cssPerUnit}px`,
+      width: `${W / dpr}px`,
+      height: `${H / dpr}px`,
       pointerEvents: 'none',
     });
     // shape, rasterised once per size (anti-aliased like the SVG source graphic)
     const sc = document.createElement('canvas');
-    sc.width = W;
-    sc.height = H;
+    sc.width = Math.round(region[2] * pxPerUnit);
+    sc.height = Math.round(region[3] * pxPerUnit);
     const ctx = sc.getContext('2d')!;
     ctx.setTransform(pxPerUnit, 0, 0, pxPerUnit, -region[0] * pxPerUnit, -region[1] * pxPerUnit);
     ctx.fillStyle = '#000';
@@ -236,7 +245,8 @@ export async function mountHeroBlobGL(svg: SVGSVGElement, opts: Opts) {
     gl.bindTexture(gl.TEXTURE_2D, noiseTex);
     gl.uniform1i(u(pDisp, 'src'), 0);
     gl.uniform1i(u(pDisp, 'noise'), 1);
-    gl.uniform4f(u(pDisp, 'region'), region[0], region[1], region[2], region[3]);
+    gl.uniform4f(u(pDisp, 'region'), out[0], out[1], out[2], out[3]);
+    gl.uniform4f(u(pDisp, 'sreg'), region[0], region[1], region[2], region[3]);
     gl.uniform4f(u(pDisp, 'nreg'), nreg[0], nreg[1], nreg[2], nreg[3]);
     gl.uniform2f(u(pDisp, 'off'), o.x, o.y);
     gl.uniform1f(u(pDisp, 'scale'), scale);
