@@ -109,3 +109,4 @@ Defined as custom properties in `src/styles/global.css`:
 - **Mobile/tablet (<760):** 4 cols, 20px margins, 16px gutters. Copy and images both take the full content width.
 - Don't add ad-hoc max-widths for these blocks; change the span tokens instead.
 - Press G to toggle the column overlay, in dev or on `/canvas` frames (`?canvas=1`). `?grid=1` also shows it.
+- Case page spacing tokens: `--space-block` (between images and pairs; 84px desktop, 56px mobile), `--space-text` (visible gap around text blocks; 240 / 160), `--space-section` (before Process and Info; 240 / 160). Pair and process inner gaps use `--gutter` (16px). Change the tokens, not per-block margins.
