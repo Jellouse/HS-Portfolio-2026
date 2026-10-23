@@ -78,6 +78,10 @@ function attachIOS(host: HTMLElement) {
   // only for a genuine tap so a scroll that ends on the label does not navigate.
   let replaying = false;
   label.addEventListener('click', (e) => {
+    // The label sits inside the host, so its own click would bubble to the host's handlers
+    // and the replay below would run them a second time (a toggle button opened and closed
+    // again: the menu and the name/time on phones did nothing). Only the replay may reach them.
+    e.stopPropagation();
     if (!genuineTap()) {
       e.preventDefault();
       return;
