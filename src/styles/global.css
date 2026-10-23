@@ -717,6 +717,13 @@ body:has(.project) .site-header {
   transform-origin: center center;
 }
 
+/* Distorted face mark: static, keeps its proportions (no cursor stretch). */
+.project-mark .mark-face {
+  width: 64px;
+  transform: none;
+  overflow: visible;
+}
+
 .project-mark a:hover {
   opacity: 1;
 }

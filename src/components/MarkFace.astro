@@ -1,0 +1,62 @@
+---
+/**
+ * Small case-page mark (top of each case, links home): the hero's distorted face, static.
+ * Same paths and filter values as HeroBlob (freq 0.015, scale 111, blur 2.2), no drift,
+ * so it renders once. Filter values are in viewBox units, so the look holds at small size.
+ */
+---
+
+<svg
+  class="mark mark-face"
+  viewBox="0 0 559 249"
+  fill="none"
+  aria-hidden="true"
+  xmlns="http://www.w3.org/2000/svg"
+  overflow="visible"
+>
+  <defs>
+    <filter
+      id="mark-face-texture"
+      x="-45%"
+      y="-55%"
+      width="190%"
+      height="210%"
+      filterUnits="objectBoundingBox"
+      color-interpolation-filters="sRGB"
+    >
+      <feTurbulence
+        type="fractalNoise"
+        baseFrequency="0.015"
+        numOctaves="2"
+        seed="48"
+        result="noise"
+      ></feTurbulence>
+      
+      <feDisplacementMap
+        in="SourceGraphic"
+        in2="noise"
+        scale="111"
+        xChannelSelector="R"
+        yChannelSelector="G"
+        result="displaced"
+      ></feDisplacementMap>
+      <feGaussianBlur in="displaced" stdDeviation="2.2" result="blurred"></feGaussianBlur>
+      <feComponentTransfer in="blurred" result="goo">
+        <feFuncA type="discrete" tableValues="0 0 1 1 1 1 1 1"></feFuncA>
+      </feComponentTransfer>
+      <feFlood flood-color="#B70606" result="red"></feFlood>
+      <feComposite in="red" in2="goo" operator="in" result="flat"></feComposite>
+      <feMerge>
+        <feMergeNode in="flat"></feMergeNode>
+      </feMerge>
+    </filter>
+  </defs>
+  <g filter="url(#mark-face-texture)">
+    <path
+      d="M279.042 0C433.153 -6.7364e-06 558.085 58.867 558.085 131.482C558.085 182.171 497.209 226.158 408.028 248.102V245.562C476.807 225.284 522.552 189.272 522.552 148.225C522.552 84.8558 413.529 33.4854 279.042 33.4854C144.555 33.4854 35.5312 84.8557 35.5312 148.225C35.5314 189.275 81.2831 225.289 150.07 245.566V248.104C60.8819 226.162 0.000283291 182.174 0 131.482C-3.17412e-06 58.8671 124.931 0.000104863 279.042 0Z"
+      fill="#B70606"></path>
+    <ellipse cx="153.872" cy="149.482" rx="84.8098" ry="60.171" fill="#B70606"></ellipse>
+    <ellipse cx="404.224" cy="149.482" rx="84.8098" ry="60.171" fill="#B70606"></ellipse>
+    <ellipse cx="280.484" cy="235.027" rx="78.7657" ry="10.0642" fill="#B70606"></ellipse>
+  </g>
+</svg>

@@ -218,7 +218,7 @@ const site = await getSite();
 
         var marks = Array.prototype.filter.call(document.querySelectorAll('.mark'), function (m) {
           // Blob keeps source proportions; only gradient Mark stretches.
-          return !m.closest('[hidden]') && !m.classList.contains('mark-blob');
+          return !m.closest('[hidden]') && !m.classList.contains('mark-blob') && !m.classList.contains('mark-face');
         });
         if (marks.length) {
           var fine = window.matchMedia('(hover: hover) and (pointer: fine)');
@@ -269,15 +269,6 @@ const site = await getSite();
             if (!fine.matches || reduce.matches || event.pointerType === 'touch') return;
             var distance = Math.abs(event.clientX - window.innerWidth / 2);
             var reach = Math.min(1, distance / (window.innerWidth / 2));
-            var max = stretchMax();
-            target = rest + (max - rest) * reach * reach;
-            wake();
-          });
-
-          // phones: tilt left or right stretches the mark like moving the cursor to the edge
-          window.addEventListener('hs:tilt', function (event) {
-            if (reduce.matches) return;
-            var reach = Math.min(1, Math.abs(event.detail.u - 0.5) * 2);
             var max = stretchMax();
             target = rest + (max - rest) * reach * reach;
             wake();
