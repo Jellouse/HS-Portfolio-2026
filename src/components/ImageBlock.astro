@@ -6,15 +6,16 @@ interface Props {
   src: string;
   alt: string;
   frame?: 'full' | 'wide' | 'medium' | 'narrow';
+  large?: boolean;
   priority?: boolean;
   flush?: boolean;
 }
 
-const { src, alt, frame = 'full', priority = false, flush = false } = Astro.props;
+const { src, alt, frame = 'full', priority = false, flush = false, large = false } = Astro.props;
 const image = resolveImageSource(src);
 const sizes = '(min-width: 760px) 552px, calc(100vw - 40px)';
 ---
 
-<figure class="image-block fade-in" data-frame={frame}>
+<figure class="image-block fade-in" data-frame={frame} data-large={large ? '' : undefined}>
   <BlurImage src={image} alt={alt} sizes={sizes} priority={priority} flush={flush} />
 </figure>

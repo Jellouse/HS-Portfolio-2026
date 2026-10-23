@@ -59,15 +59,14 @@
   --track: -0.02em;
   --lh-title: 29px;
   --lh-body: 29px;
-  --cols: 8;
+  --cols: 10;
   --margin: 160px;
   --gutter: 16px;
-  /* Grid: 8 cols, 160 margins, 16 gutters at 1440 (col = 126px). Main images and body
-     copy share ONE centred span: 4 cols = 552px at 1440. 4 (not 6 = 836px) keeps a
-     comfortable ~55-character measure at 23px; 3 (410px) would be too narrow for images.
-     Wider blocks (pairs, process grids) snap to --wide-span. */
-  --content-span: 4;
-  --wide-span: 6;
+  /* Grid: 10 cols, 160 margins, 16 gutters at 1440 (col = 97.6px). Main images and body
+     copy share ONE centred span: 6 cols = 666px at 1440. Wider blocks (large image/pair blocks,
+     process grids, homepage wide cards) snap to --wide-span: 8 cols = 893px. */
+  --content-span: 6;
+  --wide-span: 8;
   --col: calc((min(100vw, 1440px) - 2 * var(--margin) - (var(--cols) - 1) * var(--gutter)) / var(--cols));
   --content-width: calc(var(--content-span) * var(--col) + (var(--content-span) - 1) * var(--gutter));
   --measure: var(--content-width);
@@ -1163,12 +1162,12 @@ body:has(.project) .site-header {
   }
 
   .site-header .who {
-    grid-column: 1 / 5;
+    grid-column: 1 / 6;
     justify-self: start;
   }
 
   .site-header .contact {
-    grid-column: 5 / -1;
+    grid-column: 6 / -1;
     justify-self: end;
   }
 
@@ -1198,15 +1197,15 @@ body:has(.project) .site-header {
   }
 
   .card[data-frame='wide'] > a:first-child {
-    grid-column: 2 / 8;
+    grid-column: calc((var(--cols) - var(--wide-span)) / 2 + 1) / span var(--wide-span);
   }
 
   .card[data-frame='medium'] > a:first-child {
-    grid-column: 3 / 7;
+    grid-column: calc((var(--cols) - var(--content-span)) / 2 + 1) / span var(--content-span);
   }
 
   .card[data-frame='narrow'] > a:first-child {
-    grid-column: 3 / 7;
+    grid-column: calc((var(--cols) - var(--content-span)) / 2 + 1) / span var(--content-span);
     justify-self: center;
     width: calc((100% - 3 * var(--gutter)) * 0.75 + 2 * var(--gutter));
   }
@@ -1229,7 +1228,8 @@ body:has(.project) .site-header {
     margin-right: 0;
   }
 
-  .project.page-grid > .image-block {
+  .project.page-grid > .image-block,
+  .project.page-grid > .pair {
     grid-column: calc((var(--cols) - var(--content-span)) / 2 + 1) / span var(--content-span);
     width: auto;
     max-width: none;
@@ -1237,7 +1237,9 @@ body:has(.project) .site-header {
     margin-right: 0;
   }
 
-  .project.page-grid > .pair,
+  /* Keystatic "Large" on image and pair blocks, and process grids: the wide span. */
+  .project.page-grid > .image-block[data-large],
+  .project.page-grid > .pair[data-large],
   .project.page-grid > .process {
     grid-column: calc((var(--cols) - var(--wide-span)) / 2 + 1) / span var(--wide-span);
     width: auto;

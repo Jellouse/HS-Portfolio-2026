@@ -18,6 +18,7 @@ const imageBlock = z.object({
     alt: z.string().default(''),
     frame: frame.default('full'),
     flush: z.boolean().default(false),
+    large: z.boolean().default(false),
   }),
 });
 
@@ -40,6 +41,7 @@ const pairBlock = z.object({
     leftAlt: z.string().default(''),
     right: z.string(),
     rightAlt: z.string().default(''),
+    large: z.boolean().default(false),
   }),
 });
 

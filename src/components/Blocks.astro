@@ -45,6 +45,7 @@ const eager = () => imageCount++ < 2;
           alt={block.value.alt}
           frame={block.value.frame}
           flush={block.value.flush}
+          large={block.value.large}
           priority={eager()}
         />
       );
@@ -67,8 +68,8 @@ const eager = () => imageCount++ < 2;
     if (block.value.layout === 'stack') {
       return (
         <>
-          <ImageBlock src={block.value.left} alt={block.value.leftAlt ?? ''} priority={eager()} />
-          <ImageBlock src={block.value.right} alt={block.value.rightAlt ?? ''} priority={eager()} />
+          <ImageBlock src={block.value.left} alt={block.value.leftAlt ?? ''} priority={eager()} large={block.value.large} />
+          <ImageBlock src={block.value.right} alt={block.value.rightAlt ?? ''} priority={eager()} large={block.value.large} />
         </>
       );
     }
@@ -78,6 +79,7 @@ const eager = () => imageCount++ < 2;
         leftAlt={block.value.leftAlt}
         right={block.value.right}
         rightAlt={block.value.rightAlt}
+        large={block.value.large}
         leftPriority={eager()}
         rightPriority={eager()}
       />

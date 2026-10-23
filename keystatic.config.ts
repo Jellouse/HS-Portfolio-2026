@@ -193,6 +193,11 @@ export default config({
                   description:
                     'White or transparent edges. No rounded corners and no padding.',
                 }),
+                large: fields.checkbox({
+                  label: 'Large',
+                  defaultValue: false,
+                  description: 'Desktop only: span the wider 8 columns instead of the text width.',
+                }),
               }),
             },
             video: {
@@ -232,6 +237,11 @@ export default config({
                 rightAlt: fields.text({
                   label: 'Right alt text',
                   description: 'Optional.',
+                }),
+                large: fields.checkbox({
+                  label: 'Large',
+                  defaultValue: false,
+                  description: 'Desktop only: span the wider 8 columns instead of the text width.',
                 }),
               }),
             },
