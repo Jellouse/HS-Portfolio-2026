@@ -80,6 +80,7 @@
      Process and Info sections. */
   --space-block: 84px;
   --space-text: 240px;
+  --space-text-titled: 150px;
   --space-section: 240px;
   --radius: 31px;
   --radius-sm: 15px;
@@ -120,6 +121,7 @@
     /* mobile rhythm: 2x the old gaps */
     --space-block: 56px;
     --space-text: 160px;
+    --space-text-titled: 100px;
     --space-section: 160px;
     --text-lead: var(--text-body);
     --lh-lead: var(--lh-body);
@@ -763,11 +765,16 @@ body:has(.project) .site-header {
   letter-spacing: var(--track);
 }
 
-/* Titled text block: centred title (case-title style, gray year), then larger body copy. */
+/* Titled text block: centred title + gray year, then body, both at lead size. Tighter gap around it. */
+.text-block[data-titled] {
+  margin-bottom: var(--space-text-titled);
+  padding-top: calc(var(--space-text-titled) - var(--space-block));
+}
+
 .text-block[data-titled] .text-block-title {
   margin: 0 0 var(--space-title);
-  font-size: var(--text-title);
-  line-height: var(--lh-title);
+  font-size: var(--text-lead);
+  line-height: var(--lh-lead);
   text-align: center;
 }
 
