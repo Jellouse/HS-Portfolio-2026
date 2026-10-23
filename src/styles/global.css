@@ -59,6 +59,10 @@
   --track: -0.02em;
   --lh-title: 29px;
   --lh-body: 29px;
+  /* text blocks with a title: larger copy */
+  --text-lead: 28px;
+  --lh-lead: 35px;
+  --space-title: 80px;
   --cols: 10;
   --margin: 160px;
   --gutter: 16px;
@@ -76,6 +80,7 @@
      Process and Info sections. */
   --space-block: 84px;
   --space-text: 240px;
+  --space-text-titled: 150px;
   --space-section: 240px;
   --radius: 31px;
   --radius-sm: 15px;
@@ -116,7 +121,11 @@
     /* mobile rhythm: 2x the old gaps */
     --space-block: 56px;
     --space-text: 160px;
+    --space-text-titled: 100px;
     --space-section: 160px;
+    --text-lead: var(--text-body);
+    --lh-lead: var(--lh-body);
+    --space-title: 48px;
     --cols: 4;
     --content-span: 4;
     --wide-span: 4;
@@ -754,6 +763,28 @@ body:has(.project) .site-header {
   font-weight: 400;
   line-height: var(--lh-body);
   letter-spacing: var(--track);
+}
+
+/* Titled text block: centred title + gray year, then body, both at lead size. Tighter gap around it. */
+.text-block[data-titled] {
+  margin-bottom: var(--space-text-titled);
+  padding-top: calc(var(--space-text-titled) - var(--space-block));
+}
+
+.text-block[data-titled] .text-block-title {
+  margin: 0 0 var(--space-title);
+  font-size: var(--text-lead);
+  line-height: var(--lh-lead);
+  text-align: center;
+}
+
+.text-block[data-titled] p {
+  font-size: var(--text-lead);
+  line-height: var(--lh-lead);
+}
+
+.text-block[data-titled] p:not(:last-child) {
+  margin-bottom: var(--lh-lead);
 }
 
 .image-block,

@@ -4,12 +4,19 @@ import { paragraphs, renderInline } from '../lib/content';
 interface Props {
   text: string;
   heading?: string;
+  year?: string;
 }
 
-const { text, heading } = Astro.props;
+const { text, heading, year } = Astro.props;
 ---
 
-<section class="text-block fade-in">
-  {heading && <h2>{heading}</h2>}
+<section class="text-block fade-in" data-titled={heading ? '' : undefined}>
+  {
+    heading && (
+      <h2 class="text-block-title">
+        {heading}{year ? <>, <span class="project-year">{year}</span></> : null}
+      </h2>
+    )
+  }
   {paragraphs(text).map((paragraph) => <p set:html={renderInline(paragraph)} />)}
 </section>

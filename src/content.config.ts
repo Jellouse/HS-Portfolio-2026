@@ -7,6 +7,7 @@ const textBlock = z.object({
   discriminant: z.literal('text'),
   value: z.object({
     heading: z.string().optional(),
+    year: z.string().optional(),
     text: z.string(),
   }),
 });
