@@ -1080,7 +1080,11 @@ body:has(.project) .site-header {
     text-align: center;
   }
 
+  /* Stacked name + @Humansize: the 4 links sit on the same 29px line grid, centred on the
+     two buttons: Linkedin one row above, Instagram + X on the name and @Humansize rows,
+     Email one row below. */
   body:has(.hero) .contact-menu {
+    top: calc(-2 * var(--lh-body));
     right: auto;
     left: 50%;
     align-items: center;
@@ -1712,5 +1716,13 @@ body .site-header:has(.contact.is-open) .who .time {
   body .site-header:has(.contact:focus-within) .who .time {
     opacity: 0;
     transition: opacity 150ms ease;
+  }
+}
+
+/* Phones (no hover): menu links are black by default; desktop keeps the quiet gray + hover. */
+@media (hover: none) {
+  .contact-menu a,
+  .contact-menu span {
+    color: var(--ink);
   }
 }
