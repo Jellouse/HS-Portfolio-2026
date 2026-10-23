@@ -3,9 +3,9 @@ type Page = { name: string; path: string };
 type Width = { w: number; vh: number };
 type Frame = { el: HTMLDivElement; box: HTMLDivElement; src: string; w: number; h: number; row: number; col: number; iframe?: HTMLIFrameElement };
 
-const GAP_X = 120;
+const GAP_X = 80;
 const GAP_Y = 160;
-const GROUP_GAP = 400;
+const GROUP_GAP = 240;
 const LABEL = 32;
 const MIN = 0.005;
 const MAX = 4;
@@ -29,57 +29,62 @@ export function mountCanvas() {
   ];
 
   const frames: Frame[] = [];
-  const cols: { x: number; w: number; vh: number; origin: string }[] = [];
+  // Columns: each page is a group (1440 then 390, top-aligned), groups left to right.
+  // Rows: this host first, compared hosts below in the same column order.
+  const cols: { x: number; w: number; vh: number; page: Page }[] = [];
   let x = 0;
-  hosts.forEach((host, gi) => {
-    if (gi > 0) x += GROUP_GAP - GAP_X;
+  data.pages.forEach((page, pi) => {
+    if (pi > 0) x += GROUP_GAP - GAP_X;
+    for (const width of data.widths) {
+      cols.push({ x, w: width.w, vh: width.vh, page });
+      x += width.w + GAP_X;
+    }
+  });
+  const rowLabels: HTMLDivElement[] = [];
+  hosts.forEach((host, row) => {
     if (hosts.length > 1) {
       const g = document.createElement('div');
       g.className = 'group-label';
       g.textContent = host.label;
-      g.style.left = `${x}px`;
-      g.style.top = `${-LABEL - 40}px`;
+      g.style.left = '0px';
       world.appendChild(g);
+      rowLabels.push(g);
     }
-    for (const width of data.widths) {
-      cols.push({ x, w: width.w, vh: width.vh, origin: host.origin });
-      x += width.w + GAP_X;
-    }
-  });
-
-  data.pages.forEach((page, row) => {
     cols.forEach((col, ci) => {
+      const page = col.page;
       const el = document.createElement('div');
       el.className = 'frame';
       const label = document.createElement('a');
       label.className = 'frame-label';
-      label.href = col.origin + page.path;
+      label.href = host.origin + page.path;
       label.target = '_blank';
       label.rel = 'noopener';
-      label.textContent = `${page.name} · ${col.w}${hosts.length > 1 ? ` · ${new URL(col.origin).host}` : ''}`;
+      label.textContent = `${page.name} · ${col.w}${hosts.length > 1 ? ` · ${host.label}` : ''}`;
       const box = document.createElement('div');
       box.className = 'frame-box';
       el.append(label, box);
       world.appendChild(el);
       const sep = page.path.includes('?') ? '&' : '?';
-      frames.push({ el, box, src: `${col.origin}${page.path}${sep}canvas=1&vh=${col.vh}`, w: col.w, h: col.vh, row, col: ci });
+      frames.push({ el, box, src: `${host.origin}${page.path}${sep}canvas=1&vh=${col.vh}`, w: col.w, h: col.vh, row, col: ci });
     });
   });
 
+  const ROW_HEAD = hosts.length > 1 ? 48 : 0;
   const layout = () => {
     let y = 0;
-    for (let row = 0; row < data.pages.length; row++) {
+    for (let row = 0; row < hosts.length; row++) {
       const inRow = frames.filter((f) => f.row === row);
       const rowH = Math.max(...inRow.map((f) => f.h));
+      if (rowLabels[row]) rowLabels[row].style.top = `${y - LABEL - ROW_HEAD}px`;
       for (const f of inRow) {
         f.el.style.left = `${cols[f.col].x}px`;
         f.el.style.top = `${y}px`;
         f.box.style.width = `${f.w}px`;
         f.box.style.height = `${f.h}px`;
       }
-      y += rowH + GAP_Y;
+      y += rowH + GAP_Y + LABEL + ROW_HEAD;
     }
-    bounds = { w: x - GAP_X, h: y - GAP_Y };
+    bounds = { w: x - GAP_X, h: y - GAP_Y - LABEL - ROW_HEAD };
   };
   let bounds = { w: 0, h: 0 };
 
@@ -98,13 +103,21 @@ export function mountCanvas() {
     s = ns;
     apply();
   };
+  const pad = 48;
+  const top = () => pad + LABEL + ROW_HEAD;
+  // 0: whole board width, top-aligned (frames are tall; scroll down to see more).
   const fit = () => {
-    const pad = 64;
-    const vw = innerWidth - pad * 2;
-    const vh = innerHeight - pad * 2 - LABEL;
-    s = Math.min(MAX, Math.max(MIN, Math.min(vw / bounds.w, vh / bounds.h)));
+    s = Math.min(MAX, Math.max(MIN, (innerWidth - pad * 2) / bounds.w));
     tx = (innerWidth - bounds.w * s) / 2;
-    ty = pad + LABEL + (hosts.length > 1 ? 40 : 0) * s;
+    ty = top() * Math.min(1, s * 4);
+    apply();
+  };
+  // Initial: the first screen (900 px tall) of every frame fits the viewport height.
+  const firstScreen = () => {
+    const sh = (innerHeight - top() - pad) / data.widths[0].vh;
+    s = Math.min(1, Math.max(MIN, sh));
+    tx = pad;
+    ty = top();
     apply();
   };
   const actual = () => zoomAt(1, innerWidth / 2, innerHeight / 2);
@@ -220,6 +233,6 @@ export function mountCanvas() {
   // Pan with space anywhere: a transparent shield is unnecessary since iframes ignore pointers while space is held.
 
   layout();
-  fit();
+  firstScreen();
   (window as unknown as { __canvas: unknown }).__canvas = { fit, actual, zoomAt, frames, get s() { return s; }, set view(v: { s: number; tx: number; ty: number }) { s = v.s; tx = v.tx; ty = v.ty; apply(); } };
 }
