@@ -66,6 +66,8 @@
   --cols: 10;
   --margin: 160px;
   --gutter: 16px;
+  /* gap between images inside pairs/process grids */
+  --image-gap: var(--gutter);
   /* Grid: 10 cols, 160 margins, 16 gutters at 1440 (col = 97.6px). Main images and body
      copy share ONE centred span: 6 cols = 666px at 1440. Wider blocks (large image/pair blocks,
      homepage wide cards) snap to --wide-span: 8 cols = 893px. */
@@ -118,8 +120,9 @@
 /* Tablet/mobile: 4 cols, 20px margins, 16px gutters; copy and images share the full width. */
 @media (max-width: 759px) {
   :root {
-    /* mobile rhythm: 2x the old gaps */
-    --space-block: 56px;
+    /* mobile: image-to-image gaps equal the side margin (20px) */
+    --space-block: var(--margin);
+    --image-gap: var(--margin);
     --space-text: 160px;
     --space-text-titled: 100px;
     --space-section: 160px;
@@ -799,7 +802,7 @@ body:has(.project) .site-header {
 .pair {
   display: grid;
   grid-template-columns: 1fr;
-  gap: var(--gutter);
+  gap: var(--image-gap);
   width: min(100%, var(--measure));
   margin: 0 auto var(--space-block);
 }
@@ -822,7 +825,7 @@ body:has(.project) .site-header {
 .process-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--gutter);
+  gap: var(--image-gap);
   align-items: start;
   width: 100%;
 }
