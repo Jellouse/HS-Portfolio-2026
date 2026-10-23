@@ -19,7 +19,7 @@ const { title, description, image, type, jsonLd, noindex = false } = Astro.props
 const site = await getSite();
 ---
 
-<html lang="en">
+<html lang="en" data-dev={import.meta.env.DEV ? '' : undefined}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -32,9 +32,18 @@ const site = await getSite();
     <script is:inline>
       document.documentElement.classList.add('js');
       (function () {
-        var value = new URLSearchParams(location.search).get('grid');
-        if (value === null || value === '0' || value === 'false' || value === 'off') return;
-        document.documentElement.classList.add('show-grid');
+        var q = new URLSearchParams(location.search);
+        var value = q.get('grid');
+        if (value !== null && value !== '0' && value !== 'false' && value !== 'off')
+          document.documentElement.classList.add('show-grid');
+        // G toggles the column overlay, in dev or on the /canvas board only.
+        if (!(document.documentElement.hasAttribute('data-dev') || q.get('canvas') === '1')) return;
+        addEventListener('keydown', function (e) {
+          if ((e.key !== 'g' && e.key !== 'G') || e.metaKey || e.ctrlKey || e.altKey) return;
+          var t = e.target;
+          if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
+          document.documentElement.classList.toggle('show-grid');
+        });
       })();
     </script>
     <script is:inline>
