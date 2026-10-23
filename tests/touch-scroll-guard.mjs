@@ -7,6 +7,8 @@ import { join, relative } from 'node:path';
 
 const ROOT = new URL('..', import.meta.url).pathname;
 const ALLOW_TOUCH_ACTION_NONE = [
+  // /canvas (dev/preview-only review board) handles its own pan and pinch.
+  'src/pages/canvas.astro',
   // none today — add a relative path only with a comment explaining why
 ];
 

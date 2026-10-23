@@ -1,0 +1,62 @@
+---
+// Live design board: every page as a live iframe at 1440 and 390. Dev and Vercel preview
+// only; production gets a 404. ?compare=<host1>,<host2> adds the same pages from other hosts.
+export const prerender = false;
+
+import { getProjects, projectLabel } from '../lib/content';
+import { canvasEnabled } from '../lib/canvas-env.mjs';
+
+if (!canvasEnabled({ ...process.env, NODE_ENV: import.meta.env.DEV ? 'development' : 'production' })) {
+  return new Response('Not found', {
+    status: 404,
+    headers: { 'X-Robots-Tag': 'noindex, nofollow', 'Cache-Control': 'no-store' },
+  });
+}
+
+const projects = await getProjects();
+const pages = [
+  { name: 'Home', path: '/' },
+  ...projects.map((p) => ({ name: projectLabel(p.data), path: `/work/${p.id}/` })),
+  { name: '404', path: '/404' },
+];
+const widths = [
+  { w: 1440, vh: 900 },
+  { w: 390, vh: 844 },
+];
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Canvas · Humansize</title>
+    <style is:global>
+      html, body { margin: 0; height: 100%; overflow: hidden; background: #1a1a1a; }
+      body { font: 12px/16px ui-monospace, SFMono-Regular, Menlo, monospace; color: #8a8a8a; }
+      #board { position: absolute; inset: 0; cursor: default; touch-action: none; }
+      #board.is-panning, body.space #board { cursor: grab; }
+      #board.is-panning { cursor: grabbing; }
+      #world { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+      .frame { position: absolute; }
+      .frame-label { position: absolute; left: 0; bottom: 100%; padding-bottom: 8px; white-space: nowrap; color: #8a8a8a; text-decoration: none; font-size: 12px; line-height: 16px; }
+      .frame-label:hover { color: #fff; }
+      .frame-box { background: #fff; overflow: hidden; }
+      .frame-box iframe { display: block; border: 0; width: 100%; height: 100%; background: #fff; }
+      .group-label { position: absolute; color: #fff; font-size: 16px; line-height: 20px; white-space: nowrap; }
+      .is-panning iframe, body.space iframe, body.pinch iframe { pointer-events: none; }
+      astro-dev-toolbar { display: none !important; }
+      #zoom { position: fixed; right: 16px; bottom: 16px; padding: 4px 8px; border-radius: 4px; background: #000; color: #fff; font-size: 12px; line-height: 16px; user-select: none; }
+    </style>
+  </head>
+  <body>
+    <div id="board"><div id="world"></div></div>
+    <div id="zoom">100%</div>
+    <script id="canvas-data" type="application/json" set:html={JSON.stringify({ pages, widths })} />
+    <script>
+      import { mountCanvas } from '../scripts/canvas';
+      mountCanvas();
+    </script>
+  </body>
+</html>

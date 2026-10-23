@@ -142,6 +142,7 @@ export default defineConfig({
           return false;
         }
         if (path === '/preview' || path.startsWith('/preview/')) return false;
+        if (path === '/canvas') return false;
         return true;
       },
     }),

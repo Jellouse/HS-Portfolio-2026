@@ -37,6 +37,60 @@ const site = await getSite();
         document.documentElement.classList.add('show-grid');
       })();
     </script>
+    <script is:inline>
+      // ?canvas=1&vh=N (the /canvas board): the iframe is as tall as the page, so viewport
+      // units are re-based on N px, reveals show their end state, and the page height is
+      // posted to the parent. Without the param this does nothing.
+      (function () {
+        var q = new URLSearchParams(location.search);
+        if (q.get('canvas') !== '1') return;
+        var vh = Number(q.get('vh')) || 900;
+        var root = document.documentElement;
+        root.classList.add('canvas-mode');
+        root.style.setProperty('--canvas-vh', vh / 100 + 'px');
+        var unit = /(-?\d*\.?\d+)(s|d|l)?vh\b/g;
+        function rebase(rules, out) {
+          for (var i = 0; i < rules.length; i++) {
+            var r = rules[i];
+            if (r.cssRules && r.cssRules.length && !(r instanceof CSSStyleRule)) {
+              var inner = [];
+              rebase(r.cssRules, inner);
+              if (inner.length) {
+                var head = r.cssText.slice(0, r.cssText.indexOf('{'));
+                out.push(head + '{' + inner.join('') + '}');
+              }
+            } else if (r.style && unit.test(r.cssText)) {
+              unit.lastIndex = 0;
+              out.push(r.cssText.replace(unit, 'calc($1 * var(--canvas-vh))'));
+            }
+            unit.lastIndex = 0;
+          }
+        }
+        function apply() {
+          var out = [];
+          for (var i = 0; i < document.styleSheets.length; i++) {
+            try { rebase(document.styleSheets[i].cssRules, out); } catch (e) {}
+          }
+          var st = document.createElement('style');
+          st.textContent =
+            out.join('\n') +
+            '.canvas-mode .fade-in,.canvas-mode .reveal-word,.canvas-mode .reveal-pending .reveal-word{opacity:1!important;filter:none!important;transform:none!important;animation:none!important;transition:none!important}astro-dev-toolbar{display:none!important}';
+          document.head.appendChild(st);
+          var last = 0;
+          function post() {
+            var h = Math.ceil(Math.max(document.body.scrollHeight, root.scrollHeight));
+            if (Math.abs(h - last) < 2) return;
+            last = h;
+            parent.postMessage({ type: 'canvas-height', href: location.pathname, h: h }, '*');
+          }
+          new ResizeObserver(post).observe(document.body);
+          addEventListener('load', post);
+          post();
+        }
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', apply);
+        else apply();
+      })();
+    </script>
   </head>
   <body>
     <svg class="squircle-def" width="0" height="0" aria-hidden="true">
