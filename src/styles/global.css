@@ -59,6 +59,10 @@
   --track: -0.02em;
   --lh-title: 29px;
   --lh-body: 29px;
+  /* text blocks with a title: larger copy */
+  --text-lead: 28px;
+  --lh-lead: 35px;
+  --space-title: 80px;
   --cols: 10;
   --margin: 160px;
   --gutter: 16px;
@@ -117,6 +121,9 @@
     --space-block: 56px;
     --space-text: 160px;
     --space-section: 160px;
+    --text-lead: var(--text-body);
+    --lh-lead: var(--lh-body);
+    --space-title: 48px;
     --cols: 4;
     --content-span: 4;
     --wide-span: 4;
@@ -754,6 +761,23 @@ body:has(.project) .site-header {
   font-weight: 400;
   line-height: var(--lh-body);
   letter-spacing: var(--track);
+}
+
+/* Titled text block: centred title (case-title style, gray year), then larger body copy. */
+.text-block[data-titled] .text-block-title {
+  margin: 0 0 var(--space-title);
+  font-size: var(--text-title);
+  line-height: var(--lh-title);
+  text-align: center;
+}
+
+.text-block[data-titled] p {
+  font-size: var(--text-lead);
+  line-height: var(--lh-lead);
+}
+
+.text-block[data-titled] p:not(:last-child) {
+  margin-bottom: var(--lh-lead);
 }
 
 .image-block,

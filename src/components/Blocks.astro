@@ -36,7 +36,7 @@ const eager = () => imageCount++ < 2;
 {
   blocks.map((block) => {
     if (block.discriminant === 'text') {
-      return <TextBlock heading={block.value.heading} text={block.value.text} />;
+      return <TextBlock heading={block.value.heading} year={block.value.year} text={block.value.text} />;
     }
     if (block.discriminant === 'image') {
       return (

@@ -169,7 +169,11 @@ export default config({
             text: {
               label: 'Text',
               schema: fields.object({
-                heading: fields.text({ label: 'Heading' }),
+                heading: fields.text({
+                  label: 'Title',
+                  description: 'Optional. Shown centred above the text, like the case title. With a title the text is set larger.',
+                }),
+                year: fields.text({ label: 'Year', description: 'Optional. Shown in gray after the title, e.g. 2024.' }),
                 text: fields.text({
                   label: 'Text',
                   multiline: true,
