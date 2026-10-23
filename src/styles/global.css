@@ -59,10 +59,17 @@
   --track: -0.02em;
   --lh-title: 29px;
   --lh-body: 29px;
-  --cols: 8;
+  --cols: 10;
   --margin: 160px;
   --gutter: 16px;
-  --measure: 550px;
+  /* Grid: 10 cols, 160 margins, 16 gutters at 1440 (col = 97.6px). Main images and body
+     copy share ONE centred span: 6 cols = 666px at 1440. Wider blocks (large image/pair blocks,
+     homepage wide cards) snap to --wide-span: 8 cols = 893px. */
+  --content-span: 6;
+  --wide-span: 8;
+  --col: calc((min(100vw, 1440px) - 2 * var(--margin) - (var(--cols) - 1) * var(--gutter)) / var(--cols));
+  --content-width: calc(var(--content-span) * var(--col) + (var(--content-span) - 1) * var(--gutter));
+  --measure: var(--content-width);
   --card: 1120px;
   --radius: 31px;
   --radius-sm: 15px;
@@ -94,6 +101,15 @@
 @media (max-width: 1439px) {
   :root {
     --margin: clamp(20px, calc((100vw - 1120px) / 2), 160px);
+  }
+}
+
+/* Tablet/mobile: 4 cols, 20px margins, 16px gutters; copy and images share the full width. */
+@media (max-width: 759px) {
+  :root {
+    --cols: 4;
+    --content-span: 4;
+    --wide-span: 4;
   }
 }
 
@@ -1146,12 +1162,12 @@ body:has(.project) .site-header {
   }
 
   .site-header .who {
-    grid-column: 1 / 5;
+    grid-column: 1 / 6;
     justify-self: start;
   }
 
   .site-header .contact {
-    grid-column: 5 / -1;
+    grid-column: 6 / -1;
     justify-self: end;
   }
 
@@ -1181,15 +1197,15 @@ body:has(.project) .site-header {
   }
 
   .card[data-frame='wide'] > a:first-child {
-    grid-column: 2 / 8;
+    grid-column: calc((var(--cols) - var(--wide-span)) / 2 + 1) / span var(--wide-span);
   }
 
   .card[data-frame='medium'] > a:first-child {
-    grid-column: 3 / 7;
+    grid-column: calc((var(--cols) - var(--content-span)) / 2 + 1) / span var(--content-span);
   }
 
   .card[data-frame='narrow'] > a:first-child {
-    grid-column: 3 / 7;
+    grid-column: calc((var(--cols) - var(--content-span)) / 2 + 1) / span var(--content-span);
     justify-self: center;
     width: calc((100% - 3 * var(--gutter)) * 0.75 + 2 * var(--gutter));
   }
@@ -1197,7 +1213,7 @@ body:has(.project) .site-header {
   .about,
   .card > .caption,
   .footer-text {
-    grid-column: 3 / 7;
+    grid-column: calc((var(--cols) - var(--content-span)) / 2 + 1) / span var(--content-span);
     width: auto;
     margin-left: 0;
     margin-right: 0;
@@ -1215,7 +1231,17 @@ body:has(.project) .site-header {
   .project.page-grid > .image-block,
   .project.page-grid > .pair,
   .project.page-grid > .process {
-    grid-column: 2 / 8;
+    grid-column: calc((var(--cols) - var(--content-span)) / 2 + 1) / span var(--content-span);
+    width: auto;
+    max-width: none;
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  /* Keystatic "Large" on image and pair blocks: the wide span. */
+  .project.page-grid > .image-block[data-large],
+  .project.page-grid > .pair[data-large] {
+    grid-column: calc((var(--cols) - var(--wide-span)) / 2 + 1) / span var(--wide-span);
     width: auto;
     max-width: none;
     margin-left: 0;
@@ -1225,11 +1251,11 @@ body:has(.project) .site-header {
   /* all project text shares the summary's measure and left edge */
   .project.page-grid > .text-block,
   .project.page-grid > .info {
-    grid-column: 1 / -1;
-    width: min(100%, var(--measure));
+    grid-column: calc((var(--cols) - var(--content-span)) / 2 + 1) / span var(--content-span);
+    width: auto;
     max-width: none;
-    margin-left: auto;
-    margin-right: auto;
+    margin-left: 0;
+    margin-right: 0;
   }
 
 }
@@ -1254,6 +1280,12 @@ html.show-grid .grid-overlay .page-grid {
   height: 100%;
   margin-inline: auto;
   padding-inline: var(--margin);
+}
+
+@media (max-width: 759px) {
+  .grid-overlay span:nth-child(n + 5) {
+    display: none;
+  }
 }
 
 .grid-overlay span {

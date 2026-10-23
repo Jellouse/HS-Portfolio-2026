@@ -98,3 +98,14 @@ One size for the whole site: 23px, line-height 29px. Hierarchy comes from spacin
 - Frames load `<path>?canvas=1&vh=900` (desktop) or `vh=844` (mobile). The inline script in `src/layouts/Base.astro` then re-bases vh/svh units on that height, shows reveals in their final state and posts the page height to the board. Without `?canvas=1` it does nothing.
 - Compare mode: `/canvas?compare=<url1>,<url2>` adds a row per URL loading the same paths from other Vercel preview hosts, labelled by host, e.g. `/canvas?compare=https://hs-portfolio-2026-git-foo-jellouse.vercel.app`. The other host needs the same canvas script (any branch with this change) for full height, and you must be logged in to Vercel in the same browser for protected previews.
 - The page list is built from the Keystatic projects collection, so new cases appear automatically.
+
+## Layout grid
+
+Defined as custom properties in `src/styles/global.css`:
+
+- **Desktop (≥760):** `--cols: 10`, `--margin: 160px` (it clamps down to 20px below 1440), `--gutter: 16px`, columns stretch (`--col` ≈ 97.6px at 1440).
+- **Content span:** main images and all body copy share ONE centred span, `--content-span: 6` (`--content-width` ≈ 666px at 1440, left edge 387). Image pairs and process grids use it too. This covers case text, the summary and info, homepage about and captions, and the footer text.
+- **Wide span:** image and pair blocks with the Keystatic "Large" checkbox and homepage wide cards use `--wide-span: 8` (≈ 893px).
+- **Mobile/tablet (<760):** 4 cols, 20px margins, 16px gutters. Copy and images both take the full content width.
+- Don't add ad-hoc max-widths for these blocks; change the span tokens instead.
+- Press G to toggle the column overlay, in dev or on `/canvas` frames (`?canvas=1`). `?grid=1` also shows it.
