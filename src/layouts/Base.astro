@@ -56,6 +56,10 @@ const site = await getSite();
         var vh = Number(q.get('vh')) || 900;
         var root = document.documentElement;
         root.classList.add('canvas-mode');
+        // canvas frames are review copies: keep them out of search indexes
+        var robots = document.querySelector('meta[name="robots"]') || document.head.appendChild(document.createElement('meta'));
+        robots.setAttribute('name', 'robots');
+        robots.setAttribute('content', 'noindex, nofollow');
         root.style.setProperty('--canvas-vh', vh / 100 + 'px');
         var unit = /(-?\d*\.?\d+)(s|d|l)?vh\b/g;
         function rebase(rules, out) {

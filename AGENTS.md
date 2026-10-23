@@ -92,7 +92,14 @@ One size for the whole site: 23px, line-height 29px. Hierarchy comes from spacin
 
 ## Design canvas (`/canvas`)
 
-`/canvas` is a pan-and-zoom board of every page (home, every published case, 404) as live iframes at 1440 and 390 wide. Pages sit side by side (each page's 1440 frame, then its 390 frame, top-aligned); compared hosts are extra rows below in the same column order. It only exists in `astro dev` and on Vercel preview deployments; production (humansize.de) returns 404, and it is noindex and excluded from the sitemap, robots and llms.txt (`tests/canvas-production.spec.mjs`).
+`/canvas` is a pan-and-zoom board of every page (home, every published case, 404) as live iframes at 1440 and 390 wide. Pages sit side by side (each page's 1440 frame, then its 390 frame, top-aligned); compared hosts are extra rows below in the same column order. It is open in `astro dev` and on Vercel previews (which already sit behind Vercel login). On production (humansize.de/canvas) it requires GitHub sign-in:
+
+- It reuses Keystatic's GitHub session: the `keystatic-gh-access-token` cookie that Keystatic sets after `/keystatic` login.
+- `src/lib/canvas-auth.mjs` checks that token server-side against GitHub. It calls `GET /user`, then `GET /repos/Jellouse/HS-Portfolio-2026`, and requires `permissions.push`. The result is cached for 5 minutes per token hash. The token never goes into the page.
+- Not signed in (or token expired): a 401 page with "Sign in with GitHub". That link starts Keystatic's login, and `src/middleware.ts` sends you from `/keystatic` back to `/canvas` (via a 10-minute `canvas-return` cookie).
+- Signed in without push access: 403.
+- /canvas is noindex (meta and X-Robots-Tag), disallowed in robots, and excluded from the sitemap and llms.txt (`tests/canvas-auth.spec.mjs`).
+- Frames load public pages with `?canvas=1`. That param only changes layout and adds noindex, nothing secret.
 
 - Controls: frames ignore the pointer so the board always pans and zooms. Turn on Interact (bottom-left button or I) or hold Alt/Option to scroll, click or hover inside frames; Esc turns it off. Drag, trackpad or space+drag to pan; ctrl/cmd+wheel, pinch or `+`/`-` to zoom; `0` fits all, `1` is 100%. Click a label to open that page in a new tab.
 - Frames load `<path>?canvas=1&vh=900` (desktop) or `vh=844` (mobile). The inline script in `src/layouts/Base.astro` then re-bases vh/svh units on that height, shows reveals in their final state and posts the page height to the board. Without `?canvas=1` it does nothing.
