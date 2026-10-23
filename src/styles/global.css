@@ -827,6 +827,20 @@ body:has(.project) .site-header {
   margin: 0;
 }
 
+/* 1px hairline on the footer's top edge, full viewport width: when scrolled to the
+   bottom (the footer is one screen tall) it sits at the top of the viewport. */
+.site-footer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: rgba(0, 0, 0, 0.1);
+  z-index: 2;
+  pointer-events: none;
+}
+
 .site-footer {
   position: relative;
   box-sizing: border-box;
