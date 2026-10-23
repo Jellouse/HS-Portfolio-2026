@@ -9,7 +9,7 @@
     "preview": "ASTRO_TELEMETRY_DISABLED=1 astro preview",
     "test:touch-guard": "node tests/touch-scroll-guard.mjs",
     "test:scroll": "node tests/mobile-scroll.spec.mjs",
-    "test:canvas": "node tests/canvas-production.spec.mjs",
+    "test:canvas": "node tests/canvas-auth.spec.mjs",
     "test": "npm run test:touch-guard && npm run test:canvas && npm run test:scroll && npm run test:project-images && npm run test:keystatic",
     "test:preview-images": "node tests/preview-images.spec.mjs",
     "optimize:images": "node scripts/optimize-content-images.mjs",

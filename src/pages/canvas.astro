@@ -1,17 +1,34 @@
 ---
-// Live design board: every page as a live iframe at 1440 and 390. Dev and Vercel preview
-// only; production gets a 404. ?compare=<host1>,<host2> adds the same pages from other hosts.
+// Live design board: every page as a live iframe at 1440 and 390. Open in dev and on Vercel
+// previews; on production only for GitHub users with push access to the repo (Keystatic's
+// GitHub session, verified server-side). ?compare=<host1>,<host2> adds other hosts.
 export const prerender = false;
 
 import { getProjects, projectLabel } from '../lib/content';
-import { canvasEnabled } from '../lib/canvas-env.mjs';
+import { canvasMode } from '../lib/canvas-env.mjs';
+import { checkCanvasAccess, RETURN_COOKIE, TOKEN_COOKIE } from '../lib/canvas-auth.mjs';
 
-if (!canvasEnabled({ ...process.env, NODE_ENV: import.meta.env.DEV ? 'development' : 'production' })) {
-  return new Response('Not found', {
-    status: 404,
-    headers: { 'X-Robots-Tag': 'noindex, nofollow', 'Cache-Control': 'no-store' },
-  });
+const NOINDEX = { 'X-Robots-Tag': 'noindex, nofollow', 'Cache-Control': 'private, no-store' };
+const mode = canvasMode({ ...process.env, NODE_ENV: import.meta.env.DEV ? 'development' : 'production' });
+if (mode === 'auth') {
+  const access = await checkCanvasAccess(Astro.cookies.get(TOKEN_COOKIE)?.value);
+  if (access.status !== 'ok') {
+    const forbidden = access.status === 'forbidden';
+    if (!forbidden) {
+      Astro.cookies.set(RETURN_COOKIE, '1', { path: '/', maxAge: 600, httpOnly: true, secure: true, sameSite: 'lax' });
+    }
+    const msg = forbidden
+      ? `Signed in as ${access.login.replace(/[^\w-]/g, '')}, which has no push access to the site repo.`
+      : 'The canvas is for site editors. Sign in with the GitHub account you use for Keystatic.';
+    const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex, nofollow"><title>Canvas · Humansize</title><style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#1a1a1a;color:#8a8a8a;font:14px/20px ui-monospace,Menlo,monospace}main{max-width:360px;padding:20px}a{display:inline-block;margin-top:16px;padding:8px 12px;border-radius:4px;background:#fff;color:#000;text-decoration:none}</style></head><body><main><p>${msg}</p><a href="/api/keystatic/github/login">Sign in with GitHub</a></main></body></html>`;
+    return new Response(html, {
+      status: forbidden ? 403 : 401,
+      headers: { ...NOINDEX, 'Content-Type': 'text/html; charset=utf-8' },
+    });
+  }
 }
+Astro.response.headers.set('X-Robots-Tag', NOINDEX['X-Robots-Tag']);
+Astro.response.headers.set('Cache-Control', NOINDEX['Cache-Control']);
 
 const projects = await getProjects();
 const pages = [
