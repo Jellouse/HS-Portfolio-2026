@@ -71,6 +71,12 @@
   --content-width: calc(var(--content-span) * var(--col) + (var(--content-span) - 1) * var(--gutter));
   --measure: var(--content-width);
   --card: 1120px;
+  /* Case page rhythm (3x the old 28 / 80 / 188px). --space-block: between images and
+     pairs. --space-text: visible gap around text blocks. --space-section: before the
+     Process and Info sections. */
+  --space-block: 84px;
+  --space-text: 240px;
+  --space-section: 240px;
   --radius: 31px;
   --radius-sm: 15px;
   --pad: 20px;
@@ -107,9 +113,20 @@
 /* Tablet/mobile: 4 cols, 20px margins, 16px gutters; copy and images share the full width. */
 @media (max-width: 759px) {
   :root {
+    /* mobile rhythm: 2x the old gaps */
+    --space-block: 56px;
+    --space-text: 160px;
+    --space-section: 160px;
     --cols: 4;
     --content-span: 4;
     --wide-span: 4;
+  }
+}
+
+/* Below the grid, block margins collapse, so the section gap is set directly. */
+@media (max-width: 759px) {
+  .project .process {
+    margin-top: var(--space-section);
   }
 }
 
@@ -725,8 +742,8 @@ body:has(.project) .site-header {
 
 .text-block {
   width: min(100%, var(--measure));
-  margin: 0 auto 80px;
-  padding-top: 52px;
+  margin: 0 auto var(--space-text);
+  padding-top: calc(var(--space-text) - var(--space-block));
   font-size: var(--text-title);
   line-height: var(--lh-title);
 }
@@ -745,20 +762,20 @@ body:has(.project) .site-header {
 .image-block[data-frame='narrow'] {
   width: min(100%, var(--measure));
   max-width: var(--measure);
-  margin: 0 auto 28px;
+  margin: 0 auto var(--space-block);
 }
 
 .pair {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 28px;
+  gap: var(--gutter);
   width: min(100%, var(--measure));
-  margin: 0 auto 28px;
+  margin: 0 auto var(--space-block);
 }
 
 .process {
   width: min(100%, var(--measure));
-  margin: 188px auto 0;
+  margin: calc(var(--space-section) - var(--space-block)) auto 0;
 }
 
 .process-label,
@@ -794,7 +811,7 @@ body:has(.project) .site-header {
 
 .info {
   width: min(100%, var(--measure));
-  margin: 188px auto 40px;
+  margin: var(--space-section) auto 40px;
 }
 
 .info-list {
