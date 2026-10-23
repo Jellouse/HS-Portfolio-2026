@@ -158,6 +158,31 @@ const site = await getSite();
           else img.addEventListener('load', mark, { once: true });
         });
 
+        // Mirror the open states onto the header as plain classes. Safari does not reliably
+        // re-match .site-header:has(.who.is-open) when a child's class flips, so the time and
+        // @Humansize ended up visible on top of each other. Plain classes always restyle.
+        document.querySelectorAll('.site-header').forEach(function (header) {
+          var sync = function () {
+            header.classList.toggle('is-time-open', !!header.querySelector('.who.is-open'));
+            var open = !!header.querySelector('.contact.is-open');
+            var was = header.classList.contains('is-menu-open');
+            header.classList.toggle('is-menu-open', open);
+            if (open) header.classList.remove('is-menu-fade', 'is-menu-snap');
+            // Menu closing: the time comes back instantly, unless the 5s timer closed it (crossfade).
+            if (was && !open) {
+              var cls = window.__hsTimerClose ? 'is-menu-fade' : 'is-menu-snap';
+              window.__hsTimerClose = false;
+              header.classList.remove('is-menu-fade', 'is-menu-snap');
+              header.classList.add(cls);
+              setTimeout(function () { header.classList.remove(cls); }, 700);
+            }
+          };
+          new MutationObserver(function (list) {
+            if (list.some(function (m) { return m.target !== header; })) sync();
+          }).observe(header, { subtree: true, attributes: true, attributeFilter: ['class'] });
+          sync();
+        });
+
         // phones: an open menu or time closes itself after 5s
         var autoClose = 0;
         var armClose = function (el) {
@@ -165,7 +190,9 @@ const site = await getSite();
           if (!el.classList.contains('is-open')) return;
           if (!window.matchMedia('(max-width: 759px)').matches) return;
           autoClose = setTimeout(function () {
+            window.__hsTimerClose = true;
             el.classList.remove('is-open');
+            setTimeout(function () { window.__hsTimerClose = false; }, 0);
           }, 5000);
         };
 
@@ -203,11 +230,15 @@ const site = await getSite();
         });
 
         // a tap outside an open menu or time closes it
-        document.addEventListener('click', function (event) {
+        // iOS only fires click on "clickable" elements, so a tap on blank page never closed
+        // the menu. pointerdown fires on every tap.
+        var closeOutside = function (event) {
           document.querySelectorAll('.contact.is-open, .who.is-open').forEach(function (el) {
             if (!el.contains(event.target)) el.classList.remove('is-open');
           });
-        });
+        };
+        document.addEventListener('click', closeOutside);
+        document.addEventListener('pointerdown', closeOutside);
 
         document.addEventListener('keydown', function (event) {
           if (event.key !== 'Escape') return;

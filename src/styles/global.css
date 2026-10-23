@@ -1068,11 +1068,11 @@ body:has(.project) .site-header {
     opacity: 1;
   }
 
-  body:has(.hero) .site-header:has(.who.is-open) .contact {
+  body:has(.hero) .site-header.is-time-open .contact {
     visibility: hidden;
   }
 
-  body:has(.hero) .site-header:has(.contact.is-open) .who > a {
+  body:has(.hero) .site-header.is-menu-open .who > a {
     visibility: hidden;
   }
 
@@ -1704,11 +1704,18 @@ html.show-grid .grid-overlay .page-grid {
   background: #f4f4f4;
 }
 
-/* The Tokyo time never shows behind an open @Humansize menu: it fades out with the
-   label (150ms) and fades back on close. */
-body .site-header:has(.contact.is-open) .who .time {
+/* The Tokyo time never shows behind an open @Humansize menu: it goes instantly when the
+   menu opens and stays gone while it is open. A tap outside brings it back instantly;
+   the 5s auto-close crossfades it back in. */
+body .site-header.is-menu-open .who .time,
+body .site-header.is-menu-snap .who .time {
+  transition: none;
+}
+body .site-header.is-menu-open .who .time {
   opacity: 0;
-  transition: opacity 150ms ease;
+}
+body .site-header.is-menu-fade:not(.is-menu-open) .who .time {
+  transition: opacity 400ms ease;
 }
 
 @media (hover: hover) {
