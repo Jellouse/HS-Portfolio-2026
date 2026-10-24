@@ -75,7 +75,7 @@ export default config({
   storage: storage(),
   ui: {
     brand: { name: 'Humansize' },
-    navigation: ['projects', 'projectOrder', '---', 'site'],
+    navigation: ['projects', 'projectOrder', '---', 'products', '---', 'site'],
   },
   collections: {
     projects: collection({
@@ -265,6 +265,31 @@ export default config({
             },
           },
           { label: 'Blocks' },
+        ),
+      },
+    }),
+    products: collection({
+      label: 'Shop products',
+      slugField: 'name',
+      path: 'src/content/products/*/',
+      format: { data: 'yaml' },
+      columns: ['name', 'price'],
+      schema: {
+        name: fields.slug({
+          name: { label: 'Name', validation: { isRequired: true, length: { min: 1 } } },
+          slug: { label: 'Slug', description: 'Also the worksurface.co/shop/<slug> link.' },
+        }),
+        order: fields.integer({ label: 'Order', description: 'Position on /shop, low first.', defaultValue: 99 }),
+        price: fields.integer({ label: 'Price (EUR)', validation: { isRequired: true } }),
+        edition: fields.text({ label: 'Edition', description: 'e.g. of 8' }),
+        dimensions: fields.text({ label: 'Dimensions', description: 'Optional, e.g. 200 mm tall' }),
+        description: fields.text({ label: 'Description', multiline: true, validation: { isRequired: true, length: { min: 1 } } }),
+        images: fields.array(
+          fields.object({
+            src: { ...fields.image({ label: 'Image', directory: 'src/content/products', publicPath: '/src/content/products', validation: { isRequired: true } }) },
+            alt: fields.text({ label: 'Alt text' }),
+          }),
+          { label: 'Images', description: 'The first image is the /shop card.', itemLabel: (props) => props.fields.alt.value || 'Image' },
         ),
       },
     }),

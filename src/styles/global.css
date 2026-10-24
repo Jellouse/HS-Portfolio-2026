@@ -1723,3 +1723,30 @@ body .site-header.is-menu-fade:not(.is-menu-open) .who .time {
 .project .info + .process {
   margin-top: var(--space-section);
 }
+
+/* Shop draft: price line + one quiet buy button (same type, squircle radius, greys). */
+.shop-buy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--lh-body);
+}
+.shop-price {
+  margin: 0;
+}
+.shop-button {
+  display: inline-block;
+  padding: 10px 20px;
+  border: 1px solid var(--ink);
+  border-radius: var(--radius-sm);
+  corner-shape: squircle;
+  color: var(--ink);
+  text-decoration: none;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+@media (hover: hover) {
+  .shop-button:hover {
+    background: var(--ink);
+    color: #fff;
+  }
+}

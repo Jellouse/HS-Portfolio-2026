@@ -1,0 +1,11 @@
+name: Type 660
+order: 1
+price: 70
+edition: of 8
+dimensions: 200 mm tall
+description: A tall industrial form made to sharpen delicate silhouettes.
+images:
+  - src: /src/content/products/thorn-vase/1.webp
+    alt: Type 660 vase
+  - src: /src/content/products/thorn-vase/2.jpg
+    alt: Type 660 vase

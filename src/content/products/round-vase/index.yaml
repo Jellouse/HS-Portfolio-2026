@@ -1,0 +1,13 @@
+name: Type 490
+order: 3
+price: 250
+edition: of 2
+dimensions: OD 160 / ID 80 mm, 250 mm tall
+description: A low, weighty volume balancing soft growth and hard material.
+images:
+  - src: /src/content/products/round-vase/1.webp
+    alt: Type 490 vase
+  - src: /src/content/products/round-vase/2.jpg
+    alt: Type 490 vase
+  - src: /src/content/products/round-vase/3.jpg
+    alt: Type 490 vase

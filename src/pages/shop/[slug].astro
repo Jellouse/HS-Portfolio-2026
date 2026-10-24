@@ -1,0 +1,46 @@
+---
+export const prerender = true;
+
+import ImageBlock from '../../components/ImageBlock.astro';
+import Info from '../../components/Info.astro';
+import MarkFace from '../../components/MarkFace.astro';
+import ProjectHero from '../../components/ProjectHero.astro';
+import Base from '../../layouts/Base.astro';
+import { getProducts, price, shopUrl, SHIPPING, type ProductEntry } from '../../lib/shop';
+
+export async function getStaticPaths() {
+  const products = await getProducts();
+  return products.map((product) => ({ params: { slug: product.id }, props: { product } }));
+}
+
+interface Props {
+  product: ProductEntry;
+}
+
+const { product } = Astro.props;
+const d = product.data;
+const info = [
+  ...(d.edition ? [{ label: 'Edition', value: d.edition }] : []),
+  ...(d.dimensions ? [{ label: 'Dimensions', value: d.dimensions }] : []),
+  { label: 'Material', value: 'raw aluminium' },
+  { label: 'Price', value: price(d.price) },
+  { label: 'Shipping', value: SHIPPING },
+];
+---
+
+<Base title={`${d.name} · Industrial Bloom · Humansize`} description={d.description} noindex>
+  <article class="project page-grid" data-slug={product.id}>
+    <p class="project-mark">
+      <a href="/" aria-label="Humansize">
+        <MarkFace />
+      </a>
+    </p>
+    <ProjectHero title={d.name} years={price(d.price)} summary={d.description} />
+    {d.images.map((img, i) => <ImageBlock src={img.src} alt={img.alt} priority={i < 2} />)}
+    <section class="text-block shop-buy">
+      <p class="shop-price">{price(d.price)}{d.edition ? <span class="project-year">, edition {d.edition}</span> : null}</p>
+      <a class="shop-button" href={shopUrl(product.id)}>Buy on worksurface.co</a>
+    </section>
+    <Info items={info} />
+  </article>
+</Base>

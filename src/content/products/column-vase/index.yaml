@@ -1,0 +1,12 @@
+name: Type 120
+order: 2
+price: 150
+edition: of 2
+description: A restrained vertical vessel with a cast, architectural texture.
+images:
+  - src: /src/content/products/column-vase/1.webp
+    alt: Type 120 vase
+  - src: /src/content/products/column-vase/2.jpg
+    alt: Type 120 vase
+  - src: /src/content/products/column-vase/3.jpg
+    alt: Type 120 vase
