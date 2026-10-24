@@ -1,0 +1,22 @@
+name: Type 660
+order: 1
+price: 70
+edition: of 8
+dimensions: 200 mm tall
+description: A tall industrial form made to sharpen delicate silhouettes.
+images:
+  - src: /src/content/products/thorn-vase/1.webp
+    alt: Type 660 vase
+  - src: /src/content/products/thorn-vase/2.jpg
+    alt: Type 660 vase
+overview:
+  show: true
+  title: "Type-660"
+  price: "150€"
+  description: "A tall vase in solid aluminium, 200 mm high. Made for long stems like branches, lilies. Raw finish, 0.5 kg."
+  left:
+    src: /src/content/products/thorn-vase/overview-1.jpg
+    alt: Type 660 vase
+  right:
+    src: /src/content/products/thorn-vase/overview-2.jpg
+    alt: Type 660 vase

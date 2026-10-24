@@ -137,4 +137,33 @@ const projectOrder = defineCollection({
   }),
 });
 
-export const collections = { projects, site, projectOrder };
+// Industrial Bloom shop (draft): one folder per product, edited in Keystatic.
+const products = defineCollection({
+  loader: glob({
+    pattern: '**/index.yaml',
+    base: './src/content/products',
+    generateId: ({ entry }) => entry.replace(/^\.\//, '').replace(/\/index\.ya?ml$/, ''),
+  }),
+  schema: z.object({
+    name: z.string(),
+    order: z.number().default(99),
+    price: z.number(),
+    edition: z.string().optional(),
+    dimensions: z.string().optional(),
+    description: z.string(),
+    images: z.array(z.object({ src: z.string(), alt: z.string().default('') })).default([]),
+    // /shop overview section: its own copy and image pair, separate from the detail page.
+    overview: z
+      .object({
+        show: z.boolean().default(true),
+        title: z.string().optional(),
+        price: z.string().optional(),
+        description: z.string().optional(),
+        left: z.object({ src: z.string().nullish(), alt: z.string().default('') }).optional(),
+        right: z.object({ src: z.string().nullish(), alt: z.string().default('') }).optional(),
+      })
+      .default({ show: true }),
+  }),
+});
+
+export const collections = { projects, site, projectOrder, products };

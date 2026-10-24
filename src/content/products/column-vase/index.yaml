@@ -1,0 +1,23 @@
+name: Type 120
+order: 2
+price: 150
+edition: of 2
+description: A restrained vertical vessel with a cast, architectural texture.
+images:
+  - src: /src/content/products/column-vase/1.webp
+    alt: Type 120 vase
+  - src: /src/content/products/column-vase/2.jpg
+    alt: Type 120 vase
+  - src: /src/content/products/column-vase/3.jpg
+    alt: Type 120 vase
+overview:
+  show: true
+  title: "Type-120"
+  price: "150€"
+  description: "A single aluminium extrusion profile with an architectural, textured surface. Edition of 2, each numbered."
+  left:
+    src: /src/content/products/column-vase/overview-1.jpg
+    alt: Type 120 vase
+  right:
+    src: /src/content/products/column-vase/overview-2.jpg
+    alt: Type 120 vase
