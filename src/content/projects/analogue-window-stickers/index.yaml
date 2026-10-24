@@ -1,0 +1,146 @@
+title: Analogue window stickers
+year: 2023
+yearEnd: 2026
+published: true
+seoTitle: Analogue window stickers, Amsterdam, 2023 to 2026
+summary: >-
+  Inspiring our local Amsterdam foot traffic with beautiful window stickers
+  has been a delight.
+cover: /src/content/projects/analogue-window-stickers/cover.jpg
+coverAlt: Film workshops window sticker, Analogue
+coverFrame: full
+coverFlush: false
+rounded: true
+info:
+  - label: Production
+    value: Humansize & Analogue team
+  - label: Role
+    value: Design & Production
+  - label: With
+    value: Analogue
+  - label: Year
+    value: 2022 - 2026
+  - label: Client
+    value: Analogue
+processFromFolder: false
+blocks:
+  - discriminant: image
+    value:
+      src: /src/content/projects/analogue-window-stickers/blocks/0/value/src.jpg
+      alt: "Film workshops window sticker, Analogue window stickers"
+      frame: full
+      flush: false
+      large: false
+  - discriminant: image
+    value:
+      src: /src/content/projects/analogue-window-stickers/blocks/1/value/src.jpg
+      alt: "Illustrated figures sticker on a window, Analogue window stickers"
+      frame: full
+      flush: false
+      large: false
+  - discriminant: pair
+    value:
+      layout: pair
+      left: /src/content/projects/analogue-window-stickers/blocks/2/value/left.jpg
+      leftAlt: "Applying the figures sticker, Analogue window stickers"
+      right: /src/content/projects/analogue-window-stickers/blocks/2/value/right.jpg
+      rightAlt: "Applying the figures sticker, Analogue window stickers"
+      large: false
+  - discriminant: image
+    value:
+      src: /src/content/projects/analogue-window-stickers/blocks/3/value/src.jpg
+      alt: "Summer focus window stickers on the shopfront, Analogue window stickers"
+      frame: full
+      flush: false
+      large: true
+  - discriminant: image
+    value:
+      src: /src/content/projects/analogue-window-stickers/blocks/4/value/src.jpg
+      alt: "Orange lettering sticker behind a window display, Analogue window stickers"
+      frame: full
+      flush: false
+      large: false
+  - discriminant: image
+    value:
+      src: /src/content/projects/analogue-window-stickers/blocks/5/value/src.jpg
+      alt: "No filters, no apps window lettering, Analogue window stickers"
+      frame: full
+      flush: false
+      large: false
+  - discriminant: image
+    value:
+      src: /src/content/projects/analogue-window-stickers/blocks/6/value/src.jpg
+      alt: "Shopfront with No filters window lettering, Analogue window stickers"
+      frame: full
+      flush: false
+      large: true
+  - discriminant: image
+    value:
+      src: /src/content/projects/analogue-window-stickers/blocks/7/value/src.jpg
+      alt: "Lettering sticker reflected on the pavement, Analogue window stickers"
+      frame: full
+      flush: false
+      large: false
+  - discriminant: image
+    value:
+      src: /src/content/projects/analogue-window-stickers/blocks/8/value/src.jpg
+      alt: "Analogue logo sticker on a shop window, Analogue window stickers"
+      frame: full
+      flush: false
+      large: false
+  - discriminant: image
+    value:
+      src: /src/content/projects/analogue-window-stickers/blocks/9/value/src.jpg
+      alt: "Shopfront with window stickers, Analogue window stickers"
+      frame: full
+      flush: false
+      large: true
+  - discriminant: image
+    value:
+      src: /src/content/projects/analogue-window-stickers/blocks/10/value/src.jpg
+      alt: "Applying a logo sticker to a window, Analogue window stickers"
+      frame: full
+      flush: false
+      large: false
+  - discriminant: image
+    value:
+      src: /src/content/projects/analogue-window-stickers/blocks/11/value/src.jpg
+      alt: "Window with camera brands lettering, Analogue window stickers"
+      frame: full
+      flush: false
+      large: false
+  - discriminant: image
+    value:
+      src: /src/content/projects/analogue-window-stickers/blocks/12/value/src.jpg
+      alt: "Applying camera brand lettering, Analogue window stickers"
+      frame: full
+      flush: false
+      large: false
+  - discriminant: image
+    value:
+      src: /src/content/projects/analogue-window-stickers/blocks/13/value/src.jpg
+      alt: "Applying a large sticker to a window, Analogue window stickers"
+      frame: full
+      flush: false
+      large: false
+  - discriminant: image
+    value:
+      src: /src/content/projects/analogue-window-stickers/blocks/14/value/src.jpg
+      alt: "Illuminated Analogue sign, Analogue window stickers"
+      frame: full
+      flush: false
+      large: false
+  - discriminant: image
+    value:
+      src: /src/content/projects/analogue-window-stickers/blocks/15/value/src.jpg
+      alt: "Placing a sidewalk sign, Analogue window stickers"
+      frame: full
+      flush: false
+      large: false
+  - discriminant: image
+    value:
+      src: /src/content/projects/analogue-window-stickers/blocks/16/value/src.jpg
+      alt: "Analogue sidewalk sign on the street, Analogue window stickers"
+      frame: full
+      flush: false
+      large: false
