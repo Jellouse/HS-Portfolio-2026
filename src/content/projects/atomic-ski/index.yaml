@@ -67,19 +67,21 @@ blocks:
       frame: full
       flush: false
       large: false
+  - discriminant: text
+    value:
+      heading: Atomic Boothub
+      text: >-
+        The Boothub was our northstar project to test out the limits of our
+        newly created brand guidelines for Atomic. Based on the Vitra
+        chairfinder i had designed years ago, the Atomic Boothub became the
+        knowledge center for everything ski boot related.
   - discriminant: video
     value:
       src: >-
         https://humansize-media.schnettker-johann.workers.dev/projects/atomic/fltc-151124-1-mvkmtvi1.mp4
-      poster: /src/content/projects/atomic-ski/blocks/5/value/poster.jpg
+      poster: /src/content/projects/atomic-ski/blocks/6/value/poster.jpg
       frame: full
       flush: false
-  - discriminant: text
-    value:
-      heading: Technology Renders
-      text: |-
-        3D content creation for Atomic Boothub, a hub for all knowledge 
-        about Atomic boot fit and technology.
   - discriminant: video
     value:
       src: >-
