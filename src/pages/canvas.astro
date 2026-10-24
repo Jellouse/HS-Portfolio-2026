@@ -70,6 +70,10 @@ const widths = [
       .is-panning iframe, body.space iframe, body.pinch iframe { pointer-events: none !important; }
       #interact { font: inherit; border: 0; cursor: pointer; position: fixed; left: 16px; bottom: 16px; padding: 4px 8px; border-radius: 4px; background: #000; color: #8a8a8a; font-size: 12px; line-height: 16px; user-select: none; }
       body.interact #interact { color: #fff; }
+      #grid-toggle { font: inherit; border: 0; cursor: pointer; padding: 4px 8px; border-radius: 4px; background: #000; color: #8a8a8a; font-size: 12px; line-height: 16px; user-select: none; }
+      .canvas-tools { position: fixed; left: 16px; bottom: 16px; display: flex; gap: 8px; }
+      .canvas-tools #interact { position: static; }
+      body.grid #grid-toggle { color: #fff; }
       astro-dev-toolbar { display: none !important; }
       #zoom { position: fixed; right: 16px; bottom: 16px; padding: 4px 8px; border-radius: 4px; background: #000; color: #fff; font-size: 12px; line-height: 16px; user-select: none; }
     </style>
@@ -77,7 +81,10 @@ const widths = [
   <body>
     <div id="board"><div id="world"></div></div>
     <div id="zoom">100%</div>
+    <div class="canvas-tools">
     <button id="interact" type="button" aria-pressed="false">Interact: off (I, or hold ⌥)</button>
+    <button id="grid-toggle" type="button" aria-pressed="false">Grid: off (G)</button>
+    </div>
     <script id="canvas-data" type="application/json" set:html={JSON.stringify({ pages, widths })} />
     <script>
       import { mountCanvas } from '../scripts/canvas';

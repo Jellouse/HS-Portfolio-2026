@@ -135,6 +135,44 @@ export function mountCanvas() {
   };
   hint.addEventListener('click', () => setInteract(!interact));
   setInteract(false);
+  // Grid overlay: drawn inside each frame from the page's own --cols/--margin/--gutter tokens,
+  // so it always matches the live site grid (10 cols desktop, mobile grid on 390 frames).
+  const gridBtn = document.getElementById('grid-toggle') as HTMLButtonElement;
+  const GRID_KEY = 'canvas-grid';
+  const GRID_CSS =
+    '.canvas-grid{position:fixed;inset:0;z-index:2147483647;pointer-events:none}' +
+    '.canvas-grid>div{display:grid;grid-template-columns:repeat(var(--cols),minmax(0,1fr));column-gap:var(--gutter);' +
+    'width:min(100%,1440px);height:100%;margin-inline:auto;padding-inline:var(--margin);box-sizing:border-box}' +
+    '.canvas-grid span{background:rgba(255,0,0,0.08)}';
+  let grid = false;
+  try { grid = localStorage.getItem(GRID_KEY) === '1'; } catch {}
+  const applyGrid = (f: Frame) => {
+    let doc: Document | null | undefined;
+    try { doc = f.iframe?.contentDocument; } catch { return; } // cross-origin compare rows
+    if (!doc || !doc.body) return;
+    let el = doc.getElementById('canvas-grid');
+    if (!grid) { el?.remove(); return; }
+    if (el) return;
+    el = doc.createElement('div');
+    el.id = 'canvas-grid';
+    el.className = 'canvas-grid';
+    el.setAttribute('aria-hidden', 'true');
+    el.innerHTML = `<style>${GRID_CSS}</style><div>${'<span></span>'.repeat(12)}</div>`;
+    doc.body.appendChild(el);
+    // Hide spare columns beyond the page's --cols.
+    const cols = parseInt(getComputedStyle(doc.documentElement).getPropertyValue('--cols')) || 10;
+    el.querySelectorAll('span').forEach((s, i) => { if (i >= cols) s.remove(); });
+  };
+  const setGrid = (on: boolean) => {
+    grid = on;
+    try { localStorage.setItem(GRID_KEY, on ? '1' : '0'); } catch {}
+    document.body.classList.toggle('grid', on);
+    gridBtn.textContent = `Grid: ${on ? 'on' : 'off'} (G)`;
+    gridBtn.setAttribute('aria-pressed', String(on));
+    frames.forEach(applyGrid);
+  };
+  gridBtn.addEventListener('click', () => setGrid(!grid));
+  setGrid(grid);
   const setAlt = (on: boolean) => document.body.classList.toggle('alt', on);
   addEventListener('blur', () => setAlt(false));
   board.addEventListener('pointermove', (e) => { if (!e.altKey) setAlt(false); });
@@ -160,6 +198,7 @@ export function mountCanvas() {
         iframe.src = f.src;
         iframe.loading = 'eager';
         iframe.title = f.src;
+        iframe.addEventListener('load', () => applyGrid(f));
         f.box.appendChild(iframe);
         f.iframe = iframe;
         io.unobserve(f.box);
@@ -233,6 +272,7 @@ export function mountCanvas() {
     if (e.target instanceof HTMLInputElement) return;
     if (e.key === 'Escape') setInteract(false);
     else if ((e.key === 'i' || e.key === 'I') && !e.metaKey && !e.ctrlKey) setInteract(!interact);
+    else if ((e.key === 'g' || e.key === 'G') && !e.metaKey && !e.ctrlKey && !e.altKey) setGrid(!grid);
     else if (e.key === 'Alt') setAlt(true);
     else if (e.code === 'Space') {
       space = true;
