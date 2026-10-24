@@ -9,13 +9,13 @@ interface Props {
   rightAlt: string;
   leftPriority?: boolean;
   rightPriority?: boolean;
-  large?: boolean;
+  frame?: 'default' | 'wide';
 }
 
-const { left, leftAlt, right, rightAlt, leftPriority = false, rightPriority = false, large = false } = Astro.props;
+const { left, leftAlt, right, rightAlt, leftPriority = false, rightPriority = false, frame = 'default' } = Astro.props;
 ---
 
-<div class="pair fade-in" data-large={large ? '' : undefined}>
+<div class="pair fade-in" data-frame={frame}>
   <BlurImage
     src={resolveImageSource(left)}
     alt={leftAlt}

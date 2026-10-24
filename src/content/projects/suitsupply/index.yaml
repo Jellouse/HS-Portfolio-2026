@@ -34,25 +34,25 @@ blocks:
   value:
     src: https://humansize-media.schnettker-johann.workers.dev/projects/suitsupply/suitsupply-2-mvd41shw.mp4
     alt: Suitsupply Look Builder animation dressing a model in shirts and trousers
-    frame: full
+    frame: default
     flush: false
 - discriminant: image
   value:
     src: /src/content/projects/suitsupply/blocks/3/value/src.jpg
     alt: Suitsupply poster with a model and a goat in an underground station
-    frame: full
+    frame: default
     flush: false
 - discriminant: video
   value:
     src: https://humansize-media.schnettker-johann.workers.dev/projects/suitsupply/suitsupply-4-mvd41v2a.mp4
     alt: Suitsupply Look Builder pages on the website
-    frame: full
+    frame: default
     flush: false
 - discriminant: image
   value:
     src: /src/content/projects/suitsupply/blocks/5/value/src.jpg
     alt: Terrace Tower construction billboard in front of an office building
-    frame: full
+    frame: default
     flush: false
 - discriminant: pair
   value:

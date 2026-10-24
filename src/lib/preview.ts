@@ -48,7 +48,7 @@ export function toProjectEntry(slug: string, data: Record<string, unknown>): Pro
       cover: typeof data.cover === 'string' ? data.cover : undefined,
       coverVideo: typeof data.coverVideo === 'string' ? data.coverVideo : undefined,
       coverAlt: typeof data.coverAlt === 'string' ? data.coverAlt : undefined,
-      coverFrame: (data.coverFrame as 'full' | 'wide' | 'medium' | 'narrow') || 'full',
+      coverFrame: (data.coverFrame === 'wide' ? 'wide' : 'default') as 'default' | 'wide',
       coverFlush: Boolean(data.coverFlush),
       rounded: data.rounded !== false,
       info: info.map((item: { label?: string; value?: string; href?: string }) => ({

@@ -24,29 +24,29 @@ blocks:
   value:
     src: https://humansize-media.schnettker-johann.workers.dev/projects/the-post/the-post-1-mvd43wpz.mp4
     alt: Monitor showing The Post brand identity
-    frame: full
+    frame: default
     flush: false
 - discriminant: image
   value:
     src: /src/content/projects/the-post/blocks/2/value/src.jpg
     alt: Shop window with The Post posters in pill-shaped frames
-    frame: full
+    frame: default
     flush: false
 - discriminant: video
   value:
     src: https://humansize-media.schnettker-johann.workers.dev/projects/the-post/the-post-3-mvd43z3q.mp4
     alt: Laptop on a ledge in an Amsterdam street showing The Post
-    frame: full
+    frame: default
     flush: false
 - discriminant: video
   value:
     src: https://humansize-media.schnettker-johann.workers.dev/projects/the-post/the-post-4-mvd441jt.mp4
     alt: Woman on the phone inside the pill shape of The Post logo
-    frame: full
+    frame: default
     flush: false
 - discriminant: video
   value:
     src: https://humansize-media.schnettker-johann.workers.dev/projects/the-post/the-post-5-mvd443cn.mp4
     alt: Hands typing on a laptop showing The Post
-    frame: full
+    frame: default
     flush: false

@@ -6,11 +6,11 @@ interface Props {
   src: string;
   poster?: string;
   label?: string;
-  frame?: 'full' | 'wide' | 'medium' | 'narrow';
+  frame?: 'default' | 'wide';
   flush?: boolean;
 }
 
-const { src, poster, label, frame = 'full', flush = false } = Astro.props;
+const { src, poster, label, frame = 'default', flush = false } = Astro.props;
 const posterImage = poster ? resolveImageSource(poster) : undefined;
 ---
 

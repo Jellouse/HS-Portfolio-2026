@@ -25,13 +25,13 @@ blocks:
   value:
     src: https://humansize-media.schnettker-johann.workers.dev/projects/other/other-2-mvd44617.mp4
     alt: Opto logo animation on dark blue
-    frame: full
+    frame: default
     flush: false
 - discriminant: video
   value:
     src: https://humansize-media.schnettker-johann.workers.dev/projects/other/other-3-mvd447n8.mp4
     alt: Animation of the line We build digital flagship
-    frame: full
+    frame: default
     flush: false
 - discriminant: pair
   value:
@@ -49,5 +49,5 @@ blocks:
   value:
     src: /src/content/projects/other/blocks/6/value/src.jpg
     alt: Wooden dining table with a laptop by a window
-    frame: full
+    frame: default
     flush: false

@@ -8,7 +8,7 @@ summary: >-
   renders, a LiDAR animation and a product showcase video.
 cover: /src/content/projects/analogue-af1/cover.jpg
 coverAlt: Black Analogue AF1 film camera from the front
-coverFrame: medium
+coverFrame: default
 coverFlush: false
 rounded: true
 info:
@@ -23,7 +23,7 @@ blocks:
       src: >-
         https://humansize-media.schnettker-johann.workers.dev/projects/analogue-af1/analogue-af1-1-mvd42svq.mp4
       alt: Animation of the Analogue AF1 camera turning in the dark
-      frame: wide
+      frame: default
       flush: false
   - discriminant: pair
     value:
@@ -32,37 +32,33 @@ blocks:
       leftAlt: Black Analogue AF1 film camera from the front
       right: /src/content/projects/analogue-af1/blocks/1/value/right.jpg
       rightAlt: Analogue AF1 camera surrounded by splashing water
-      large: false
+      frame: default
   - discriminant: video
     value:
       src: >-
         https://humansize-media.schnettker-johann.workers.dev/projects/analogue-af1/analogue-af1-2-mvd42um0.mp4
       alt: Glowing particles floating on a black background
-      frame: full
+      frame: default
       flush: false
   - discriminant: image
     value:
       src: /src/content/projects/analogue-af1/blocks/3/value/src.jpg
-      frame: wide
+      frame: default
       flush: false
-      large: false
   - discriminant: image
     value:
       src: /src/content/projects/analogue-af1/blocks/4/value/src.jpg
-      frame: wide
+      frame: default
       flush: false
-      large: false
   - discriminant: image
     value:
       src: /src/content/projects/analogue-af1/blocks/5/value/src.jpg
       alt: Website hero with the camera rising into frame, Analogue AF1
-      frame: full
+      frame: default
       flush: false
-      large: false
   - discriminant: image
     value:
       src: /src/content/projects/analogue-af1/blocks/6/value/src.jpg
       alt: Render of the lens elements spread out on blue, Analogue AF1
-      frame: full
+      frame: default
       flush: false
-      large: false

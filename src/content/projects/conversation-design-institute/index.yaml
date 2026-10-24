@@ -19,13 +19,13 @@ blocks:
   value:
     src: https://humansize-media.schnettker-johann.workers.dev/projects/conversation-design-institute/conversation-design-institute-0-mvd41x95.mp4
     alt: Animated white dot on a dark blue background
-    frame: full
+    frame: default
     flush: false
 - discriminant: image
   value:
     src: /src/content/projects/conversation-design-institute/blocks/1/value/src.jpg
     alt: Tablet showing the Conversation Designer course page with dotted circles
-    frame: full
+    frame: default
     flush: false
 - discriminant: pair
   value:
@@ -38,23 +38,23 @@ blocks:
     src: https://humansize-media.schnettker-johann.workers.dev/projects/conversation-design-institute/conversation-design-institute-3-mvd420hz.mp4
     alt: Two dotted circles overlapping on light blue, with the words Conversation
       Design
-    frame: full
+    frame: default
     flush: false
 - discriminant: video
   value:
     src: https://humansize-media.schnettker-johann.workers.dev/projects/conversation-design-institute/conversation-design-institute-4-mvd422kp.mp4
     alt: Animation of three dots moving across a light grey background
-    frame: full
+    frame: default
     flush: false
 - discriminant: video
   value:
     src: https://humansize-media.schnettker-johann.workers.dev/projects/conversation-design-institute/conversation-design-institute-5-mvd424me.mp4
     alt: Laptop showing a green Conversation Design Institute course page
-    frame: full
+    frame: default
     flush: false
 - discriminant: video
   value:
     src: https://humansize-media.schnettker-johann.workers.dev/projects/conversation-design-institute/conversation-design-institute-6-mvd426h3.mp4
     alt: Conversation Design Institute homepage with a ring of dots
-    frame: full
+    frame: default
     flush: false

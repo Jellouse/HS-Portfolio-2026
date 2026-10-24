@@ -9,7 +9,7 @@ cover: /src/content/projects/industrial-bloom/cover.jpg
 coverVideo: >-
   https://humansize-media.schnettker-johann.workers.dev/projects/industrial-bloom/render-7-base-11-mvevabg5.mp4
 coverAlt: Industrial Bloom
-coverFrame: medium
+coverFrame: default
 coverFlush: true
 rounded: true
 info:
@@ -28,26 +28,26 @@ blocks:
     value:
       src: /src/content/projects/industrial-bloom/blocks/0/value/src.jpg
       alt: Industrial Bloom
-      frame: full
+      frame: default
       flush: false
   - discriminant: image
     value:
       src: /src/content/projects/industrial-bloom/blocks/1/value/src.jpg
       alt: "Purple thistle in a dark aluminium vase on a purple gradient, Industrial Bloom"
-      frame: full
+      frame: default
       flush: false
   - discriminant: video
     value:
       src: >-
         https://humansize-media.schnettker-johann.workers.dev/projects/industrial-bloom/untitled3-mvcgnkky-mvd3ga1e.mp4
       poster: /src/content/projects/industrial-bloom/blocks/2/value/poster.jpg
-      frame: full
+      frame: default
       flush: false
   - discriminant: image
     value:
       src: /src/content/projects/industrial-bloom/blocks/3/value/src.jpg
       alt: "Hydrangea in an aluminium vase under teal light, Industrial Bloom"
-      frame: full
+      frame: default
       flush: false
   - discriminant: pair
     value:
@@ -56,47 +56,48 @@ blocks:
       leftAlt: "Small lilac flowers spilling from a round aluminium vase, Industrial Bloom"
       right: /src/content/projects/industrial-bloom/blocks/4/value/right.jpg
       rightAlt: "Pink pincushion flowers in a round aluminium vase, Industrial Bloom"
+      frame: default
   - discriminant: image
     value:
       src: /src/content/projects/industrial-bloom/blocks/5/value/src.jpg
       alt: "Silhouette of a thistle in an aluminium vase, Industrial Bloom"
-      frame: full
+      frame: default
       flush: false
   - discriminant: image
     value:
       src: /src/content/projects/industrial-bloom/blocks/6/value/src.jpg
       alt: "Hand holding an aluminium vase with purple flowers against a blue sky, Industrial Bloom"
-      frame: full
+      frame: default
       flush: false
   - discriminant: image
     value:
       src: /src/content/projects/industrial-bloom/blocks/7/value/src.jpg
       alt: "Dark spiky thistle head seen from above, Industrial Bloom"
-      frame: full
+      frame: default
       flush: false
   - discriminant: image
     value:
       src: /src/content/projects/industrial-bloom/blocks/8/value/src.jpg
       alt: "Render of a tall aluminium extrusion vase on grey, Industrial Bloom"
-      frame: full
+      frame: default
       flush: false
   - discriminant: image
     value:
       src: /src/content/projects/industrial-bloom/blocks/9/value/src.jpg
       alt: "Orange poppy in a polished aluminium vase in soft light, Industrial Bloom"
-      frame: full
+      frame: default
       flush: false
   - discriminant: image
     value:
       src: /src/content/projects/industrial-bloom/blocks/10/value/src.jpg
       alt: "Orange flower in front of an aluminium vase seen from above, Industrial Bloom"
-      frame: full
+      frame: default
       flush: false
   - discriminant: image
     value:
       src: /src/content/projects/industrial-bloom/blocks/11/value/src.jpg
       alt: "Orange poppies in a tall aluminium vase on a grey studio backdrop, Industrial Bloom"
-      frame: full
+      frame: default
       flush: false
   - discriminant: process
     value:

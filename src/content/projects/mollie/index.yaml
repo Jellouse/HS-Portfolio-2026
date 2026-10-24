@@ -47,5 +47,5 @@ blocks:
   value:
     src: /src/content/projects/mollie/blocks/4/value/src.jpg
     alt: Technical drawing of the Founders Club sign with handwritten notes
-    frame: full
+    frame: default
     flush: false

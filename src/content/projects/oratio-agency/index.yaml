@@ -44,17 +44,17 @@ blocks:
   value:
     src: https://humansize-media.schnettker-johann.workers.dev/projects/oratio-agency/oratio-agency-4-mvd43l3c.mp4
     alt: Oratio website opening with the logo on orange
-    frame: full
+    frame: default
     flush: false
 - discriminant: video
   value:
     src: https://humansize-media.schnettker-johann.workers.dev/projects/oratio-agency/oratio-agency-5-mvd43nt0.mp4
     alt: Hand holding a tablet showing the Oratio website
-    frame: full
+    frame: default
     flush: false
 - discriminant: video
   value:
     src: https://humansize-media.schnettker-johann.workers.dev/projects/oratio-agency/oratio-agency-6-mvd43pkc.mp4
     alt: Laptop on dark rock showing the Oratio website
-    frame: full
+    frame: default
     flush: false

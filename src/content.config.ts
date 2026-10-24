@@ -1,7 +1,7 @@
 import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
 
-const frame = z.enum(['full', 'wide', 'medium', 'narrow']);
+const frame = z.enum(['default', 'wide']);
 
 const textBlock = z.object({
   discriminant: z.literal('text'),
@@ -17,9 +17,8 @@ const imageBlock = z.object({
   value: z.object({
     src: z.string(),
     alt: z.string().default(''),
-    frame: frame.default('full'),
+    frame: frame.default('default'),
     flush: z.boolean().default(false),
-    large: z.boolean().default(false),
   }),
 });
 
@@ -29,7 +28,7 @@ const videoBlock = z.object({
     src: z.string().nullish(),
     poster: z.string().nullish(),
     alt: z.string().nullish(),
-    frame: frame.default('full'),
+    frame: frame.default('default'),
     flush: z.boolean().default(false),
   }),
 });
@@ -42,7 +41,7 @@ const pairBlock = z.object({
     leftAlt: z.string().default(''),
     right: z.string(),
     rightAlt: z.string().default(''),
-    large: z.boolean().default(false),
+    frame: frame.default('default'),
   }),
 });
 
@@ -93,7 +92,7 @@ const projects = defineCollection({
     cover: z.string().optional(),
     coverVideo: z.string().nullish(),
     coverAlt: z.string().optional(),
-    coverFrame: frame.default('full'),
+    coverFrame: frame.default('default'),
     coverFlush: z.boolean().default(false),
     rounded: z.boolean().default(true),
     info: z.array(infoSchema).default([]),

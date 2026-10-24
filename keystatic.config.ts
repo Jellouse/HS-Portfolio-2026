@@ -38,13 +38,12 @@ const inlineLink = {
 
 const frame = fields.select({
   label: 'Frame',
+  description: 'Desktop width. Default: the 6 text columns. Wide: one column more on each side (8 columns).',
   options: [
-    { label: 'Full', value: 'full' },
+    { label: 'Default', value: 'default' },
     { label: 'Wide', value: 'wide' },
-    { label: 'Medium', value: 'medium' },
-    { label: 'Narrow', value: 'narrow' },
   ],
-  defaultValue: 'full',
+  defaultValue: 'default',
 });
 
 // Videos: a URL (Cloudflare R2, uploaded with the button) or an older local path under
@@ -197,11 +196,6 @@ export default config({
                   description:
                     'White or transparent edges. No rounded corners and no padding.',
                 }),
-                large: fields.checkbox({
-                  label: 'Large',
-                  defaultValue: false,
-                  description: 'Desktop only: span the wider 8 columns instead of the text width.',
-                }),
               }),
             },
             video: {
@@ -242,11 +236,7 @@ export default config({
                   label: 'Right alt text',
                   description: 'Optional.',
                 }),
-                large: fields.checkbox({
-                  label: 'Large',
-                  defaultValue: false,
-                  description: 'Desktop only: span the wider 8 columns instead of the text width.',
-                }),
+                frame,
               }),
             },
             process: {
