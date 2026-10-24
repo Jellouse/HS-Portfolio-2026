@@ -152,7 +152,7 @@ blocks:
   - discriminant: image
     value:
       src: /src/content/projects/atomic-ski/blocks/17/value/src.jpg
-      frame: full
+      frame: wide
       flush: false
       large: false
   - discriminant: image
@@ -182,30 +182,24 @@ blocks:
   - discriminant: image
     value:
       src: /src/content/projects/atomic-ski/blocks/22/value/src.jpg
-      frame: full
+      frame: wide
       flush: false
       large: false
   - discriminant: image
     value:
       src: /src/content/projects/atomic-ski/blocks/23/value/src.jpg
-      frame: wide
-      flush: false
-      large: false
-  - discriminant: image
-    value:
-      src: /src/content/projects/atomic-ski/blocks/24/value/src.jpg
       frame: full
       flush: false
       large: false
   - discriminant: image
     value:
-      src: /src/content/projects/atomic-ski/blocks/25/value/src.jpg
+      src: /src/content/projects/atomic-ski/blocks/24/value/src.jpg
       frame: wide
       flush: false
       large: false
   - discriminant: image
     value:
-      src: /src/content/projects/atomic-ski/blocks/26/value/src.jpg
+      src: /src/content/projects/atomic-ski/blocks/25/value/src.jpg
       frame: full
       flush: false
       large: false
