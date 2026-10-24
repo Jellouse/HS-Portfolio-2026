@@ -23,7 +23,7 @@ blocks:
       src: >-
         https://humansize-media.schnettker-johann.workers.dev/projects/analogue-af1/analogue-af1-1-mvd42svq.mp4
       alt: Animation of the Analogue AF1 camera turning in the dark
-      frame: full
+      frame: wide
       flush: false
   - discriminant: pair
     value:
