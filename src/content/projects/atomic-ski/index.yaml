@@ -177,16 +177,6 @@ blocks:
       src: /src/content/projects/atomic-ski/blocks/23/value/src.jpg
       frame: default
       flush: false
-  - discriminant: image
-    value:
-      src: /src/content/projects/atomic-ski/blocks/24/value/src.jpg
-      frame: default
-      flush: false
-  - discriminant: image
-    value:
-      src: /src/content/projects/atomic-ski/blocks/25/value/src.jpg
-      frame: default
-      flush: false
   - discriminant: process
     value:
       images: []
