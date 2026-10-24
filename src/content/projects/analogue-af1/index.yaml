@@ -40,13 +40,11 @@ blocks:
       alt: Glowing particles floating on a black background
       frame: full
       flush: false
-  - discriminant: pair
+  - discriminant: image
     value:
-      layout: pair
-      left: /src/content/projects/analogue-af1/blocks/3/value/left.jpg
-      leftAlt: Analogue AF1 cameras from several angles on a black background
-      right: /src/content/projects/analogue-af1/blocks/3/value/right.jpg
-      rightAlt: Back of the Analogue AF1 camera next to a Kodak film roll
+      src: /src/content/projects/analogue-af1/blocks/3/value/src.jpg
+      frame: wide
+      flush: false
       large: false
   - discriminant: image
     value:
@@ -57,19 +55,13 @@ blocks:
   - discriminant: image
     value:
       src: /src/content/projects/analogue-af1/blocks/5/value/src.jpg
-      frame: wide
-      flush: false
-      large: false
-  - discriminant: image
-    value:
-      src: /src/content/projects/analogue-af1/blocks/6/value/src.jpg
       alt: Website hero with the camera rising into frame, Analogue AF1
       frame: full
       flush: false
       large: false
   - discriminant: image
     value:
-      src: /src/content/projects/analogue-af1/blocks/7/value/src.jpg
+      src: /src/content/projects/analogue-af1/blocks/6/value/src.jpg
       alt: Render of the lens elements spread out on blue, Analogue AF1
       frame: full
       flush: false
