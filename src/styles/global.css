@@ -1733,3 +1733,11 @@ body .site-header.is-menu-fade:not(.is-menu-open) .who .time {
     color: var(--ink);
   }
 }
+
+/* Info sits before Process: one section gap between them, the 40px tail stays at page end. */
+.project .info:has(+ .process) {
+  margin-bottom: 0;
+}
+.project .info + .process {
+  margin-top: var(--space-section);
+}

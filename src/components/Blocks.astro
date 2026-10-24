@@ -1,4 +1,5 @@
 ---
+import Info from './Info.astro';
 import ImageBlock from './ImageBlock.astro';
 import ImagePair from './ImagePair.astro';
 import ProcessBlock from './ProcessBlock.astro';
@@ -14,9 +15,17 @@ interface Props {
   processFromFolder?: boolean;
   /** When set (live preview), use these paths instead of the build-time process/ glob. */
   processFolderSrcs?: string[];
+  info?: { label: string; value: string; href?: string }[];
 }
 
-const { blocks, slug, processFromFolder = false, processFolderSrcs } = Astro.props;
+const { blocks, slug, processFromFolder = false, processFolderSrcs, info = [] } = Astro.props;
+// Info sits right before the first Process section; without one it closes the page.
+let infoShown = false;
+const takeInfo = () => {
+  if (infoShown) return false;
+  infoShown = true;
+  return true;
+};
 const rawFolderSrcs =
   processFolderSrcs ??
   (processFromFolder && slug ? processFolderImages(slug) : []);
@@ -63,7 +72,12 @@ const eager = () => imageCount++ < 2;
       );
     }
     if (block.discriminant === 'process') {
-      return <ProcessBlock images={useFolder ? folder : block.value.images} />;
+      return (
+        <>
+          {takeInfo() && <Info items={info} />}
+          <ProcessBlock images={useFolder ? folder : block.value.images} />
+        </>
+      );
     }
     if (block.value.layout === 'stack') {
       return (
@@ -86,4 +100,10 @@ const eager = () => imageCount++ < 2;
     );
   })
 }
-{useFolder && !hasProcessBlock && <ProcessBlock images={folder} />}
+{useFolder && !hasProcessBlock && (
+  <>
+    {takeInfo() && <Info items={info} />}
+    <ProcessBlock images={folder} />
+  </>
+)}
+{takeInfo() && <Info items={info} />}

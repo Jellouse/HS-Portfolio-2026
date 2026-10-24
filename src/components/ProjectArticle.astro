@@ -1,6 +1,5 @@
 ---
 import Blocks from './Blocks.astro';
-import Info from './Info.astro';
 import MarkFace from './MarkFace.astro';
 import ProjectHero from './ProjectHero.astro';
 import { yearRange, type ProjectEntry } from '../lib/content';
@@ -39,6 +38,6 @@ const info = (() => {
     slug={project.id}
     processFromFolder={project.data.processFromFolder}
     processFolderSrcs={processFolderSrcs}
+    info={info}
   />
-  <Info items={info} />
 </article>
