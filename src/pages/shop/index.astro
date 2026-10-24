@@ -8,26 +8,28 @@ import { resolveImageSource } from '../../lib/images';
 import { getProducts, price } from '../../lib/shop';
 
 const products = await getProducts();
-const sizes = '(min-width: 1440px) 666px, (min-width: 760px) 55vw, 100vw';
+const sizes = '(min-width: 1440px) 439px, (min-width: 760px) 30vw, 50vw';
 ---
 
 <Base title="Industrial Bloom shop · Humansize" description="Industrial Bloom vases by Humansize." noindex>
   <h1 class="sr-only">Industrial Bloom</h1>
   <div class="feed page-grid">
     <About paragraphs={['[About Industrial Bloom: copy from Johann]']} />
-    {
-      products.map((p, i) => (
-        <article class="card fade-in" data-frame="default">
-          <a href={`/shop/${p.id}/`} aria-label={p.data.name}>
-            {p.data.images[0] && (
-              <BlurImage src={resolveImageSource(p.data.images[0].src)} alt={p.data.images[0].alt} sizes={sizes} priority={i === 0} />
-            )}
-          </a>
-          <a class="caption" href={`/shop/${p.id}/`}>
-            {p.data.name}, <span class="project-year">{price(p.data.price)}</span>
-          </a>
-        </article>
-      ))
-    }
+    <div class="shop-grid">
+      {
+        products.map((p, i) => (
+          <article class="shop-item fade-in" data-fit={/\.png$/i.test(p.data.images[0]?.src ?? '') ? 'contain' : undefined}>
+            <a href={`/shop/${p.id}/`} aria-label={p.data.name}>
+              {p.data.images[0] && (
+                <BlurImage src={resolveImageSource(p.data.images[0].src)} alt={p.data.images[0].alt} sizes={sizes} priority={i < 2} />
+              )}
+            </a>
+            <a class="caption shop-caption" href={`/shop/${p.id}/`}>
+              {p.data.name}, <span class="project-year">{price(p.data.price)}</span>
+            </a>
+          </article>
+        ))
+      }
+    </div>
   </div>
 </Base>

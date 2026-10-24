@@ -1750,3 +1750,42 @@ body .site-header.is-menu-fade:not(.is-menu-open) .who .time {
     color: #fff;
   }
 }
+
+/* Shop overview: 2-up product grid on the Wide (8-col) span; columns split by the image gap. */
+.shop-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: var(--image-gap);
+  row-gap: var(--space-block);
+  width: 100%;
+  margin: 0 auto 120px;
+  align-items: start;
+}
+.shop-item {
+  min-width: 0;
+}
+.shop-grid .shop-caption {
+  margin-top: 20px;
+  margin-bottom: 0;
+}
+@media (min-width: 760px) {
+  .feed.page-grid > .shop-grid {
+    grid-column: calc((var(--cols) - var(--wide-span)) / 2 + 1) / span var(--wide-span);
+  }
+}
+/* One crop for every tile so rows line up and captions share a baseline.
+   Drawings (png) sit whole inside the tile instead of being cropped. */
+.shop-item .frame {
+  aspect-ratio: 3 / 4;
+}
+.shop-item .frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.shop-item[data-fit='contain'] .frame img {
+  object-fit: contain;
+}
+.shop-item[data-fit='contain'] .frame {
+  background: none !important;
+}
