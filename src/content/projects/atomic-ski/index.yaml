@@ -134,7 +134,7 @@ blocks:
       src: >-
         https://humansize-media.schnettker-johann.workers.dev/projects/atomic/03-boa-mvkn2grv.mp4
       poster: /src/content/projects/atomic-ski/blocks/14/value/poster.jpg
-      frame: full
+      frame: wide
       flush: false
   - discriminant: video
     value:
