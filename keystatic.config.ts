@@ -289,7 +289,24 @@ export default config({
             src: { ...fields.image({ label: 'Image', directory: 'src/content/products', publicPath: '/src/content/products', validation: { isRequired: true } }) },
             alt: fields.text({ label: 'Alt text' }),
           }),
-          { label: 'Images', description: 'The first image is the /shop card.', itemLabel: (props) => props.fields.alt.value || 'Image' },
+          { label: 'Images', description: 'Detail page images.', itemLabel: (props) => props.fields.alt.value || 'Image' },
+        ),
+        overview: fields.object(
+          {
+            show: fields.checkbox({ label: 'Show on /shop', defaultValue: true }),
+            title: fields.text({ label: 'Title', description: 'As shown on /shop, e.g. Type-660. Empty: the name.' }),
+            price: fields.text({ label: 'Price label', description: 'As shown on /shop, e.g. 150€. Empty: the price above.' }),
+            description: fields.text({ label: 'Description', description: 'Optional line under the caption.', multiline: true }),
+            left: fields.object({
+              src: { ...fields.image({ label: 'Image', directory: 'src/content/products', publicPath: '/src/content/products' }) },
+              alt: fields.text({ label: 'Alt text' }),
+            }, { label: 'Left image' }),
+            right: fields.object({
+              src: { ...fields.image({ label: 'Image', directory: 'src/content/products', publicPath: '/src/content/products' }) },
+              alt: fields.text({ label: 'Alt text' }),
+            }, { label: 'Right image' }),
+          },
+          { label: '/shop overview', description: 'The product section on /shop: an image pair and its caption.' },
         ),
       },
     }),

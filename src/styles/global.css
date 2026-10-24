@@ -1751,41 +1751,146 @@ body .site-header.is-menu-fade:not(.is-menu-open) .who .time {
   }
 }
 
-/* Shop overview: 2-up product grid on the Wide (8-col) span; columns split by the image gap. */
-.shop-grid {
+/* Shop overview (desktop mock, 1440): title row with the Industrial Bloom mark centred,
+   intro on the content span, then one section per product: image pair on the Wide span,
+   centred caption, optional description on the content span. */
+body:has(.shop-page) .site-header {
+  display: none;
+}
+.shop-page {
+  padding-top: 216px;
+  padding-bottom: 150px;
+}
+.shop-head {
+  grid-column: 1 / -1;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  column-gap: var(--image-gap);
-  row-gap: var(--space-block);
+  grid-template-columns: subgrid;
+  align-items: center;
+  margin: 0 0 184px;
+}
+.shop-head-title,
+.shop-head-sub {
+  margin: 0;
+  font-size: var(--text-body);
+  font-weight: 400;
+  line-height: var(--lh-body);
+  white-space: nowrap;
+}
+.shop-head-title {
+  grid-column: 1 / 3;
+}
+.shop-head-sub {
+  grid-column: 9 / -1;
+  text-align: right;
+}
+.shop-mark {
+  grid-column: 3 / 9;
+  justify-self: center;
+  width: 440px;
+  color: var(--ink);
+}
+.shop-mark svg {
+  display: block;
   width: 100%;
-  margin: 0 auto 120px;
-  align-items: start;
+  height: auto;
 }
-.shop-item {
-  min-width: 0;
+.shop-intro,
+.shop-desc {
+  grid-column: calc((var(--cols) - var(--content-span)) / 2 + 1) / span var(--content-span);
 }
-.shop-grid .shop-caption {
-  margin-top: 20px;
+.shop-intro {
+  margin: 0 0 136px;
+}
+.shop-intro p {
+  margin: 0 0 29px;
+}
+.shop-intro p:last-child {
   margin-bottom: 0;
 }
-@media (min-width: 760px) {
-  .feed.page-grid > .shop-grid {
-    grid-column: calc((var(--cols) - var(--wide-span)) / 2 + 1) / span var(--wide-span);
-  }
+.shop-intro a,
+.shop-links a {
+  color: inherit;
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
 }
-/* One crop for every tile so rows line up and captions share a baseline.
-   Drawings (png) sit whole inside the tile instead of being cropped. */
-.shop-item .frame {
-  aspect-ratio: 3 / 4;
+.shop-product {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: subgrid;
+  margin: 0 0 128px;
 }
-.shop-item .frame img {
+.shop-product:last-child {
+  margin-bottom: 0;
+}
+.shop-pair {
+  grid-column: calc((var(--cols) - var(--wide-span)) / 2 + 1) / span var(--wide-span);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--image-gap);
+}
+.shop-pair > .frame {
+  min-width: 0;
+  aspect-ratio: 441 / 531;
+  border-radius: var(--radius-sm);
+}
+.shop-pair > .frame img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
-.shop-item[data-fit='contain'] .frame img {
-  object-fit: contain;
+.shop-caption {
+  grid-column: 1 / -1;
+  margin: 72px 0 0;
+  text-align: center;
 }
-.shop-item[data-fit='contain'] .frame {
-  background: none !important;
+.shop-links {
+  display: block;
+  margin-top: 29px;
+}
+.shop-desc {
+  margin: 84px 0 0;
+}
+
+@media (max-width: 759px) {
+  .shop-page {
+    padding: 96px var(--margin);
+  }
+  .shop-product {
+    display: block;
+  }
+  .shop-head {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-items: center;
+    text-align: center;
+    margin-bottom: 96px;
+  }
+  .shop-head-title,
+  .shop-head-sub,
+  .shop-mark {
+    grid-column: 1 / -1;
+    text-align: center;
+  }
+  .shop-mark {
+    order: -1;
+    width: 240px;
+    margin-bottom: 48px;
+  }
+  .shop-intro {
+    margin-bottom: 96px;
+  }
+  .shop-product {
+    margin-bottom: 96px;
+  }
+  .shop-pair {
+    gap: var(--gutter);
+  }
+  .shop-caption {
+    margin-top: 40px;
+  }
+  .shop-desc {
+    margin-top: 40px;
+  }
 }

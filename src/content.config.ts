@@ -152,6 +152,17 @@ const products = defineCollection({
     dimensions: z.string().optional(),
     description: z.string(),
     images: z.array(z.object({ src: z.string(), alt: z.string().default('') })).default([]),
+    // /shop overview section: its own copy and image pair, separate from the detail page.
+    overview: z
+      .object({
+        show: z.boolean().default(true),
+        title: z.string().optional(),
+        price: z.string().optional(),
+        description: z.string().optional(),
+        left: z.object({ src: z.string().nullish(), alt: z.string().default('') }).optional(),
+        right: z.object({ src: z.string().nullish(), alt: z.string().default('') }).optional(),
+      })
+      .default({ show: true }),
   }),
 });
 
