@@ -1,7 +1,7 @@
 title: Analogue Store
-seoTitle: Analogue Store Zeedijk, Amsterdam, 2026
 year: 2026
 published: true
+seoTitle: Analogue Store Zeedijk, Amsterdam, 2026
 summary: >-
   A new store for Analogue Amsterdam on the Zeedijk, built by Humansize in
   aluminium extrusion with 3D printed displays.
@@ -42,30 +42,43 @@ blocks:
       alt: Analogue store on Zeedijk in Amsterdam
       frame: wide
       flush: false
+      large: false
   - discriminant: image
     value:
       src: /src/content/projects/analogue-counters/blocks/3/value/src.jpg
-      alt: "Rolling vitrine with aluminium frame, glass top and backlit milk glass, Analogue store Zeedijk"
+      alt: >-
+        Rolling vitrine with aluminium frame, glass top and backlit milk glass,
+        Analogue store Zeedijk
       frame: full
       flush: false
+      large: false
   - discriminant: image
     value:
       src: /src/content/projects/analogue-counters/blocks/4/value/src.jpg
-      alt: "Film cameras and boxed cameras on backlit milk glass inside a vitrine, Analogue store Zeedijk"
+      alt: >-
+        Film cameras and boxed cameras on backlit milk glass inside a vitrine,
+        Analogue store Zeedijk
       frame: full
       flush: false
+      large: false
   - discriminant: image
     value:
       src: /src/content/projects/analogue-counters/blocks/5/value/src.jpg
-      alt: "Shop window with the Analogue logo and vitrines inside, Analogue store Zeedijk"
+      alt: >-
+        Shop window with the Analogue logo and vitrines inside, Analogue store
+        Zeedijk
       frame: full
       flush: false
+      large: false
   - discriminant: image
     value:
       src: /src/content/projects/analogue-counters/blocks/6/value/src.jpg
-      alt: "Blue sidewalk sign listing film development and cameras outside the shop, Analogue store Zeedijk"
+      alt: >-
+        Blue sidewalk sign listing film development and cameras outside the
+        shop, Analogue store Zeedijk
       frame: full
       flush: false
+      large: false
   - discriminant: text
     value:
       text: >-
@@ -77,15 +90,21 @@ blocks:
   - discriminant: image
     value:
       src: /src/content/projects/analogue-counters/blocks/8/value/src.jpg
-      alt: "Glass vitrine top with photo prints laid on milk glass, Analogue store Zeedijk"
+      alt: >-
+        Glass vitrine top with photo prints laid on milk glass, Analogue store
+        Zeedijk
       frame: full
       flush: false
+      large: false
   - discriminant: image
     value:
       src: /src/content/projects/analogue-counters/blocks/9/value/src.jpg
-      alt: "Close-up of an aluminium extrusion corner with a 3D printed end cap, Analogue store Zeedijk"
+      alt: >-
+        Close-up of an aluminium extrusion corner with a 3D printed end cap,
+        Analogue store Zeedijk
       frame: full
       flush: false
+      large: false
   - discriminant: video
     value:
       src: >-
@@ -96,107 +115,159 @@ blocks:
   - discriminant: image
     value:
       src: /src/content/projects/analogue-counters/blocks/11/value/src.jpg
-      alt: "Transparent caster wheel under an aluminium vitrine, Analogue store Zeedijk"
+      alt: >-
+        Transparent caster wheel under an aluminium vitrine, Analogue store
+        Zeedijk
       frame: full
       flush: false
+      large: false
   - discriminant: image
     value:
       src: /src/content/projects/analogue-counters/blocks/12/value/src.jpg
-      alt: "Side of a vitrine with glass panel and aluminium frame, Analogue store Zeedijk"
+      alt: >-
+        Side of a vitrine with glass panel and aluminium frame, Analogue store
+        Zeedijk
       frame: full
       flush: false
+      large: false
   - discriminant: pair
     value:
+      layout: pair
       left: /src/content/projects/analogue-counters/blocks/13/value/left.jpg
-      leftAlt: "Corner of a vitrine with glass top and printed connector, Analogue store Zeedijk"
+      leftAlt: >-
+        Corner of a vitrine with glass top and printed connector, Analogue store
+        Zeedijk
       right: /src/content/projects/analogue-counters/blocks/13/value/right.jpg
-      rightAlt: "3D printed clip holding a glass panel in an aluminium extrusion, Analogue store Zeedijk"
+      rightAlt: >-
+        3D printed clip holding a glass panel in an aluminium extrusion,
+        Analogue store Zeedijk
+      large: false
   - discriminant: text
     value:
+      heading: Gallery
       text: >-
         The second room gives back to the photographers who shoot with these
         cameras. It's a gallery of extrusion, steel cables and 3D printed parts
         that holds their prints in mid-air.
   - discriminant: pair
     value:
+      layout: pair
       left: /src/content/projects/analogue-counters/blocks/15/value/left.jpg
-      leftAlt: "Print gallery card held by a 3D printed clip on an extrusion frame, Analogue store Zeedijk"
+      leftAlt: >-
+        Print gallery card held by a 3D printed clip on an extrusion frame,
+        Analogue store Zeedijk
       right: /src/content/projects/analogue-counters/blocks/15/value/right.jpg
-      rightAlt: "Steel cable with a clamp holding a print in the gallery, Analogue store Zeedijk"
+      rightAlt: >-
+        Steel cable with a clamp holding a print in the gallery, Analogue store
+        Zeedijk
+      large: false
   - discriminant: image
     value:
       src: /src/content/projects/analogue-counters/blocks/16/value/src.jpeg
-      alt: "Visitor looking at photo prints hanging in the gallery room, Analogue store Zeedijk"
+      alt: >-
+        Visitor looking at photo prints hanging in the gallery room, Analogue
+        store Zeedijk
       frame: full
       flush: false
+      large: false
   - discriminant: process
     value:
       images:
         - src: >-
             /src/content/projects/analogue-counters/blocks/17/value/images/0/src.jpg
-          alt: "Box of sorted 3D printed parts and fasteners, Analogue store Zeedijk"
+          alt: Box of sorted 3D printed parts and fasteners, Analogue store Zeedijk
           flush: false
         - src: >-
             /src/content/projects/analogue-counters/blocks/17/value/images/1/src.jpg
-          alt: "Hand fitting a caster wheel into a 3D printed mount, Analogue store Zeedijk"
+          alt: >-
+            Hand fitting a caster wheel into a 3D printed mount, Analogue store
+            Zeedijk
           flush: false
         - src: >-
             /src/content/projects/analogue-counters/blocks/17/value/images/2/src.jpg
-          alt: "Hand holding an aluminium extrusion with mounted connector blocks, Analogue store Zeedijk"
+          alt: >-
+            Hand holding an aluminium extrusion with mounted connector blocks,
+            Analogue store Zeedijk
           flush: false
         - src: >-
             /src/content/projects/analogue-counters/blocks/17/value/images/3/src.jpg
-          alt: "3D printed brackets and caps laid out on a table, Analogue store Zeedijk"
+          alt: >-
+            3D printed brackets and caps laid out on a table, Analogue store
+            Zeedijk
           flush: false
         - src: >-
             /src/content/projects/analogue-counters/blocks/17/value/images/4/src.jpg
-          alt: "Hand assembling small parts on a sheet of acrylic glass, Analogue store Zeedijk"
+          alt: >-
+            Hand assembling small parts on a sheet of acrylic glass, Analogue
+            store Zeedijk
           flush: false
         - src: >-
             /src/content/projects/analogue-counters/blocks/17/value/images/5/src.jpg
-          alt: "Half assembled vitrine frame with milk glass panels, Analogue store Zeedijk"
+          alt: >-
+            Half assembled vitrine frame with milk glass panels, Analogue store
+            Zeedijk
           flush: false
         - src: >-
             /src/content/projects/analogue-counters/blocks/17/value/images/6/src.jpg
-          alt: "Two vitrine frames under construction in the empty shop, Analogue store Zeedijk"
+          alt: >-
+            Two vitrine frames under construction in the empty shop, Analogue
+            store Zeedijk
           flush: false
         - src: >-
             /src/content/projects/analogue-counters/blocks/17/value/images/7/src.jpg
-          alt: "Shop interior during the build with vitrines and tools, Analogue store Zeedijk"
+          alt: >-
+            Shop interior during the build with vitrines and tools, Analogue
+            store Zeedijk
           flush: false
         - src: >-
             /src/content/projects/analogue-counters/blocks/17/value/images/8/src.jpg
-          alt: "CAD section of a bolt joining extrusion profiles, Analogue store Zeedijk"
+          alt: >-
+            CAD section of a bolt joining extrusion profiles, Analogue store
+            Zeedijk
           flush: false
         - src: >-
             /src/content/projects/analogue-counters/blocks/17/value/images/9/src.jpg
-          alt: "CAD view of an extrusion profile with its connector, Analogue store Zeedijk"
+          alt: >-
+            CAD view of an extrusion profile with its connector, Analogue store
+            Zeedijk
           flush: false
         - src: >-
             /src/content/projects/analogue-counters/blocks/17/value/images/10/src.jpg
-          alt: "CAD close-up of a 3D printed bracket on an extrusion, Analogue store Zeedijk"
+          alt: >-
+            CAD close-up of a 3D printed bracket on an extrusion, Analogue store
+            Zeedijk
           flush: false
         - src: >-
             /src/content/projects/analogue-counters/blocks/17/value/images/11/src.jpg
-          alt: "CAD detail of a caster mount next to the parts list, Analogue store Zeedijk"
+          alt: >-
+            CAD detail of a caster mount next to the parts list, Analogue store
+            Zeedijk
           flush: false
         - src: >-
             /src/content/projects/analogue-counters/blocks/17/value/images/12/src.jpg
-          alt: "CAD model of a complete vitrine frame with its parts tree, Analogue store Zeedijk"
+          alt: >-
+            CAD model of a complete vitrine frame with its parts tree, Analogue
+            store Zeedijk
           flush: false
         - src: >-
             /src/content/projects/analogue-counters/blocks/17/value/images/13/src.jpg
-          alt: "CAD close-up of a blue corner connector joining extrusions, Analogue store Zeedijk"
+          alt: >-
+            CAD close-up of a blue corner connector joining extrusions, Analogue
+            store Zeedijk
           flush: false
         - src: >-
             /src/content/projects/analogue-counters/blocks/17/value/images/14/src.jpg
-          alt: "Build plate filled with blue 3D printed connectors, Analogue store Zeedijk"
+          alt: >-
+            Build plate filled with blue 3D printed connectors, Analogue store
+            Zeedijk
           flush: false
         - src: >-
             /src/content/projects/analogue-counters/blocks/17/value/images/15/src.jpg
-          alt: "CAD model of a 3D printed caster plate, Analogue store Zeedijk"
+          alt: CAD model of a 3D printed caster plate, Analogue store Zeedijk
           flush: false
         - src: >-
             /src/content/projects/analogue-counters/blocks/17/value/images/16/src.jpeg
-          alt: "Unfinished vitrines with frames and glass in the workshop, Analogue store Zeedijk"
+          alt: >-
+            Unfinished vitrines with frames and glass in the workshop, Analogue
+            store Zeedijk
           flush: false
