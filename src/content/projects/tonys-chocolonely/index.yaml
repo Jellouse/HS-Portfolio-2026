@@ -6,7 +6,7 @@ summary: >
   and so many rules. It grew on me.
 cover: /src/content/projects/tonys-chocolonely/cover.jpg
 coverAlt: Tony's Chocolonely
-coverFrame: medium
+coverFrame: default
 coverFlush: false
 rounded: false
 info:
@@ -32,11 +32,11 @@ blocks:
     value:
       src: /src/content/projects/tonys-chocolonely/blocks/1/value/src.jpg
       alt: Tony's Chocolonely
-      frame: wide
+      frame: default
       flush: false
   - discriminant: image
     value:
       src: /src/content/projects/tonys-chocolonely/blocks/2/value/src.jpg
       alt: Tony's Chocolonely website
-      frame: wide
+      frame: default
       flush: false

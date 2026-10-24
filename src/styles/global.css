@@ -522,20 +522,12 @@ body:has(.hero) .site-header {
   margin: 0 auto 120px;
 }
 
-.card[data-frame='full'] {
-  max-width: var(--card);
-}
-
 .card[data-frame='wide'] {
-  max-width: 848px;
+  max-width: 893px;
 }
 
-.card[data-frame='medium'] {
-  max-width: 652px;
-}
-
-.card[data-frame='narrow'] {
-  max-width: 420px;
+.card[data-frame='default'] {
+  max-width: 666px;
 }
 
 .frame,
@@ -797,10 +789,7 @@ body:has(.project) .site-header {
   margin-bottom: var(--lh-lead);
 }
 
-.image-block,
-.image-block[data-frame='wide'],
-.image-block[data-frame='medium'],
-.image-block[data-frame='narrow'] {
+.image-block {
   width: min(100%, var(--measure));
   max-width: var(--measure);
   margin: 0 auto var(--space-block);
@@ -1267,8 +1256,7 @@ body:has(.project) .site-header {
     margin-bottom: 247px;
   }
 
-  .card.is-lead > .lead,
-  .card[data-frame='full'] > a:first-child {
+  .card.is-lead > .lead {
     grid-column: 1 / -1;
   }
 
@@ -1276,14 +1264,8 @@ body:has(.project) .site-header {
     grid-column: calc((var(--cols) - var(--wide-span)) / 2 + 1) / span var(--wide-span);
   }
 
-  .card[data-frame='medium'] > a:first-child {
+  .card[data-frame='default'] > a:first-child {
     grid-column: calc((var(--cols) - var(--content-span)) / 2 + 1) / span var(--content-span);
-  }
-
-  .card[data-frame='narrow'] > a:first-child {
-    grid-column: calc((var(--cols) - var(--content-span)) / 2 + 1) / span var(--content-span);
-    justify-self: center;
-    width: calc((100% - 3 * var(--gutter)) * 0.75 + 2 * var(--gutter));
   }
 
   .about,
@@ -1314,9 +1296,9 @@ body:has(.project) .site-header {
     margin-right: 0;
   }
 
-  /* Keystatic "Large" on image and pair blocks: the wide span. */
-  .project.page-grid > .image-block[data-large],
-  .project.page-grid > .pair[data-large] {
+  /* Keystatic Frame: Wide on image, video and pair blocks: one column more on each side. */
+  .project.page-grid > .image-block[data-frame='wide'],
+  .project.page-grid > .pair[data-frame='wide'] {
     grid-column: calc((var(--cols) - var(--wide-span)) / 2 + 1) / span var(--wide-span);
     width: auto;
     max-width: none;

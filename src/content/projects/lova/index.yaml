@@ -19,23 +19,23 @@ blocks:
   value:
     src: https://humansize-media.schnettker-johann.workers.dev/projects/lova/lova-0-mvd43d60.mp4
     alt: Tablet floating in blue water
-    frame: full
+    frame: default
     flush: false
 - discriminant: video
   value:
     src: https://humansize-media.schnettker-johann.workers.dev/projects/lova/lova-1-mvd43eqv.mp4
     alt: Animation of light moving over sand
-    frame: full
+    frame: default
     flush: false
 - discriminant: video
   value:
     src: https://humansize-media.schnettker-johann.workers.dev/projects/lova/lova-2-mvd43h1f.mp4
     alt: Lova logo animation with a bouncing dot
-    frame: full
+    frame: default
     flush: false
 - discriminant: image
   value:
     src: /src/content/projects/lova/blocks/3/value/src.jpg
     alt: Tablet with large Lova lettering lying in sand
-    frame: full
+    frame: default
     flush: false

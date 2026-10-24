@@ -39,6 +39,7 @@ blocks:
       rightAlt: >-
         Browser window with a grid of Vitra office chairs and a sitting time
         slider
+      frame: default
   - discriminant: video
     value:
       src: >-
@@ -46,12 +47,12 @@ blocks:
       alt: >-
         Screen recording of the Vitra Office Chair Finder, from the welcome
         screen to a chair detail page
-      frame: full
+      frame: default
       flush: false
   - discriminant: video
     value:
       src: >-
         https://humansize-media.schnettker-johann.workers.dev/projects/vitra-chairfinder/vitra-chairfinder-2-mvd41pxs.mp4
       alt: Phone showing the Vitra Office Chair Finder chair grid
-      frame: full
+      frame: default
       flush: false

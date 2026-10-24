@@ -21,13 +21,13 @@ blocks:
   value:
     src: https://humansize-media.schnettker-johann.workers.dev/projects/conway-and-co/conway-and-co-0-mvd433ay.mp4
     alt: Scrolling animation of the Conway & Co website
-    frame: full
+    frame: default
     flush: false
 - discriminant: image
   value:
     src: /src/content/projects/conway-and-co/blocks/1/value/src.jpg
     alt: Brushed metal Conway & Co sign on a white wall
-    frame: full
+    frame: default
     flush: false
 - discriminant: pair
   value:
@@ -51,13 +51,13 @@ blocks:
   value:
     src: https://humansize-media.schnettker-johann.workers.dev/projects/conway-and-co/conway-and-co-5-mvd43677.mp4
     alt: Hands opening a Conway & Co package
-    frame: full
+    frame: default
     flush: false
 - discriminant: image
   value:
     src: /src/content/projects/conway-and-co/blocks/6/value/src.jpg
     alt: Overview of the Conway & Co brand identity
-    frame: full
+    frame: default
     flush: false
 - discriminant: pair
   value:
@@ -81,12 +81,12 @@ blocks:
   value:
     src: https://humansize-media.schnettker-johann.workers.dev/projects/conway-and-co/conway-and-co-10-mvd438vj.mp4
     alt: Monitor showing an orange Conway & Co page
-    frame: full
+    frame: default
     flush: false
 - discriminant: image
   value:
     src: /src/content/projects/conway-and-co/blocks/11/value/src.jpg
     alt: Phone showing the Conway & Co page Technology is the growth engine of your
       company
-    frame: full
+    frame: default
     flush: false

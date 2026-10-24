@@ -9,7 +9,7 @@ summary: >-
   around tension and ski nets.
 cover: /src/content/projects/atomic-ski/cover.jpg
 coverAlt: Atomic Ski
-coverFrame: medium
+coverFrame: default
 coverFlush: true
 rounded: true
 info:
@@ -34,39 +34,34 @@ blocks:
     value:
       src: /src/content/projects/atomic-ski/blocks/0/value/src.jpg
       alt: Magazine page design with skier portraits, Atomic Ski website
-      frame: full
+      frame: default
       flush: false
-      large: false
   - discriminant: image
     value:
       src: /src/content/projects/atomic-ski/blocks/1/value/src.jpg
       alt: Product overlay on a photo of a skier mid-jump, Atomic Ski website
-      frame: full
+      frame: default
       flush: false
-      large: false
   - discriminant: image
     value:
       src: /src/content/projects/atomic-ski/blocks/2/value/src.jpg
       alt: Mobile navigation menu over a blurred ski photo, Atomic Ski website
-      frame: full
+      frame: default
       flush: false
-      large: false
   - discriminant: image
     value:
       src: /src/content/projects/atomic-ski/blocks/3/value/src.jpg
       alt: Category menu next to a green ski goggle render, Atomic Ski website
-      frame: full
+      frame: default
       flush: false
-      large: false
   - discriminant: image
     value:
       src: /src/content/projects/atomic-ski/blocks/4/value/src.jpg
       alt: >-
         Factory video with chapter list over red ski production footage, Atomic
         Ski website
-      frame: full
+      frame: default
       flush: false
-      large: false
   - discriminant: text
     value:
       heading: Atomic Boothub
@@ -80,68 +75,66 @@ blocks:
       src: >-
         https://humansize-media.schnettker-johann.workers.dev/projects/atomic/fltc-151124-1-mvkmtvi1.mp4
       poster: /src/content/projects/atomic-ski/blocks/6/value/poster.jpg
-      frame: full
+      frame: default
       flush: false
   - discriminant: video
     value:
       src: >-
         https://humansize-media.schnettker-johann.workers.dev/projects/atomic/disassemble-animation-mvkmumnk.mp4
       poster: /src/content/projects/atomic-ski/blocks/7/value/poster.jpg
-      frame: full
+      frame: default
       flush: false
   - discriminant: video
     value:
       src: >-
         https://humansize-media.schnettker-johann.workers.dev/projects/atomic/main-2-mvkmvmnk.mp4
       poster: /src/content/projects/atomic-ski/blocks/8/value/poster.jpg
-      frame: full
+      frame: default
       flush: false
   - discriminant: image
     value:
       src: /src/content/projects/atomic-ski/blocks/9/value/src.jpg
-      frame: full
+      frame: wide
       flush: false
-      large: true
   - discriminant: image
     value:
       src: /src/content/projects/atomic-ski/blocks/10/value/src.jpg
-      frame: full
+      frame: default
       flush: false
-      large: false
   - discriminant: video
     value:
       src: >-
         https://humansize-media.schnettker-johann.workers.dev/projects/atomic/07-power-shift-mvkmxodu.mp4
       poster: /src/content/projects/atomic-ski/blocks/11/value/poster.jpg
-      frame: full
+      frame: default
       flush: false
   - discriminant: video
     value:
       src: >-
         https://humansize-media.schnettker-johann.workers.dev/projects/atomic/4-3-mvkmym43.mp4
       poster: /src/content/projects/atomic-ski/blocks/12/value/poster.jpg
-      frame: full
+      frame: default
       flush: false
   - discriminant: video
     value:
       src: >-
         https://humansize-media.schnettker-johann.workers.dev/projects/atomic/08-prolite-mvkn23fs.mp4
       poster: /src/content/projects/atomic-ski/blocks/13/value/poster.jpg
-      frame: full
+      frame: default
       flush: false
   - discriminant: video
     value:
       src: >-
         https://humansize-media.schnettker-johann.workers.dev/projects/atomic/03-boa-mvkn2grv.mp4
       poster: /src/content/projects/atomic-ski/blocks/14/value/poster.jpg
-      frame: wide
+      frame: default
       flush: false
   - discriminant: video
     value:
       src: >-
         https://humansize-media.schnettker-johann.workers.dev/projects/atomic/3-pph-feedback-applied-2-mvkn3k2d.mp4
       poster: /src/content/projects/atomic-ski/blocks/15/value/poster.jpg
-      frame: full
+      frame: default
       flush: false
   - discriminant: text
     value:
@@ -152,57 +145,48 @@ blocks:
   - discriminant: image
     value:
       src: /src/content/projects/atomic-ski/blocks/17/value/src.jpg
-      frame: wide
+      frame: default
       flush: false
-      large: false
   - discriminant: image
     value:
       src: /src/content/projects/atomic-ski/blocks/18/value/src.jpg
-      frame: full
+      frame: default
       flush: false
-      large: false
   - discriminant: image
     value:
       src: /src/content/projects/atomic-ski/blocks/19/value/src.jpg
-      frame: full
+      frame: default
       flush: false
-      large: false
   - discriminant: image
     value:
       src: /src/content/projects/atomic-ski/blocks/20/value/src.jpg
-      frame: full
+      frame: default
       flush: false
-      large: false
   - discriminant: image
     value:
       src: /src/content/projects/atomic-ski/blocks/21/value/src.jpg
-      frame: full
+      frame: default
       flush: false
-      large: false
   - discriminant: image
     value:
       src: /src/content/projects/atomic-ski/blocks/22/value/src.jpg
-      frame: wide
+      frame: default
       flush: false
-      large: false
   - discriminant: image
     value:
       src: /src/content/projects/atomic-ski/blocks/23/value/src.jpg
-      frame: full
+      frame: default
       flush: false
-      large: false
   - discriminant: image
     value:
       src: /src/content/projects/atomic-ski/blocks/24/value/src.jpg
-      frame: wide
+      frame: default
       flush: false
-      large: false
   - discriminant: image
     value:
       src: /src/content/projects/atomic-ski/blocks/25/value/src.jpg
-      frame: full
+      frame: default
       flush: false
-      large: false
   - discriminant: process
     value:
       images: []

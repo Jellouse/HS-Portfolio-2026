@@ -26,25 +26,25 @@ blocks:
   value:
     src: https://humansize-media.schnettker-johann.workers.dev/projects/stellar-development/stellar-development-1-mvd43rk4.mp4
     alt: Swarm of dots forming the name Hydra Utrecht
-    frame: full
+    frame: default
     flush: false
 - discriminant: image
   value:
     src: /src/content/projects/stellar-development/blocks/2/value/src.jpg
     alt: Stellar Development logo inside a cloud of white dots
-    frame: full
+    frame: default
     flush: false
 - discriminant: video
   value:
     src: https://humansize-media.schnettker-johann.workers.dev/projects/stellar-development/stellar-development-3-mvd43ttc.mp4
     alt: Animation of dots drifting on black
-    frame: full
+    frame: default
     flush: false
 - discriminant: image
   value:
     src: /src/content/projects/stellar-development/blocks/4/value/src.jpg
     alt: Timber wall and white steel beams against a blue sky
-    frame: full
+    frame: default
     flush: false
 - discriminant: pair
   value:
@@ -56,5 +56,5 @@ blocks:
   value:
     src: /src/content/projects/stellar-development/blocks/6/value/src.jpg
     alt: Stellar Development billboard by a road that reads We develop destinations
-    frame: full
+    frame: default
     flush: false

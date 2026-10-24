@@ -33,5 +33,5 @@ blocks:
   value:
     src: /src/content/projects/new-physix/blocks/2/value/src.jpg
     alt: New Physix jar with walnuts, almonds and blackberries on wood
-    frame: full
+    frame: default
     flush: false

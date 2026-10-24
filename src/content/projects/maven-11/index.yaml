@@ -19,17 +19,17 @@ blocks:
   value:
     src: https://humansize-media.schnettker-johann.workers.dev/projects/maven-11/maven-11-0-mvd42yp4.mp4
     alt: Abstract shapes in black, white and light blue
-    frame: full
+    frame: default
     flush: false
 - discriminant: video
   value:
     src: https://humansize-media.schnettker-johann.workers.dev/projects/maven-11/maven-11-1-mvd430ne.mp4
     alt: Maven 11 poster in a dark window that reads We Partner With Brave Outliers
-    frame: full
+    frame: default
     flush: false
 - discriminant: image
   value:
     src: /src/content/projects/maven-11/blocks/2/value/src.jpg
     alt: Phone showing a Maven 11 page that reads Keep updated
-    frame: full
+    frame: default
     flush: false

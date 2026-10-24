@@ -5,17 +5,19 @@ import { resolveImageSource } from '../lib/images';
 interface Props {
   src: string;
   alt: string;
-  frame?: 'full' | 'wide' | 'medium' | 'narrow';
-  large?: boolean;
+  frame?: 'default' | 'wide';
   priority?: boolean;
   flush?: boolean;
 }
 
-const { src, alt, frame = 'full', priority = false, flush = false, large = false } = Astro.props;
+const { src, alt, frame = 'default', priority = false, flush = false } = Astro.props;
 const image = resolveImageSource(src);
-const sizes = '(min-width: 760px) 552px, calc(100vw - 40px)';
+const sizes =
+  frame === 'wide'
+    ? '(min-width: 1440px) 893px, (min-width: 760px) 70vw, calc(100vw - 40px)'
+    : '(min-width: 1440px) 666px, (min-width: 760px) 552px, calc(100vw - 40px)';
 ---
 
-<figure class="image-block fade-in" data-frame={frame} data-large={large ? '' : undefined}>
+<figure class="image-block fade-in" data-frame={frame}>
   <BlurImage src={image} alt={alt} sizes={sizes} priority={priority} flush={flush} />
 </figure>
