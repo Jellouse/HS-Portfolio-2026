@@ -1,7 +1,9 @@
 name: Type 120
 order: 2
 edition: of 2
-description: An aluminium vase made from one textured extrusion profile, for a medium-sized bouquet.
+description: >-
+  An aluminium vase made from one textured extrusion profile, for a medium-sized
+  bouquet.
 seo:
   title: Type-120 aluminium vase · Industrial Bloom · Humansize
   description: >-
@@ -18,11 +20,14 @@ overview:
     alt: Type 120 vase
     outline: false
   right:
-    src: /src/content/products/120/overview/right/src.jpg
+    src: /src/content/products/120/overview/right/src.webp
     alt: Type 120 vase
     outline: false
 detail:
-  description: A single aluminium extrusion profile with a textured, architectural surface. Finished by hand with a 3D-printed base sealed in epoxy and a laser-cut cork foot. 250 mm high, 0.85 kg. Edition of 2, each numbered.
+  description: >-
+    A single aluminium extrusion profile with a textured, architectural surface.
+    Finished by hand with a 3D-printed base sealed in epoxy and a laser-cut cork
+    foot. 250 mm high, 0.85 kg. Edition of 2, each numbered.
   images:
     - src: /src/content/products/120/detail/images/0/src.jpg
       alt: Type-120 aluminium vase with a textured extrusion surface
