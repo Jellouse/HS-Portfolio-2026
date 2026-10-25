@@ -16,14 +16,16 @@ const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.jpg': 'image/jpeg', '.webp': 'image/webp', '.png': 'image/png', '.woff2': 'font/woff2', '.avif': 'image/avif' };
 const root = [join(ROOT, '.vercel', 'output', 'static'), join(ROOT, 'dist', 'client')].find((d) => existsSync(join(d, 'index.html')));
 if (!root) { console.error('Run npm run build first.'); process.exit(1); }
-const server = createServer((req, res) => {
+// Assets arrive 250ms late, like a real network: with the opt-in only in the external
+// stylesheet, Chrome skipped every clicked morph on production ('opt-in disabled').
+const server = createServer(async (req, res) => {
   let path = decodeURIComponent((req.url || '/').split('?')[0]);
   if (path.endsWith('/')) path += 'index.html';
   const file = [join(root, path), join(root, path, 'index.html')].find((f) => f.startsWith(root) && existsSync(f) && statSync(f).isFile());
   if (!file) { res.writeHead(404); return res.end(); }
-  // Cacheable like production: re-fetching every asset on each navigation can push the
-  // new page's first render past Chrome's cross-document transition window.
-  res.writeHead(200, { 'content-type': MIME[extname(file)] || 'application/octet-stream', 'cache-control': file.includes('/_astro/') ? 'public, max-age=31536000, immutable' : 'no-cache' });
+  // Uncached and late, the worst case for the incoming page's first render.
+  if (!file.endsWith('.html')) await new Promise((r) => setTimeout(r, 250));
+  res.writeHead(200, { 'content-type': MIME[extname(file)] || 'application/octet-stream', 'cache-control': 'no-store' });
   res.end(readFileSync(file));
 });
 await new Promise((r) => server.listen(4333, '127.0.0.1', r));
@@ -41,18 +43,19 @@ await page.addInitScript(() => {
     window.__vt = { ran: !!vt, morph: false, done: false };
     if (!vt) { window.__vt.done = 'none'; return; }
     vt.ready.then(() => {
-      window.__vt.morph = document.getAnimations().some((a) => a.effect?.pseudoElement === '::view-transition-group(ib-mark)');
+      window.__vt.morph = document.getAnimations().some((a) => /^::view-transition-group\((ib|hs)-mark\)$/.test(a.effect?.pseudoElement || ''));
+      window.__vt.types = [...(vt.types || [])];
       // the incoming mark must not be running the load spin
-      window.__vt.spin = document.querySelector('[data-spin-mark]').getAnimations().length;
+      window.__vt.spin = document.querySelector('[data-spin-mark]')?.getAnimations().length || 0;
     });
     vt.finished.then(() => (window.__vt.done = true), () => (window.__vt.done = 'skipped'));
   });
 });
 const failures = [];
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
-const vtName = () => page.evaluate(() => getComputedStyle(document.querySelector('[data-spin-mark]')).viewTransitionName);
+const vtName = (sel = '[data-spin-mark]') => page.evaluate((sel) => getComputedStyle(document.querySelector(sel)).viewTransitionName, sel);
 
-const go = async (label, click, expectPath) => {
+const go = async (label, click, expectPath, mark = 'ib-mark') => {
   // Chrome skips a cross-document transition ('opt-in disabled') when you navigate again
   // within about a second of arriving; let the page settle first, like a real visit.
   await page.waitForLoadState('load');
@@ -63,11 +66,11 @@ const go = async (label, click, expectPath) => {
   await page.waitForFunction(() => window.__vt && window.__vt.done, null, { timeout: 5000 });
   const vt = await page.evaluate(() => window.__vt);
   const y = await page.evaluate(() => scrollY);
-  const name = await vtName();
+  const name = mark === 'ib-mark' ? await vtName() : 'hs-mark';
   await wait(1000);
-  const a = await page.evaluate(() => Number(/rotate\(([-\d.e]+)deg\)/.exec(document.querySelector('[data-spin-mark]').style.transform)?.[1]));
-  console.log(`${label}: vt=${vt.ran} morph=${vt.morph} spinAnims=${vt.spin} scrollY=${y} name=${name} rest=${a}deg`);
-  if (name !== 'ib-mark') failures.push(`${label}: mark has view-transition-name ${name}`);
+  const a = mark === 'ib-mark' ? await page.evaluate(() => Number(/rotate\(([-\d.e]+)deg\)/.exec(document.querySelector('[data-spin-mark]').style.transform)?.[1])) : 90;
+  console.log(`${label}: vt=${vt.ran} morph=${vt.morph} spinAnims=${vt.spin} scrollY=${y} name=${name} rest=${a}deg types=${vt.types}`);
+  if (name !== mark) failures.push(`${label}: mark has view-transition-name ${name}`);
   if (!vt.ran || !vt.morph || vt.done !== true) failures.push(`${label}: shared-element morph did not run`);
   if (vt.spin) failures.push(`${label}: load spin replayed after in-site navigation`);
   if (y !== 0) failures.push(`${label}: arrived at scrollY ${y}`);
@@ -77,9 +80,14 @@ const go = async (label, click, expectPath) => {
 await page.goto(`${BASE}/shop/`, { waitUntil: 'load' });
 await wait(1800);
 if ((await vtName()) !== 'ib-mark') failures.push('/shop: mark is not a shared element');
-await go('/shop -> detail', () => page.evaluate(() => document.querySelector('a.shop-pair').click()), '/shop/thorn-vase/');
-await go('detail -> /shop', () => page.click('.shop-detail-mark a'), '/shop/');
-await go('/shop -> detail again', () => page.evaluate(() => document.querySelector('a.shop-pair').click()), '/shop/thorn-vase/');
+await go('/shop -> detail (click)', () => page.click('a.shop-pair >> nth=0'), '/shop/thorn-vase/');
+await go('detail ring click -> /shop', () => page.click('.shop-detail-mark a'), '/shop/');
+await go('/shop -> detail again', () => page.click('a.shop-pair >> nth=0'), '/shop/thorn-vase/');
+await go('detail ring click -> /shop again', () => page.click('.shop-detail-mark a'), '/shop/');
+// Project page: the small mark at the top morphs into the homepage mark (hs-mark).
+await page.goto(`${BASE}/work/atomic-ski/`, { waitUntil: 'load' });
+if ((await vtName('.project-mark .mark')) !== 'hs-mark') failures.push('project mark is not a shared element');
+await go('project mark click -> home', () => page.click('.project-mark a'), '/', 'hs-mark');
 
 await browser.close();
 server.close();

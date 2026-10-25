@@ -24,6 +24,19 @@ const site = await getSite();
 <html lang="en" data-dev={import.meta.env.DEV ? '' : undefined}>
   <head>
     <meta charset="utf-8" />
+    <!-- Cross-page view transitions: the opt-in lives inline at the top of <head>, so the
+         incoming page has it on its very first render even when the stylesheet is still
+         downloading (otherwise Chrome skips the morph: "opt-in disabled"). The expect link
+         holds that first render until <main> is parsed, so the shared mark exists in it. -->
+    <style is:inline>@view-transition{navigation:auto}@media (prefers-reduced-motion:reduce){@view-transition{navigation:none}}</style>
+    <link rel="expect" href="#content" blocking="render" />
+    <script is:inline>
+      // Ring morph direction, so CSS can show only the larger (sharper) snapshot of the mark.
+      addEventListener('pagereveal', function (e) {
+        var vt = e.viewTransition;
+        if (vt && vt.types) vt.types.add(document.querySelector('.shop-detail-mark') ? 'ib-shrink' : 'ib-grow');
+      });
+    </script>
     <meta name="viewport" content={`width=device-width, initial-scale=1${safeArea ? ', viewport-fit=cover' : ''}`} />
     <meta name="theme-color" content="#ffffff" />
     <meta name="google-site-verification" content="M6eRTJDg2gB4PMiLKpzNVeRX6jugbsgeBjGd_0ci2V4" />

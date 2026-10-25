@@ -1497,7 +1497,10 @@ html.show-grid .grid-overlay .page-grid {
   animation-timing-function: var(--ease-out-expo);
 }
 
-/* Same artwork on both sides: no plus-lighter double image, the new (crisp) one takes over. */
+/* Only the vector mark moves: no crossfade between its two snapshots (a small raster
+   blown up under the big one read as a JPG-like haze). Show only the larger snapshot,
+   which is the sharper one, for the whole morph: the new one when growing into /shop,
+   the old one when shrinking into a detail page. */
 ::view-transition-image-pair(ib-mark) {
   isolation: auto;
 }
@@ -1505,14 +1508,16 @@ html.show-grid .grid-overlay .page-grid {
 ::view-transition-new(ib-mark) {
   mix-blend-mode: normal;
   height: 100%;
-}
-/* Old stays opaque underneath, new fades in on top: coverage never dips mid-morph. */
-::view-transition-old(ib-mark) {
   animation: none;
+}
+::view-transition-old(ib-mark) {
+  opacity: 0;
+}
+html:active-view-transition-type(ib-shrink)::view-transition-old(ib-mark) {
   opacity: 1;
 }
-::view-transition-new(ib-mark) {
-  animation: vt-in 300ms var(--ease-out-quad) both;
+html:active-view-transition-type(ib-shrink)::view-transition-new(ib-mark) {
+  opacity: 0;
 }
 
 ::view-transition-group(hs-mark) {
