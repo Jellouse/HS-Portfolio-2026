@@ -19,6 +19,7 @@ const imageBlock = z.object({
     alt: z.string().default(''),
     frame: frame.default('default'),
     flush: z.boolean().default(false),
+    outline: z.boolean().default(false),
   }),
 });
 
@@ -42,6 +43,7 @@ const pairBlock = z.object({
     right: z.string(),
     rightAlt: z.string().default(''),
     frame: frame.default('default'),
+    outline: z.boolean().default(false),
   }),
 });
 
@@ -54,6 +56,7 @@ const processBlock = z.object({
           src: z.string(),
           alt: z.string().default(''),
           flush: z.boolean().default(false),
+          outline: z.boolean().default(false),
         }),
       )
       .default([]),
@@ -94,6 +97,7 @@ const projects = defineCollection({
     coverAlt: z.string().optional(),
     coverFrame: frame.default('default'),
     coverFlush: z.boolean().default(false),
+    coverOutline: z.boolean().default(false),
     rounded: z.boolean().default(true),
     info: z.array(infoSchema).default([]),
     processFromFolder: z.boolean().default(false),
@@ -156,8 +160,8 @@ const products = defineCollection({
         show: z.boolean().default(true),
         title: z.string().optional(),
         description: z.string().optional(),
-        left: z.object({ src: z.string().nullish(), alt: z.string().default('') }).optional(),
-        right: z.object({ src: z.string().nullish(), alt: z.string().default('') }).optional(),
+        left: z.object({ src: z.string().nullish(), alt: z.string().default(''), outline: z.boolean().default(false) }).optional(),
+        right: z.object({ src: z.string().nullish(), alt: z.string().default(''), outline: z.boolean().default(false) }).optional(),
       })
       .default({ show: true }),
     // /shop/<slug> detail page copy (Johann's mock). Empty fields fall back to the fields above.
@@ -165,12 +169,12 @@ const products = defineCollection({
       .object({
         title: z.string().optional(),
         description: z.string().optional(),
-        images: z.array(z.object({ src: z.string(), alt: z.string().default('') })).default([]),
+        images: z.array(z.object({ src: z.string(), alt: z.string().default(''), outline: z.boolean().default(false) })).default([]),
         sections: z
-          .array(z.object({ heading: z.string().default(''), text: z.string().default(''), image: z.object({ src: z.string().nullish(), alt: z.string().default('') }).optional() }))
+          .array(z.object({ heading: z.string().default(''), text: z.string().default(''), image: z.object({ src: z.string().nullish(), alt: z.string().default(''), outline: z.boolean().default(false) }).optional() }))
           .default([]),
         wildTitle: z.string().optional(),
-        wild: z.array(z.object({ src: z.string(), alt: z.string().default('') })).default([]),
+        wild: z.array(z.object({ src: z.string(), alt: z.string().default(''), outline: z.boolean().default(false) })).default([]),
         info: z.array(z.object({ label: z.string(), value: z.string() })).default([]),
       })
       .default({}),

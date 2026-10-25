@@ -37,8 +37,8 @@ const sizes = '(min-width: 1440px) 439px, (min-width: 760px) 30vw, calc(50vw - 3
         return (
           <section class="shop-product" aria-label={p.data.name}>
             <a class="shop-pair fade-in" href={`/shop/${p.id}/`} aria-label={`${p.data.name} details page`}>
-              {left?.src && <BlurImage src={resolveImageSource(left.src)} alt={left.alt} sizes={sizes} priority={i === 0} />}
-              {right?.src && <BlurImage src={resolveImageSource(right.src)} alt={right.alt} sizes={sizes} priority={i === 0} />}
+              {left?.src && <BlurImage src={resolveImageSource(left.src)} alt={left.alt} outline={left.outline === true} sizes={sizes} priority={i === 0} />}
+              {right?.src && <BlurImage src={resolveImageSource(right.src)} alt={right.alt} outline={right.outline === true} sizes={sizes} priority={i === 0} />}
             </a>
             <p class="shop-caption">
               <a class="shop-title" href={`/shop/${p.id}/`}>{o.title || p.data.name}</a>

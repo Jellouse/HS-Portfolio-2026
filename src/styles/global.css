@@ -54,6 +54,7 @@
   --bg-mobile: #fff;
   --red: #b70606; /* the homepage faces SVG fill (#B70606) */
   --line: #d6d6d6;
+  --image-stroke: #e5e5e5; /* 1px inside outline on images with Outline on (Keystatic) */
   --button-fill: #f2f2f2; /* off-white light grey: the shop Buy button at rest */
   --text-title: 23px;
   --text-body: 23px;
@@ -547,6 +548,19 @@ body:has(.hero) .site-header {
 .frame img,
 .frame video {
   corner-shape: inherit;
+}
+
+/* Outline: an overlay, so it sits on top of both the blur placeholder (frame background)
+   and the loaded image, follows the frame's corners and never changes the layout size. */
+.frame.is-outlined::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  corner-shape: inherit;
+  box-shadow: inset 0 0 0 1px var(--image-stroke);
+  pointer-events: none;
 }
 
 .frame.is-plain video,

@@ -49,7 +49,7 @@ const half = '(min-width: 760px) 272px, calc((100vw - 48px) / 2)';
     </div>
     {images.map((img, i) => (
       <figure class="shop-detail-image fade-in">
-        <BlurImage src={resolveImageSource(img.src)} alt={img.alt} sizes={big} priority={i < 1} />
+        <BlurImage src={resolveImageSource(img.src)} alt={img.alt} outline={img.outline === true} sizes={big} priority={i < 1} />
       </figure>
     ))}
     {detail.sections.map((s) => (
@@ -58,7 +58,7 @@ const half = '(min-width: 760px) 272px, calc((100vw - 48px) / 2)';
         {s.text && <div class="shop-detail-text">{paragraphs(s.text).map((p) => <p set:html={renderInline(p)} />)}</div>}
         {s.image?.src && (
           <figure class="shop-detail-image fade-in">
-            <BlurImage src={resolveImageSource(s.image.src)} alt={s.image.alt} sizes={big} />
+            <BlurImage src={resolveImageSource(s.image.src)} alt={s.image.alt} outline={s.image.outline === true} sizes={big} />
           </figure>
         )}
       </section>
@@ -67,7 +67,7 @@ const half = '(min-width: 760px) 272px, calc((100vw - 48px) / 2)';
       <section class="shop-detail-section shop-wild">
         {detail.wildTitle && <h2 class="shop-detail-heading">{detail.wildTitle}</h2>}
         <div class="shop-wild-grid fade-in">
-          {detail.wild.map((img) => <BlurImage src={resolveImageSource(img.src)} alt={img.alt} sizes={half} />)}
+          {detail.wild.map((img) => <BlurImage src={resolveImageSource(img.src)} alt={img.alt} outline={img.outline === true} sizes={half} />)}
         </div>
       </section>
     )}

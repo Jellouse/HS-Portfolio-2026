@@ -10,9 +10,10 @@ interface Props {
   leftPriority?: boolean;
   rightPriority?: boolean;
   frame?: 'default' | 'wide';
+  outline?: boolean;
 }
 
-const { left, leftAlt, right, rightAlt, leftPriority = false, rightPriority = false, frame = 'default' } = Astro.props;
+const { left, leftAlt, right, rightAlt, leftPriority = false, rightPriority = false, frame = 'default', outline = false } = Astro.props;
 ---
 
 <div class="pair fade-in" data-frame={frame}>
@@ -21,11 +22,13 @@ const { left, leftAlt, right, rightAlt, leftPriority = false, rightPriority = fa
     alt={leftAlt}
     priority={leftPriority}
     sizes="(min-width: 760px) 552px, calc(100vw - 40px)"
+    outline={outline}
   />
   <BlurImage
     src={resolveImageSource(right)}
     alt={rightAlt}
     priority={rightPriority}
     sizes="(min-width: 760px) 552px, calc(100vw - 40px)"
+    outline={outline}
   />
 </div>

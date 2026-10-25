@@ -56,6 +56,13 @@ function videoField(label: string, description?: string) {
   return { ...field, Input: withUpload(field.Input as any) };
 }
 
+// Thin light grey inside stroke for images whose edge disappears into the page.
+const outline = fields.checkbox({
+  label: 'Outline',
+  defaultValue: false,
+  description: '1px light grey line inside the image edge. Does not change the size.',
+});
+
 function imageField(
   label: string,
   opts?: { required?: boolean; description?: string },
@@ -131,6 +138,11 @@ export default config({
           description:
             'White or transparent edges. The homepage image has no rounded corners and no padding.',
         }),
+        coverOutline: fields.checkbox({
+          label: 'Outline cover',
+          defaultValue: false,
+          description: '1px light grey line inside the cover image edge. Does not change the size.',
+        }),
         rounded: fields.checkbox({
           label: 'Rounded image',
           defaultValue: true,
@@ -196,6 +208,7 @@ export default config({
                   description:
                     'White or transparent edges. No rounded corners and no padding.',
                 }),
+                outline,
               }),
             },
             video: {
@@ -237,6 +250,7 @@ export default config({
                   description: 'Optional.',
                 }),
                 frame,
+                outline,
               }),
             },
             process: {
@@ -255,6 +269,7 @@ export default config({
                       description:
                         'White or transparent edges. No rounded corners and no padding.',
                     }),
+                    outline,
                   }),
                   {
                     label: 'Photos',
@@ -290,11 +305,11 @@ export default config({
             description: fields.text({ label: 'Description', description: 'Optional line under the caption.', multiline: true }),
             left: fields.object({
               src: { ...fields.image({ label: 'Image', directory: 'src/content/products', publicPath: '/src/content/products' }) },
-              alt: fields.text({ label: 'Alt text' }),
+              alt: fields.text({ label: 'Alt text' }), outline,
             }, { label: 'Left image' }),
             right: fields.object({
               src: { ...fields.image({ label: 'Image', directory: 'src/content/products', publicPath: '/src/content/products' }) },
-              alt: fields.text({ label: 'Alt text' }),
+              alt: fields.text({ label: 'Alt text' }), outline,
             }, { label: 'Right image' }),
           },
           { label: '/shop overview', description: 'The product section on /shop: an image pair and its caption.' },
@@ -304,20 +319,20 @@ export default config({
             title: fields.text({ label: 'Title', description: 'e.g. Type-660. Empty: the name.' }),
             description: fields.text({ label: 'Intro', multiline: true, description: 'Empty: the description above.' }),
             images: fields.array(
-              fields.object({ src: { ...fields.image({ label: 'Image', directory: 'src/content/products', publicPath: '/src/content/products', validation: { isRequired: true } }) }, alt: fields.text({ label: 'Alt text' }) }),
+              fields.object({ src: { ...fields.image({ label: 'Image', directory: 'src/content/products', publicPath: '/src/content/products', validation: { isRequired: true } }) }, alt: fields.text({ label: 'Alt text' }), outline }),
               { label: 'Top images', description: 'Big images at the top of the detail page.', itemLabel: (props) => props.fields.alt.value || 'Image' },
             ),
             sections: fields.array(
               fields.object({
                 heading: fields.text({ label: 'Heading' }),
                 text: fields.text({ label: 'Text', multiline: true }),
-                image: fields.object({ src: { ...fields.image({ label: 'Image', directory: 'src/content/products', publicPath: '/src/content/products' }) }, alt: fields.text({ label: 'Alt text' }) }, { label: 'Image' }),
+                image: fields.object({ src: { ...fields.image({ label: 'Image', directory: 'src/content/products', publicPath: '/src/content/products' }) }, alt: fields.text({ label: 'Alt text' }), outline }, { label: 'Image' }),
               }),
               { label: 'Sections', description: 'Centred heading, text, one image.', itemLabel: (props) => props.fields.heading.value || 'Section' },
             ),
             wildTitle: fields.text({ label: 'Gallery heading', description: 'e.g. In the wild' }),
             wild: fields.array(
-              fields.object({ src: { ...fields.image({ label: 'Image', directory: 'src/content/products', publicPath: '/src/content/products', validation: { isRequired: true } }) }, alt: fields.text({ label: 'Alt text' }) }),
+              fields.object({ src: { ...fields.image({ label: 'Image', directory: 'src/content/products', publicPath: '/src/content/products', validation: { isRequired: true } }) }, alt: fields.text({ label: 'Alt text' }), outline }),
               { label: 'Gallery images', description: 'Two columns, in reading order.', itemLabel: (props) => props.fields.alt.value || 'Image' },
             ),
             info: fields.array(
