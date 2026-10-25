@@ -1,0 +1,74 @@
+name: Type 660
+order: 1
+edition: of 8
+dimensions: 200 mm tall
+description: A tall industrial form made to sharpen delicate silhouettes.
+images:
+  - src: /src/content/products/660/images/0/src.webp
+    alt: Type 660 vase
+  - src: /src/content/products/660/images/1/src.jpg
+    alt: Type 660 vase
+overview:
+  show: true
+  title: Type-660
+  description: >-
+    A tall vase in solid aluminium, 200 mm high. Made for long stems like
+    branches, lilies. Raw finish, 0.5 kg.
+  left:
+    src: /src/content/products/660/overview/left/src.jpg
+    alt: Type 660 vase
+  right:
+    src: /src/content/products/660/overview/right/src.jpg
+    alt: Type 660 vase
+detail:
+  title: Type-660
+  description: >-
+    A tall vase in solid aluminium, 200 mm high. Made for long stems like
+    branches, lilies. Raw finish, 0.5 kg.
+  images:
+    - src: /src/content/products/660/detail/images/0/src.jpg
+      alt: Type 660 vase with an orange flower
+    - src: /src/content/products/660/detail/images/1/src.jpg
+      alt: Type 660 vase from above with an orange flower
+  sections:
+    - heading: Cork Base
+      text: >-
+        A laser-cut cork base is fitted to give the vase a soft bottom surface
+        to rest on any surface without damaging it.
+      image:
+        src: /src/content/products/660/detail/sections/0/image/src.jpg
+        alt: Cork base fitted to the bottom of the vase
+    - heading: Each vase is numbered
+      text: >-
+        Hand-lettered in one of the grooves with its type-, and edition number.
+        Serialised in a deliberately subtle place, making every vase unique.
+      image:
+        src: /src/content/products/660/detail/sections/1/image/src.jpg
+        alt: Edition number lettered in a groove of the vase
+  wildTitle: In the wild
+  wild:
+    - src: /src/content/products/660/detail/wild/0/src.jpg
+      alt: Type 660 vase with a yellow orchid
+    - src: /src/content/products/660/detail/wild/1/src.jpg
+      alt: Type 660 vase on a table with purple flowers
+    - src: /src/content/products/660/detail/wild/2/src.jpg
+      alt: Type 660 vase with purple flowers on a windowsill
+    - src: /src/content/products/660/detail/wild/3/src.jpg
+      alt: Several vases on paving stones
+    - src: /src/content/products/660/detail/wild/4/src.jpg
+      alt: Type 660 vase with pink tulips on a desk
+    - src: /src/content/products/660/detail/wild/5/src.jpg
+      alt: Type 660 vase with yellow and purple flowers in a kitchen
+  info:
+    - label: Design
+      value: Humansize
+    - label: Line
+      value: Industrial Bloom
+    - label: Year
+      value: '2026'
+    - label: Height
+      value: 200mm
+    - label: Weight
+      value: 500g
+    - label: Material
+      value: Aluminium
