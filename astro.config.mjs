@@ -71,6 +71,15 @@ export default defineConfig({
   site,
   output: 'static',
   adapter: vercel(),
+  // Vercel's function socket is plain http, so without trusted forwarded hosts Astro sees
+  // http://humansize.de and its origin check 403s every same-site form POST (Buy, /admin).
+  security: {
+    allowedDomains: [
+      { hostname: 'humansize.de', protocol: 'https' },
+      { hostname: 'www.humansize.de', protocol: 'https' },
+      { hostname: '**.vercel.app', protocol: 'https' },
+    ],
+  },
   redirects: {
     '/work': '/',
     '/projects': '/',
