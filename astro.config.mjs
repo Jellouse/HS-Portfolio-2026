@@ -5,6 +5,9 @@ import keystatic from '@keystatic/astro';
 import vercel from '@astrojs/vercel';
 import { execFileSync } from 'node:child_process';
 import { statSync } from 'node:fs';
+import { hiddenProductSlugs } from './src/lib/shop/hidden.mjs';
+
+const hiddenShop = new Set(hiddenProductSlugs().map((s) => `/shop/${s}`));
 
 // Sitemap lastmod: last git commit touching the page's content, else file mtime, else build time.
 function lastModified(paths) {
@@ -152,6 +155,7 @@ export default defineConfig({
         }
         if (path === '/preview' || path.startsWith('/preview/')) return false;
         if (path === '/canvas') return false;
+        if (hiddenShop.has(path)) return false;
         if (path === '/admin' || path.startsWith('/keystatic')) return false;
         return true;
       },

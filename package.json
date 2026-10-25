@@ -10,7 +10,8 @@
     "test:touch-guard": "node tests/touch-scroll-guard.mjs",
     "test:scroll": "node tests/mobile-scroll.spec.mjs",
     "test:canvas": "node tests/canvas-auth.spec.mjs",
-    "test": "npm run test:shop && npm run test:touch-guard && npm run test:canvas && npm run test:scroll && npm run test:taps && npm run test:hscroll && npm run test:time && npm run test:reveal && npm run test:spin && npm run test:vt && npm run test:canvas-pages && npm run test:project-images && npm run test:keystatic",
+    "test:shop-grid": "node tests/shop-grid.spec.mjs",
+    "test": "npm run test:shop && npm run test:touch-guard && npm run test:canvas && npm run test:scroll && npm run test:taps && npm run test:hscroll && npm run test:time && npm run test:reveal && npm run test:spin && npm run test:vt && npm run test:canvas-pages && npm run test:project-images && npm run test:shop-grid && npm run test:keystatic",
     "test:preview-images": "node tests/preview-images.spec.mjs",
     "optimize:images": "node scripts/optimize-content-images.mjs",
     "test:keystatic": "node tests/keystatic-smoke.spec.mjs",
@@ -44,6 +45,7 @@
     "stripe": "^23.0.1"
   },
   "devDependencies": {
-    "playwright": "^1.64.1"
+    "playwright": "^1.64.1",
+    "yaml": "^2.9.1"
   }
 }

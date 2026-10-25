@@ -226,11 +226,15 @@ await test('shop is findable: indexable, in the sitemap, Product JSON-LD, but no
   const sitemap = (await Promise.all((await readdir(root)).filter((f) => /^sitemap-\d+\.xml$/.test(f)).map((f) => readFile(`${root}/${f}`, 'utf8')))).join('');
   assert.doesNotMatch(overview, /name="robots"/);
   assert.match(sitemap, /<loc>[^<]*\/shop\/<\/loc>/);
+  const { hiddenProductSlugs } = await import('../src/lib/shop/hidden.mjs');
+  const hidden = new Set(hiddenProductSlugs());
+  assert.ok(hidden.has('28'), 'Type-28 has Show on /shop off');
   for (const slug of slugs) {
     const html = await readFile(`${root}/shop/${slug}/index.html`, 'utf8');
     assert.doesNotMatch(html, /name="robots"/, slug);
     assert.match(html, /"@type":"Product"/, slug);
-    assert.match(sitemap, new RegExp(`<loc>[^<]*/shop/${slug}/</loc>`), slug);
+    const inMap = new RegExp(`<loc>[^<]*/shop/${slug}/</loc>`).test(sitemap);
+    assert.equal(inMap, !hidden.has(slug), `${slug} sitemap entry should follow Show on /shop`);
   }
   assert.doesNotMatch(sitemap, /\/(admin|canvas|keystatic)/);
   const home = await readFile(`${root}/index.html`, 'utf8');
