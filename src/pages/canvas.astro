@@ -4,7 +4,7 @@
 // GitHub session, verified server-side). ?compare=<host1>,<host2> adds other hosts.
 export const prerender = false;
 
-import { getProjects, projectLabel } from '../lib/content';
+import { canvasPages } from '../lib/canvas-pages';
 import { canvasMode } from '../lib/canvas-env.mjs';
 import { checkCanvasAccess, RETURN_COOKIE, TOKEN_COOKIE } from '../lib/canvas-auth.mjs';
 
@@ -30,12 +30,7 @@ if (mode === 'auth') {
 Astro.response.headers.set('X-Robots-Tag', NOINDEX['X-Robots-Tag']);
 Astro.response.headers.set('Cache-Control', NOINDEX['Cache-Control']);
 
-const projects = await getProjects();
-const pages = [
-  { name: 'Home', path: '/' },
-  ...projects.map((p) => ({ name: projectLabel(p.data), path: `/work/${p.id}/` })),
-  { name: '404', path: '/404' },
-];
+const pages = await canvasPages();
 const widths = [
   { w: 1440, vh: 900 },
   { w: 390, vh: 844 },
