@@ -2081,12 +2081,19 @@ body:has(.shop-detail) .site-header {
   bottom: calc(56px + env(safe-area-inset-bottom, 0px));
   z-index: 5;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
   margin-top: 116px;
   pointer-events: none;
 }
 .shop-buy-form {
   margin: 0;
+}
+.shop-buy-note {
+  margin: 0;
+  color: var(--muted);
+  pointer-events: auto;
 }
 .shop-buy-button {
   pointer-events: auto;
@@ -2117,9 +2124,8 @@ body:has(.shop-detail) .site-header {
 }
 @media (hover: hover) {
   .shop-buy-button:disabled:hover {
-    background: #fff;
+    background: var(--button-fill);
     color: var(--muted);
-    box-shadow: 0 0 0 1px var(--line);
   }
 }
 .shop-buy-button:focus-visible {

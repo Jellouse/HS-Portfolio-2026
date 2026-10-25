@@ -5,7 +5,7 @@ import BlurImage from '../../components/BlurImage.astro';
 import Base from '../../layouts/Base.astro';
 import mark from '../../assets/industrial-bloom-mark.svg?raw';
 import { resolveImageSource } from '../../lib/images';
-import { getProducts, price } from '../../lib/shop';
+import { getProducts, priceText, seedEur } from '../../lib/shop';
 
 const products = (await getProducts()).filter((p) => p.data.overview.show !== false);
 const sizes = '(min-width: 1440px) 439px, (min-width: 760px) 30vw, calc(50vw - 30px)';
@@ -43,7 +43,7 @@ const sizes = '(min-width: 1440px) 439px, (min-width: 760px) 30vw, calc(50vw - 3
             <p class="shop-caption">
               <a class="shop-title" href={`/shop/${p.id}/`}>{o.title || p.data.name}</a>
               <br />
-              {o.price || price(p.data.price)}
+              <span data-price={p.id} data-price-style="suffix">{priceText(seedEur(p.id), 'suffix')}</span>
               <span class="shop-links">
                 {o.description ? (
                   <button class="shop-details" type="button" aria-expanded="false" aria-controls={`details-${p.id}`}>
@@ -73,6 +73,9 @@ const sizes = '(min-width: 1440px) 439px, (min-width: 760px) 30vw, calc(50vw - 3
   import { initShopDetails } from '../../scripts/shop-details';
 
   initShopDetails();
+
+  import { refreshPrices } from '../../scripts/shop-price';
+  refreshPrices();
 
   // Re-init after a back/forward cache restore (pagehide stops it cleanly).
   const start = () => {

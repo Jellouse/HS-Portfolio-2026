@@ -7,5 +7,14 @@ export async function getProducts(): Promise<ProductEntry[]> {
   return all.sort((a, b) => a.data.order - b.data.order || a.data.name.localeCompare(b.data.name));
 }
 
-export const price = (eur: number) => `€${eur}`;
+import { SEED } from './shop/store.mjs';
+
+// The price lives in the shop DB (edit in /admin). Pages render this seed value and
+// replace it with the live one from /api/shop/stock (see scripts/shop-price.ts).
+export const seedEur = (slug: string) => {
+  const p = SEED.find((s) => s.slug === slug);
+  return p ? p.price_cents / 100 : null;
+};
+export const priceText = (eur: number | null, style: 'suffix' | 'prefix') =>
+  eur == null ? '' : style === 'prefix' ? `€${eur}` : `${eur}€`;
 export const SHIPPING = '€12 flat, EU only, 3–7 business days';

@@ -1,6 +1,5 @@
 name: Type 490
 order: 3
-price: 250
 edition: of 2
 dimensions: OD 160 / ID 80 mm, 250 mm tall
 description: A low, weighty volume balancing soft growth and hard material.
@@ -14,7 +13,6 @@ images:
 overview:
   show: true
   title: "Type-490"
-  price: "250€"
   description: "Four curved aluminium extrusion profiles, joined into a ring. 160 mm across, with an 80 mm opening, 250 mm high. Edition of 2, each numbered."
   left:
     src: /src/content/products/round-vase/overview-1.jpg

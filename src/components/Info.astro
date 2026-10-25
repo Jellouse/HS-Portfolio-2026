@@ -3,6 +3,8 @@ interface Item {
   label: string;
   value: string;
   href?: string;
+  /** Live shop price: the value is replaced from /api/shop/stock. */
+  priceSlug?: string;
 }
 
 interface Props {
@@ -26,7 +28,7 @@ const parts = (value: string) =>
       <ul class="info-list">
         {items.map((item) => (
           <li>
-            {item.label}: {item.href ? <a href={item.href}>{item.value}</a> : parts(item.value).map((p) => (p.href ? <a href={p.href}>{p.text}</a> : p.text))}
+            {item.label}: {item.priceSlug ? <span data-price={item.priceSlug} data-price-style="prefix">{item.value}</span> : item.href ? <a href={item.href}>{item.value}</a> : parts(item.value).map((p) => (p.href ? <a href={p.href}>{p.text}</a> : p.text))}
           </li>
         ))}
       </ul>

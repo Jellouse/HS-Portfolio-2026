@@ -147,7 +147,6 @@ const products = defineCollection({
   schema: z.object({
     name: z.string(),
     order: z.number().default(99),
-    price: z.number(),
     edition: z.string().optional(),
     dimensions: z.string().optional(),
     description: z.string(),
@@ -157,7 +156,6 @@ const products = defineCollection({
       .object({
         show: z.boolean().default(true),
         title: z.string().optional(),
-        price: z.string().optional(),
         description: z.string().optional(),
         left: z.object({ src: z.string().nullish(), alt: z.string().default('') }).optional(),
         right: z.object({ src: z.string().nullish(), alt: z.string().default('') }).optional(),
@@ -167,9 +165,7 @@ const products = defineCollection({
     detail: z
       .object({
         title: z.string().optional(),
-        price: z.string().optional(),
         description: z.string().optional(),
-        buyLabel: z.string().optional(),
         images: z.array(z.object({ src: z.string(), alt: z.string().default('') })).default([]),
         sections: z
           .array(z.object({ heading: z.string().default(''), text: z.string().default(''), image: z.object({ src: z.string().nullish(), alt: z.string().default('') }).optional() }))

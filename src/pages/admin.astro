@@ -34,7 +34,9 @@ const ranges = (list: number[]) => {
   return out.join(', ');
 };
 
-if (allowed) {
+if (allowed && !process.env.DATABASE_URL) {
+  error = 'Database not connected yet: DATABASE_URL is not set on Vercel.';
+} else if (allowed) {
   const pool = getPool();
   if (Astro.request.method === 'POST') {
     const f = await Astro.request.formData();

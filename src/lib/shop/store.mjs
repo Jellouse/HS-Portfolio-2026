@@ -14,7 +14,7 @@ export const SHIPPING_CENTS = 1200;
 // Copied from industrial-bloom lib/shop/shipping.js.
 export const SHIPPING_COUNTRIES = ['DE', 'AT', 'BE', 'CZ', 'DK', 'ES', 'FI', 'FR', 'IE', 'IT', 'LU', 'NL', 'PL', 'PT', 'SE'];
 
-// Live state from worksurface.co (Oct 2026). Seeded only into an empty table.
+// Starting prices and edition sizes (Oct 2026). Seeded only into an empty table; /admin owns them after that.
 export const SEED = [
   { slug: 'thorn-vase', code: '660', price_cents: 7000, edition_size: 8 },
   { slug: 'column-vase', code: '120', price_cents: 15000, edition_size: 2 },

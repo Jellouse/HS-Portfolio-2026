@@ -11,8 +11,11 @@ Buy now, one item, no cart. Stripe Checkout + one Postgres DB with two tables.
 - Abandoned holds also come back by themselves 5 min after expiry (checked on every read),
   so there is no cron.
 - Tables are created and seeded on first request (`src/lib/shop/store.mjs`), no migration step.
-- Keystatic stays the source for copy and images. Price shown on the page comes from Keystatic;
-  the price charged comes from the DB (edit in /admin). Keep them in sync.
+- Keystatic is the source for copy and images. The price lives only in the DB (edit in /admin):
+  pages render the seed price from `store.mjs` and swap in the live one from `/api/shop/stock`.
+- Own stock pool. worksurface.co is not connected.
+- Without `DATABASE_URL` / `STRIPE_SECRET_KEY` the Buy button still shows "Buy" and returns to the
+  product page with "Checkout opens soon." (`?checkout=soon`). No 500s.
 
 ## Env (Vercel, Production + Preview)
 - `DATABASE_URL` set by the Vercel Neon integration.

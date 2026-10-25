@@ -168,6 +168,22 @@ await test('button label updates', async () => {
   await p.end();
 });
 
+await test('price comes from the DB seed, not Keystatic, in the built pages', async () => {
+  const { readFile } = await import('node:fs/promises');
+  const { SEED } = await import('../src/lib/shop/store.mjs');
+  const root = '.vercel/output/static';
+  const detail = await readFile(`${root}/shop/thorn-vase/index.html`, 'utf8').catch(() => null);
+  if (!detail) return console.log('   (no build, skipped page check)');
+  const eur = SEED.find((x) => x.slug === 'thorn-vase').price_cents / 100;
+  assert.match(detail, new RegExp(`data-price="thorn-vase" data-price-style="suffix">${eur}€<`));
+  assert.match(detail, new RegExp(`data-price="thorn-vase" data-price-style="prefix">€${eur}<`));
+  assert.match(detail, /data-buy-note/);
+  const overview = await readFile(`${root}/shop/index.html`, 'utf8');
+  assert.match(overview, new RegExp(`data-price="thorn-vase" data-price-style="suffix">${eur}€<`));
+  const ks = await readFile('keystatic.config.ts', 'utf8');
+  assert.doesNotMatch(ks, /Price \(EUR\)|Price label/);
+});
+
 await pool.query('DROP TABLE IF EXISTS shop_orders, shop_products');
 await pool.end();
 for (const [s, name, e] of results) console.log(`${s} ${name}${e ? `\n   ${e.stack || e}` : ''}`);

@@ -6,7 +6,7 @@ export const prerender = false;
 
 export const POST: APIRoute = async ({ request }) => {
   const secret = process.env.STRIPE_WEBHOOK_SECRET;
-  if (!secret) return new Response('Not configured', { status: 500 });
+  if (!secret) return new Response('Not configured', { status: 503 });
   const body = await request.text();
   let event;
   try {

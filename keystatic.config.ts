@@ -273,14 +273,13 @@ export default config({
       slugField: 'name',
       path: 'src/content/products/*/',
       format: { data: 'yaml' },
-      columns: ['name', 'price'],
+      columns: ['name'],
       schema: {
         name: fields.slug({
           name: { label: 'Name', validation: { isRequired: true, length: { min: 1 } } },
-          slug: { label: 'Slug', description: 'Also the worksurface.co/shop/<slug> link.' },
+          slug: { label: 'Slug', description: 'Also the /shop/<slug> URL and the product key in /admin.' },
         }),
         order: fields.integer({ label: 'Order', description: 'Position on /shop, low first.', defaultValue: 99 }),
-        price: fields.integer({ label: 'Price (EUR)', validation: { isRequired: true } }),
         edition: fields.text({ label: 'Edition', description: 'e.g. of 8' }),
         dimensions: fields.text({ label: 'Dimensions', description: 'Optional, e.g. 200 mm tall' }),
         description: fields.text({ label: 'Description', multiline: true, validation: { isRequired: true, length: { min: 1 } } }),
@@ -295,7 +294,6 @@ export default config({
           {
             show: fields.checkbox({ label: 'Show on /shop', defaultValue: true }),
             title: fields.text({ label: 'Title', description: 'As shown on /shop, e.g. Type-660. Empty: the name.' }),
-            price: fields.text({ label: 'Price label', description: 'As shown on /shop, e.g. 150€. Empty: the price above.' }),
             description: fields.text({ label: 'Description', description: 'Optional line under the caption.', multiline: true }),
             left: fields.object({
               src: { ...fields.image({ label: 'Image', directory: 'src/content/products', publicPath: '/src/content/products' }) },
@@ -311,9 +309,7 @@ export default config({
         detail: fields.object(
           {
             title: fields.text({ label: 'Title', description: 'e.g. Type-660. Empty: the name.' }),
-            price: fields.text({ label: 'Price label', description: 'Under the title, e.g. 70€. Empty: the price above.' }),
             description: fields.text({ label: 'Intro', multiline: true, description: 'Empty: the description above.' }),
-            buyLabel: fields.text({ label: 'Buy button label', description: 'e.g. Buy: IB-660-001. Links to worksurface.co/shop/<slug>.' }),
             images: fields.array(
               fields.object({ src: { ...fields.image({ label: 'Image', directory: 'src/content/products', publicPath: '/src/content/products', validation: { isRequired: true } }) }, alt: fields.text({ label: 'Alt text' }) }),
               { label: 'Top images', description: 'Empty: the Images above.', itemLabel: (props) => props.fields.alt.value || 'Image' },
