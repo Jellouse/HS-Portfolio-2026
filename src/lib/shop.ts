@@ -17,4 +17,4 @@ export const seedEur = (slug: string) => {
 };
 export const priceText = (eur: number | null, style: 'suffix' | 'prefix') =>
   eur == null ? '' : style === 'prefix' ? `€${eur}` : `${eur}€`;
-export const SHIPPING = '€12 flat, EU only, 3–7 business days';
+export { SHIPPING_TEXT as SHIPPING } from './shop/store.mjs';

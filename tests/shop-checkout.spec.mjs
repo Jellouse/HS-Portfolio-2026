@@ -201,6 +201,16 @@ await test('every product on /shop has a store entry (catches Keystatic slug ren
   assert.deepEqual(missing, [], `products on /shop without a store entry in store.mjs SEED: ${missing.join(', ')}`);
 });
 
+await test('Shipping row: one source, matches what Stripe charges, shown once', async () => {
+  const { readFile } = await import('node:fs/promises');
+  const { SHIPPING_TEXT, SHIPPING_CENTS } = await import('../src/lib/shop/store.mjs');
+  assert.equal(SHIPPING_TEXT, '€12 flat, EU only, 3–7 business days');
+  assert.ok(SHIPPING_TEXT.startsWith(`€${SHIPPING_CENTS / 100} `));
+  const html = await readFile('.vercel/output/static/shop/660/index.html', 'utf8').catch(() => null);
+  if (!html) return console.log('   (no build, skipped page check)');
+  assert.equal(html.split(`Shipping: ${SHIPPING_TEXT}`).length - 1, 1, 'Shipping row exactly once');
+});
+
 await pool.query('DROP TABLE IF EXISTS shop_orders, shop_products');
 await pool.end();
 for (const [s, name, e] of results) console.log(`${s} ${name}${e ? `\n   ${e.stack || e}` : ''}`);

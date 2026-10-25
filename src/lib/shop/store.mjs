@@ -11,6 +11,9 @@ export const HOLD_MINUTES = 30;
 // A payment can complete right at the deadline; give the webhook a grace window before release.
 export const GRACE_MINUTES = 5;
 export const SHIPPING_CENTS = 1200;
+export const SHIPPING_DAYS = '3–7 business days';
+// The Info row on every product page; built from the same values Stripe charges.
+export const SHIPPING_TEXT = `€${SHIPPING_CENTS / 100} flat, EU only, ${SHIPPING_DAYS}`;
 // Copied from industrial-bloom lib/shop/shipping.js.
 export const SHIPPING_COUNTRIES = ['DE', 'AT', 'BE', 'CZ', 'DK', 'ES', 'FI', 'FR', 'IE', 'IT', 'LU', 'NL', 'PL', 'PT', 'SE'];
 
@@ -143,7 +146,7 @@ export async function buy(pool, stripe, { slug, name, siteUrl, now = Date.now() 
       expires_at: Math.floor(expiresAt.getTime() / 1000),
       line_items: [{ quantity: 1, price_data: { currency: 'eur', unit_amount: held.product.price_cents, product_data: { name: `${name || slug}, ${label}` } } }],
       shipping_address_collection: { allowed_countries: SHIPPING_COUNTRIES },
-      shipping_options: [{ shipping_rate_data: { display_name: 'EU shipping, 3–7 business days', type: 'fixed_amount', fixed_amount: { amount: SHIPPING_CENTS, currency: 'eur' },
+      shipping_options: [{ shipping_rate_data: { display_name: `EU shipping, ${SHIPPING_DAYS}`, type: 'fixed_amount', fixed_amount: { amount: SHIPPING_CENTS, currency: 'eur' },
         delivery_estimate: { minimum: { unit: 'business_day', value: 3 }, maximum: { unit: 'business_day', value: 7 } } } }],
       metadata: { site: SITE, product: slug, serial: String(held.serial), order: String(held.orderId) },
       success_url: `${siteUrl}/shop/${slug}/?bought=${encodeURIComponent(label)}`,
