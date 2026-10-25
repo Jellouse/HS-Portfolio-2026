@@ -54,6 +54,36 @@ export function split(host: Host) {
   host.classList.add('is-split');
 }
 
+const lineCount = (host: HTMLElement) =>
+  new Set([...host.querySelectorAll<HTMLElement>('.reveal-word')].map((w) => w.style.getPropertyValue('--line'))).size;
+
+// Class-driven reveal, shared by the scroll fallback and in-place reveals (the /shop Details
+// panel): words blur in line by line (400ms, 30ms per line); playOut reverses it, last line first.
+export function prepareReveal(host: Host, manual = false) {
+  if (manual) {
+    split(host);
+    host.classList.add('reveal-manual');
+    host.style.setProperty('--lines', String(lineCount(host)));
+  }
+  host.classList.remove('reveal-in', 'reveal-out', 'reveal-now');
+  host.classList.add('reveal-pending');
+}
+
+export function playIn(host: Host, instant = false) {
+  host.classList.remove('reveal-out');
+  host.classList.add('reveal-in');
+  if (instant) host.classList.add('reveal-now');
+  requestAnimationFrame(() => host.classList.remove('reveal-pending'));
+}
+
+export function playOut(host: Host) {
+  host.classList.remove('reveal-now');
+  host.classList.add('reveal-out', 'reveal-pending');
+}
+
+export const revealDuration = (host: HTMLElement) =>
+  400 + (Number(host.style.getPropertyValue('--lines')) - 1 || 0) * 30;
+
 function armFallback(hosts: Host[]) {
   if (!('IntersectionObserver' in window)) return;
   const io = new IntersectionObserver(
@@ -62,10 +92,8 @@ function armFallback(hosts: Host[]) {
         if (!entry.isIntersecting) continue;
         const el = entry.target as Host;
         io.unobserve(el);
-        el.classList.add('reveal-in');
         // scrolled past fast: show instantly
-        if (entry.boundingClientRect.top < window.innerHeight * 0.5) el.classList.add('reveal-now');
-        requestAnimationFrame(() => el.classList.remove('reveal-pending'));
+        playIn(el, entry.boundingClientRect.top < window.innerHeight * 0.5);
       }
     },
     { rootMargin: '0px 0px -5% 0px' },
@@ -73,7 +101,7 @@ function armFallback(hosts: Host[]) {
   hosts.forEach((el) => {
     if (el.classList.contains('reveal-in')) return;
     if (el.getBoundingClientRect().top < window.innerHeight) return;
-    el.classList.add('reveal-pending');
+    prepareReveal(el);
     io.observe(el);
   });
 }

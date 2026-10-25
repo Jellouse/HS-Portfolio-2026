@@ -10,7 +10,7 @@
     "test:touch-guard": "node tests/touch-scroll-guard.mjs",
     "test:scroll": "node tests/mobile-scroll.spec.mjs",
     "test:canvas": "node tests/canvas-auth.spec.mjs",
-    "test": "npm run test:touch-guard && npm run test:canvas && npm run test:scroll && npm run test:taps && npm run test:hscroll && npm run test:time && npm run test:reveal && npm run test:project-images && npm run test:keystatic",
+    "test": "npm run test:touch-guard && npm run test:canvas && npm run test:scroll && npm run test:taps && npm run test:hscroll && npm run test:time && npm run test:reveal && npm run test:spin && npm run test:project-images && npm run test:keystatic",
     "test:preview-images": "node tests/preview-images.spec.mjs",
     "optimize:images": "node scripts/optimize-content-images.mjs",
     "test:keystatic": "node tests/keystatic-smoke.spec.mjs",
@@ -19,7 +19,8 @@
     "test:taps": "node tests/mobile-taps.spec.mjs",
     "test:hscroll": "node tests/no-hscroll.spec.mjs",
     "test:time": "node tests/time-overlap.spec.mjs",
-    "test:reveal": "node tests/text-reveal.spec.mjs"
+    "test:reveal": "node tests/text-reveal.spec.mjs",
+    "test:spin": "node tests/spin-mark.spec.mjs"
   },
   "engines": {
     "node": ">=22"

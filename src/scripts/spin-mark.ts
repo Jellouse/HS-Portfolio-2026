@@ -31,17 +31,25 @@ export function initSpinMark(el: HTMLElement): () => void {
     el.style.transform = `rotate(${rotation}deg)`;
   };
 
-  const animateTo = (target: number) => {
-    cancelAnimationFrame(snapFrame);
-    const from = rotation;
-    const t0 = performance.now();
-    const frame = (now: number) => {
-      const p = Math.min(1, (now - t0) / SNAP_MS);
-      rotation = from + (target - from) * (1 - Math.pow(1 - p, 3));
-      render();
-      if (p < 1) snapFrame = requestAnimationFrame(frame);
-    };
-    snapFrame = requestAnimationFrame(frame);
+  // One integer quarter-turn target and one rAF loop. Hover adds a quarter turn to the
+  // target; the post-scroll snap sets it to round(angle / 90). Each retarget eases from the
+  // current angle (650ms ease-out cubic), and the loop always lands exactly on target * 90,
+  // so nothing can finish off the 90deg grid.
+  let quarter = Math.round(REST / 90);
+  let from = rotation;
+  let t0 = 0;
+  const tick = (now: number) => {
+    const p = Math.min(1, (now - t0) / SNAP_MS);
+    const to = quarter * 90;
+    rotation = p < 1 ? from + (to - from) * (1 - Math.pow(1 - p, 3)) : to;
+    render();
+    snapFrame = p < 1 ? requestAnimationFrame(tick) : 0;
+  };
+  const retarget = (q: number) => {
+    quarter = q;
+    from = rotation;
+    t0 = performance.now();
+    if (!snapFrame) snapFrame = requestAnimationFrame(tick);
   };
 
   const finishLoad = () => {
@@ -63,6 +71,7 @@ export function initSpinMark(el: HTMLElement): () => void {
         settle?.cancel();
         settle = undefined;
         rotation = REST;
+        quarter = Math.round(REST / 90);
         render();
       }, SETTLE_MS),
     );
@@ -96,14 +105,15 @@ export function initSpinMark(el: HTMLElement): () => void {
     lastY = scrollY;
     if (spin || settle) return;
     cancelAnimationFrame(snapFrame);
+    snapFrame = 0;
     rotation += delta * DEG_PER_PX;
     render();
     clearTimeout(snapTimer);
-    snapTimer = window.setTimeout(() => animateTo(Math.round(rotation / 90) * 90), SNAP_DELAY);
+    snapTimer = window.setTimeout(() => retarget(Math.round(rotation / 90)), SNAP_DELAY);
   };
   const onEnter = () => {
     if (spin || settle) return;
-    animateTo(rotation + 90);
+    retarget(quarter + 1);
   };
   addEventListener('scroll', onScroll, { passive: true });
   el.addEventListener('mouseenter', onEnter);
@@ -115,6 +125,7 @@ export function initSpinMark(el: HTMLElement): () => void {
     clearTimeout(snapTimer);
     timers.forEach(clearTimeout);
     cancelAnimationFrame(snapFrame);
+    snapFrame = 0;
     spin?.cancel();
     settle?.cancel();
     spin = settle = undefined;

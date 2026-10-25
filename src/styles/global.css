@@ -1552,23 +1552,31 @@ html.show-grid .grid-overlay .page-grid {
     }
   }
 
-  @supports not (animation-timeline: view()) {
-    .reveal-pending .reveal-word {
-      opacity: 0;
-      filter: blur(4px);
-      transform: translateY(4px);
-    }
+  /* Class-driven reveal: the scroll fallback where view() timelines are missing, and
+     in-place reveals (.reveal-manual, e.g. /shop Details). .reveal-out plays it in reverse. */
+  .reveal-manual .reveal-word {
+    animation: none;
+  }
 
-    .reveal-in .reveal-word {
-      transition:
-        opacity 400ms var(--ease-out-expo) calc(var(--line, 0) * 30ms),
-        filter 400ms var(--ease-out-expo) calc(var(--line, 0) * 30ms),
-        transform 400ms var(--ease-out-expo) calc(var(--line, 0) * 30ms);
-    }
+  .reveal-pending .reveal-word {
+    opacity: 0;
+    filter: blur(4px);
+    transform: translateY(4px);
+  }
 
-    .reveal-now .reveal-word {
-      transition: none;
-    }
+  .reveal-in .reveal-word {
+    transition:
+      opacity 400ms var(--ease-out-expo) calc(var(--line, 0) * 30ms),
+      filter 400ms var(--ease-out-expo) calc(var(--line, 0) * 30ms),
+      transform 400ms var(--ease-out-expo) calc(var(--line, 0) * 30ms);
+  }
+
+  .reveal-in.reveal-out .reveal-word {
+    transition-delay: calc((var(--lines, 1) - 1 - var(--line, 0)) * 30ms);
+  }
+
+  .reveal-now .reveal-word {
+    transition: none;
   }
 
   /* Menu + Tokyo time: opacity transition only — no keyframes, no translate, no blur. */
@@ -1897,9 +1905,8 @@ body:has(.shop-page) .site-header {
   }
 }
 
-/* /shop Details panel: height eases open (grid row 0fr -> 1fr) while the copy plays the
-   site text reveal (text-in: opacity, 4px blur, 4px rise; 400ms ease-out-expo, 30ms/line).
-   Closing reverses it, last line first. */
+/* /shop Details panel: height eases open (no clipping, overflow stays visible) and the copy
+   plays the shared class-driven text reveal; closing reverses it, then the height closes. */
 .shop-details {
   padding: 0;
   border: 0;
@@ -1923,40 +1930,14 @@ body:has(.shop-page) .site-header {
   text-decoration: none;
 }
 .shop-desc-wrap {
-  display: grid;
   grid-column: calc((var(--cols) - var(--content-span)) / 2 + 1) / span var(--content-span);
-  grid-template-rows: 0fr;
-  transition: grid-template-rows 400ms var(--ease-out-expo);
-}
-.shop-desc-wrap.is-open {
-  grid-template-rows: 1fr;
+  transition: height 400ms var(--ease-out-expo);
 }
 .shop-desc-inner {
-  min-height: 0;
-  overflow: hidden;
-}
-.shop-desc-wrap .reveal-word {
-  display: inline-block;
-  animation: none;
-  opacity: 0;
-  filter: blur(4px);
-  transform: translateY(4px);
-  transition:
-    opacity 400ms var(--ease-out-expo) calc(var(--line, 0) * 30ms),
-    filter 400ms var(--ease-out-expo) calc(var(--line, 0) * 30ms),
-    transform 400ms var(--ease-out-expo) calc(var(--line, 0) * 30ms);
-}
-.shop-desc-wrap.is-open .reveal-word {
-  opacity: 1;
-  filter: none;
-  transform: none;
-}
-.shop-desc-wrap.is-closing .reveal-word {
-  transition-delay: calc((var(--lines, 1) - 1 - var(--line, 0)) * 30ms);
+  display: flow-root;
 }
 @media (prefers-reduced-motion: reduce) {
-  .shop-desc-wrap,
-  .shop-desc-wrap .reveal-word {
+  .shop-desc-wrap {
     transition: none;
   }
 }

@@ -1,44 +1,58 @@
-// /shop "Details" toggles: the description opens in place with the site's text reveal
-// (blur-to-sharp per line, 400ms ease-out-expo, 30ms per-line stagger) while its height
-// grows; closing plays the same motion in reverse (last line first). Reduced motion: instant.
-import { split } from './text-reveal';
+// /shop "Details" toggles. Open: the panel height eases open (overflow visible, so nothing is
+// clipped) and leads; the copy then plays the site's text reveal (shared code path in
+// text-reveal.ts: per-line split, 400ms, 30ms per line). Close: the exact reverse, last line
+// first, then the height closes. Reduced motion: instant.
+import { playIn, playOut, prepareReveal, revealDuration } from './text-reveal';
 
-const MS = 400;
-const STAGGER = 30;
+const HEIGHT_MS = 400;
+const LEAD_MS = 120; // height leads the text by this much
 
 export function initShopDetails() {
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
   document.querySelectorAll<HTMLButtonElement>('.shop-details[aria-controls]').forEach((button) => {
     const panel = document.getElementById(button.getAttribute('aria-controls') || '');
-    if (!panel) return;
-    const text = panel.querySelector<HTMLElement>('.shop-desc');
-    let timer = 0;
+    const text = panel?.querySelector<HTMLElement>('.shop-desc');
+    if (!panel || !text) return;
+    const timers: number[] = [];
+    const clear = () => timers.splice(0).forEach(clearTimeout);
+    const later = (fn: () => void, ms: number) => timers.push(window.setTimeout(fn, ms));
 
     const open = () => {
-      clearTimeout(timer);
-      panel.hidden = false;
-      panel.classList.remove('is-closing');
-      if (text && !reduced) {
-        split(text);
-        const lines = new Set([...text.querySelectorAll<HTMLElement>('.reveal-word')].map((w) => w.style.getPropertyValue('--line')));
-        panel.style.setProperty('--lines', String(lines.size));
-      }
-      void panel.offsetHeight; // start from the closed state
-      panel.classList.add('is-open');
+      clear();
       button.setAttribute('aria-expanded', 'true');
+      const from = panel.hidden ? 0 : panel.getBoundingClientRect().height;
+      panel.hidden = false;
+      if (reduced) {
+        panel.style.height = '';
+        return;
+      }
+      prepareReveal(text, true);
+      panel.style.height = 'auto';
+      const to = panel.getBoundingClientRect().height;
+      panel.style.height = `${from}px`;
+      void panel.offsetHeight;
+      panel.style.height = `${to}px`;
+      later(() => playIn(text), LEAD_MS);
+      later(() => (panel.style.height = ''), HEIGHT_MS);
     };
 
     const close = () => {
-      clearTimeout(timer);
-      panel.classList.add('is-closing');
-      panel.classList.remove('is-open');
+      clear();
       button.setAttribute('aria-expanded', 'false');
-      const lines = Number(panel.style.getPropertyValue('--lines')) || 1;
-      const wait = reduced ? 0 : MS + (lines - 1) * STAGGER;
-      timer = window.setTimeout(() => {
+      if (reduced) {
         panel.hidden = true;
-        panel.classList.remove('is-closing');
-      }, wait);
+        return;
+      }
+      playOut(text);
+      later(() => {
+        panel.style.height = `${panel.getBoundingClientRect().height}px`;
+        void panel.offsetHeight;
+        panel.style.height = '0px';
+      }, Math.max(0, revealDuration(text) - LEAD_MS));
+      later(() => {
+        panel.hidden = true;
+        panel.style.height = '';
+      }, revealDuration(text) - LEAD_MS + HEIGHT_MS);
     };
 
     button.addEventListener('click', () => (button.getAttribute('aria-expanded') === 'true' ? close() : open()));

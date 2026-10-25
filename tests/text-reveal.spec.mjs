@@ -101,14 +101,32 @@ await page.goto(BASE + '/shop/', { waitUntil: 'load' });
 const btn = page.locator('.shop-details').first();
 await btn.scrollIntoViewIfNeeded();
 if ((await btn.getAttribute('aria-expanded')) !== 'false') failures.push('/shop: Details not closed by default');
+// Per-line opacities (first and last line) plus whether any word is clipped by the panel.
+const sample = () => page.evaluate(() => {
+  const b = document.querySelector('.shop-details');
+  const p = document.getElementById(b.getAttribute('aria-controls'));
+  const words = [...p.querySelectorAll('.reveal-word')];
+  const byLine = {};
+  for (const w of words) (byLine[w.style.getPropertyValue('--line')] ??= []).push(+getComputedStyle(w).opacity);
+  const lines = Object.keys(byLine).sort((x, y) => x - y).map((k) => Math.max(...byLine[k]));
+  const clipped = getComputedStyle(p).overflow !== 'visible' || getComputedStyle(p.firstElementChild).overflow !== 'visible';
+  return { lines, clipped, expanded: b.getAttribute('aria-expanded'), hidden: p.hidden, h: p.getBoundingClientRect().height };
+});
 await btn.click();
+await page.waitForTimeout(200); // height has led; text is mid-reveal
+const mid = await sample();
+if (mid.clipped) failures.push('/shop: Details panel clips its text (overflow not visible)');
+if (!(mid.lines.length >= 2 && mid.lines[0] > mid.lines.at(-1) + 0.02)) failures.push(`/shop: Details lines did not reveal one by one (${mid.lines})`);
 await page.waitForTimeout(800);
-const open = await page.evaluate(() => { const b = document.querySelector('.shop-details'); const p = document.getElementById(b.getAttribute('aria-controls')); return b.getAttribute('aria-expanded') === 'true' && !p.hidden && p.getBoundingClientRect().height > 20 && [...p.querySelectorAll('.reveal-word')].every((w) => +getComputedStyle(w).opacity > 0.99); });
-if (!open) failures.push('/shop: Details did not open fully');
+const open = await sample();
+if (!(open.expanded === 'true' && !open.hidden && open.h > 20 && open.lines.every((o) => o > 0.99))) failures.push('/shop: Details did not open fully');
 await btn.press('Enter');
-await page.waitForTimeout(800);
-const closed = await page.evaluate(() => { const b = document.querySelector('.shop-details'); return b.getAttribute('aria-expanded') === 'false' && document.getElementById(b.getAttribute('aria-controls')).hidden; });
-if (!closed) failures.push('/shop: Details did not close via keyboard');
+await page.waitForTimeout(90); // reverse: last line goes first
+const out = await sample();
+if (!(out.lines.at(-1) < out.lines[0] - 0.02)) failures.push(`/shop: Details did not close in reverse, last line first (${out.lines})`);
+await page.waitForTimeout(1000);
+const closed = await sample();
+if (!(closed.expanded === 'false' && closed.hidden)) failures.push('/shop: Details did not close via keyboard');
 
 await browser.close();
 server.close();
