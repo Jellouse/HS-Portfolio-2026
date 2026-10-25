@@ -117,7 +117,7 @@ const site = defineCollection({
     email: z.string().email(),
     intro: z.string(),
     timezone: z.string(),
-    place: z.string(),
+    place: z.string().default(''),
     about: z.array(z.string()),
     socials: z
       .array(
@@ -154,6 +154,8 @@ const products = defineCollection({
     edition: z.string().optional(),
     dimensions: z.string().optional(),
     description: z.string(),
+    // Search title and meta description; empty falls back to the name and description.
+    seo: z.object({ title: z.string().optional(), description: z.string().optional() }).default({}),
     // /shop overview section: its own copy and image pair, separate from the detail page.
     overview: z
       .object({

@@ -22,7 +22,7 @@ const menu = [
 <header class="site-header page-grid">
   <div class="who">
     <a href="/">{site.name}</a>
-    <p class="time" data-tokyo-time data-place={site.place} data-timezone={site.timezone}>
+    <p class="time" data-tokyo-time data-place={site.place || undefined} data-timezone={site.timezone}>
       {site.place}
     </p>
   </div>

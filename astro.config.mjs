@@ -152,7 +152,7 @@ export default defineConfig({
         }
         if (path === '/preview' || path.startsWith('/preview/')) return false;
         if (path === '/canvas') return false;
-        if (path === '/shop' || path.startsWith('/shop/')) return false;
+        if (path === '/admin' || path.startsWith('/keystatic')) return false;
         return true;
       },
     }),

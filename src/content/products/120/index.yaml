@@ -1,7 +1,12 @@
 name: Type 120
 order: 2
 edition: of 2
-description: A restrained vertical vessel with a cast, architectural texture.
+description: A single aluminium extrusion profile with a textured, architectural surface. Finished by hand with a 3D-printed base sealed in epoxy and a laser-cut cork foot. 250 mm high, 0.85 kg. Edition of 2, each numbered.
+seo:
+  title: Type-120 aluminium vase · Industrial Bloom · Humansize
+  description: >-
+    A solid aluminium vase made from a single extrusion profile with a textured,
+    architectural surface. 250 mm, edition of 2, handmade in Germany.
 overview:
   show: true
   title: Type-120
@@ -19,19 +24,19 @@ overview:
 detail:
   images:
     - src: /src/content/products/120/detail/images/0/src.jpg
-      alt: Type 120 vase
+      alt: Type-120 aluminium vase with a textured extrusion surface
       outline: false
     - src: /src/content/products/120/detail/images/1/src.jpg
       alt: Type 120 vase
       outline: false
     - src: /src/content/products/120/detail/images/2/src.jpg
-      alt: thistle in the 120 vase against a gradient background
+      alt: Thistle in the Type-120 vase
       outline: false
     - src: /src/content/products/120/detail/images/3/src.jpg
-      alt: packshot of 120 vase
+      alt: Type-120 vase packshot
       outline: false
     - src: /src/content/products/120/detail/images/4/src.png
-      alt: technical drawing of vase
+      alt: Technical drawing of the Type-120 vase
       outline: true
   sections: []
   wild: []

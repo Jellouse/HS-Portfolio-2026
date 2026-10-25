@@ -216,3 +216,23 @@ await pool.end();
 for (const [s, name, e] of results) console.log(`${s} ${name}${e ? `\n   ${e.stack || e}` : ''}`);
 if (results.some((r) => r[0] === 'FAIL')) process.exit(1);
 console.log(`shop-checkout: ${results.length} passed`);
+
+await test('shop is findable: indexable, in the sitemap, Product JSON-LD, but not linked from nav/home', async () => {
+  const { readFile, readdir } = await import('node:fs/promises');
+  const root = '.vercel/output/static';
+  const overview = await readFile(`${root}/shop/index.html`, 'utf8').catch(() => null);
+  if (!overview) return console.log('   (no build, skipped)');
+  const slugs = (await readdir('src/content/products', { withFileTypes: true })).filter((e) => e.isDirectory()).map((e) => e.name);
+  const sitemap = (await Promise.all((await readdir(root)).filter((f) => /^sitemap-\d+\.xml$/.test(f)).map((f) => readFile(`${root}/${f}`, 'utf8')))).join('');
+  assert.doesNotMatch(overview, /name="robots"/);
+  assert.match(sitemap, /<loc>[^<]*\/shop\/<\/loc>/);
+  for (const slug of slugs) {
+    const html = await readFile(`${root}/shop/${slug}/index.html`, 'utf8');
+    assert.doesNotMatch(html, /name="robots"/, slug);
+    assert.match(html, /"@type":"Product"/, slug);
+    assert.match(sitemap, new RegExp(`<loc>[^<]*/shop/${slug}/</loc>`), slug);
+  }
+  assert.doesNotMatch(sitemap, /\/(admin|canvas|keystatic)/);
+  const home = await readFile(`${root}/index.html`, 'utf8');
+  assert.doesNotMatch(home, /href="\/shop/);
+});

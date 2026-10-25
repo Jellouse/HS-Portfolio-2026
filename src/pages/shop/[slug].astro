@@ -7,7 +7,9 @@ import Info from '../../components/Info.astro';
 import Base from '../../layouts/Base.astro';
 import { paragraphs, renderInline } from '../../lib/content';
 import { resolveImageSource } from '../../lib/images';
+import { getImage } from 'astro:assets';
 import { getProducts, priceText, seedEur, SHIPPING, type ProductEntry } from '../../lib/shop';
+import { productJsonLd } from '../../lib/shop/jsonld';
 
 export async function getStaticPaths() {
   const products = await getProducts();
@@ -30,11 +32,37 @@ const info = [
   ...(eur == null ? [] : [{ label: 'Price', value: priceText(eur, 'prefix'), priceSlug: product.id }]),
   { label: 'Shipping', value: SHIPPING },
 ];
+// og:image: the packshot (alt says so), else the first top image.
+const packshot = images.find((i) => /packshot/i.test(i.alt)) ?? images[0];
+const packshotSrc = packshot ? resolveImageSource(packshot.src) : undefined;
+const ogImage = packshotSrc && typeof packshotSrc !== 'string' ? packshotSrc : undefined;
+const site = Astro.site!;
+const imageUrls = await Promise.all(
+  images.map(async (i) => {
+    const src = resolveImageSource(i.src);
+    if (typeof src === 'string') return new URL(src, site).href;
+    return new URL((await getImage({ src, width: Math.min(1200, src.width), format: 'jpeg', quality: 80 })).src, site).href;
+  }),
+);
+const jsonLd = await productJsonLd({
+  slug: product.id,
+  name: title,
+  description: d.seo.description || d.description,
+  url: new URL(`/shop/${product.id}/`, site).href,
+  images: imageUrls,
+  eur,
+});
 const big = '(min-width: 760px) calc(5 * var(--col) + 4 * var(--gutter)), calc(100vw - 40px)';
 const half = '(min-width: 760px) 272px, calc((100vw - 48px) / 2)';
 ---
 
-<Base title={`${d.name} · Industrial Bloom · Humansize`} description={d.description} noindex safeArea>
+<Base
+  title={d.seo.title || `${d.name} · Industrial Bloom · Humansize`}
+  description={d.seo.description || d.description}
+  image={ogImage}
+  jsonLd={jsonLd}
+  safeArea
+>
   <article class="shop-detail page-grid" data-slug={product.id}>
     <p class="shop-detail-mark">
       <a href="/shop/" aria-label="Industrial Bloom shop">

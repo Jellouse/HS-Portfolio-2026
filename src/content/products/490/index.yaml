@@ -2,7 +2,12 @@ name: Type 490
 order: 3
 edition: of 2
 dimensions: OD 160 / ID 80 mm, 250 mm tall
-description: A low, weighty volume balancing soft growth and hard material.
+description: Four curved aluminium extrusion profiles, joined into a ring. 160 mm across, with an 80 mm opening, 250 mm high and 3.5 kg. Heavy and steady, so tall stems stay put. Edition of 2, each numbered.
+seo:
+  title: Type-490 aluminium ring vase · Industrial Bloom · Humansize
+  description: >-
+    A heavy aluminium vase made from four curved extrusion profiles joined into
+    a ring. 160 mm across, 250 mm high, edition of 2, handmade in Germany.
 overview:
   show: true
   title: Type-490
@@ -20,16 +25,16 @@ overview:
 detail:
   images:
     - src: /src/content/products/490/detail/images/0/src.webp
-      alt: Type 490 vase
+      alt: Type-490 aluminium ring vase from above
       outline: false
     - src: /src/content/products/490/detail/images/1/src.jpg
-      alt: Type 490 vase
+      alt: Type-490 vase from the side
       outline: false
     - src: /src/content/products/490/detail/images/2/src.jpg
       alt: Type 490 vase
       outline: false
     - src: /src/content/products/490/detail/images/3/src.png
-      alt: Technical drawing of vase
+      alt: Technical drawing of the Type-490 vase
       outline: true
   sections: []
   wild: []
@@ -38,6 +43,10 @@ detail:
       value: Humansize
     - label: Height
       value: 250mm
+    - label: Diameter
+      value: 160mm
+    - label: Opening
+      value: 80mm
     - label: Weight
       value: 3.5kg
     - label: Material

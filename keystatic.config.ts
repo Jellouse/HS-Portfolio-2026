@@ -298,6 +298,13 @@ export default config({
         edition: fields.text({ label: 'Edition', description: 'e.g. of 8' }),
         dimensions: fields.text({ label: 'Dimensions', description: 'Optional, e.g. 200 mm tall' }),
         description: fields.text({ label: 'Description', multiline: true, validation: { isRequired: true, length: { min: 1 } } }),
+        seo: fields.object(
+          {
+            title: fields.text({ label: 'Search title', description: 'Browser and search title. Empty: name · Industrial Bloom · Humansize.' }),
+            description: fields.text({ label: 'Meta description', multiline: true, description: 'Search snippet. Empty: the description.' }),
+          },
+          { label: 'SEO' },
+        ),
         overview: fields.object(
           {
             show: fields.checkbox({ label: 'Show on /shop', defaultValue: true }),
@@ -403,8 +410,7 @@ export default config({
         }),
         place: fields.text({
           label: 'Place label',
-          description: 'Example: Tokyo',
-          validation: { isRequired: true, length: { min: 1 } },
+          description: 'Optional city shown before the clock, e.g. Tokyo. Empty: only the time.',
         }),
         about: fields.array(
           fields.markdoc.inline({
