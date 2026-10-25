@@ -52,7 +52,7 @@
   --muted: var(--ink-40);
   --bg: #fff;
   --bg-mobile: #fff;
-  --red: #b70606;
+  --red: #b70606; /* the homepage faces SVG fill (#B70606) */
   --line: #d6d6d6;
   --text-title: 23px;
   --text-body: 23px;
@@ -1943,4 +1943,168 @@ body:has(.shop-page) .site-header {
 }
 .shop-desc-wrap[hidden] {
   display: none;
+}
+
+/* Shop detail (/shop/<slug>, Johann's 1440 mock): everything on a centred 5-col
+   measure (552 at 1440), Industrial Bloom mark on top, centred title + price,
+   sections of centred heading / text / image, a two-column gallery, Info, and a
+   bottom-pinned Buy button. */
+body:has(.shop-detail) .site-header {
+  display: none;
+}
+.shop-detail {
+  padding-top: 44px;
+  padding-bottom: 116px;
+}
+@media (min-width: 760px) {
+  .shop-detail {
+    --measure: calc(5 * var(--col) + 4 * var(--gutter));
+  }
+}
+.shop-detail > * {
+  grid-column: 1 / -1;
+  width: min(100%, var(--measure));
+  margin-inline: auto;
+}
+.shop-detail-mark {
+  display: flex;
+  justify-content: center;
+  margin-block: 0 130px;
+}
+.shop-detail-mark a {
+  display: block;
+}
+.shop-detail-mark .shop-mark {
+  display: block;
+  width: 54px;
+}
+.shop-detail-head h1,
+.shop-detail-heading {
+  margin: 0 0 60px;
+  font-size: var(--text-body);
+  font-weight: 400;
+  line-height: var(--lh-body);
+  text-align: center;
+}
+.shop-detail-text {
+  margin-bottom: 122px;
+}
+.shop-detail-text p {
+  margin: 0 0 var(--lh-body);
+}
+.shop-detail-text p:last-child {
+  margin-bottom: 0;
+}
+.shop-detail-image {
+  margin: 0 auto 60px;
+}
+.shop-detail-image img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.shop-detail-section {
+  margin-top: 56px;
+}
+.shop-detail-section > * {
+  width: 100%;
+}
+.shop-wild {
+  margin-top: 86px;
+}
+.shop-wild .shop-detail-heading {
+  margin-bottom: 72px;
+}
+.shop-wild-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 8px;
+  align-items: start;
+}
+.shop-wild-grid img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.shop-wild + .shop-detail-info {
+  margin-top: 116px;
+}
+.shop-detail-info .info {
+  width: 100%;
+  margin: 0;
+}
+.shop-detail-info .info-label {
+  margin-bottom: 60px;
+}
+/* Buy: sticky, not fixed. It pins to the viewport bottom (plus the iOS home
+   indicator inset) while the article scrolls, then rests after Info, so it never
+   covers the footer. Rest: white fill, black label; hover: the faces red with a
+   white label (7.1:1), quiet 150ms. */
+.shop-buy-bar {
+  position: sticky;
+  bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+  z-index: 5;
+  display: flex;
+  justify-content: center;
+  margin-top: 116px;
+  pointer-events: none;
+}
+.shop-buy-button {
+  pointer-events: auto;
+  display: inline-block;
+  padding: 10px 20px 9px;
+  border-radius: var(--radius-sm);
+  corner-shape: squircle;
+  background: #fff;
+  color: var(--ink);
+  box-shadow: 0 0 0 1px var(--line);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background-color 150ms ease, color 150ms ease, box-shadow 150ms ease;
+}
+@media (hover: hover) {
+  .shop-buy-button:hover {
+    background: var(--red);
+    color: #fff;
+    box-shadow: 0 0 0 1px var(--red);
+    opacity: 1;
+  }
+}
+.shop-buy-button:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+@media (max-width: 759px) {
+  .shop-detail {
+    padding: 32px var(--margin) 96px;
+  }
+  .shop-detail-mark {
+    margin-bottom: 96px;
+  }
+  .shop-detail-head h1,
+  .shop-detail-heading {
+    margin-bottom: var(--lh-body);
+  }
+  .shop-detail-text {
+    margin-bottom: 48px;
+  }
+  .shop-detail-image {
+    margin-bottom: var(--space-block);
+  }
+  .shop-detail-section {
+    margin-top: 76px;
+  }
+  .shop-wild .shop-detail-heading {
+    margin-bottom: 48px;
+  }
+  .shop-wild + .shop-detail-info {
+    margin-top: 96px;
+  }
+  .shop-detail-info .info-label {
+    margin-bottom: var(--lh-body);
+  }
+  .shop-buy-bar {
+    bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+    margin-top: 96px;
+  }
 }

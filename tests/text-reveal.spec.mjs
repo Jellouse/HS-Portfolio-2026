@@ -9,6 +9,8 @@
  * Deliberate exceptions (ALLOW):
  * - .site-header: the fixed name/@Humansize header and Tokyo time (opacity-only by design).
  * - .skip, .sr-only: never visible.
+ * - .shop-buy-bar: the bottom-pinned Buy button on /shop/<slug>. It is UI chrome that sits
+ *   over content from first paint, so it must never be hidden or blurred mid-scroll.
  * - [data-no-reveal]: blocks that animate themselves (the /shop Details panel; tested below).
  * - .shop-head: the /shop title row sits in the first screen.
  * - .shop-button: the bordered Buy button on /shop/*; a control, so its label never blurs
@@ -22,7 +24,7 @@ import { join, extname, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
-const ALLOW = '.site-header, .skip, .sr-only, [data-no-reveal], .shop-head, .shop-button';
+const ALLOW = '.site-header, .skip, .sr-only, [data-no-reveal], .shop-head, .shop-button, .shop-buy-bar';
 const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.webp': 'image/webp', '.woff2': 'font/woff2' };
 const root = [join(ROOT, '.vercel', 'output', 'static'), join(ROOT, 'dist', 'client')].find((d) => existsSync(join(d, 'index.html')));
 if (!root) { console.error('Run npm run build first.'); process.exit(1); }

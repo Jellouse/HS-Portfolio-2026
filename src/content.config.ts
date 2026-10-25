@@ -163,6 +163,22 @@ const products = defineCollection({
         right: z.object({ src: z.string().nullish(), alt: z.string().default('') }).optional(),
       })
       .default({ show: true }),
+    // /shop/<slug> detail page copy (Johann's mock). Empty fields fall back to the fields above.
+    detail: z
+      .object({
+        title: z.string().optional(),
+        price: z.string().optional(),
+        description: z.string().optional(),
+        buyLabel: z.string().optional(),
+        images: z.array(z.object({ src: z.string(), alt: z.string().default('') })).default([]),
+        sections: z
+          .array(z.object({ heading: z.string().default(''), text: z.string().default(''), image: z.object({ src: z.string().nullish(), alt: z.string().default('') }).optional() }))
+          .default([]),
+        wildTitle: z.string().optional(),
+        wild: z.array(z.object({ src: z.string(), alt: z.string().default('') })).default([]),
+        info: z.array(z.object({ label: z.string(), value: z.string() })).default([]),
+      })
+      .default({}),
   }),
 });
 

@@ -1,11 +1,12 @@
 ---
 export const prerender = true;
 
-import ImageBlock from '../../components/ImageBlock.astro';
+import mark from '../../assets/industrial-bloom-mark.svg?raw';
+import BlurImage from '../../components/BlurImage.astro';
 import Info from '../../components/Info.astro';
-import MarkFace from '../../components/MarkFace.astro';
-import ProjectHero from '../../components/ProjectHero.astro';
 import Base from '../../layouts/Base.astro';
+import { paragraphs, renderInline } from '../../lib/content';
+import { resolveImageSource } from '../../lib/images';
 import { getProducts, price, shopUrl, SHIPPING, type ProductEntry } from '../../lib/shop';
 
 export async function getStaticPaths() {
@@ -19,28 +20,77 @@ interface Props {
 
 const { product } = Astro.props;
 const d = product.data;
+const detail = d.detail;
+const title = detail.title || d.overview.title || d.name;
+const priceLabel = detail.price || d.overview.price || `${d.price}€`;
+const intro = paragraphs(detail.description || d.description);
+const images = detail.images.length ? detail.images : d.images;
 const info = [
-  ...(d.edition ? [{ label: 'Edition', value: d.edition }] : []),
-  ...(d.dimensions ? [{ label: 'Dimensions', value: d.dimensions }] : []),
-  { label: 'Material', value: 'raw aluminium' },
+  ...detail.info,
   { label: 'Price', value: price(d.price) },
   { label: 'Shipping', value: SHIPPING },
 ];
+const big = '(min-width: 760px) calc(5 * var(--col) + 4 * var(--gutter)), calc(100vw - 40px)';
+const half = '(min-width: 760px) 272px, calc((100vw - 48px) / 2)';
 ---
 
-<Base title={`${d.name} · Industrial Bloom · Humansize`} description={d.description} noindex>
-  <article class="project page-grid" data-slug={product.id}>
-    <p class="project-mark">
-      <a href="/" aria-label="Humansize">
-        <MarkFace />
+<Base title={`${d.name} · Industrial Bloom · Humansize`} description={d.description} noindex safeArea>
+  <article class="shop-detail page-grid" data-slug={product.id}>
+    <p class="shop-detail-mark">
+      <a href="/shop/" aria-label="Industrial Bloom shop">
+        <span class="shop-mark" data-spin-mark set:html={mark} />
       </a>
     </p>
-    <ProjectHero title={d.name} years={price(d.price)} summary={d.description} />
-    {d.images.map((img, i) => <ImageBlock src={img.src} alt={img.alt} priority={i < 2} />)}
-    <section class="text-block shop-buy">
-      <p class="shop-price">{price(d.price)}{d.edition ? <span class="project-year">, edition {d.edition}</span> : null}</p>
-      <a class="shop-button" href={shopUrl(product.id)}>Buy on worksurface.co</a>
+    <header class="shop-detail-head">
+      <h1>{title}<br />{priceLabel}</h1>
+    </header>
+    <div class="shop-detail-text">
+      {intro.map((p) => <p set:html={renderInline(p)} />)}
+    </div>
+    {images.map((img, i) => (
+      <figure class="shop-detail-image fade-in">
+        <BlurImage src={resolveImageSource(img.src)} alt={img.alt} sizes={big} priority={i < 1} />
+      </figure>
+    ))}
+    {detail.sections.map((s) => (
+      <section class="shop-detail-section">
+        {s.heading && <h2 class="shop-detail-heading">{s.heading}</h2>}
+        {s.text && <div class="shop-detail-text">{paragraphs(s.text).map((p) => <p set:html={renderInline(p)} />)}</div>}
+        {s.image?.src && (
+          <figure class="shop-detail-image fade-in">
+            <BlurImage src={resolveImageSource(s.image.src)} alt={s.image.alt} sizes={big} />
+          </figure>
+        )}
+      </section>
+    ))}
+    {detail.wild.length > 0 && (
+      <section class="shop-detail-section shop-wild">
+        {detail.wildTitle && <h2 class="shop-detail-heading">{detail.wildTitle}</h2>}
+        <div class="shop-wild-grid fade-in">
+          {detail.wild.map((img) => <BlurImage src={resolveImageSource(img.src)} alt={img.alt} sizes={half} />)}
+        </div>
+      </section>
+    )}
+    <section class="shop-detail-section shop-detail-info">
+      <Info items={info} />
     </section>
-    <Info items={info} />
+    <!-- Sticky, not fixed: pinned to the viewport bottom while the article scrolls,
+         then it rests after Info, so the footer is never covered. -->
+    <div class="shop-buy-bar">
+      <a class="shop-buy-button" href={shopUrl(product.id)}>{detail.buyLabel || 'Buy'}</a>
+    </div>
   </article>
 </Base>
+
+<script>
+  import { initSpinMark } from '../../scripts/spin-mark';
+
+  const start = () => {
+    const el = document.querySelector<HTMLElement>('[data-spin-mark]');
+    if (el) initSpinMark(el);
+  };
+  start();
+  addEventListener('pageshow', (e) => {
+    if (e.persisted) start();
+  });
+</script>
