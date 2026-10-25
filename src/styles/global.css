@@ -2175,3 +2175,71 @@ body:has(.shop-detail) .site-header {
     margin-top: 96px;
   }
 }
+
+/* Homepage intro (src/scripts/intro-face.ts): huge face pushed down to size by the name. */
+.hero[data-intro] {
+  padding-top: 0;
+  overflow-x: clip;
+}
+
+.hero[data-intro] .mark-wrap {
+  min-height: 100svh;
+}
+
+.hero[data-intro] [data-hero-variant="blob"] {
+  transform-origin: 50% var(--intro-origin, 0);
+}
+
+.hero[data-intro] .mark-blob {
+  top: var(--intro-face-top, 0);
+  width: var(--intro-w, 500px);
+  transform: translateX(-50%);
+}
+
+body:has(.hero[data-intro]) .site-header {
+  top: var(--intro-name-top, 72svh);
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0;
+  transform: translateX(-50%);
+}
+
+body:has(.hero[data-intro]) .site-header .who,
+body:has(.hero[data-intro]) .site-header .contact {
+  width: 100%;
+  text-align: center;
+}
+
+body:has(.hero[data-intro]) .site-header .contact-label {
+  margin-inline: auto;
+}
+
+body:has(.hero[data-intro]) .who .time {
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+body:has(.hero[data-intro]) .contact-menu {
+  top: calc(-2 * var(--lh-body));
+  right: auto;
+  left: 50%;
+  align-items: center;
+  transform: translateX(-50%) scale(0.95);
+  transform-origin: 50% 100%;
+}
+
+body:has(.hero[data-intro]) .contact:hover .contact-menu,
+body:has(.hero[data-intro]) .contact:focus-within .contact-menu,
+body:has(.hero[data-intro]) .contact.is-open .contact-menu {
+  transform: translateX(-50%) scale(1);
+}
+
+body:has(.hero[data-intro]) .site-header.page-grid {
+  display: flex;
+}
+
+body:has(.hero[data-intro]) .site-header .who,
+body:has(.hero[data-intro]) .site-header .contact {
+  grid-column: auto;
+}
