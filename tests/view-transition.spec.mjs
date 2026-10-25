@@ -84,9 +84,11 @@ const go = async (label, click, expectPath, mark = 'ib-mark') => {
 await page.goto(`${BASE}/shop/`, { waitUntil: 'load' });
 await wait(1800);
 if ((await vtName()) !== 'ib-mark') failures.push('/shop: mark is not a shared element');
-await go('/shop -> detail (click)', () => page.click('a.shop-pair >> nth=0'), '/shop/thorn-vase/');
+// First product's detail URL (slugs are edited in Keystatic, so read it from the page).
+const firstDetail = await page.getAttribute('a.shop-pair >> nth=0', 'href');
+await go('/shop -> detail (click)', () => page.click('a.shop-pair >> nth=0'), firstDetail);
 await go('detail ring click -> /shop', () => page.click('.shop-detail-mark a'), '/shop/');
-await go('/shop -> detail again', () => page.click('a.shop-pair >> nth=0'), '/shop/thorn-vase/');
+await go('/shop -> detail again', () => page.click('a.shop-pair >> nth=0'), firstDetail);
 await go('detail ring click -> /shop again', () => page.click('.shop-detail-mark a'), '/shop/');
 // Project page: the small mark at the top morphs into the homepage mark (hs-mark).
 await page.goto(`${BASE}/work/atomic-ski/`, { waitUntil: 'load' });

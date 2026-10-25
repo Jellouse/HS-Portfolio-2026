@@ -32,8 +32,8 @@ const sizes = '(min-width: 1440px) 439px, (min-width: 760px) 30vw, calc(50vw - 3
     {
       products.map((p, i) => {
         const o = p.data.overview;
-        const left = o.left?.src ? o.left : p.data.images[0];
-        const right = o.right?.src ? o.right : p.data.images[1];
+        const left = o.left?.src ? o.left : p.data.detail.images[0];
+        const right = o.right?.src ? o.right : p.data.detail.images[1];
         return (
           <section class="shop-product" aria-label={p.data.name}>
             <a class="shop-pair fade-in" href={`/shop/${p.id}/`} aria-label={`${p.data.name} details page`}>

@@ -24,7 +24,7 @@ const detail = d.detail;
 const title = detail.title || d.overview.title || d.name;
 const eur = seedEur(product.id);
 const intro = paragraphs(detail.description || d.description);
-const images = detail.images.length ? detail.images : d.images;
+const images = detail.images;
 const info = [
   ...detail.info,
   ...(eur == null ? [] : [{ label: 'Price', value: priceText(eur, 'prefix'), priceSlug: product.id }]),

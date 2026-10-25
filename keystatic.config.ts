@@ -283,13 +283,6 @@ export default config({
         edition: fields.text({ label: 'Edition', description: 'e.g. of 8' }),
         dimensions: fields.text({ label: 'Dimensions', description: 'Optional, e.g. 200 mm tall' }),
         description: fields.text({ label: 'Description', multiline: true, validation: { isRequired: true, length: { min: 1 } } }),
-        images: fields.array(
-          fields.object({
-            src: { ...fields.image({ label: 'Image', directory: 'src/content/products', publicPath: '/src/content/products', validation: { isRequired: true } }) },
-            alt: fields.text({ label: 'Alt text' }),
-          }),
-          { label: 'Images', description: 'Detail page images.', itemLabel: (props) => props.fields.alt.value || 'Image' },
-        ),
         overview: fields.object(
           {
             show: fields.checkbox({ label: 'Show on /shop', defaultValue: true }),
@@ -312,7 +305,7 @@ export default config({
             description: fields.text({ label: 'Intro', multiline: true, description: 'Empty: the description above.' }),
             images: fields.array(
               fields.object({ src: { ...fields.image({ label: 'Image', directory: 'src/content/products', publicPath: '/src/content/products', validation: { isRequired: true } }) }, alt: fields.text({ label: 'Alt text' }) }),
-              { label: 'Top images', description: 'Empty: the Images above.', itemLabel: (props) => props.fields.alt.value || 'Image' },
+              { label: 'Top images', description: 'Big images at the top of the detail page.', itemLabel: (props) => props.fields.alt.value || 'Image' },
             ),
             sections: fields.array(
               fields.object({

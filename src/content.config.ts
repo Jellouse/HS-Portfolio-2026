@@ -150,7 +150,6 @@ const products = defineCollection({
     edition: z.string().optional(),
     dimensions: z.string().optional(),
     description: z.string(),
-    images: z.array(z.object({ src: z.string(), alt: z.string().default('') })).default([]),
     // /shop overview section: its own copy and image pair, separate from the detail page.
     overview: z
       .object({

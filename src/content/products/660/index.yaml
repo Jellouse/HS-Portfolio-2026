@@ -3,11 +3,6 @@ order: 1
 edition: of 8
 dimensions: 200 mm tall
 description: A tall industrial form made to sharpen delicate silhouettes.
-images:
-  - src: /src/content/products/660/images/0/src.webp
-    alt: Type 660 vase
-  - src: /src/content/products/660/images/1/src.jpg
-    alt: Type 660 vase
 overview:
   show: true
   title: Type-660
