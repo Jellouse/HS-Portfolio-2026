@@ -34,6 +34,7 @@
     "@aws-sdk/s3-request-presigner": "^3.1152.0",
     "@keystatic/astro": "^6.0.0",
     "@keystatic/core": "^0.6.9",
+    "@vercel/analytics": "^2.0.1",
     "astro": "^5.14.1",
     "react": "^19.3.1",
     "react-dom": "^19.3.1"
