@@ -1,0 +1,28 @@
+name: Type 120
+order: 2
+edition: of 2
+description: A restrained vertical vessel with a cast, architectural texture.
+images:
+  - src: /src/content/products/120/images/0/src.webp
+    alt: Type 120 vase
+  - src: /src/content/products/120/images/1/src.jpg
+    alt: Type 120 vase
+  - src: /src/content/products/120/images/2/src.jpg
+    alt: Type 120 vase
+overview:
+  show: true
+  title: Type-120
+  description: >-
+    A single aluminium extrusion profile with an architectural, textured
+    surface. Edition of 2, each numbered.
+  left:
+    src: /src/content/products/120/overview/left/src.jpg
+    alt: Type 120 vase
+  right:
+    src: /src/content/products/120/overview/right/src.jpg
+    alt: Type 120 vase
+detail:
+  images: []
+  sections: []
+  wild: []
+  info: []
