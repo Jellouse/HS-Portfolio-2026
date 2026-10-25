@@ -31,8 +31,13 @@ detail:
     - src: /src/content/products/thorn-vase/detail-2.jpg
       alt: Type 660 vase from above with an orange flower
   sections:
+    - heading: "Cork Base"
+      text: "A cork base is fitted to give the vase a soft bottom surface to rest on any surface without damaging it."
+      image:
+        src: /src/content/products/thorn-vase/cork.jpg
+        alt: Cork base fitted to the bottom of the vase
     - heading: "Each vase is numbered"
-      text: "Hand-lettered in one of the grooves with it's type-, and edition number. Serialised in a deliberately subtile plasce, making every vase unique."
+      text: "Hand-lettered in one of the grooves with its type-, and edition number. Serialised in a deliberately subtle place, making every vase unique."
       image:
         src: /src/content/products/thorn-vase/numbered.jpg
         alt: Edition number lettered in a groove of the vase

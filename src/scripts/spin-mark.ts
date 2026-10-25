@@ -13,12 +13,37 @@ const DEG_PER_PX = 0.18;
 const SNAP_DELAY = 260;
 const MIN_LOAD = 650;
 const MAX_LOAD = 4000;
+// Shared element across /shop and /shop/<slug> (view-transition-name: ib-mark). On pageswap
+// the outgoing page freezes the mark and hands its angle over, so the incoming mark starts on
+// the same angle (no jump between snapshots) and skips the load spin.
+const HANDOFF_KEY = 'ib-mark-handoff';
+const HANDOFF_TTL = 5000;
+
+function takeHandoff(): number | null {
+  try {
+    const raw = sessionStorage.getItem(HANDOFF_KEY);
+    sessionStorage.removeItem(HANDOFF_KEY);
+    if (!raw) return null;
+    const { angle, at } = JSON.parse(raw);
+    return Date.now() - at < HANDOFF_TTL && Number.isFinite(angle) ? angle : null;
+  } catch {
+    return null;
+  }
+}
+
+// pagereveal can fire before or after module scripts run; remember its transition either way.
+let revealTransition: ViewTransition | null | undefined;
+addEventListener('pagereveal', (e) => {
+  revealTransition = (e as PageRevealEvent).viewTransition ?? null;
+});
 
 export function initSpinMark(el: HTMLElement): () => void {
   const started = performance.now();
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const loading = !reduced;
-  let rotation = REST;
+  const handoff = takeHandoff();
+  // In-site arrival from the other shop page: no load spin, start where the old mark was.
+  const loading = !reduced && handoff === null;
+  let rotation = handoff ?? REST;
   let lastY = scrollY;
   let snapTimer = 0;
   let snapFrame = 0;
@@ -35,7 +60,7 @@ export function initSpinMark(el: HTMLElement): () => void {
   // target; the post-scroll snap sets it to round(angle / 90). Each retarget eases from the
   // current angle (650ms ease-out cubic), and the loop always lands exactly on target * 90,
   // so nothing can finish off the 90deg grid.
-  let quarter = Math.round(REST / 90);
+  let quarter = Math.round(rotation / 90);
   let from = rotation;
   let t0 = 0;
   const tick = (now: number) => {
@@ -97,6 +122,13 @@ export function initSpinMark(el: HTMLElement): () => void {
     timers.push(window.setTimeout(finishLoad, MAX_LOAD));
   } else {
     settled = true;
+    if (handoff !== null && rotation !== quarter * 90) {
+      // Ease onto the 90deg grid only after the morph, so the shared element stays frozen.
+      const settleAfter = () => retarget(Math.round(rotation / 90));
+      const vt = revealTransition ?? (document as Document & { activeViewTransition?: ViewTransition }).activeViewTransition;
+      if (vt) vt.finished.then(settleAfter, settleAfter);
+      else requestAnimationFrame(() => setTimeout(settleAfter, 0));
+    }
   }
 
   // Scroll and hover act on the resting mark; during the load spin they wait for the settle.
@@ -122,6 +154,7 @@ export function initSpinMark(el: HTMLElement): () => void {
     removeEventListener('scroll', onScroll);
     el.removeEventListener('mouseenter', onEnter);
     removeEventListener('pagehide', stop);
+    removeEventListener('pageswap', onSwap);
     clearTimeout(snapTimer);
     timers.forEach(clearTimeout);
     cancelAnimationFrame(snapFrame);
@@ -132,6 +165,33 @@ export function initSpinMark(el: HTMLElement): () => void {
     rotation = REST;
     render();
   };
+  // Outgoing navigation with a view transition: freeze at the current angle (the old snapshot
+  // is taken after this handler) and hand it to the next page.
+  const onSwap = (e: Event) => {
+    const vt = (e as PageSwapEvent).viewTransition;
+    if (!vt) return;
+    let angle = rotation;
+    if (spin) {
+      const elapsed = Number(spin.currentTime) || 0;
+      angle = ((elapsed % SPIN_MS) / SPIN_MS) * 360;
+    } else if (settle) {
+      angle = REST;
+    }
+    clearTimeout(snapTimer);
+    cancelAnimationFrame(snapFrame);
+    snapFrame = 0;
+    spin?.cancel();
+    settle?.cancel();
+    spin = settle = undefined;
+    rotation = angle;
+    render();
+    try {
+      sessionStorage.setItem(HANDOFF_KEY, JSON.stringify({ angle, at: Date.now() }));
+    } catch {
+      /* private mode: the next page just starts at rest */
+    }
+  };
+  addEventListener('pageswap', onSwap);
   addEventListener('pagehide', stop);
   return stop;
 }
