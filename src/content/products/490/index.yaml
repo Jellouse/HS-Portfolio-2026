@@ -33,4 +33,12 @@ detail:
       outline: true
   sections: []
   wild: []
-  info: []
+  info:
+    - label: Design
+      value: Humansize
+    - label: Height
+      value: 250mm
+    - label: Weight
+      value: 3.5kg
+    - label: Material
+      value: Aluminium
