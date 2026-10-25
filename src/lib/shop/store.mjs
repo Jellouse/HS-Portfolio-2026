@@ -16,8 +16,8 @@ export const SHIPPING_COUNTRIES = ['DE', 'AT', 'BE', 'CZ', 'DK', 'ES', 'FI', 'FR
 
 // Starting prices and edition sizes (Oct 2026). Seeded only into an empty table; /admin owns them after that.
 export const SEED = [
-  { slug: 'thorn-vase', code: '660', price_cents: 7000, edition_size: 8 },
-  { slug: 'column-vase', code: '120', price_cents: 15000, edition_size: 2 },
+  { slug: '660', code: '660', price_cents: 7000, edition_size: 8 },
+  { slug: '120', code: '120', price_cents: 15000, edition_size: 2 },
   { slug: 'round-vase', code: '490', price_cents: 25000, edition_size: 2 },
   { slug: '28', code: '28', price_cents: 5500, edition_size: 4 },
 ];

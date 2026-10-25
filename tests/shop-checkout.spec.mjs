@@ -32,14 +32,14 @@ const ev = (type, o, extra = {}) => ({ id: `evt_${Math.random()}`, type, data: {
 
 await test('concurrent buys never get the same serial', async () => {
   const p = await reset();
-  const all = await Promise.all(Array.from({ length: 12 }, () => buy(p, fakeStripe, { slug: 'thorn-vase', siteUrl: 'http://x' })));
+  const all = await Promise.all(Array.from({ length: 12 }, () => buy(p, fakeStripe, { slug: '660', siteUrl: 'http://x' })));
   const serials = all.filter((r) => !r.soldOut).map((r) => r.serial);
   assert.equal(serials.length, 8, 'exactly the edition of 8 sold');
   assert.equal(new Set(serials).size, 8, 'no duplicates');
   assert.deepEqual([...serials].sort((a, b) => a - b), [1, 2, 3, 4, 5, 6, 7, 8]);
   assert.equal(all.filter((r) => r.soldOut).length, 4);
   const s = await stock(p);
-  assert.equal(s['thorn-vase'].soldOut, true);
+  assert.equal(s['660'].soldOut, true);
   await p.end();
 });
 
@@ -63,48 +63,48 @@ await test('checkout session carries expiry, shipping and site metadata', async 
 await test('Stripe failure releases the hold at once', async () => {
   const p = await reset();
   const broken = { checkout: { sessions: { create: async () => { throw new Error('stripe down'); } } } };
-  await assert.rejects(buy(p, broken, { slug: 'column-vase', siteUrl: 'http://x' }));
-  assert.equal((await stock(p))['column-vase'].label, 'IB-120-001');
+  await assert.rejects(buy(p, broken, { slug: '120', siteUrl: 'http://x' }));
+  assert.equal((await stock(p))['120'].label, 'IB-120-001');
   await p.end();
 });
 
 await test('expiry restores the serial (webhook and lazy timeout)', async () => {
   const p = await reset();
-  const a = await buy(p, fakeStripe, { slug: 'column-vase', siteUrl: 'http://x' });
-  const b = await buy(p, fakeStripe, { slug: 'column-vase', siteUrl: 'http://x' });
-  assert.equal((await stock(p))['column-vase'].soldOut, true);
+  const a = await buy(p, fakeStripe, { slug: '120', siteUrl: 'http://x' });
+  const b = await buy(p, fakeStripe, { slug: '120', siteUrl: 'http://x' });
+  assert.equal((await stock(p))['120'].soldOut, true);
   // Stripe says session A expired.
-  assert.equal(await handleEvent(p, ev('checkout.session.expired', { ...a, slug: 'column-vase' })), 'released');
-  assert.equal(await handleEvent(p, ev('checkout.session.expired', { ...a, slug: 'column-vase' })), 'noop', 'second delivery is a no-op');
-  assert.equal((await stock(p))['column-vase'].label, 'IB-120-001');
+  assert.equal(await handleEvent(p, ev('checkout.session.expired', { ...a, slug: '120' })), 'released');
+  assert.equal(await handleEvent(p, ev('checkout.session.expired', { ...a, slug: '120' })), 'noop', 'second delivery is a no-op');
+  assert.equal((await stock(p))['120'].label, 'IB-120-001');
   // B is abandoned and its webhook never arrives: past expiry + grace it comes back by itself.
   await p.query(`UPDATE shop_orders SET expires_at = now() - interval '${GRACE_MINUTES + 1} minutes' WHERE id = $1`, [b.orderId]);
   await releaseStale(p);
-  const s = (await stock(p))['column-vase'];
+  const s = (await stock(p))['120'];
   assert.equal(s.free, 2);
   // Within the grace window it is still held.
-  const c = await buy(p, fakeStripe, { slug: 'column-vase', siteUrl: 'http://x' });
+  const c = await buy(p, fakeStripe, { slug: '120', siteUrl: 'http://x' });
   await p.query(`UPDATE shop_orders SET expires_at = now() - interval '1 minute' WHERE id = $1`, [c.orderId]);
-  assert.equal((await stock(p))['column-vase'].free, 1);
+  assert.equal((await stock(p))['120'].free, 1);
   await p.end();
 });
 
 await test('webhook is idempotent', async () => {
   const p = await reset();
-  const a = await buy(p, fakeStripe, { slug: 'thorn-vase', siteUrl: 'http://x' });
-  const e = ev('checkout.session.completed', { ...a, slug: 'thorn-vase', session: 'cs_test_1' });
-  const out = await Promise.all([handleEvent(p, e), handleEvent(p, e), handleEvent(p, ev('checkout.session.async_payment_succeeded', { ...a, slug: 'thorn-vase', session: 'cs_test_1' }))]);
+  const a = await buy(p, fakeStripe, { slug: '660', siteUrl: 'http://x' });
+  const e = ev('checkout.session.completed', { ...a, slug: '660', session: 'cs_test_1' });
+  const out = await Promise.all([handleEvent(p, e), handleEvent(p, e), handleEvent(p, ev('checkout.session.async_payment_succeeded', { ...a, slug: '660', session: 'cs_test_1' }))]);
   assert.equal(out.filter((x) => x === 'paid').length, 1);
-  assert.equal(await handleEvent(p, ev('checkout.session.expired', { ...a, slug: 'thorn-vase' })), 'noop', 'late expired never frees a paid serial');
+  assert.equal(await handleEvent(p, ev('checkout.session.expired', { ...a, slug: '660' })), 'noop', 'late expired never frees a paid serial');
   const { rows } = await p.query('SELECT * FROM shop_orders');
   assert.equal(rows.length, 1);
   assert.equal(rows[0].status, 'paid');
   assert.equal(rows[0].shipping.city, 'Berlin');
-  assert.equal((await stock(p))['thorn-vase'].label, 'IB-660-002');
+  assert.equal((await stock(p))['660'].label, 'IB-660-002');
   // Refund: restore puts serial 1 back as the next one.
   assert.equal(await restoreSerial(p, rows[0].id), true);
   assert.equal(await restoreSerial(p, rows[0].id), false);
-  assert.equal((await stock(p))['thorn-vase'].label, 'IB-660-001');
+  assert.equal((await stock(p))['660'].label, 'IB-660-001');
   await p.end();
 });
 
@@ -121,12 +121,12 @@ await test('paid after hold expired: re-take serial or flag for check', async ()
 
 await test('foreign-site events are ignored', async () => {
   const p = await reset();
-  const a = await buy(p, fakeStripe, { slug: 'thorn-vase', siteUrl: 'http://x' });
+  const a = await buy(p, fakeStripe, { slug: '660', siteUrl: 'http://x' });
   for (const site of ['worksurface', undefined]) {
-    const e = ev('checkout.session.completed', { ...a, slug: 'thorn-vase' });
+    const e = ev('checkout.session.completed', { ...a, slug: '660' });
     e.data.object.metadata.site = site;
     assert.equal(await handleEvent(p, e), 'ignored');
-    const x = ev('checkout.session.expired', { ...a, slug: 'thorn-vase' });
+    const x = ev('checkout.session.expired', { ...a, slug: '660' });
     x.data.object.metadata.site = site;
     assert.equal(await handleEvent(p, x), 'ignored');
   }
@@ -148,20 +148,20 @@ await test('button label updates', async () => {
   const p = await reset();
   const btn = () => ({ textContent: 'Buy', disabled: false, attrs: {}, setAttribute(k, v) { this.attrs[k] = v; }, removeAttribute(k) { delete this.attrs[k]; } });
   const b = btn();
-  applyStock(b, 'thorn-vase', await stock(p));
+  applyStock(b, '660', await stock(p));
   assert.equal(b.textContent, 'Buy: IB-660-001');
-  await buy(p, fakeStripe, { slug: 'thorn-vase', siteUrl: 'http://x' });
-  applyStock(b, 'thorn-vase', await stock(p));
+  await buy(p, fakeStripe, { slug: '660', siteUrl: 'http://x' });
+  applyStock(b, '660', await stock(p));
   assert.equal(b.textContent, 'Buy: IB-660-002');
-  await buy(p, fakeStripe, { slug: 'column-vase', siteUrl: 'http://x' });
-  await buy(p, fakeStripe, { slug: 'column-vase', siteUrl: 'http://x' });
+  await buy(p, fakeStripe, { slug: '120', siteUrl: 'http://x' });
+  await buy(p, fakeStripe, { slug: '120', siteUrl: 'http://x' });
   const c = btn();
-  applyStock(c, 'column-vase', await stock(p));
+  applyStock(c, '120', await stock(p));
   assert.equal(c.textContent, 'Sold out');
   assert.equal(c.disabled, true);
   // API down or unknown: plain, enabled "Buy".
   for (const data of [null, { error: 'unavailable' }, {}]) {
-    const d = btn(); applyStock(d, 'column-vase', data);
+    const d = btn(); applyStock(d, '120', data);
     assert.equal(d.textContent, 'Buy'); assert.equal(d.disabled, false);
   }
   assert.equal(buyLabel(undefined), 'Buy');
@@ -172,16 +172,33 @@ await test('price comes from the DB seed, not Keystatic, in the built pages', as
   const { readFile } = await import('node:fs/promises');
   const { SEED } = await import('../src/lib/shop/store.mjs');
   const root = '.vercel/output/static';
-  const detail = await readFile(`${root}/shop/thorn-vase/index.html`, 'utf8').catch(() => null);
+  const detail = await readFile(`${root}/shop/660/index.html`, 'utf8').catch(() => null);
   if (!detail) return console.log('   (no build, skipped page check)');
-  const eur = SEED.find((x) => x.slug === 'thorn-vase').price_cents / 100;
-  assert.match(detail, new RegExp(`data-price="thorn-vase" data-price-style="suffix">${eur}€<`));
-  assert.match(detail, new RegExp(`data-price="thorn-vase" data-price-style="prefix">€${eur}<`));
+  const eur = SEED.find((x) => x.slug === '660').price_cents / 100;
+  assert.match(detail, new RegExp(`data-price="660" data-price-style="suffix">${eur}€<`));
+  assert.match(detail, new RegExp(`data-price="660" data-price-style="prefix">€${eur}<`));
   assert.match(detail, /data-buy-note/);
   const overview = await readFile(`${root}/shop/index.html`, 'utf8');
-  assert.match(overview, new RegExp(`data-price="thorn-vase" data-price-style="suffix">${eur}€<`));
+  assert.match(overview, new RegExp(`data-price="660" data-price-style="suffix">${eur}€<`));
   const ks = await readFile('keystatic.config.ts', 'utf8');
   assert.doesNotMatch(ks, /Price \(EUR\)|Price label/);
+});
+
+await test('every product on /shop has a store entry (catches Keystatic slug renames)', async () => {
+  const { readdir, readFile } = await import('node:fs/promises');
+  const { SEED } = await import('../src/lib/shop/store.mjs');
+  const dir = 'src/content/products';
+  const listed = [];
+  for (const slug of await readdir(dir)) {
+    const yaml = await readFile(`${dir}/${slug}/index.yaml`, 'utf8').catch(() => null);
+    if (yaml === null) continue;
+    // Same rule as /shop: hidden only with overview.show: false.
+    const hidden = /^overview:\n(?:[ ].*\n)*?  show: false\b/m.test(yaml);
+    if (!hidden) listed.push(slug);
+  }
+  assert.ok(listed.length > 0, 'no products found');
+  const missing = listed.filter((slug) => !SEED.some((p) => p.slug === slug));
+  assert.deepEqual(missing, [], `products on /shop without a store entry in store.mjs SEED: ${missing.join(', ')}`);
 });
 
 await pool.query('DROP TABLE IF EXISTS shop_orders, shop_products');
