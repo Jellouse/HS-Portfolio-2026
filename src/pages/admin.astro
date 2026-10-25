@@ -1,0 +1,229 @@
+---
+// Shop admin: orders, serials, price and stock. Same login as the CMS: the Keystatic GitHub
+// session cookie must belong to someone with push access to the site repo. No extra secret.
+export const prerender = false;
+
+import '../styles/global.css';
+import mark from '../assets/industrial-bloom-mark.svg?raw';
+import { cmsTokenFromRequest, hasRepoPushAccess } from '../lib/cms-auth';
+import { adminOverview, markShipped, restoreSerial, updateProduct } from '../lib/shop/store.mjs';
+import { getPool } from '../lib/shop/server.mjs';
+
+Astro.response.headers.set('cache-control', 'no-store');
+Astro.response.headers.set('x-robots-tag', 'noindex');
+
+// Local dev only: SHOP_ADMIN_DEV=1 skips GitHub so the page can be built without a login.
+const devBypass = import.meta.env.DEV && process.env.SHOP_ADMIN_DEV === '1';
+const token = cmsTokenFromRequest(Astro.request);
+const allowed = devBypass || (token ? await hasRepoPushAccess(token).catch(() => false) : false);
+
+let error = '';
+let flash = '';
+let data: Awaited<ReturnType<typeof adminOverview>> | null = null;
+const eur = (c: number | null) => (c == null ? '–' : `€${(c / 100).toFixed(c % 100 ? 2 : 0)}`);
+const date = (d: Date | null) => (d ? new Date(d).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Europe/Berlin' }) : '–');
+const addr = (a: any) => (a ? [a.line1, a.line2, [a.postal_code, a.city].filter(Boolean).join(' '), a.state, a.country].filter(Boolean).join(', ') : '–');
+const ranges = (list: number[]) => {
+  const out: string[] = [];
+  for (let i = 0; i < list.length; i++) {
+    let j = i;
+    while (j + 1 < list.length && list[j + 1] === list[j] + 1) j++;
+    out.push(j > i ? `${list[i]}-${list[j]}` : `${list[i]}`);
+    i = j;
+  }
+  return out.join(', ');
+};
+
+if (allowed) {
+  const pool = getPool();
+  if (Astro.request.method === 'POST') {
+    const f = await Astro.request.formData();
+    const action = String(f.get('action'));
+    try {
+      if (action === 'ship') await markShipped(pool, Number(f.get('id')), f.get('undo') !== '1');
+      if (action === 'restore') flash = (await restoreSerial(pool, Number(f.get('id')))) ? 'Serial is back on sale. Refund the payment in Stripe if you have not yet.' : '';
+      if (action === 'product') {
+        await updateProduct(pool, String(f.get('slug')), { priceEur: String(f.get('price') || ''), freeSerials: String(f.get('free') ?? '') });
+        flash = 'Saved.';
+      }
+      if (!flash) return Astro.redirect(Astro.url.pathname + Astro.url.search, 303);
+    } catch (e) {
+      error = e instanceof Error ? e.message : String(e);
+    }
+  }
+  try {
+    data = await adminOverview(pool);
+  } catch (e) {
+    error = `Database: ${e instanceof Error ? e.message : e}`;
+  }
+}
+const open = Astro.url.searchParams.get('order');
+const names: Record<string, string> = { 'thorn-vase': 'Type 660', 'column-vase': 'Type 120', 'round-vase': 'Type 490', '28': 'Type 28' };
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <link rel="icon" href="/favicon.png" type="image/png" />
+    <title>Shop admin · Humansize</title>
+  </head>
+  <body class="admin">
+    <header class="admin-head">
+      <span class="admin-mark" set:html={mark} />
+      <h1>Shop admin</h1>
+      <nav><a href="/keystatic">Copy and images in Keystatic</a> · <a href="/shop/">View shop</a></nav>
+    </header>
+
+    {!allowed && (
+      <section class="admin-block">
+        <p>Sign in to the CMS with GitHub first, then come back here.</p>
+        <p><a class="admin-button" href="/keystatic">Open Keystatic</a></p>
+      </section>
+    )}
+    {error && <p class="admin-note admin-error">{error}</p>}
+    {flash && <p class="admin-note">{flash}</p>}
+
+    {data && (
+      <>
+        <section class="admin-block">
+          <h2>Vases</h2>
+          <div class="admin-vases">
+            {data.vases.map((v) => (
+              <form class="admin-vase" method="post">
+                <input type="hidden" name="action" value="product" />
+                <input type="hidden" name="slug" value={v.slug} />
+                <h3>{names[v.slug] || v.slug}</h3>
+                <ol class="admin-serials" aria-label="Serials">
+                  {v.serials.map((s) => (
+                    <li class={`is-${s.state}`} title={`${s.label}: ${s.state}`}>
+                      {s.order ? <a href={`?order=${s.order}`}>{String(s.n).padStart(3, '0')}</a> : String(s.n).padStart(3, '0')}
+                    </li>
+                  ))}
+                </ol>
+                <p class="admin-muted">
+                  {v.serials.filter((s) => s.state === 'sold').length} sold · {v.serials.filter((s) => s.state === 'held').length} held · {v.available_serials.length} free
+                </p>
+                <label>Price (€)<input name="price" inputmode="decimal" value={(v.price_cents / 100).toString()} /></label>
+                <label>Free serials<input name="free" value={ranges(v.available_serials)} placeholder="e.g. 3-8" /></label>
+                <button class="admin-button" type="submit">Save</button>
+              </form>
+            ))}
+          </div>
+          <p class="admin-muted admin-legend"><span class="dot is-free" /> free <span class="dot is-held" /> in checkout (30 min) <span class="dot is-sold" /> sold</p>
+        </section>
+
+        <section class="admin-block">
+          <h2>Orders</h2>
+          {data.orders.length === 0 ? <p class="admin-muted">No orders yet.</p> : (
+            <table class="admin-orders">
+              <thead><tr><th>Date</th><th>Serial</th><th>Customer</th><th>Total</th><th>Status</th><th></th></tr></thead>
+              <tbody>
+                {data.orders.map((o) => {
+                  const v = data!.vases.find((x) => x.slug === o.slug);
+                  const label = `IB-${v?.code}-${String(o.serial).padStart(3, '0')}`;
+                  const isOpen = open === String(o.id);
+                  return (
+                    <>
+                      <tr class={isOpen ? 'is-open' : ''}>
+                        <td>{date(o.paid_at || o.created_at)}</td>
+                        <td><a href={isOpen ? '?' : `?order=${o.id}`}>{label}</a></td>
+                        <td>{o.customer_name || o.customer_email || '–'}</td>
+                        <td>{eur(o.amount_total)}</td>
+                        <td>{o.status === 'paid' ? (o.fulfilment === 'shipped' ? 'Shipped' : o.fulfilment === 'check' ? 'Check' : 'To ship') : o.status === 'pending' ? 'In checkout' : 'Refunded'}</td>
+                        <td class="admin-actions">
+                          {o.status === 'paid' && o.fulfilment !== 'shipped' && (
+                            <form method="post"><input type="hidden" name="action" value="ship" /><input type="hidden" name="id" value={o.id} /><button class="admin-button" type="submit">Mark shipped</button></form>
+                          )}
+                        </td>
+                      </tr>
+                      {isOpen && (
+                        <tr class="admin-detail"><td colspan="6">
+                          <dl>
+                            <dt>Email</dt><dd>{o.customer_email ? <a href={`mailto:${o.customer_email}`}>{o.customer_email}</a> : '–'}</dd>
+                            <dt>Ship to</dt><dd>{o.customer_name || '–'}<br />{addr(o.shipping)}</dd>
+                            <dt>Stripe</dt><dd>{o.stripe_session_id || '–'}</dd>
+                            <dt>Shipped</dt><dd>{date(o.shipped_at)}</dd>
+                            {o.note && <><dt>Note</dt><dd>{o.note}</dd></>}
+                          </dl>
+                          <div class="admin-row">
+                            {o.fulfilment === 'shipped' && (
+                              <form method="post"><input type="hidden" name="action" value="ship" /><input type="hidden" name="undo" value="1" /><input type="hidden" name="id" value={o.id} /><button class="admin-button is-quiet" type="submit">Undo shipped</button></form>
+                            )}
+                            {o.status === 'paid' && (
+                              <form method="post" onsubmit="return confirm('Put this serial back on sale? Refund the payment in Stripe separately.')"><input type="hidden" name="action" value="restore" /><input type="hidden" name="id" value={o.id} /><button class="admin-button is-quiet" type="submit">Refunded: restore serial</button></form>
+                            )}
+                          </div>
+                        </td></tr>
+                      )}
+                    </>
+                  );
+                })}
+              </tbody>
+            </table>
+          )}
+        </section>
+      </>
+    )}
+  </body>
+</html>
+
+<style>
+  .admin {
+    margin: 0;
+    padding: 40px var(--pad) 120px;
+    max-width: 1120px;
+    margin-inline: auto;
+    font-family: 'ABC Areal', system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 22px;
+    letter-spacing: var(--track);
+    color: var(--ink);
+    background: var(--bg);
+  }
+  .admin a { color: inherit; }
+  .admin h1, .admin h2, .admin h3 { font-size: var(--text-title); line-height: var(--lh-title); font-weight: 400; margin: 0; }
+  .admin h3 { font-size: 16px; line-height: 22px; }
+  .admin-head { display: flex; align-items: center; gap: var(--gutter); margin-bottom: 80px; flex-wrap: wrap; }
+  .admin-head nav { margin-left: auto; color: var(--muted); }
+  .admin-mark { display: block; width: 40px; height: 40px; }
+  .admin-mark :global(svg) { display: block; width: 100%; height: 100%; }
+  .admin-block { margin-bottom: 80px; }
+  .admin-block h2 { margin-bottom: 29px; }
+  .admin-muted { color: var(--muted); margin: 0; }
+  .admin-note { padding: 10px 20px; border-radius: var(--radius-sm); background: #f2f2f2; margin: 0 0 40px; }
+  .admin-error { color: var(--red); }
+  .admin-vases { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: var(--gutter); }
+  .admin-vase { display: flex; flex-direction: column; gap: 12px; padding: var(--pad); border-radius: var(--radius-sm); corner-shape: squircle; background: #f5f5f5; }
+  .admin-vase label { display: flex; flex-direction: column; gap: 4px; color: var(--muted); }
+  .admin-vase input { font: inherit; color: var(--ink); padding: 8px 12px; border: 0; border-radius: 10px; background: #fff; }
+  .admin-serials { display: flex; flex-wrap: wrap; gap: 4px; margin: 0; padding: 0; list-style: none; font-variant-numeric: tabular-nums; }
+  .admin-serials li { padding: 2px 8px; border-radius: 8px; }
+  .admin-serials a { text-decoration: none; }
+  .is-free { background: #fff; box-shadow: inset 0 0 0 1px var(--line); }
+  .is-held { background: #e6e6e6; color: var(--muted); }
+  .is-sold { background: var(--ink); color: #fff; }
+  .is-off { color: var(--muted); text-decoration: line-through; }
+  .admin-legend { margin-top: 16px; display: flex; gap: 8px; align-items: center; }
+  .dot { display: inline-block; width: 12px; height: 12px; border-radius: 4px; }
+  .admin-button { font: inherit; letter-spacing: inherit; padding: 8px 16px; border: 0; border-radius: 10px; corner-shape: squircle; background: var(--ink); color: #fff; cursor: pointer; text-decoration: none; display: inline-block; }
+  .admin-button.is-quiet { background: #ececec; color: var(--ink); }
+  @media (hover: hover) { .admin-button:hover { background: var(--red); color: #fff; } }
+  .admin-vase .admin-button { align-self: flex-start; }
+  .admin-orders { width: 100%; border-collapse: collapse; }
+  .admin-orders th { text-align: left; font-weight: 400; color: var(--muted); }
+  .admin-orders th, .admin-orders td { padding: 10px 12px 10px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+  .admin-orders form { margin: 0; }
+  .admin-actions { text-align: right; }
+  .admin-detail dl { display: grid; grid-template-columns: 120px 1fr; gap: 6px 16px; margin: 0 0 16px; }
+  .admin-detail dt { color: var(--muted); }
+  .admin-detail dd { margin: 0; }
+  .admin-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  @media (max-width: 759px) {
+    .admin-orders thead { display: none; }
+    .admin-orders td { display: block; border: 0; padding: 2px 0; }
+    .admin-orders tr { display: block; padding: 12px 0; border-bottom: 1px solid var(--line); }
+    .admin-actions { text-align: left; }
+  }
+</style>

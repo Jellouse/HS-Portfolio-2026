@@ -5,7 +5,7 @@ import BlurImage from '../../components/BlurImage.astro';
 import Base from '../../layouts/Base.astro';
 import mark from '../../assets/industrial-bloom-mark.svg?raw';
 import { resolveImageSource } from '../../lib/images';
-import { getProducts, price, shopUrl } from '../../lib/shop';
+import { getProducts, price } from '../../lib/shop';
 
 const products = (await getProducts()).filter((p) => p.data.overview.show !== false);
 const sizes = '(min-width: 1440px) 439px, (min-width: 760px) 30vw, calc(50vw - 30px)';
@@ -51,7 +51,7 @@ const sizes = '(min-width: 1440px) 439px, (min-width: 760px) 30vw, calc(50vw - 3
                   </button>
                 ) : (
                   <a href={`/shop/${p.id}/`}>Details</a>
-                )}, <a href={shopUrl(p.id)}>Buy</a>
+                )}, <a href={`/shop/${p.id}/`}>Buy</a>
               </span>
             </p>
             {o.description && (

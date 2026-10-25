@@ -1,0 +1,175 @@
+/**
+ * Checkout logic against a real Postgres (local: see docs/shop.md).
+ *   TEST_DATABASE_URL=postgres://shop:shop@localhost/shop_test npm run test:shop
+ * Stripe is faked for session creation; webhook signatures use the real Stripe SDK.
+ */
+import pg from 'pg';
+import Stripe from 'stripe';
+import assert from 'node:assert/strict';
+import { buy, handleEvent, stock, restoreSerial, ensureSchema, releaseStale, HOLD_MINUTES, GRACE_MINUTES } from '../src/lib/shop/store.mjs';
+import { applyStock, buyLabel } from '../src/lib/shop/label.mjs';
+
+const url = process.env.TEST_DATABASE_URL || 'postgres://shop:shop@localhost:5432/shop_test';
+const pool = new pg.Pool({ connectionString: url, max: 20 });
+try { await pool.query('SELECT 1'); } catch (e) {
+  console.error(`shop-checkout: no Postgres at ${url} (${e.message}). See docs/shop.md.`);
+  process.exit(1);
+}
+
+let n = 0;
+const fakeStripe = { checkout: { sessions: { create: async (p) => { await new Promise((r) => setTimeout(r, Math.random() * 20)); return { id: `cs_test_${++n}`, url: `https://checkout.stripe.test/${n}`, params: p }; } } } };
+const reset = async () => {
+  await pool.query('DROP TABLE IF EXISTS shop_orders, shop_products');
+  const fresh = new pg.Pool({ connectionString: url, max: 20 }); // ensureSchema runs once per pool
+  await ensureSchema(fresh);
+  return fresh;
+};
+const results = [];
+const test = async (name, fn) => {
+  try { await fn(); results.push(['ok', name]); } catch (e) { results.push(['FAIL', name, e]); }
+};
+const ev = (type, o, extra = {}) => ({ id: `evt_${Math.random()}`, type, data: { object: { id: o.session || 'cs_x', payment_status: 'paid', amount_total: 8200, metadata: { site: 'humansize', product: o.slug, serial: String(o.serial), order: String(o.orderId) }, customer_details: { email: 'a@b.de', name: 'A B' }, collected_information: { shipping_details: { name: 'A B', address: { line1: 'Str 1', city: 'Berlin', postal_code: '10115', country: 'DE' } } }, ...extra } } });
+
+await test('concurrent buys never get the same serial', async () => {
+  const p = await reset();
+  const all = await Promise.all(Array.from({ length: 12 }, () => buy(p, fakeStripe, { slug: 'thorn-vase', siteUrl: 'http://x' })));
+  const serials = all.filter((r) => !r.soldOut).map((r) => r.serial);
+  assert.equal(serials.length, 8, 'exactly the edition of 8 sold');
+  assert.equal(new Set(serials).size, 8, 'no duplicates');
+  assert.deepEqual([...serials].sort((a, b) => a - b), [1, 2, 3, 4, 5, 6, 7, 8]);
+  assert.equal(all.filter((r) => r.soldOut).length, 4);
+  const s = await stock(p);
+  assert.equal(s['thorn-vase'].soldOut, true);
+  await p.end();
+});
+
+await test('checkout session carries expiry, shipping and site metadata', async () => {
+  const p = await reset();
+  const before = Date.now();
+  let params;
+  const spy = { checkout: { sessions: { create: async (x) => { params = x; return { id: 'cs_1', url: 'u' }; } } } };
+  const r = await buy(p, spy, { slug: 'round-vase', name: 'Type 490', siteUrl: 'http://x' });
+  assert.equal(r.label, 'IB-490-001');
+  assert.deepEqual(params.metadata, { site: 'humansize', product: 'round-vase', serial: '1', order: String(r.orderId) });
+  assert.equal(params.line_items[0].price_data.unit_amount, 25000);
+  assert.equal(params.shipping_options[0].shipping_rate_data.fixed_amount.amount, 1200);
+  assert.equal(params.shipping_address_collection.allowed_countries.length, 15);
+  assert.ok(Math.abs(params.expires_at * 1000 - (before + HOLD_MINUTES * 60_000)) < 5000);
+  const { rows } = await p.query('SELECT expires_at FROM shop_orders WHERE id = $1', [r.orderId]);
+  assert.equal(Math.floor(rows[0].expires_at.getTime() / 1000), params.expires_at, 'hold and Stripe share one expiry');
+  await p.end();
+});
+
+await test('Stripe failure releases the hold at once', async () => {
+  const p = await reset();
+  const broken = { checkout: { sessions: { create: async () => { throw new Error('stripe down'); } } } };
+  await assert.rejects(buy(p, broken, { slug: 'column-vase', siteUrl: 'http://x' }));
+  assert.equal((await stock(p))['column-vase'].label, 'IB-120-001');
+  await p.end();
+});
+
+await test('expiry restores the serial (webhook and lazy timeout)', async () => {
+  const p = await reset();
+  const a = await buy(p, fakeStripe, { slug: 'column-vase', siteUrl: 'http://x' });
+  const b = await buy(p, fakeStripe, { slug: 'column-vase', siteUrl: 'http://x' });
+  assert.equal((await stock(p))['column-vase'].soldOut, true);
+  // Stripe says session A expired.
+  assert.equal(await handleEvent(p, ev('checkout.session.expired', { ...a, slug: 'column-vase' })), 'released');
+  assert.equal(await handleEvent(p, ev('checkout.session.expired', { ...a, slug: 'column-vase' })), 'noop', 'second delivery is a no-op');
+  assert.equal((await stock(p))['column-vase'].label, 'IB-120-001');
+  // B is abandoned and its webhook never arrives: past expiry + grace it comes back by itself.
+  await p.query(`UPDATE shop_orders SET expires_at = now() - interval '${GRACE_MINUTES + 1} minutes' WHERE id = $1`, [b.orderId]);
+  await releaseStale(p);
+  const s = (await stock(p))['column-vase'];
+  assert.equal(s.free, 2);
+  // Within the grace window it is still held.
+  const c = await buy(p, fakeStripe, { slug: 'column-vase', siteUrl: 'http://x' });
+  await p.query(`UPDATE shop_orders SET expires_at = now() - interval '1 minute' WHERE id = $1`, [c.orderId]);
+  assert.equal((await stock(p))['column-vase'].free, 1);
+  await p.end();
+});
+
+await test('webhook is idempotent', async () => {
+  const p = await reset();
+  const a = await buy(p, fakeStripe, { slug: 'thorn-vase', siteUrl: 'http://x' });
+  const e = ev('checkout.session.completed', { ...a, slug: 'thorn-vase', session: 'cs_test_1' });
+  const out = await Promise.all([handleEvent(p, e), handleEvent(p, e), handleEvent(p, ev('checkout.session.async_payment_succeeded', { ...a, slug: 'thorn-vase', session: 'cs_test_1' }))]);
+  assert.equal(out.filter((x) => x === 'paid').length, 1);
+  assert.equal(await handleEvent(p, ev('checkout.session.expired', { ...a, slug: 'thorn-vase' })), 'noop', 'late expired never frees a paid serial');
+  const { rows } = await p.query('SELECT * FROM shop_orders');
+  assert.equal(rows.length, 1);
+  assert.equal(rows[0].status, 'paid');
+  assert.equal(rows[0].shipping.city, 'Berlin');
+  assert.equal((await stock(p))['thorn-vase'].label, 'IB-660-002');
+  // Refund: restore puts serial 1 back as the next one.
+  assert.equal(await restoreSerial(p, rows[0].id), true);
+  assert.equal(await restoreSerial(p, rows[0].id), false);
+  assert.equal((await stock(p))['thorn-vase'].label, 'IB-660-001');
+  await p.end();
+});
+
+await test('paid after hold expired: re-take serial or flag for check', async () => {
+  const p = await reset();
+  const a = await buy(p, fakeStripe, { slug: 'round-vase', siteUrl: 'http://x' });
+  await handleEvent(p, ev('checkout.session.expired', { ...a, slug: 'round-vase' }));
+  assert.equal(await handleEvent(p, ev('checkout.session.completed', { ...a, slug: 'round-vase' })), 'paid');
+  assert.equal((await stock(p))['round-vase'].label, 'IB-490-002');
+  const { rows } = await p.query('SELECT fulfilment FROM shop_orders WHERE id = $1', [a.orderId]);
+  assert.equal(rows[0].fulfilment, 'unfulfilled');
+  await p.end();
+});
+
+await test('foreign-site events are ignored', async () => {
+  const p = await reset();
+  const a = await buy(p, fakeStripe, { slug: 'thorn-vase', siteUrl: 'http://x' });
+  for (const site of ['worksurface', undefined]) {
+    const e = ev('checkout.session.completed', { ...a, slug: 'thorn-vase' });
+    e.data.object.metadata.site = site;
+    assert.equal(await handleEvent(p, e), 'ignored');
+    const x = ev('checkout.session.expired', { ...a, slug: 'thorn-vase' });
+    x.data.object.metadata.site = site;
+    assert.equal(await handleEvent(p, x), 'ignored');
+  }
+  const { rows } = await p.query('SELECT status FROM shop_orders');
+  assert.equal(rows[0].status, 'pending');
+  await p.end();
+});
+
+await test('webhook signature check (real Stripe SDK)', async () => {
+  const stripe = new Stripe('sk_test_dummy');
+  const payload = JSON.stringify({ id: 'evt_1', type: 'checkout.session.expired', data: { object: { metadata: { site: 'worksurface' } } } });
+  const secret = 'whsec_test';
+  const header = stripe.webhooks.generateTestHeaderString({ payload, secret });
+  assert.equal(stripe.webhooks.constructEvent(payload, header, secret).id, 'evt_1');
+  assert.throws(() => stripe.webhooks.constructEvent(payload, header, 'whsec_other'));
+});
+
+await test('button label updates', async () => {
+  const p = await reset();
+  const btn = () => ({ textContent: 'Buy', disabled: false, attrs: {}, setAttribute(k, v) { this.attrs[k] = v; }, removeAttribute(k) { delete this.attrs[k]; } });
+  const b = btn();
+  applyStock(b, 'thorn-vase', await stock(p));
+  assert.equal(b.textContent, 'Buy: IB-660-001');
+  await buy(p, fakeStripe, { slug: 'thorn-vase', siteUrl: 'http://x' });
+  applyStock(b, 'thorn-vase', await stock(p));
+  assert.equal(b.textContent, 'Buy: IB-660-002');
+  await buy(p, fakeStripe, { slug: 'column-vase', siteUrl: 'http://x' });
+  await buy(p, fakeStripe, { slug: 'column-vase', siteUrl: 'http://x' });
+  const c = btn();
+  applyStock(c, 'column-vase', await stock(p));
+  assert.equal(c.textContent, 'Sold out');
+  assert.equal(c.disabled, true);
+  // API down or unknown: plain, enabled "Buy".
+  for (const data of [null, { error: 'unavailable' }, {}]) {
+    const d = btn(); applyStock(d, 'column-vase', data);
+    assert.equal(d.textContent, 'Buy'); assert.equal(d.disabled, false);
+  }
+  assert.equal(buyLabel(undefined), 'Buy');
+  await p.end();
+});
+
+await pool.query('DROP TABLE IF EXISTS shop_orders, shop_products');
+await pool.end();
+for (const [s, name, e] of results) console.log(`${s} ${name}${e ? `\n   ${e.stack || e}` : ''}`);
+if (results.some((r) => r[0] === 'FAIL')) process.exit(1);
+console.log(`shop-checkout: ${results.length} passed`);

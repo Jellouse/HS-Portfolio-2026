@@ -7,7 +7,7 @@ import Info from '../../components/Info.astro';
 import Base from '../../layouts/Base.astro';
 import { paragraphs, renderInline } from '../../lib/content';
 import { resolveImageSource } from '../../lib/images';
-import { getProducts, price, shopUrl, SHIPPING, type ProductEntry } from '../../lib/shop';
+import { getProducts, price, SHIPPING, type ProductEntry } from '../../lib/shop';
 
 export async function getStaticPaths() {
   const products = await getProducts();
@@ -77,7 +77,11 @@ const half = '(min-width: 760px) 272px, calc((100vw - 48px) / 2)';
     <!-- Sticky, not fixed: pinned to the viewport bottom while the article scrolls,
          then it rests after Info, so the footer is never covered. -->
     <div class="shop-buy-bar">
-      <a class="shop-buy-button" href={shopUrl(product.id)}>{detail.buyLabel || 'Buy'}</a>
+      <!-- Posts to the one Buy endpoint; the label is filled in live from /api/shop/stock. -->
+      <form class="shop-buy-form" method="post" action="/api/shop/buy">
+        <input type="hidden" name="slug" value={product.id} />
+        <button class="shop-buy-button" type="submit" data-buy={product.id}>Buy</button>
+      </form>
     </div>
   </article>
 </Base>
@@ -90,7 +94,24 @@ const half = '(min-width: 760px) 272px, calc((100vw - 48px) / 2)';
     if (el) initSpinMark(el);
   };
   start();
+
+  import { applyStock } from '../../lib/shop/label.mjs';
+  // Live serial on the Buy button. Any failure (API down, slow) leaves the static "Buy".
+  const refreshBuy = async () => {
+    const btn = document.querySelector<HTMLButtonElement>('[data-buy]');
+    if (!btn) return;
+    try {
+      const res = await fetch('/api/shop/stock', { signal: AbortSignal.timeout(4000) });
+      applyStock(btn, btn.dataset.buy!, res.ok ? await res.json() : null);
+    } catch {
+      applyStock(btn, btn.dataset.buy!, null);
+    }
+  };
+  refreshBuy();
   addEventListener('pageshow', (e) => {
-    if (e.persisted) start();
+    if (e.persisted) {
+      start();
+      refreshBuy();
+    }
   });
 </script>
