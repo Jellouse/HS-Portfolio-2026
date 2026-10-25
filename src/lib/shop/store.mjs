@@ -18,7 +18,7 @@ export const SHIPPING_COUNTRIES = ['DE', 'AT', 'BE', 'CZ', 'DK', 'ES', 'FI', 'FR
 export const SEED = [
   { slug: '660', code: '660', price_cents: 7000, edition_size: 8 },
   { slug: '120', code: '120', price_cents: 15000, edition_size: 2 },
-  { slug: 'round-vase', code: '490', price_cents: 25000, edition_size: 2 },
+  { slug: '490', code: '490', price_cents: 25000, edition_size: 2 },
   { slug: '28', code: '28', price_cents: 5500, edition_size: 4 },
 ];
 

@@ -48,9 +48,9 @@ await test('checkout session carries expiry, shipping and site metadata', async 
   const before = Date.now();
   let params;
   const spy = { checkout: { sessions: { create: async (x) => { params = x; return { id: 'cs_1', url: 'u' }; } } } };
-  const r = await buy(p, spy, { slug: 'round-vase', name: 'Type 490', siteUrl: 'http://x' });
+  const r = await buy(p, spy, { slug: '490', name: 'Type 490', siteUrl: 'http://x' });
   assert.equal(r.label, 'IB-490-001');
-  assert.deepEqual(params.metadata, { site: 'humansize', product: 'round-vase', serial: '1', order: String(r.orderId) });
+  assert.deepEqual(params.metadata, { site: 'humansize', product: '490', serial: '1', order: String(r.orderId) });
   assert.equal(params.line_items[0].price_data.unit_amount, 25000);
   assert.equal(params.shipping_options[0].shipping_rate_data.fixed_amount.amount, 1200);
   assert.equal(params.shipping_address_collection.allowed_countries.length, 15);
@@ -110,10 +110,10 @@ await test('webhook is idempotent', async () => {
 
 await test('paid after hold expired: re-take serial or flag for check', async () => {
   const p = await reset();
-  const a = await buy(p, fakeStripe, { slug: 'round-vase', siteUrl: 'http://x' });
-  await handleEvent(p, ev('checkout.session.expired', { ...a, slug: 'round-vase' }));
-  assert.equal(await handleEvent(p, ev('checkout.session.completed', { ...a, slug: 'round-vase' })), 'paid');
-  assert.equal((await stock(p))['round-vase'].label, 'IB-490-002');
+  const a = await buy(p, fakeStripe, { slug: '490', siteUrl: 'http://x' });
+  await handleEvent(p, ev('checkout.session.expired', { ...a, slug: '490' }));
+  assert.equal(await handleEvent(p, ev('checkout.session.completed', { ...a, slug: '490' })), 'paid');
+  assert.equal((await stock(p))['490'].label, 'IB-490-002');
   const { rows } = await p.query('SELECT fulfilment FROM shop_orders WHERE id = $1', [a.orderId]);
   assert.equal(rows[0].fulfilment, 'unfulfilled');
   await p.end();
