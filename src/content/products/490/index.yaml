@@ -12,17 +12,25 @@ overview:
   left:
     src: /src/content/products/490/overview/left/src.jpg
     alt: Type 490 vase
+    outline: false
   right:
     src: /src/content/products/490/overview/right/src.jpg
     alt: Type 490 vase
+    outline: false
 detail:
   images:
     - src: /src/content/products/490/detail/images/0/src.webp
       alt: Type 490 vase
+      outline: false
     - src: /src/content/products/490/detail/images/1/src.jpg
       alt: Type 490 vase
+      outline: false
     - src: /src/content/products/490/detail/images/2/src.jpg
       alt: Type 490 vase
+      outline: false
+    - src: /src/content/products/490/detail/images/3/src.png
+      alt: Technical drawing of vase
+      outline: true
   sections: []
   wild: []
   info: []
