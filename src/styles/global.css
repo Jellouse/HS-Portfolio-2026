@@ -1788,14 +1788,16 @@ body:has(.shop-page) .site-header {
   justify-self: center;
   width: 440px;
   color: var(--ink);
+  transform: rotate(90deg);
+  will-change: transform;
+  backface-visibility: hidden;
 }
 .shop-mark svg {
   display: block;
   width: 100%;
   height: auto;
 }
-.shop-intro,
-.shop-desc {
+.shop-intro {
   grid-column: calc((var(--cols) - var(--content-span)) / 2 + 1) / span var(--content-span);
 }
 .shop-intro {
@@ -1893,4 +1895,71 @@ body:has(.shop-page) .site-header {
   .shop-desc {
     margin-top: 40px;
   }
+}
+
+/* /shop Details panel: height eases open (grid row 0fr -> 1fr) while the copy plays the
+   site text reveal (text-in: opacity, 4px blur, 4px rise; 400ms ease-out-expo, 30ms/line).
+   Closing reverses it, last line first. */
+.shop-details {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.shop-details:focus-visible,
+.shop-links a:focus-visible,
+.shop-title:focus-visible {
+  outline: 1px solid currentColor;
+  outline-offset: 3px;
+}
+.shop-title {
+  color: inherit;
+  text-decoration: none;
+}
+.shop-desc-wrap {
+  display: grid;
+  grid-column: calc((var(--cols) - var(--content-span)) / 2 + 1) / span var(--content-span);
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 400ms var(--ease-out-expo);
+}
+.shop-desc-wrap.is-open {
+  grid-template-rows: 1fr;
+}
+.shop-desc-inner {
+  min-height: 0;
+  overflow: hidden;
+}
+.shop-desc-wrap .reveal-word {
+  display: inline-block;
+  animation: none;
+  opacity: 0;
+  filter: blur(4px);
+  transform: translateY(4px);
+  transition:
+    opacity 400ms var(--ease-out-expo) calc(var(--line, 0) * 30ms),
+    filter 400ms var(--ease-out-expo) calc(var(--line, 0) * 30ms),
+    transform 400ms var(--ease-out-expo) calc(var(--line, 0) * 30ms);
+}
+.shop-desc-wrap.is-open .reveal-word {
+  opacity: 1;
+  filter: none;
+  transform: none;
+}
+.shop-desc-wrap.is-closing .reveal-word {
+  transition-delay: calc((var(--lines, 1) - 1 - var(--line, 0)) * 30ms);
+}
+@media (prefers-reduced-motion: reduce) {
+  .shop-desc-wrap,
+  .shop-desc-wrap .reveal-word {
+    transition: none;
+  }
+}
+.shop-desc-wrap[hidden] {
+  display: none;
 }

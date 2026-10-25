@@ -3,8 +3,15 @@
 // and words are grouped into visual lines by offsetTop (--line). Scroll-linked browsers animate
 // each word against its own position, so a whole line reveals together; others get a 250ms
 // fallback staggered per line. Re-split on resize, restoring the original HTML first.
-const SELECTOR =
-  '.about p, .text-block p, .footer-text p, .caption, .project-summary, .info-list li, .project-hero h1';
+// Every text block in the page content and footer reveals by default, so new pages and
+// components get it without opting in. (A hard-coded class list used to miss new markup,
+// e.g. the /shop overview.) Hosts nested inside another host are skipped; [data-no-reveal]
+// opts a block out (it animates itself, like the /shop Details panel).
+const SELECTOR = [
+  'main :is(p, h1, h2, h3, h4, li, blockquote, figcaption, .caption, .project-summary)',
+  '.site-footer :is(p, li)',
+].join(', ');
+const EXCLUDE = '.sr-only, [data-no-reveal], [data-no-reveal] *';
 
 type Host = HTMLElement & { __revealHtml?: string };
 
@@ -30,7 +37,7 @@ function wrapWords(node: Node) {
   }
 }
 
-function split(host: Host) {
+export function split(host: Host) {
   if (host.__revealHtml === undefined) host.__revealHtml = host.innerHTML;
   else host.innerHTML = host.__revealHtml;
   wrapWords(host);
@@ -73,7 +80,8 @@ function armFallback(hosts: Host[]) {
 
 export function initTextReveal() {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  const hosts = [...document.querySelectorAll<Host>(SELECTOR)];
+  const all = [...document.querySelectorAll<Host>(SELECTOR)].filter((el) => !el.matches(EXCLUDE));
+  const hosts = all.filter((el) => !all.some((other) => other !== el && other.contains(el)));
   if (!hosts.length) return;
   const scrollLinked = CSS.supports('animation-timeline: view()');
 

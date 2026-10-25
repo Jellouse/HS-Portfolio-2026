@@ -15,11 +15,11 @@ const sizes = '(min-width: 1440px) 439px, (min-width: 760px) 30vw, calc(50vw - 3
   <div class="shop-page page-grid">
     <header class="shop-head">
       <h1 class="shop-head-title">Industrial Bloom</h1>
-      <div class="shop-mark" role="img" aria-label="Industrial Bloom mark" set:html={mark} />
+      <div class="shop-mark" data-spin-mark role="img" aria-label="Industrial Bloom mark" set:html={mark} />
       <p class="shop-head-sub">Aluminium Vases</p>
     </header>
 
-    <section class="shop-intro fade-in" aria-label="About Industrial Bloom">
+    <section class="shop-intro" aria-label="About Industrial Bloom">
       <p>
         Industrial Bloom is a range of solid aluminium vases. The name is a play on "industrial boom". Each vase is made
         from aluminium extrusion, a heavy-duty building material, and brings it into the home to hold something as
@@ -36,22 +36,51 @@ const sizes = '(min-width: 1440px) 439px, (min-width: 760px) 30vw, calc(50vw - 3
         const right = o.right?.src ? o.right : p.data.images[1];
         return (
           <section class="shop-product" aria-label={p.data.name}>
-            <div class="shop-pair fade-in">
+            <a class="shop-pair fade-in" href={`/shop/${p.id}/`} aria-label={`${p.data.name} details page`}>
               {left?.src && <BlurImage src={resolveImageSource(left.src)} alt={left.alt} sizes={sizes} priority={i === 0} />}
               {right?.src && <BlurImage src={resolveImageSource(right.src)} alt={right.alt} sizes={sizes} priority={i === 0} />}
-            </div>
-            <p class="shop-caption fade-in">
-              {o.title || p.data.name}
+            </a>
+            <p class="shop-caption">
+              <a class="shop-title" href={`/shop/${p.id}/`}>{o.title || p.data.name}</a>
               <br />
               {o.price || price(p.data.price)}
               <span class="shop-links">
-                <a href={`/shop/${p.id}/`}>Details</a>, <a href={shopUrl(p.id)}>Buy</a>
+                {o.description ? (
+                  <button class="shop-details" type="button" aria-expanded="false" aria-controls={`details-${p.id}`}>
+                    Details
+                  </button>
+                ) : (
+                  <a href={`/shop/${p.id}/`}>Details</a>
+                )}, <a href={shopUrl(p.id)}>Buy</a>
               </span>
             </p>
-            {o.description && <p class="shop-desc fade-in">{o.description}</p>}
+            {o.description && (
+              <div class="shop-desc-wrap" id={`details-${p.id}`} data-no-reveal hidden>
+                <div class="shop-desc-inner">
+                  <p class="shop-desc">{o.description}</p>
+                </div>
+              </div>
+            )}
           </section>
         );
       })
     }
   </div>
 </Base>
+
+<script>
+  import { initSpinMark } from '../../scripts/spin-mark';
+  import { initShopDetails } from '../../scripts/shop-details';
+
+  initShopDetails();
+
+  // Re-init after a back/forward cache restore (pagehide stops it cleanly).
+  const start = () => {
+    const el = document.querySelector<HTMLElement>('[data-spin-mark]');
+    if (el) initSpinMark(el);
+  };
+  start();
+  addEventListener('pageshow', (e) => {
+    if (e.persisted) start();
+  });
+</script>
