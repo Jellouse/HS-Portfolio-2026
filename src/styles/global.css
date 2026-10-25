@@ -52,8 +52,9 @@
   --muted: var(--ink-40);
   --bg: #fff;
   --bg-mobile: #fff;
-  --red: #b70606;
+  --red: #b70606; /* the homepage faces SVG fill (#B70606) */
   --line: #d6d6d6;
+  --button-fill: #f2f2f2; /* off-white light grey: the shop Buy button at rest */
   --text-title: 23px;
   --text-body: 23px;
   --track: -0.02em;
@@ -1484,6 +1485,36 @@ html.show-grid .grid-overlay .page-grid {
   view-transition-name: hs-mark;
 }
 
+/* The Industrial Bloom ring is the same kind of shared element between /shop (big, centred)
+   and /shop/<slug> (small, top): one eased move + scale. spin-mark.ts freezes and hands over
+   its angle on pageswap so both snapshots match. */
+.shop-mark {
+  view-transition-name: ib-mark;
+}
+
+::view-transition-group(ib-mark) {
+  animation-duration: 600ms;
+  animation-timing-function: var(--ease-out-expo);
+}
+
+/* Same artwork on both sides: no plus-lighter double image, the new (crisp) one takes over. */
+::view-transition-image-pair(ib-mark) {
+  isolation: auto;
+}
+::view-transition-old(ib-mark),
+::view-transition-new(ib-mark) {
+  mix-blend-mode: normal;
+  height: 100%;
+}
+/* Old stays opaque underneath, new fades in on top: coverage never dips mid-morph. */
+::view-transition-old(ib-mark) {
+  animation: none;
+  opacity: 1;
+}
+::view-transition-new(ib-mark) {
+  animation: vt-in 300ms var(--ease-out-quad) both;
+}
+
 ::view-transition-group(hs-mark) {
   animation-duration: 500ms;
   animation-timing-function: var(--ease-out-expo);
@@ -1552,23 +1583,31 @@ html.show-grid .grid-overlay .page-grid {
     }
   }
 
-  @supports not (animation-timeline: view()) {
-    .reveal-pending .reveal-word {
-      opacity: 0;
-      filter: blur(4px);
-      transform: translateY(4px);
-    }
+  /* Class-driven reveal: the scroll fallback where view() timelines are missing, and
+     in-place reveals (.reveal-manual, e.g. /shop Details). .reveal-out plays it in reverse. */
+  .reveal-manual .reveal-word {
+    animation: none;
+  }
 
-    .reveal-in .reveal-word {
-      transition:
-        opacity 400ms var(--ease-out-expo) calc(var(--line, 0) * 30ms),
-        filter 400ms var(--ease-out-expo) calc(var(--line, 0) * 30ms),
-        transform 400ms var(--ease-out-expo) calc(var(--line, 0) * 30ms);
-    }
+  .reveal-pending .reveal-word {
+    opacity: 0;
+    filter: blur(4px);
+    transform: translateY(4px);
+  }
 
-    .reveal-now .reveal-word {
-      transition: none;
-    }
+  .reveal-in .reveal-word {
+    transition:
+      opacity 400ms var(--ease-out-expo) calc(var(--line, 0) * 30ms),
+      filter 400ms var(--ease-out-expo) calc(var(--line, 0) * 30ms),
+      transform 400ms var(--ease-out-expo) calc(var(--line, 0) * 30ms);
+  }
+
+  .reveal-in.reveal-out .reveal-word {
+    transition-delay: calc((var(--lines, 1) - 1 - var(--line, 0)) * 30ms);
+  }
+
+  .reveal-now .reveal-word {
+    transition: none;
   }
 
   /* Menu + Tokyo time: opacity transition only — no keyframes, no translate, no blur. */
@@ -1722,4 +1761,379 @@ body .site-header.is-menu-fade:not(.is-menu-open) .who .time {
 }
 .project .info + .process {
   margin-top: var(--space-section);
+}
+
+/* Shop draft: price line + one quiet buy button (same type, squircle radius, greys). */
+.shop-buy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--lh-body);
+}
+.shop-price {
+  margin: 0;
+}
+.shop-button {
+  display: inline-block;
+  padding: 10px 20px;
+  border: 1px solid var(--ink);
+  border-radius: var(--radius-sm);
+  corner-shape: squircle;
+  color: var(--ink);
+  text-decoration: none;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+@media (hover: hover) {
+  .shop-button:hover {
+    background: var(--ink);
+    color: #fff;
+  }
+}
+
+/* Shop overview (desktop mock, 1440): title row with the Industrial Bloom mark centred,
+   intro on the content span, then one section per product: image pair on the Wide span,
+   centred caption, optional description on the content span. */
+body:has(.shop-page) .site-header {
+  display: none;
+}
+.shop-page {
+  padding-top: 216px;
+  padding-bottom: 150px;
+}
+.shop-head {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: subgrid;
+  align-items: center;
+  margin: 0 0 184px;
+}
+.shop-head-title,
+.shop-head-sub {
+  margin: 0;
+  font-size: var(--text-body);
+  font-weight: 400;
+  line-height: var(--lh-body);
+  white-space: nowrap;
+}
+.shop-head-title {
+  grid-column: 1 / 3;
+}
+.shop-head-sub {
+  grid-column: 9 / -1;
+  text-align: right;
+}
+.shop-mark {
+  grid-column: 3 / 9;
+  justify-self: center;
+  width: 440px;
+  color: var(--ink);
+  transform: rotate(90deg);
+  will-change: transform;
+  backface-visibility: hidden;
+}
+.shop-mark svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.shop-intro {
+  grid-column: calc((var(--cols) - var(--content-span)) / 2 + 1) / span var(--content-span);
+}
+.shop-intro {
+  margin: 0 0 136px;
+}
+.shop-intro p {
+  margin: 0 0 29px;
+}
+.shop-intro p:last-child {
+  margin-bottom: 0;
+}
+.shop-intro a,
+.shop-links a {
+  color: inherit;
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+.shop-product {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: subgrid;
+  margin: 0 0 128px;
+}
+.shop-product:last-child {
+  margin-bottom: 0;
+}
+.shop-pair {
+  grid-column: calc((var(--cols) - var(--wide-span)) / 2 + 1) / span var(--wide-span);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--image-gap);
+}
+.shop-pair > .frame {
+  min-width: 0;
+  aspect-ratio: 441 / 531;
+  border-radius: var(--radius-sm);
+}
+.shop-pair > .frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.shop-caption {
+  grid-column: 1 / -1;
+  margin: 72px 0 0;
+  text-align: center;
+}
+.shop-links {
+  display: block;
+  margin-top: 29px;
+}
+.shop-desc {
+  margin: 84px 0 0;
+}
+
+@media (max-width: 759px) {
+  .shop-page {
+    padding: 96px var(--margin);
+  }
+  .shop-product {
+    display: block;
+  }
+  .shop-head {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-items: center;
+    text-align: center;
+    margin-bottom: 96px;
+  }
+  .shop-head-title,
+  .shop-head-sub,
+  .shop-mark {
+    grid-column: 1 / -1;
+    text-align: center;
+  }
+  .shop-mark {
+    order: -1;
+    width: 240px;
+    margin-bottom: 48px;
+  }
+  .shop-intro {
+    margin-bottom: 96px;
+  }
+  .shop-product {
+    margin-bottom: 96px;
+  }
+  .shop-pair {
+    gap: var(--gutter);
+  }
+  .shop-caption {
+    margin-top: 40px;
+  }
+  .shop-desc {
+    margin-top: 40px;
+  }
+}
+
+/* /shop Details panel: height eases open (no clipping, overflow stays visible) and the copy
+   plays the shared class-driven text reveal; closing reverses it, then the height closes. */
+.shop-details {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.shop-details:focus-visible,
+.shop-links a:focus-visible,
+.shop-title:focus-visible {
+  outline: 1px solid currentColor;
+  outline-offset: 3px;
+}
+.shop-title {
+  color: inherit;
+  text-decoration: none;
+}
+.shop-desc-wrap {
+  grid-column: calc((var(--cols) - var(--content-span)) / 2 + 1) / span var(--content-span);
+  transition: height 400ms var(--ease-out-expo);
+}
+.shop-desc-inner {
+  display: flow-root;
+}
+@media (prefers-reduced-motion: reduce) {
+  .shop-desc-wrap {
+    transition: none;
+  }
+}
+.shop-desc-wrap[hidden] {
+  display: none;
+}
+
+/* Shop detail (/shop/<slug>, Johann's 1440 mock): everything on a centred 5-col
+   measure (552 at 1440), Industrial Bloom mark on top, centred title + price,
+   sections of centred heading / text / image, a two-column gallery, Info, and a
+   bottom-pinned Buy button. */
+body:has(.shop-detail) .site-header {
+  display: none;
+}
+.shop-detail {
+  padding-top: 44px;
+  padding-bottom: 116px;
+}
+@media (min-width: 760px) {
+  .shop-detail {
+    --measure: calc(5 * var(--col) + 4 * var(--gutter));
+  }
+}
+.shop-detail > * {
+  grid-column: 1 / -1;
+  width: min(100%, var(--measure));
+  margin-inline: auto;
+}
+.shop-detail-mark {
+  display: flex;
+  justify-content: center;
+  margin-block: 0 130px;
+}
+.shop-detail-mark a {
+  display: block;
+}
+.shop-detail-mark .shop-mark {
+  display: block;
+  width: 54px;
+}
+.shop-detail-head h1,
+.shop-detail-heading {
+  margin: 0 0 60px;
+  font-size: var(--text-body);
+  font-weight: 400;
+  line-height: var(--lh-body);
+  text-align: center;
+}
+.shop-detail-text {
+  margin-bottom: 122px;
+}
+.shop-detail-text p {
+  margin: 0 0 var(--lh-body);
+}
+.shop-detail-text p:last-child {
+  margin-bottom: 0;
+}
+.shop-detail-image {
+  margin: 0 auto 60px;
+}
+.shop-detail-image img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.shop-detail-section {
+  margin-top: 56px;
+}
+.shop-detail-section > * {
+  width: 100%;
+}
+.shop-wild {
+  margin-top: 86px;
+}
+.shop-wild .shop-detail-heading {
+  margin-bottom: 72px;
+}
+.shop-wild-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 8px;
+  align-items: start;
+}
+.shop-wild-grid img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.shop-wild + .shop-detail-info {
+  margin-top: 116px;
+}
+.shop-detail-info .info {
+  width: 100%;
+  margin: 0;
+}
+.shop-detail-info .info-label {
+  margin-bottom: 60px;
+}
+/* Buy: sticky, not fixed. It pins to the viewport bottom (plus the iOS home
+   indicator inset) while the article scrolls, then rests after Info, so it never
+   covers the footer. Rest: --button-fill, black label; hover: the faces red with a
+   white label (7.1:1), quiet 150ms. */
+.shop-buy-bar {
+  position: sticky;
+  bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+  z-index: 5;
+  display: flex;
+  justify-content: center;
+  margin-top: 116px;
+  pointer-events: none;
+}
+.shop-buy-button {
+  pointer-events: auto;
+  display: inline-block;
+  padding: 10px 20px 9px;
+  border-radius: var(--radius-sm);
+  corner-shape: squircle;
+  background: var(--button-fill);
+  color: var(--ink);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+@media (hover: hover) {
+  .shop-buy-button:hover {
+    background: var(--red);
+    color: #fff;
+    opacity: 1;
+  }
+}
+.shop-buy-button:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+@media (max-width: 759px) {
+  .shop-detail {
+    padding: 32px var(--margin) 96px;
+  }
+  .shop-detail-mark {
+    margin-bottom: 96px;
+  }
+  .shop-detail-head h1,
+  .shop-detail-heading {
+    margin-bottom: var(--lh-body);
+  }
+  .shop-detail-text {
+    margin-bottom: 48px;
+  }
+  .shop-detail-image {
+    margin-bottom: var(--space-block);
+  }
+  .shop-detail-section {
+    margin-top: 76px;
+  }
+  .shop-wild .shop-detail-heading {
+    margin-bottom: 48px;
+  }
+  .shop-wild + .shop-detail-info {
+    margin-top: 96px;
+  }
+  .shop-detail-info .info-label {
+    margin-bottom: var(--lh-body);
+  }
+  .shop-buy-bar {
+    bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+    margin-top: 96px;
+  }
 }

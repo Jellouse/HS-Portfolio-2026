@@ -1,0 +1,10 @@
+name: Type 28
+order: 4
+price: 55
+edition: of 4
+description: A small tubular vessel for a single flower.
+images:
+  - src: /src/content/products/28/1.png
+    alt: Type 28 vase, technical drawing
+overview:
+  show: false

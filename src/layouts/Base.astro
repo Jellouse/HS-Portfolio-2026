@@ -13,16 +13,18 @@ interface Props {
   type?: 'website' | 'article';
   jsonLd?: unknown;
   noindex?: boolean;
+  /** viewport-fit=cover, so env(safe-area-inset-*) works (pages with bottom-pinned UI). */
+  safeArea?: boolean;
 }
 
-const { title, description, image, type, jsonLd, noindex = false } = Astro.props;
+const { title, description, image, type, jsonLd, noindex = false, safeArea = false } = Astro.props;
 const site = await getSite();
 ---
 
 <html lang="en" data-dev={import.meta.env.DEV ? '' : undefined}>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content={`width=device-width, initial-scale=1${safeArea ? ', viewport-fit=cover' : ''}`} />
     <meta name="theme-color" content="#ffffff" />
     <meta name="google-site-verification" content="M6eRTJDg2gB4PMiLKpzNVeRX6jugbsgeBjGd_0ci2V4" />
     <link rel="preload" href="/fonts/ABCAreal-Regular.woff2" as="font" type="font/woff2" crossorigin />

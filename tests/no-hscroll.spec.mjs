@@ -81,7 +81,10 @@ async function ensureServer() {
 const slugs = readdirSync(join(ROOT, 'src/content/projects'), { withFileTypes: true })
   .filter((d) => d.isDirectory())
   .map((d) => d.name);
-const paths = ['/', ...slugs.map((s) => `/work/${s}/`)];
+const shopSlugs = readdirSync(join(ROOT, 'src/content/products'), { withFileTypes: true })
+  .filter((d) => d.isDirectory())
+  .map((d) => d.name);
+const paths = ['/', ...slugs.map((s) => `/work/${s}/`), '/shop/', ...shopSlugs.map((s) => `/shop/${s}/`)];
 const { url, stop } = await ensureServer();
 const browser = await chromium.launch();
 let failed = false;

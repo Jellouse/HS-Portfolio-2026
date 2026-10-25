@@ -1,0 +1,197 @@
+// Spinning mark, ported from the worksurface.co logo (Jellouse/industrial-bloom website/index.html).
+// Load: constant spin (1 turn / 4800ms, linear) until fonts + window load (min 650ms, fallback
+// 4000ms), then settle to the next quarter turn over 900ms. Scroll: +0.18deg per px, snapping to
+// the nearest 90deg 260ms after scrolling stops. Hover: +90deg. Reduced motion skips the load spin.
+// The Industrial Bloom ring is 4-fold symmetric, so the 90deg rest looks the same as 0deg.
+
+const SPIN_MS = 4800;
+const REST = 90;
+const SNAP_MS = 650;
+const SETTLE_MS = 900;
+const SETTLE_EASE = 'cubic-bezier(0.22, 0.61, 0.36, 1)';
+const DEG_PER_PX = 0.18;
+const SNAP_DELAY = 260;
+const MIN_LOAD = 650;
+const MAX_LOAD = 4000;
+// Shared element across /shop and /shop/<slug> (view-transition-name: ib-mark). On pageswap
+// the outgoing page freezes the mark and hands its angle over, so the incoming mark starts on
+// the same angle (no jump between snapshots) and skips the load spin.
+const HANDOFF_KEY = 'ib-mark-handoff';
+const HANDOFF_TTL = 5000;
+
+function takeHandoff(): number | null {
+  try {
+    const raw = sessionStorage.getItem(HANDOFF_KEY);
+    sessionStorage.removeItem(HANDOFF_KEY);
+    if (!raw) return null;
+    const { angle, at } = JSON.parse(raw);
+    return Date.now() - at < HANDOFF_TTL && Number.isFinite(angle) ? angle : null;
+  } catch {
+    return null;
+  }
+}
+
+// pagereveal can fire before or after module scripts run; remember its transition either way.
+let revealTransition: ViewTransition | null | undefined;
+addEventListener('pagereveal', (e) => {
+  revealTransition = (e as PageRevealEvent).viewTransition ?? null;
+});
+
+export function initSpinMark(el: HTMLElement): () => void {
+  const started = performance.now();
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const handoff = takeHandoff();
+  // In-site arrival from the other shop page: no load spin, start where the old mark was.
+  const loading = !reduced && handoff === null;
+  let rotation = handoff ?? REST;
+  let lastY = scrollY;
+  let snapTimer = 0;
+  let snapFrame = 0;
+  let spin: Animation | undefined;
+  let settle: Animation | undefined;
+  let settled = false;
+  const timers: number[] = [];
+
+  const render = () => {
+    el.style.transform = `rotate(${rotation}deg)`;
+  };
+
+  // One integer quarter-turn target and one rAF loop. Hover adds a quarter turn to the
+  // target; the post-scroll snap sets it to round(angle / 90). Each retarget eases from the
+  // current angle (650ms ease-out cubic), and the loop always lands exactly on target * 90,
+  // so nothing can finish off the 90deg grid.
+  let quarter = Math.round(rotation / 90);
+  let from = rotation;
+  let t0 = 0;
+  const tick = (now: number) => {
+    const p = Math.min(1, (now - t0) / SNAP_MS);
+    const to = quarter * 90;
+    rotation = p < 1 ? from + (to - from) * (1 - Math.pow(1 - p, 3)) : to;
+    render();
+    snapFrame = p < 1 ? requestAnimationFrame(tick) : 0;
+  };
+  const retarget = (q: number) => {
+    quarter = q;
+    from = rotation;
+    t0 = performance.now();
+    if (!snapFrame) snapFrame = requestAnimationFrame(tick);
+  };
+
+  const finishLoad = () => {
+    if (settled) return;
+    settled = true;
+    if (!spin) return;
+    const elapsed = Number(spin.currentTime) || 0;
+    const current = ((elapsed % SPIN_MS) / SPIN_MS) * 360;
+    const target = current <= REST ? REST : REST + 360;
+    spin.cancel();
+    spin = undefined;
+    settle = el.animate([{ transform: `rotate(${current}deg)` }, { transform: `rotate(${target}deg)` }], {
+      duration: SETTLE_MS,
+      easing: SETTLE_EASE,
+      fill: 'forwards',
+    });
+    timers.push(
+      window.setTimeout(() => {
+        settle?.cancel();
+        settle = undefined;
+        rotation = REST;
+        quarter = Math.round(REST / 90);
+        render();
+      }, SETTLE_MS),
+    );
+  };
+
+  // Load spin
+  render();
+  if (loading && !reduced && el.animate) {
+    rotation = REST;
+    spin = el.animate([{ transform: 'rotate(0deg)' }, { transform: 'rotate(360deg)' }], {
+      duration: SPIN_MS,
+      iterations: Infinity,
+      easing: 'linear',
+    });
+    const fonts = document.fonts?.ready ?? Promise.resolve();
+    const win =
+      document.readyState === 'complete'
+        ? Promise.resolve()
+        : new Promise<void>((r) => addEventListener('load', () => r(), { once: true }));
+    Promise.all([fonts, win]).then(() => {
+      timers.push(window.setTimeout(finishLoad, Math.max(0, MIN_LOAD - (performance.now() - started))));
+    });
+    timers.push(window.setTimeout(finishLoad, MAX_LOAD));
+  } else {
+    settled = true;
+    if (handoff !== null && rotation !== quarter * 90) {
+      // Ease onto the 90deg grid only after the morph, so the shared element stays frozen.
+      const settleAfter = () => retarget(Math.round(rotation / 90));
+      const vt = revealTransition ?? (document as Document & { activeViewTransition?: ViewTransition }).activeViewTransition;
+      if (vt) vt.finished.then(settleAfter, settleAfter);
+      else requestAnimationFrame(() => setTimeout(settleAfter, 0));
+    }
+  }
+
+  // Scroll and hover act on the resting mark; during the load spin they wait for the settle.
+  const onScroll = () => {
+    const delta = scrollY - lastY;
+    lastY = scrollY;
+    if (spin || settle) return;
+    cancelAnimationFrame(snapFrame);
+    snapFrame = 0;
+    rotation += delta * DEG_PER_PX;
+    render();
+    clearTimeout(snapTimer);
+    snapTimer = window.setTimeout(() => retarget(Math.round(rotation / 90)), SNAP_DELAY);
+  };
+  const onEnter = () => {
+    if (spin || settle) return;
+    retarget(quarter + 1);
+  };
+  addEventListener('scroll', onScroll, { passive: true });
+  el.addEventListener('mouseenter', onEnter);
+
+  const stop = () => {
+    removeEventListener('scroll', onScroll);
+    el.removeEventListener('mouseenter', onEnter);
+    removeEventListener('pagehide', stop);
+    removeEventListener('pageswap', onSwap);
+    clearTimeout(snapTimer);
+    timers.forEach(clearTimeout);
+    cancelAnimationFrame(snapFrame);
+    snapFrame = 0;
+    spin?.cancel();
+    settle?.cancel();
+    spin = settle = undefined;
+    rotation = REST;
+    render();
+  };
+  // Outgoing navigation with a view transition: freeze at the current angle (the old snapshot
+  // is taken after this handler) and hand it to the next page.
+  const onSwap = (e: Event) => {
+    const vt = (e as PageSwapEvent).viewTransition;
+    if (!vt) return;
+    let angle = rotation;
+    if (spin) {
+      const elapsed = Number(spin.currentTime) || 0;
+      angle = ((elapsed % SPIN_MS) / SPIN_MS) * 360;
+    } else if (settle) {
+      angle = REST;
+    }
+    clearTimeout(snapTimer);
+    cancelAnimationFrame(snapFrame);
+    snapFrame = 0;
+    spin?.cancel();
+    settle?.cancel();
+    spin = settle = undefined;
+    rotation = angle;
+    render();
+    try {
+      sessionStorage.setItem(HANDOFF_KEY, JSON.stringify({ angle, at: Date.now() }));
+    } catch {
+      /* private mode: the next page just starts at rest */
+    }
+  };
+  addEventListener('pageswap', onSwap);
+  addEventListener('pagehide', stop);
+  return stop;
+}

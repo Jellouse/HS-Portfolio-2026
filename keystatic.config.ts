@@ -75,7 +75,7 @@ export default config({
   storage: storage(),
   ui: {
     brand: { name: 'Humansize' },
-    navigation: ['projects', 'projectOrder', '---', 'site'],
+    navigation: ['projects', 'projectOrder', '---', 'products', '---', 'site'],
   },
   collections: {
     projects: collection({
@@ -265,6 +265,78 @@ export default config({
             },
           },
           { label: 'Blocks' },
+        ),
+      },
+    }),
+    products: collection({
+      label: 'Shop products',
+      slugField: 'name',
+      path: 'src/content/products/*/',
+      format: { data: 'yaml' },
+      columns: ['name', 'price'],
+      schema: {
+        name: fields.slug({
+          name: { label: 'Name', validation: { isRequired: true, length: { min: 1 } } },
+          slug: { label: 'Slug', description: 'Also the worksurface.co/shop/<slug> link.' },
+        }),
+        order: fields.integer({ label: 'Order', description: 'Position on /shop, low first.', defaultValue: 99 }),
+        price: fields.integer({ label: 'Price (EUR)', validation: { isRequired: true } }),
+        edition: fields.text({ label: 'Edition', description: 'e.g. of 8' }),
+        dimensions: fields.text({ label: 'Dimensions', description: 'Optional, e.g. 200 mm tall' }),
+        description: fields.text({ label: 'Description', multiline: true, validation: { isRequired: true, length: { min: 1 } } }),
+        images: fields.array(
+          fields.object({
+            src: { ...fields.image({ label: 'Image', directory: 'src/content/products', publicPath: '/src/content/products', validation: { isRequired: true } }) },
+            alt: fields.text({ label: 'Alt text' }),
+          }),
+          { label: 'Images', description: 'Detail page images.', itemLabel: (props) => props.fields.alt.value || 'Image' },
+        ),
+        overview: fields.object(
+          {
+            show: fields.checkbox({ label: 'Show on /shop', defaultValue: true }),
+            title: fields.text({ label: 'Title', description: 'As shown on /shop, e.g. Type-660. Empty: the name.' }),
+            price: fields.text({ label: 'Price label', description: 'As shown on /shop, e.g. 150€. Empty: the price above.' }),
+            description: fields.text({ label: 'Description', description: 'Optional line under the caption.', multiline: true }),
+            left: fields.object({
+              src: { ...fields.image({ label: 'Image', directory: 'src/content/products', publicPath: '/src/content/products' }) },
+              alt: fields.text({ label: 'Alt text' }),
+            }, { label: 'Left image' }),
+            right: fields.object({
+              src: { ...fields.image({ label: 'Image', directory: 'src/content/products', publicPath: '/src/content/products' }) },
+              alt: fields.text({ label: 'Alt text' }),
+            }, { label: 'Right image' }),
+          },
+          { label: '/shop overview', description: 'The product section on /shop: an image pair and its caption.' },
+        ),
+        detail: fields.object(
+          {
+            title: fields.text({ label: 'Title', description: 'e.g. Type-660. Empty: the name.' }),
+            price: fields.text({ label: 'Price label', description: 'Under the title, e.g. 70€. Empty: the price above.' }),
+            description: fields.text({ label: 'Intro', multiline: true, description: 'Empty: the description above.' }),
+            buyLabel: fields.text({ label: 'Buy button label', description: 'e.g. Buy: IB-660-001. Links to worksurface.co/shop/<slug>.' }),
+            images: fields.array(
+              fields.object({ src: { ...fields.image({ label: 'Image', directory: 'src/content/products', publicPath: '/src/content/products', validation: { isRequired: true } }) }, alt: fields.text({ label: 'Alt text' }) }),
+              { label: 'Top images', description: 'Empty: the Images above.', itemLabel: (props) => props.fields.alt.value || 'Image' },
+            ),
+            sections: fields.array(
+              fields.object({
+                heading: fields.text({ label: 'Heading' }),
+                text: fields.text({ label: 'Text', multiline: true }),
+                image: fields.object({ src: { ...fields.image({ label: 'Image', directory: 'src/content/products', publicPath: '/src/content/products' }) }, alt: fields.text({ label: 'Alt text' }) }, { label: 'Image' }),
+              }),
+              { label: 'Sections', description: 'Centred heading, text, one image.', itemLabel: (props) => props.fields.heading.value || 'Section' },
+            ),
+            wildTitle: fields.text({ label: 'Gallery heading', description: 'e.g. In the wild' }),
+            wild: fields.array(
+              fields.object({ src: { ...fields.image({ label: 'Image', directory: 'src/content/products', publicPath: '/src/content/products', validation: { isRequired: true } }) }, alt: fields.text({ label: 'Alt text' }) }),
+              { label: 'Gallery images', description: 'Two columns, in reading order.', itemLabel: (props) => props.fields.alt.value || 'Image' },
+            ),
+            info: fields.array(
+              fields.object({ label: fields.text({ label: 'Label' }), value: fields.text({ label: 'Value' }) }),
+              { label: 'Info rows', description: 'Price and Shipping are added after these automatically.', itemLabel: (props) => props.fields.label.value || 'Row' },
+            ),
+          },
+          { label: 'Detail page', description: 'The /shop/<slug> page.' },
         ),
       },
     }),
