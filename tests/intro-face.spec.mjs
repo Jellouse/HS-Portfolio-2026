@@ -38,8 +38,7 @@ for (const [name, vp, mobile] of [['desktop', { width: 1440, height: 900 }, fals
     const host = document.querySelector('[data-hero-variant="blob"]');
     const f = document.querySelector('[data-hero-blob]').getBoundingClientRect();
     const n = document.querySelector('.site-header').getBoundingClientRect();
-    const m = /scale\(([\d.e-]+)\)/.exec(host.style.transform);
-    return { s: m ? Number(m[1]) : 1, bottom: f.bottom, top: f.top, name: n.top };
+    return { s: new DOMMatrix(getComputedStyle(host).transform).a, bottom: f.bottom, top: f.top, name: n.top };
   });
   let prev = null;
   let gap0 = null;

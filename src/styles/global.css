@@ -2282,3 +2282,342 @@ body:has(.hero[data-intro]) .site-header .contact {
   border: 1px solid rgb(255 255 255 / 40%);
   border-radius: 4px;
 }
+
+/* Homepage name block (mock 2): "Humansize" over Home / Contact / Shop. */
+.site-header .brand {
+  margin: 0;
+  font-size: var(--text-body);
+  line-height: var(--lh-body);
+}
+
+.site-menu {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+}
+
+.site-menu > a,
+.site-menu > button,
+.project-menu > a,
+.project-menu > button {
+  padding: 0;
+  font: inherit;
+  font-size: var(--text-body);
+  line-height: var(--lh-body);
+  color: var(--ink);
+  text-decoration: none;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  transition: color 160ms ease;
+}
+
+/* Landing: all gray, the hovered one turns black. */
+.site-menu > a,
+.site-menu > button {
+  color: var(--muted);
+}
+
+.site-menu > :hover,
+.site-menu > :focus-visible {
+  color: var(--ink);
+}
+
+/* Project pages: face opens the menu; items come out from behind the face. */
+.project-mark {
+  position: relative;
+  transition: margin-bottom 300ms var(--ease-out);
+}
+
+.project-mark.is-open {
+  margin-bottom: 152px;
+}
+
+.project-mark.is-open::before {
+  /* the "general area": leaving it closes the menu */
+  content: "";
+  position: absolute;
+  top: -32px;
+  left: 50%;
+  width: 440px;
+  height: 176px;
+  transform: translateX(-50%);
+}
+
+.project-mark > a {
+  position: relative;
+  z-index: 2;
+}
+
+.project-menu {
+  position: absolute;
+  top: 85px;
+  left: 50%;
+  z-index: 1;
+  display: flex;
+  gap: 24px;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.project-menu > a,
+.project-menu > button {
+  opacity: 0;
+  transform: translate(calc(var(--i) * -48px), -56px) scale(0.6);
+  transition:
+    opacity 200ms ease,
+    transform 300ms var(--ease-out),
+    color 160ms ease;
+}
+
+.project-mark.is-open .project-menu {
+  pointer-events: auto;
+}
+
+.project-mark.is-open .project-menu > a,
+.project-mark.is-open .project-menu > button {
+  opacity: 1;
+  transform: none;
+}
+
+.project-menu:has(> :hover) > :not(:hover) {
+  color: var(--muted);
+}
+
+/* Contact sheet */
+.contact-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+}
+
+.contact-sheet[hidden] {
+  display: none;
+}
+
+html.is-contact-open {
+  overflow: hidden;
+}
+
+.contact-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgb(0 0 0 / 20%);
+  opacity: 0;
+  transition: opacity 500ms ease;
+}
+
+.contact-panel {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 435px;
+  padding: 49px 20px 0;
+  text-align: center;
+  background: #fff;
+  transform: translateY(100%);
+  transition: transform 500ms var(--ease-out);
+}
+
+.contact-sheet.is-open .contact-backdrop {
+  opacity: 1;
+}
+
+.contact-sheet.is-open .contact-panel {
+  transform: none;
+}
+
+.contact-step[hidden] {
+  display: none;
+}
+
+.contact-q,
+.contact-done {
+  display: block;
+  margin: 0;
+  font-size: var(--text-body);
+  line-height: var(--lh-body);
+  color: var(--ink);
+  transition: color 160ms ease;
+}
+
+.contact-q.is-muted {
+  color: var(--muted);
+}
+
+.contact-done {
+  padding-top: 116px;
+}
+
+.contact-options {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px 24px;
+  margin-top: 142px;
+}
+
+.contact-options button,
+.contact-nav button {
+  padding: 0;
+  font: inherit;
+  font-size: var(--text-body);
+  line-height: var(--lh-body);
+  color: var(--ink);
+  background: none;
+  border: 0;
+  cursor: pointer;
+  transition: color 160ms ease;
+}
+
+.contact-options:has(> :hover) > :not(:hover) {
+  color: var(--muted);
+}
+
+.contact-panel textarea,
+.contact-panel input {
+  display: block;
+  width: min(664px, 100%);
+  margin: 56px auto 0;
+  padding: 0;
+  font: inherit;
+  font-size: var(--text-body);
+  line-height: var(--lh-body);
+  color: var(--ink);
+  text-align: left;
+  background: none;
+  border: 0;
+  outline: none;
+  resize: none;
+}
+
+.contact-panel textarea {
+  height: 174px;
+}
+
+.contact-panel textarea:placeholder-shown {
+  padding-top: 86px;
+  text-align: center;
+}
+
+.contact-panel input {
+  margin-top: 142px;
+  text-align: center;
+}
+
+.contact-panel ::placeholder {
+  color: var(--muted);
+  opacity: 1;
+}
+
+.contact-nav {
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  height: 29px;
+  transform: translateX(-50%);
+}
+
+.contact-dots {
+  display: flex;
+  gap: 6px;
+  transition: gap 200ms var(--ease-out);
+}
+
+.contact-dots i {
+  width: 4px;
+  height: 4px;
+  background: var(--muted);
+  border-radius: 50%;
+  transition: background 160ms ease;
+}
+
+.contact-dots i.is-on {
+  background: var(--ink);
+}
+
+.contact-back,
+.contact-next {
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 200ms ease,
+    transform 250ms var(--ease-out),
+    color 160ms ease;
+}
+
+.contact-back {
+  transform: translateX(16px);
+}
+
+.contact-next {
+  transform: translateX(-16px);
+}
+
+.contact-nav button:disabled {
+  color: rgb(0 0 0 / 15%);
+  cursor: default;
+}
+
+/* From step 2 on: hovering the dots merges them into one and brings in Back / Next. */
+.contact-nav.has-controls:hover .contact-dots,
+.contact-nav.has-controls:focus-within .contact-dots {
+  gap: 0;
+}
+
+.contact-nav.has-controls:hover .contact-dots i:not(.is-on),
+.contact-nav.has-controls:focus-within .contact-dots i:not(.is-on) {
+  width: 0;
+}
+
+.contact-nav.has-controls:hover :is(.contact-back, .contact-next),
+.contact-nav.has-controls:focus-within :is(.contact-back, .contact-next) {
+  opacity: 1;
+  pointer-events: auto;
+  transform: none;
+}
+
+/* Touch: no hover, so Back / Next stay visible from step 2 on. */
+@media (hover: none) {
+  .contact-nav.has-controls :is(.contact-back, .contact-next) {
+    opacity: 1;
+    pointer-events: auto;
+    transform: none;
+  }
+}
+
+.contact-back,
+.contact-next {
+  position: absolute;
+  top: 0;
+}
+
+.contact-back {
+  right: calc(100% + 16px);
+}
+
+.contact-next {
+  left: calc(100% + 16px);
+}
+
+/* Touch intro: the scale runs as a scroll-driven animation on the compositor (no JS per frame),
+   so iOS momentum scrolling stays smooth. */
+@keyframes intro-face-scale {
+  from {
+    transform: scale(1) translateZ(0);
+  }
+
+  to {
+    transform: scale(var(--intro-smin)) translateZ(0);
+  }
+}
+
+.hero[data-intro].is-sda [data-hero-variant="blob"] {
+  animation: intro-face-scale linear both;
+  animation-timeline: scroll(root block);
+  animation-range: 0px var(--intro-r);
+}

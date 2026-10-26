@@ -18,7 +18,7 @@ export const heroBlobDrift: HeroBlobDrift = {
 };
 
 export function initHeroBlob(root: ParentNode = document) {
-  const svg = root.querySelector<SVGSVGElement>('[data-hero-blob]');
+  const svg = root.querySelector<SVGSVGElement>('[data-hero-blob], [data-mark-face]');
   if (!svg) return;
   const offset = svg.querySelector<SVGFEOffsetElement>('feOffset[data-blob-offset]');
   if (!offset) return;

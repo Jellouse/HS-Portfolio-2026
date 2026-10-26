@@ -22,7 +22,7 @@ export function initIntroFace(hero: HTMLElement) {
   let cur = NaN; // rendered scale; chases the scroll target
   let lastT = 0;
   const KEY = 'intro-smooth-ms';
-  const DEFAULT_TAU = 100;
+  const DEFAULT_TAU = 30; // Johann's pick
   const stored = Number(localStorage.getItem(KEY));
   let tau = hero.hasAttribute('data-intro-tune') && localStorage.getItem(KEY) !== null && stored >= 0 ? stored : DEFAULT_TAU;
   if (reduced) tau = 0;
@@ -44,6 +44,7 @@ export function initIntroFace(hero: HTMLElement) {
     const nameTop = Math.round(vh * 0.715);
     const faceBottom = nameTop - gap;
     host.style.transform = 'none';
+    hero.classList.remove('is-sda');
     const hostTop = Math.round(host.getBoundingClientRect().top + scrollY);
     R = Math.max(1, Math.round(faceBottom - Hf - topF));
     sMin = Wf / W0;
@@ -52,9 +53,15 @@ export function initIntroFace(hero: HTMLElement) {
     hero.style.setProperty('--intro-origin', `${faceBottom - hostTop}px`);
     hero.style.setProperty('--intro-name-top', `${nameTop}px`);
     hero.dataset.introR = String(R);
+    hero.style.setProperty('--intro-r', `${R}px`);
+    hero.style.setProperty('--intro-smin', String(sMin));
     lastS = NaN;
     cur = NaN;
-    write(performance.now());
+    if (sda) {
+      host.style.transform = '';
+      hero.classList.add('is-sda');
+    }
+    else write(performance.now());
   };
 
   const target = () => {
@@ -83,7 +90,6 @@ export function initIntroFace(hero: HTMLElement) {
     if (!frame) frame = requestAnimationFrame(write);
   };
 
-  if (hero.hasAttribute('data-intro-tune')) mountTune();
 
   function mountTune() {
     const box = document.createElement('div');
@@ -112,8 +118,21 @@ export function initIntroFace(hero: HTMLElement) {
     document.body.appendChild(box);
   }
 
+  // Touch: scroll-driven CSS animation where supported (compositor, follows momentum scroll
+  // exactly); rAF + smoothing elsewhere.
+  const sda =
+    !reduced &&
+    matchMedia('(pointer: coarse)').matches &&
+    CSS.supports('animation-timeline: scroll()') &&
+    new URLSearchParams(location.search).get('intro') !== 'raf';
+
   hero.dataset.intro = '';
+  if (sda) {
+    hero.classList.add('is-sda');
+    hero.toggleAttribute('data-intro-settled', true);
+  }
   layout();
-  addEventListener('scroll', onScroll, { passive: true });
+  if (!sda) addEventListener('scroll', onScroll, { passive: true });
+  if (hero.hasAttribute('data-intro-tune') && !sda) mountTune();
   addEventListener('resize', layout, { passive: true });
 }

@@ -27,11 +27,16 @@ const info = (() => {
   class:list={['project', 'page-grid', { 'is-plain': project.data.rounded === false }]}
   data-slug={project.id}
 >
-  <p class="project-mark">
-    <a href="/" aria-label="Humansize">
+  <div class="project-mark" data-project-menu>
+    <a href="/" aria-label="Humansize" data-project-face>
       <MarkFace />
     </a>
-  </p>
+    <nav class="project-menu" aria-label="Main">
+      <a href="/" style="--i: -1">Home</a>
+      <a href="/shop" style="--i: 0">Shop</a>
+      <button type="button" data-contact-open style="--i: 1">Contact</button>
+    </nav>
+  </div>
   <ProjectHero title={project.data.title} years={years} summary={project.data.summary} />
   <Blocks
     blocks={project.data.blocks}
@@ -41,3 +46,8 @@ const info = (() => {
     info={info}
   />
 </article>
+
+<script>
+  import { initProjectMenu } from '../scripts/project-menu';
+  initProjectMenu();
+</script>
