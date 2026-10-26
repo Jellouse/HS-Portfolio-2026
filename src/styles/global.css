@@ -2180,7 +2180,9 @@ body:has(.shop-detail) .site-header {
 .hero[data-intro] [data-hero-variant="blob"] {
   /* Extends above the page and past the sides so nothing crops the face (iOS rubber-band,
      WebGL output region). Scaled as one composited layer. */
-  inset: -100lvh -50% 0;
+  position: fixed;
+  inset: -100lvh -50% auto;
+  height: calc(100lvh + 100svh);
   transform-origin: 50% var(--intro-origin, 0);
   will-change: transform;
 }
@@ -2669,8 +2671,9 @@ html.is-contact-open {
 }
 
 .shop-ring-layer {
-  /* Extends 100lvh above the page like the home face host, so elastic overscroll never crops the ring. */
-  position: absolute;
+  /* position:fixed so elastic overscroll never crops it (content above doc y 0 is never painted);
+     shop-intro.ts / the scroll() animation translate it by -scrollY so it scrolls with the page. */
+  position: fixed;
   top: -100lvh;
   right: 0;
   left: 0;
@@ -3008,3 +3011,24 @@ html.is-contact-open, html.is-contact-open body { overscroll-behavior: none; }
 .shop-ring .shop-mark.has-canvas.at-top svg {
   visibility: hidden;
 }
+
+/* Fixed intro graphics follow the page: touch path translates by -scroll on the compositor. */
+@keyframes intro-follow {
+  from { translate: 0 0; }
+  to { translate: 0 -100000px; }
+}
+
+.hero[data-intro].is-sda [data-hero-variant="blob"] {
+  animation: intro-face-scale linear both, intro-follow linear both;
+  animation-timeline: scroll(root block), scroll(root block);
+  animation-range: 0px var(--intro-r), 0px 100000px;
+}
+
+.shop-head.is-sda .shop-ring-layer {
+  animation: shop-ring-scale linear both, intro-follow linear both;
+  animation-timeline: scroll(root block), scroll(root block);
+  animation-range: 0px var(--ring-r), 0px 100000px;
+}
+
+/* No visibility toggle when scrolled off: the view-transition morph (ib-mark / hs-mark) must
+   snapshot the graphic even off-screen, and the compositor already skips off-screen tiles. */

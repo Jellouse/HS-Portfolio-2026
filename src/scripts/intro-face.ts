@@ -47,7 +47,8 @@ export function initIntroFace(hero: HTMLElement) {
     const faceBottom = mobile ? Math.round(nameTop / 2 + H0 / 2) : nameTop - gap;
     host.style.transform = 'none';
     hero.classList.remove('is-sda');
-    const hostTop = Math.round(host.getBoundingClientRect().top + scrollY);
+    host.style.translate = 'none';
+    const hostTop = Math.round(host.getBoundingClientRect().top); // fixed host: viewport = doc at scroll 0
     R = Math.max(1, Math.round(faceBottom - Hf - topF));
     sMin = Wf / W0;
     hero.style.setProperty('--intro-w', `${W0}px`);
@@ -61,6 +62,7 @@ export function initIntroFace(hero: HTMLElement) {
     hero.style.setProperty('--intro-smin', String(sMin));
     lastS = NaN;
     cur = NaN;
+    follow();
     if (sda) {
       host.style.transform = '';
       hero.classList.add('is-sda');
@@ -90,6 +92,13 @@ export function initIntroFace(hero: HTMLElement) {
     if (cur !== goal) frame = requestAnimationFrame(write);
     else lastT = 0;
   };
+  // position:fixed host (overscroll never crops it) that follows the page by -scrollY, clamped at
+  // 0 for rubber-band pulls; touch uses a CSS scroll() animation on `translate`.
+  function follow() {
+    const y = Math.max(0, scrollY);
+    host!.style.translate = sda ? '' : `0 ${-y}px`;
+  }
+  addEventListener('scroll', follow, { passive: true });
   const onScroll = () => {
     if (!frame) frame = requestAnimationFrame(write);
   };

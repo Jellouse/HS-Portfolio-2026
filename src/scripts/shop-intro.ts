@@ -89,7 +89,8 @@ export function initShopIntro(head: HTMLElement) {
     const titleF = topF + Wf + (mobile ? 96 : 130); // detail h1 top
     head.classList.remove('is-sda');
     layer.style.transform = 'none';
-    const L = Math.round(layer.getBoundingClientRect().top + scrollY);
+    layer.style.translate = 'none';
+    const L = Math.round(layer.getBoundingClientRect().top); // fixed layer: viewport top = doc top at scroll 0
     host.style.top = `${C - W0 / 2 - L}px`;
     const titleTop = Math.round(title.getBoundingClientRect().top + scrollY);
     R = Math.max(1, titleTop - titleF);
@@ -103,12 +104,23 @@ export function initShopIntro(head: HTMLElement) {
     head.dataset.ringR = String(R);
     head.dataset.ringReady = '';
     paintCanvas(W0);
+    follow();
     cur = NaN;
     if (sda) {
       layer.style.transform = '';
       head.classList.add('is-sda');
     } else write(performance.now());
   };
+
+  // The layer is position:fixed (overscroll never crops fixed content); it follows the page by
+  // translating -scrollY, clamped at 0 so a rubber-band pull keeps it whole. Touch: CSS scroll()
+  // animation on `translate`.
+  const follow = () => {
+    const y = Math.max(0, scrollY);
+    if (!sda) layer.style.translate = `0 ${-y}px`;
+    else layer.style.translate = '';
+  };
+  addEventListener('scroll', follow, { passive: true });
 
   const write = (now: number) => {
     frame = 0;

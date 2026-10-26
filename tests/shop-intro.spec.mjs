@@ -46,6 +46,21 @@ for (const [label, opt] of [['desktop', { viewport: { width: 1440, height: 900 }
   check(clipper === '', `${label}: no ancestor clips the ring (${clipper || 'none'})`);
   const painted = await p.evaluate(() => { const c = document.querySelector('.shop-ring-canvas'); const m = c.closest('.shop-mark'); if (!m.classList.contains('at-top') || getComputedStyle(c).visibility !== 'visible') return 'canvas not shown'; const x = c.getContext('2d'); const h = c.height; let top = 0, bot = 0; const row = (y) => { const d = x.getImageData(0, y, c.width, 1).data; let n = 0; for (let i = 3; i < d.length; i += 4) n += d[i] > 0; return n; }; for (let y = 0; y < h / 2; y += 8) top += row(y); for (let y = Math.ceil(h / 2); y < h; y += 8) bot += row(y); return top > 0 && Math.abs(top - bot) / bot < 0.1 ? 'ok' : `top ${top} bottom ${bot}`; });
   check(painted === 'ok', `${label}: full ring painted, both halves (${painted})`);
+  // Structural overscroll fix: the graphic lives in a viewport-fixed layer (no ancestor turns
+  // fixed into absolute), so a rubber-band shift cannot crop it at doc y 0.
+  const fixedCheck = (sel) => `(() => { const l = document.querySelector('${sel}'); if (getComputedStyle(l).position !== 'fixed') return 'not fixed'; let e = l.parentElement; while (e && e !== document.documentElement) { const c = getComputedStyle(e); if (c.transform !== 'none' || c.filter !== 'none' || c.perspective !== 'none' || /transform|filter|perspective/.test(c.willChange) || /paint|layout|strict|content/.test(c.contain) || (c.backdropFilter && c.backdropFilter !== 'none')) return 'containing block ' + e.tagName + '.' + e.className; e = e.parentElement; } return 'ok'; })()`;
+  check((await p.evaluate(fixedCheck('.shop-ring-layer'))) === 'ok', `${label}: ring layer is viewport-fixed (${await p.evaluate(fixedCheck('.shop-ring-layer'))})`);
+  const hp2 = await (await browser.newContext(opt)).newPage();
+  await hp2.goto(B + '/', { waitUntil: 'load' });
+  await hp2.waitForSelector('[data-intro-ready]');
+  check((await hp2.evaluate(fixedCheck('[data-hero-variant="blob"]'))) === 'ok', `${label}: home face host is viewport-fixed (${await hp2.evaluate(fixedCheck('[data-hero-variant="blob"]'))})`);
+  const b0 = await hp2.evaluate(() => document.querySelector('.mark-blob').getBoundingClientRect().top);
+  await hp2.evaluate(() => scrollTo(0, 3000));
+  await hp2.waitForFunction(() => document.querySelector('.mark-blob').getBoundingClientRect().bottom < 0);
+  await hp2.evaluate(() => scrollTo(0, 0));
+  await hp2.waitForFunction((b) => Math.abs(document.querySelector('.mark-blob').getBoundingClientRect().top - b) < 1, b0);
+  check(true, `${label}: fixed face scrolls away with the page and returns to rest at top`);
+  await hp2.close();
   check(Math.abs(shop.x - 195 * (label === 'mobile' ? 1 : 1440 / 390)) <= 1, `${label}: ring centred horizontally`);
   if (label === 'mobile') {
     check(Math.abs(home.top - home.below) <= 2 && Math.abs(shop.top - shop.below) <= 2, `mobile: equal space above and below (face ${home.top.toFixed(0)}/${home.below.toFixed(0)}, ring ${shop.top.toFixed(0)}/${shop.below.toFixed(0)})`);
