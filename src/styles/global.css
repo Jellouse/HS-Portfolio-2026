@@ -2256,7 +2256,8 @@ body:has(.hero[data-intro]) .site-header .contact {
   position: fixed;
   right: 16px;
   bottom: 16px;
-  z-index: 50;
+  /* under the header (z 5) so the open contact menu stays tappable */
+  z-index: 4;
   display: flex;
   flex-direction: column;
   gap: 6px;
