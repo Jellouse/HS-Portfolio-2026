@@ -11,7 +11,7 @@
     "test:scroll": "node tests/mobile-scroll.spec.mjs",
     "test:canvas": "node tests/canvas-auth.spec.mjs",
     "test:shop-grid": "node tests/shop-grid.spec.mjs",
-    "test": "npm run test:shop && npm run test:touch-guard && npm run test:canvas && npm run test:scroll && npm run test:taps && npm run test:hscroll && npm run test:reveal && npm run test:spin && npm run test:vt && npm run test:canvas-pages && npm run test:project-images && npm run test:shop-grid && npm run test:keystatic && npm run test:intro && npm run test:contact && npm run test:shop-intro && npm run test:a11y",
+    "test": "npm run build && node tests/run.mjs",
     "test:preview-images": "node tests/preview-images.spec.mjs",
     "optimize:images": "node scripts/optimize-content-images.mjs",
     "test:keystatic": "node tests/keystatic-smoke.spec.mjs",
@@ -27,7 +27,9 @@
     "test:intro": "node tests/intro-face.spec.mjs",
     "test:contact": "node tests/contact.spec.mjs",
     "test:shop-intro": "node tests/shop-intro.spec.mjs",
-    "test:a11y": "node tests/a11y.spec.mjs"
+    "test:a11y": "node tests/a11y.spec.mjs",
+    "test:serial": "npm run test:shop && npm run test:touch-guard && npm run test:canvas && npm run test:scroll && npm run test:taps && npm run test:hscroll && npm run test:reveal && npm run test:spin && npm run test:vt && npm run test:canvas-pages && npm run test:project-images && npm run test:shop-grid && npm run test:keystatic && npm run test:intro && npm run test:contact && npm run test:shop-intro && npm run test:a11y",
+    "test:quick": "node tests/run.mjs"
   },
   "engines": {
     "node": ">=22"
