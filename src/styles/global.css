@@ -2983,3 +2983,28 @@ html.is-contact-open, html.is-contact-open body { overscroll-behavior: none; }
     animation: text-blur-in 550ms var(--ease-out-expo) both;
   }
 }
+
+/* /shop big ring: drawn into a canvas (see shop-intro.ts) so the half above the page top is
+   painted too and elastic overscroll reveals it. The SVG keeps the box size. */
+.shop-ring .shop-mark {
+  position: relative;
+}
+
+.shop-ring-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.shop-ring-canvas {
+  visibility: hidden;
+}
+
+.shop-ring .shop-mark.has-canvas.at-top .shop-ring-canvas {
+  visibility: visible;
+}
+
+.shop-ring .shop-mark.has-canvas.at-top svg {
+  visibility: hidden;
+}

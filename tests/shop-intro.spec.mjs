@@ -38,12 +38,19 @@ for (const [label, opt] of [['desktop', { viewport: { width: 1440, height: 900 }
   const home = await hp.evaluate(() => { const t = document.querySelector('.site-header .brand').getBoundingClientRect(); const r = document.querySelector('.mark-blob').getBoundingClientRect(); return { text: t.top, c: (r.top + r.bottom) / 2, top: r.top, below: t.top - r.bottom }; });
   await hp.close();
   check(Math.abs(shop.text - home.text) <= 1, `${label}: name blocks at the same top (home ${home.text}, shop ${shop.text})`);
-  check(Math.abs(shop.c - home.c) <= 1.5, `${label}: face and ring centres aligned (${home.c.toFixed(1)}/${shop.c.toFixed(1)})`);
+  if (label === 'mobile') check(Math.abs(shop.c - home.c) <= 1.5, `${label}: face and ring centres aligned (${home.c.toFixed(1)}/${shop.c.toFixed(1)})`);
+  else check(Math.abs(shop.c) <= 1.5 && Math.abs(shop.w - 980) <= 2 && shop.text === 695, `desktop: ring 68vw, centre on the page top, name at 695 (c ${shop.c.toFixed(1)}, w ${shop.w.toFixed(0)}, text ${shop.text})`);
+  // Overscroll: nothing between the ring and the root clips it, and the whole ring (incl. the
+  // half above the page top) is painted into the canvas that shows at the top.
+  const clipper = await p.evaluate(() => { let e = document.querySelector('.shop-ring-canvas').parentElement; const bad = []; while (e && e !== document.documentElement) { const c = getComputedStyle(e); if (/hidden|clip|scroll|auto/.test(c.overflowX + c.overflowY) || c.clipPath !== 'none' || /paint|strict|content/.test(c.contain)) bad.push(e.tagName + '.' + e.className); e = e.parentElement; } return bad.join(','); });
+  check(clipper === '', `${label}: no ancestor clips the ring (${clipper || 'none'})`);
+  const painted = await p.evaluate(() => { const c = document.querySelector('.shop-ring-canvas'); const m = c.closest('.shop-mark'); if (!m.classList.contains('at-top') || getComputedStyle(c).visibility !== 'visible') return 'canvas not shown'; const x = c.getContext('2d'); const h = c.height; let top = 0, bot = 0; const row = (y) => { const d = x.getImageData(0, y, c.width, 1).data; let n = 0; for (let i = 3; i < d.length; i += 4) n += d[i] > 0; return n; }; for (let y = 0; y < h / 2; y += 8) top += row(y); for (let y = Math.ceil(h / 2); y < h; y += 8) bot += row(y); return top > 0 && Math.abs(top - bot) / bot < 0.1 ? 'ok' : `top ${top} bottom ${bot}`; });
+  check(painted === 'ok', `${label}: full ring painted, both halves (${painted})`);
   check(Math.abs(shop.x - 195 * (label === 'mobile' ? 1 : 1440 / 390)) <= 1, `${label}: ring centred horizontally`);
   if (label === 'mobile') {
     check(Math.abs(home.top - home.below) <= 2 && Math.abs(shop.top - shop.below) <= 2, `mobile: equal space above and below (face ${home.top.toFixed(0)}/${home.below.toFixed(0)}, ring ${shop.top.toFixed(0)}/${shop.below.toFixed(0)})`);
     check(shop.top >= 0 && Math.abs(shop.w - 351) <= 2, `mobile: ring whole and 90% wide (top ${shop.top.toFixed(0)}, w ${shop.w.toFixed(0)})`);
-  } else check(Math.abs(shop.below - home.below) <= 2, `desktop: same gap to the name as the face (${home.below.toFixed(0)}/${shop.below.toFixed(0)})`);
+  }
   const R = Number(await p.getAttribute('[data-shop-head]', 'data-ring-r'));
   await p.evaluate((y) => scrollTo(0, y), R);
   await p.waitForTimeout(800);
@@ -121,7 +128,8 @@ await p.type('#contact-project', ' words');
 await p.waitForTimeout(400);
 const s1b = await st();
 check(s1.align === 'center' && s1.top === s1b.top, `one line: centred, no move while typing (${s1.align}, ${s1.top}/${s1b.top})`);
-await p.type('#contact-project', ' and more words so that it wraps well past the first line of this field');
+await p.focus('#contact-project');
+await p.keyboard.insertText(' and more words so that it wraps well past the first line of this field');
 await p.waitForTimeout(500);
 const s2 = await st();
 check(s2.align === 'left' && s2.h === 58 && s2.top < s1.top, `two lines: left, grew, re-centred (${s2.align}, h ${s2.h}, top ${s2.top})`);

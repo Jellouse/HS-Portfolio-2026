@@ -34,6 +34,44 @@ export function initShopIntro(head: HTMLElement) {
   // Phones: the ring is centred between the viewport top and the title (equal space above and
   // below), on the same centre as the home face. Desktop: the ring is the size of the home face's
   // height and shares its centre and its 160px gap to the name; like the face it runs off the top.
+  // Chrome only rasters DOM/SVG content inside the page's scrollable area (y >= 0), so the half
+  // of the ring above the page top was never painted and elastic overscroll showed it clipped.
+  // A canvas is uploaded whole as its own texture (like the home face's WebGL canvas), so the
+  // ring is drawn into one at its biggest size; the SVG stays for the view-transition fallback.
+  const mark = host.querySelector<HTMLElement>('.shop-mark')!;
+  const svg = mark.querySelector('svg')!;
+  const canvas = document.createElement('canvas');
+  canvas.className = 'shop-ring-canvas';
+  canvas.setAttribute('aria-hidden', 'true');
+  mark.appendChild(canvas);
+  let drawn = 0;
+  const paintCanvas = (w: number) => {
+    const px = Math.round(w * Math.min(2, devicePixelRatio || 1));
+    if (px === drawn) return;
+    const src = svg.cloneNode(true) as SVGSVGElement;
+    src.setAttribute('fill', getComputedStyle(mark).color);
+    src.setAttribute('width', String(px));
+    src.setAttribute('height', String(px));
+    const img = new Image();
+    img.onload = () => {
+      canvas.width = px;
+      canvas.height = px;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+      ctx.clearRect(0, 0, px, px);
+      ctx.drawImage(img, 0, 0, px, px);
+      drawn = px;
+      mark.classList.add('has-canvas');
+      atTop();
+    };
+    img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(new XMLSerializer().serializeToString(src));
+  };
+
+  // the canvas only shows while the page is at (or pulled past) its top; once scrolling, the
+  // crisp SVG takes over for the shrink to 54px
+  const atTop = () => mark.classList.toggle('at-top', drawn > 0 && scrollY <= 1);
+  addEventListener('scroll', atTop, { passive: true });
+
   const layout = () => {
     const vw = document.documentElement.clientWidth;
     if (vw === lastW) return;
@@ -42,9 +80,10 @@ export function initShopIntro(head: HTMLElement) {
     const mobile = vw < 760;
     const nameTop = Math.round(vh * (mobile ? 0.715 : 0.772));
     document.documentElement.style.setProperty('--intro-name-top', `${nameTop}px`);
-    const faceH = Math.round(((Math.round(vw * 1.15) * 249) / 559) / 2) * 2;
-    const W0 = mobile ? Math.round((vw * 0.9) / 2) * 2 : faceH; // even, so the centre is a whole px
-    const C = mobile ? Math.round(nameTop / 2) : nameTop - 160 - W0 / 2;
+    const W0 = Math.round((vw * (mobile ? 0.9 : 0.68)) / 2) * 2; // even, so the centre is a whole px
+    // phones: centred between the viewport top and the name (equal space, same centre as the
+    // home face); desktop: round 5/6 placement, centre exactly on the page top (half above it)
+    const C = mobile ? Math.round(nameTop / 2) : 0;
     const Wf = 54;
     const topF = mobile ? 32 : 44; // .shop-detail padding-top
     const titleF = topF + Wf + (mobile ? 96 : 130); // detail h1 top
@@ -63,6 +102,7 @@ export function initShopIntro(head: HTMLElement) {
     head.style.setProperty('--ring-smin', String(sMin));
     head.dataset.ringR = String(R);
     head.dataset.ringReady = '';
+    paintCanvas(W0);
     cur = NaN;
     if (sda) {
       layer.style.transform = '';
