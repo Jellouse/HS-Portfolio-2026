@@ -2250,3 +2250,34 @@ body:has(.hero[data-intro]) .site-header .who,
 body:has(.hero[data-intro]) .site-header .contact {
   grid-column: auto;
 }
+
+/* Preview-only intro smoothing dial (never rendered on production). */
+.intro-tune {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 200px;
+  padding: 12px;
+  font-size: 13px;
+  line-height: 16px;
+  color: #fff;
+  background: rgb(0 0 0 / 80%);
+  border-radius: 8px;
+}
+
+.intro-tune label {
+  display: flex;
+  justify-content: space-between;
+}
+
+.intro-tune button {
+  padding: 4px 0;
+  font: inherit;
+  color: inherit;
+  border: 1px solid rgb(255 255 255 / 40%);
+  border-radius: 4px;
+}

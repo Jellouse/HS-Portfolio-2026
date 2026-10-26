@@ -1,6 +1,7 @@
 /**
  * Homepage intro: face scale falls monotonically with scroll, the gap between face bottom and
  * name top stays constant (±1px) until release, then the face moves 1:1 with the page.
+ * Smoothing (scale chases the scroll target) is allowed; every assertion is on the settled state.
  * SHOTS=dir also saves screenshots at 0/25/50/75/100% of the intro.
  *
  *   npm run build && npm run test:intro
@@ -44,7 +45,8 @@ for (const [name, vp, mobile] of [['desktop', { width: 1440, height: 900 }, fals
   let gap0 = null;
   for (let y = 0; y <= R + 200; y += 10) {
     await page.evaluate((y) => window.scrollTo(0, y), y);
-    await page.waitForTimeout(30);
+    await page.waitForTimeout(40);
+    await page.waitForSelector('[data-intro-settled]', { state: 'attached' });
     const m = await measure();
     const gap = m.name - m.bottom;
     if (gap0 === null) gap0 = gap;
@@ -58,6 +60,7 @@ for (const [name, vp, mobile] of [['desktop', { width: 1440, height: 900 }, fals
     for (const p of [0, 25, 50, 75, 100]) {
       await page.evaluate((y) => window.scrollTo(0, y), Math.round((R * p) / 100));
       await page.waitForTimeout(150);
+      await page.waitForSelector('[data-intro-settled]', { state: 'attached' });
       await page.screenshot({ path: `${SHOTS}/${name}-${p}.png` });
     }
   }
