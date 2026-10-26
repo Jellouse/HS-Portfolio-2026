@@ -16,7 +16,10 @@ const services = ['Product', 'Retail', 'Website', 'Other'];
     </section>
     <section class="contact-step" data-step="2" hidden>
       <label class="contact-q" for="contact-project">Describe your project</label>
-      <textarea id="contact-project" name="project" rows="5" placeholder="Type here..."></textarea>
+      <div class="contact-field" data-contact-field>
+        <textarea id="contact-project" name="project" rows="1" placeholder="Type here..."></textarea>
+        <div class="contact-mirror" aria-hidden="true" data-contact-mirror></div>
+      </div>
     </section>
     <section class="contact-step" data-step="3" hidden>
       <label class="contact-q" for="contact-email">Add your email</label>

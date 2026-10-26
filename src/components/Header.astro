@@ -5,18 +5,30 @@ interface Props {
   site: SiteData;
 }
 
-// Homepage name block: "Humansize" (no hover state) over the menu. Items start gray, the
+// Homepage name block: "@Humansize" (no hover state) over About / Shop / Contact (Home off the homepage). Items start gray, the
 // hovered one turns black. Contact opens the contact sheet (ContactSheet.astro).
 Astro.props;
+const home = Astro.url.pathname === '/';
 ---
 
 <a class="skip" href="#content">Skip to content</a>
 
 <header class="site-header">
-  <p class="brand">Humansize</p>
+  <p class="brand">@Humansize</p>
   <nav class="site-menu" aria-label="Main">
-    <a href="/">Home</a>
-    <button type="button" data-contact-open>Contact</button>
+    {home ? <a href="#about" data-about-link>About</a> : <a href="/">Home</a>}
     <a href="/shop">Shop</a>
+    <button type="button" data-contact-open>Contact</button>
   </nav>
 </header>
+
+<script>
+  // About: smooth-scroll to the about text (respects reduced motion).
+  document.querySelector('[data-about-link]')?.addEventListener('click', (e) => {
+    const about = document.getElementById('about');
+    if (!about) return;
+    e.preventDefault();
+    const smooth = !matchMedia('(prefers-reduced-motion: reduce)').matches;
+    about.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', block: 'start' });
+  });
+</script>

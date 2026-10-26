@@ -1,4 +1,5 @@
 ---
+import SmallMenu from './SmallMenu.astro';
 import Blocks from './Blocks.astro';
 import MarkFace from './MarkFace.astro';
 import ProjectHero from './ProjectHero.astro';
@@ -31,11 +32,7 @@ const info = (() => {
     <a href="/" aria-label="Humansize" data-project-face>
       <MarkFace />
     </a>
-    <nav class="project-menu" aria-label="Main">
-      <a href="/" style="--i: -1">Home</a>
-      <a href="/shop" style="--i: 0">Shop</a>
-      <button type="button" data-contact-open style="--i: 1">Contact</button>
-    </nav>
+    <SmallMenu />
   </div>
   <ProjectHero title={project.data.title} years={years} summary={project.data.summary} />
   <Blocks

@@ -2621,3 +2621,220 @@ html.is-contact-open {
   animation-timeline: scroll(root block);
   animation-range: 0px var(--intro-r);
 }
+
+/* Round 5 ------------------------------------------------------------------ */
+
+/* Small-icon menus (project, /shop, /shop/<slug>): gray, the hovered one turns black. Items
+   blur in as they come out from behind the icon. */
+.project-menu > a,
+.project-menu > button {
+  color: var(--muted);
+  filter: blur(4px);
+  transition:
+    opacity 200ms ease,
+    filter 300ms var(--ease-out-expo),
+    transform 300ms var(--ease-out),
+    color 160ms ease;
+}
+
+.project-mark.is-open .project-menu > a,
+.project-mark.is-open .project-menu > button {
+  filter: none;
+}
+
+.project-menu:has(> :hover) > :not(:hover) {
+  color: var(--muted);
+}
+
+.project-menu > :hover,
+.project-menu > :focus-visible {
+  color: var(--ink);
+}
+
+/* Ring icons: the menu hangs 16px under the ring, with a 16px bridge so the pointer can cross. */
+.project-mark.is-ring .project-menu {
+  top: 100%;
+  padding-top: 16px;
+}
+
+/* /shop header (mock: shop header): big ring centred on the viewport top, title + subline at
+   75svh; shop-intro.ts scales the ring down onto the /shop/<slug> icon spot. */
+.shop-page {
+  position: relative;
+  padding-top: round(75svh, 1px);
+}
+
+.shop-head {
+  --ring-w: round(68vw, 1px);
+  display: block;
+  margin: 0 0 184px;
+  text-align: center;
+}
+
+.shop-head .shop-head-title,
+.shop-head .shop-head-sub {
+  text-align: center;
+}
+
+.shop-head .shop-head-sub {
+  color: var(--muted);
+}
+
+.shop-ring-wrap.project-mark,
+.shop-ring-wrap.project-mark.is-open {
+  position: static;
+  display: block;
+  margin: 0;
+}
+
+.shop-ring-wrap.project-mark.is-open::before {
+  content: none;
+}
+
+.shop-ring {
+  position: absolute;
+  top: calc(var(--ring-w) / -2);
+  left: 50%;
+  z-index: 2;
+  width: var(--ring-w);
+  margin-left: calc(var(--ring-w) / -2);
+  transform-origin: 50% 50%;
+  will-change: transform;
+}
+
+.shop-ring .shop-mark {
+  display: block;
+  width: 100%;
+  margin: 0;
+}
+
+.shop-ring-wrap.project-mark.is-ring .project-menu {
+  top: var(--ring-menu-top, 0);
+}
+
+@keyframes shop-ring-scale {
+  from {
+    transform: translateY(0) scale(1) translateZ(0);
+  }
+
+  to {
+    transform: translateY(var(--ring-dy)) scale(var(--ring-smin)) translateZ(0);
+  }
+}
+
+.shop-head.is-sda .shop-ring {
+  animation: shop-ring-scale linear both;
+  animation-timeline: scroll(root block);
+  animation-range: 0px var(--ring-r);
+}
+
+@media (max-width: 759px) {
+  .shop-page {
+    padding-top: round(75svh, 1px);
+  }
+
+  .shop-head {
+    --ring-w: round(90vw, 1px);
+    margin-bottom: 96px;
+  }
+}
+
+/* Contact: thank-you centred in the panel like the other steps' content; no dots there. */
+.contact-step[data-step="done"] {
+  position: absolute;
+  top: 220px;
+  right: 20px;
+  left: 20px;
+}
+
+.contact-done {
+  padding-top: 0;
+}
+
+.contact-sheet[data-step="done"] .contact-nav {
+  visibility: hidden;
+}
+
+/* Dots: one generous hover zone that covers the dots and both buttons. */
+.contact-nav::before {
+  content: "";
+  position: absolute;
+  inset: -32px -136px;
+}
+
+/* Project text: centred while it is one line, left from the second; the block stays
+   vertically centred in the area and only moves when the line count changes. */
+.contact-field {
+  position: relative;
+  width: min(664px, 100%);
+  height: 232px;
+  margin: 33px auto 0;
+}
+
+.contact-panel .contact-field textarea {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: calc(var(--lines, 1) * var(--lh-body));
+  max-height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  text-align: center;
+  transform: translateY(-50%);
+  transition: height 240ms var(--ease-out);
+}
+
+.contact-panel .contact-field textarea:placeholder-shown {
+  padding-top: 0;
+}
+
+.contact-field.is-multi textarea {
+  text-align: left;
+}
+
+.contact-field.is-full textarea {
+  overflow-y: auto;
+}
+
+.contact-mirror {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  font-size: var(--text-body);
+  line-height: var(--lh-body);
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* Blur reveal on text that appears: header name + menu, each contact step, the thank-you. */
+@media (prefers-reduced-motion: no-preference) {
+  .site-header .brand,
+  .site-menu > *,
+  .contact-step:not([hidden]) :is(.contact-q, .contact-options > button, textarea, input, .contact-done) {
+    animation: text-in 400ms var(--ease-out-expo) both;
+  }
+
+  .site-menu > :nth-child(2),
+  .contact-options > :nth-child(2) {
+    animation-delay: 30ms;
+  }
+
+  .site-menu > :nth-child(3),
+  .contact-options > :nth-child(3) {
+    animation-delay: 60ms;
+  }
+
+  .contact-options > :nth-child(4),
+  .contact-step:not([hidden]) :is(textarea, input) {
+    animation-delay: 90ms;
+  }
+}
+
+.contact-dots {
+  position: relative;
+}

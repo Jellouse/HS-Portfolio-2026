@@ -20,6 +20,24 @@ export function initContact() {
   let step = 1;
   let service = '';
   let closeTimer = 0;
+  const field = root.querySelector<HTMLElement>('[data-contact-field]')!;
+  const mirror = root.querySelector<HTMLElement>('[data-contact-mirror]')!;
+  let lines = 1;
+
+  // Count wrapped lines with a hidden left-aligned mirror (same width and type). Only a change
+  // in the count touches the textarea, so typing within a line never moves the block.
+  const measure = () => {
+    mirror.textContent = text.value + '\u200b';
+    const lh = parseFloat(getComputedStyle(mirror).lineHeight) || 29;
+    const n = Math.max(1, Math.round(mirror.offsetHeight / lh));
+    const max = Math.max(1, Math.floor(field.clientHeight / lh));
+    if (n === lines && field.style.getPropertyValue('--lines')) return;
+    lines = n;
+    field.style.setProperty('--lines', String(Math.min(n, max)));
+    field.classList.toggle('is-multi', n > 1);
+    field.classList.toggle('is-full', n > max);
+    if (n > max) text.scrollTop = text.scrollHeight;
+  };
 
   const filled = () =>
     step === 1 ? !!service : step === 2 ? !!text.value.trim() : step === 3 ? email.checkValidity() && !!email.value : false;
@@ -57,6 +75,7 @@ export function initContact() {
     step = 1;
     service = '';
     text.value = '';
+    measure();
     email.value = '';
     msg.textContent = thanks;
     root.querySelectorAll('[data-service]').forEach((b) => b.classList.remove('is-picked'));
@@ -85,6 +104,7 @@ export function initContact() {
     if (dir === 1 && step === 3) return void send();
     step = Math.min(3, Math.max(1, step + dir));
     render();
+    if (step === 2) measure();
     focusStep();
   };
 
@@ -113,6 +133,8 @@ export function initContact() {
   next.addEventListener('click', () => go(1));
   back.addEventListener('click', () => go(-1));
   form.addEventListener('input', render);
+  text.addEventListener('input', measure);
+  addEventListener('resize', measure);
   form.addEventListener('submit', (e) => e.preventDefault());
   render();
 }

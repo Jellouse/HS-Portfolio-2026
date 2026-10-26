@@ -1,6 +1,7 @@
 ---
 export const prerender = true;
 
+import SmallMenu from '../../components/SmallMenu.astro';
 import BlurImage from '../../components/BlurImage.astro';
 import Base from '../../layouts/Base.astro';
 import mark from '../../assets/industrial-bloom-mark.svg?raw';
@@ -13,10 +14,15 @@ const sizes = '(min-width: 1440px) 439px, (min-width: 760px) 30vw, calc(50vw - 3
 
 <Base title="Industrial Bloom shop · Humansize" description="Industrial Bloom: solid aluminium vases made from extrusion profiles, handmade in Germany in small numbered editions.">
   <div class="shop-page page-grid">
-    <header class="shop-head">
+    <header class="shop-head" data-shop-head>
+      <div class="shop-ring-wrap project-mark is-ring" data-project-menu data-menu-small>
+        <div class="shop-ring" data-shop-ring data-project-face>
+          <div class="shop-mark" data-spin-mark role="img" aria-label="Industrial Bloom mark" set:html={mark} />
+        </div>
+        <SmallMenu />
+      </div>
       <h1 class="shop-head-title">Industrial Bloom</h1>
-      <div class="shop-mark" data-spin-mark role="img" aria-label="Industrial Bloom mark" set:html={mark} />
-      <p class="shop-head-sub">Aluminium Vases</p>
+      <p class="shop-head-sub">Solid aluminium vases</p>
     </header>
 
     <section class="shop-intro" aria-label="About Industrial Bloom">
@@ -71,6 +77,11 @@ const sizes = '(min-width: 1440px) 439px, (min-width: 760px) 30vw, calc(50vw - 3
 <script>
   import { initSpinMark } from '../../scripts/spin-mark';
   import { initShopDetails } from '../../scripts/shop-details';
+  import { initShopIntro } from '../../scripts/shop-intro';
+  import { initProjectMenu } from '../../scripts/project-menu';
+  const head = document.querySelector<HTMLElement>('[data-shop-head]');
+  if (head) initShopIntro(head);
+  initProjectMenu();
 
   initShopDetails();
 
