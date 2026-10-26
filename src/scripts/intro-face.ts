@@ -42,7 +42,9 @@ export function initIntroFace(hero: HTMLElement) {
     const Hf = (Wf * 249) / 559;
     const gap = mobile ? 96 : 160;
     const nameTop = Math.round(vh * (mobile ? 0.715 : 0.772)); // Figma home (round 6 SVG): "Humansize" baseline at 717 of 900
-    const faceBottom = nameTop - gap;
+    // phones: centred between the viewport top and the name (equal space above and below);
+    // desktop: Figma, 160px above the name, running off the top. /shop's ring shares this centre.
+    const faceBottom = mobile ? Math.round(nameTop / 2 + H0 / 2) : nameTop - gap;
     host.style.transform = 'none';
     hero.classList.remove('is-sda');
     const hostTop = Math.round(host.getBoundingClientRect().top + scrollY);

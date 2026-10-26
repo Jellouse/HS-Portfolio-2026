@@ -1,5 +1,5 @@
 /**
- * Accessibility: axe on every page, keyboard menus and dialog, skip link hidden, scroll lock,
+ * Accessibility: axe on every page, keyboard menus and dialog, scroll lock,
  * and the project textarea never clips a line (typing, wrapping, Shift+Enter, paste).
  *
  *   npm run build && npm run test:shop-intro
@@ -47,13 +47,10 @@ for (const path of pages) {
 }
 console.log(`  contrast notes (not failing): ${[...new Set(contrast.values())].join(', ') || 'none'} on ${contrast.size} nodes`);
 
-// Skip link: invisible at rest, even on elastic overscroll; visible on keyboard focus.
+// No skip link (removed in round 7: the menus are short).
 let p = await desk.newPage();
 await p.goto(B + '/work/' + work[0] + '/', { waitUntil: 'load' });
-const skipBox = () => p.evaluate(() => { const r = document.querySelector('.skip').getBoundingClientRect(); return r.width * r.height; });
-check((await skipBox()) <= 1, 'skip link hidden at rest');
-await p.keyboard.press('Tab');
-check((await skipBox()) > 100 && (await p.evaluate(() => document.activeElement.classList.contains('skip'))), 'skip link shows on keyboard focus');
+check(!(await p.evaluate(() => document.querySelector('.skip'))), 'no skip link');
 
 // Project menu: Tab opens it, items reachable, closed items not tabbable, Esc closes + returns focus.
 await p.keyboard.press('Tab');

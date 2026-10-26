@@ -31,12 +31,19 @@ for (const [label, opt] of [['desktop', { viewport: { width: 1440, height: 900 }
   const p = await (await browser.newContext(opt)).newPage();
   await p.goto(B + '/shop/', { waitUntil: 'load' });
   await p.waitForTimeout(1200);
-  const top0 = await p.evaluate(() => { const r = document.querySelector('.shop-mark').getBoundingClientRect(); return Math.round(r.top + r.height / 2); });
-  if (label === 'desktop') check(Math.abs(top0) <= 1, `${label}: ring starts half cut off (centre y ${top0})`);
-  else {
-    const r = await p.evaluate(() => { const b = document.querySelector('.shop-mark').parentElement.getBoundingClientRect(); return { t: b.top, w: b.width, c: b.left + b.width / 2 }; });
-    check(r.t >= 0 && Math.abs(r.w - 351) <= 2 && Math.abs(r.c - 195) <= 1, `mobile: ring whole, 90% wide, centred (top ${r.t.toFixed(1)}, w ${r.w.toFixed(1)})`);
-  }
+  const shop = await p.evaluate(() => { const t = document.querySelector('.shop-head-title').getBoundingClientRect(); const r = document.querySelector('.shop-ring').getBoundingClientRect(); return { text: t.top, c: (r.top + r.bottom) / 2, top: r.top, below: t.top - r.bottom, w: r.width, x: r.left + r.width / 2 }; });
+  const hp = await (await browser.newContext(opt)).newPage();
+  await hp.goto(B + '/', { waitUntil: 'load' });
+  await hp.waitForTimeout(800);
+  const home = await hp.evaluate(() => { const t = document.querySelector('.site-header .brand').getBoundingClientRect(); const r = document.querySelector('.mark-blob').getBoundingClientRect(); return { text: t.top, c: (r.top + r.bottom) / 2, top: r.top, below: t.top - r.bottom }; });
+  await hp.close();
+  check(Math.abs(shop.text - home.text) <= 1, `${label}: name blocks at the same top (home ${home.text}, shop ${shop.text})`);
+  check(Math.abs(shop.c - home.c) <= 1.5, `${label}: face and ring centres aligned (${home.c.toFixed(1)}/${shop.c.toFixed(1)})`);
+  check(Math.abs(shop.x - 195 * (label === 'mobile' ? 1 : 1440 / 390)) <= 1, `${label}: ring centred horizontally`);
+  if (label === 'mobile') {
+    check(Math.abs(home.top - home.below) <= 2 && Math.abs(shop.top - shop.below) <= 2, `mobile: equal space above and below (face ${home.top.toFixed(0)}/${home.below.toFixed(0)}, ring ${shop.top.toFixed(0)}/${shop.below.toFixed(0)})`);
+    check(shop.top >= 0 && Math.abs(shop.w - 351) <= 2, `mobile: ring whole and 90% wide (top ${shop.top.toFixed(0)}, w ${shop.w.toFixed(0)})`);
+  } else check(Math.abs(shop.below - home.below) <= 2, `desktop: same gap to the name as the face (${home.below.toFixed(0)}/${shop.below.toFixed(0)})`);
   const R = Number(await p.getAttribute('[data-shop-head]', 'data-ring-r'));
   await p.evaluate((y) => scrollTo(0, y), R);
   await p.waitForTimeout(800);
@@ -44,6 +51,20 @@ for (const [label, opt] of [['desktop', { viewport: { width: 1440, height: 900 }
   check(await p.evaluate(() => !document.querySelector('.shop-ring-wrap, [data-shop-ring] .project-menu')), `${label}: no ring menu on /shop`);
   const order = await p.evaluate(() => [...document.querySelectorAll('.shop-menu > *')].map((e) => e.textContent.trim()).join(','));
   check(order === 'Home,About,Contact', `${label}: shop menu order ${order}`);
+  if (label === 'desktop') {
+    await p.evaluate(() => scrollTo(0, 0));
+    await p.waitForTimeout(400);
+    const look = (sel) => p.evaluate((s) => { const c = getComputedStyle(document.querySelector(s)); return c.color + ' ' + c.opacity; }, sel);
+    const rest = await look('.shop-menu > a');
+    await p.hover('.shop-menu > a');
+    await p.waitForTimeout(400);
+    const hov = await look('.shop-menu > a');
+    const other = await look('.shop-menu > button');
+    check(rest.startsWith('rgb(1') || rest !== hov, `shop menu starts gray (${rest})`);
+    check(/ 1$/.test(hov) && hov !== rest && other === rest, `shop menu: hovered item turns ink, others stay gray (${hov} / ${other})`);
+    await p.evaluate((y) => scrollTo(0, y), Number(await p.getAttribute('[data-shop-head]', 'data-ring-r')));
+    await p.waitForTimeout(800);
+  }
   await p.goto(B + (await p.getAttribute('.shop-title', 'href')), { waitUntil: 'load' });
   await p.waitForTimeout(3000); // load spin settles on 90deg
   const d = await p.locator('.shop-mark').boundingBox();
@@ -52,9 +73,41 @@ for (const [label, opt] of [['desktop', { viewport: { width: 1440, height: 900 }
 const p = await browser.newPage({ viewport: { width: 1440, height: 900 } });
 await p.goto(B + '/', { waitUntil: 'load' });
 await p.waitForTimeout(500);
-const home = await p.evaluate(() => [...document.querySelectorAll('.site-menu > *')].map((e) => e.textContent.trim()).join(','));
+const home = await p.evaluate(() => [...document.querySelectorAll('[data-main-menu] > *')].map((e) => e.textContent.trim()).join(','));
 check(home === 'About,Shop,Contact', `home menu ${home}`);
 check((await p.textContent('.brand')).trim() === 'Humansize', 'brand reads Humansize');
+// Socials: "Humansize" swaps the menu row; second click, Esc, far pointer and scroll close it.
+const soc = () => p.evaluate(() => ({ exp: document.querySelector('[data-socials-toggle]').getAttribute('aria-expanded'), menu: !document.querySelector('[data-main-menu]').hidden, items: [...document.querySelectorAll('[data-socials]:not([hidden]) > a')].map((a) => a.textContent.trim() + '=' + a.getAttribute('href')).join(',') }));
+await p.click('[data-socials-toggle]');
+let st0 = await soc();
+check(st0.exp === 'true' && !st0.menu && st0.items === 'Instagram=https://instagram.com/humansize.d,LinkedIn=https://www.linkedin.com/in/johannschnettker/,X=https://x.com/humansize_d,Email=mailto:schnettker.johann@gmail.com', `socials open (${st0.items})`);
+await p.click('[data-socials-toggle]');
+check((await soc()).menu, 'second click closes socials');
+await p.click('[data-socials-toggle]');
+await p.mouse.move(720, 100);
+check((await soc()).menu, 'pointer far away closes socials');
+await p.focus('[data-socials-toggle]');
+await p.keyboard.press('Enter');
+check((await soc()).exp === 'true', 'keyboard opens socials');
+await p.keyboard.press('Escape');
+check((await soc()).menu && (await p.evaluate(() => document.activeElement.matches('[data-socials-toggle]'))), 'Esc closes socials, focus stays on Humansize');
+await p.click('[data-socials-toggle]');
+await p.evaluate(() => scrollTo(0, 200));
+await p.waitForTimeout(200);
+check((await soc()).menu, 'scrolling away closes socials');
+await p.evaluate(() => scrollTo(0, 0));
+// Small-icon menus: one shared offset per viewport on project and product pages.
+for (const [lab, o, top] of [['desktop', { viewport: { width: 1440, height: 900 } }, 70], ['mobile', { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true }, 57]]) {
+  const q = await (await browser.newContext(o)).newPage();
+  const off = [];
+  for (const u of [B + '/work/analogue-counters/', B + (await (async () => { const z = await (await browser.newContext()).newPage(); await z.goto(B + '/shop/'); const h = await z.getAttribute('.shop-title', 'href'); await z.close(); return h; })())]) {
+    await q.goto(u, { waitUntil: 'load' });
+    await q.waitForTimeout(2500);
+    off.push(await q.evaluate(() => { const w = document.querySelector('[data-project-menu]'); const n = w.querySelector('.project-menu'); w.classList.add('is-open'); const r = n.getBoundingClientRect(), m = w.getBoundingClientRect(); return Math.round(r.top + parseFloat(getComputedStyle(n).paddingTop) - m.top); }));
+  }
+  check(off[0] === top && off[1] === top, `${lab}: small-icon menu offset ${off.join('/')} (want ${top})`);
+  await q.close();
+}
 await p.click('.site-menu [data-contact-open]');
 await p.waitForTimeout(700);
 await p.click('[data-service="Other"]');
@@ -63,6 +116,7 @@ const st = () => p.evaluate(() => { const t = document.querySelector('#contact-p
 await p.type('#contact-project', 'Short');
 await p.waitForTimeout(400);
 const s1 = await st();
+check(await p.evaluate(() => getComputedStyle(document.querySelector('#contact-project')).letterSpacing === getComputedStyle(document.querySelector('.brand')).letterSpacing), 'contact text uses the site tracking');
 await p.type('#contact-project', ' words');
 await p.waitForTimeout(400);
 const s1b = await st();

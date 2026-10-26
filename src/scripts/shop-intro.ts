@@ -25,39 +25,47 @@ export function initShopIntro(head: HTMLElement) {
   let lastT = 0;
   let frame = 0;
 
+  const layer = head.querySelector<HTMLElement>('[data-shop-ring-layer]')!;
+  const probe = document.createElement('div');
+  probe.style.cssText = 'position:absolute;top:0;left:0;width:1px;height:100svh;visibility:hidden;pointer-events:none';
+  document.body.appendChild(probe);
+
+  // Shared with the homepage (intro-face.ts): the name block top, and the illustration centre.
+  // Phones: the ring is centred between the viewport top and the title (equal space above and
+  // below), on the same centre as the home face. Desktop: the ring is the size of the home face's
+  // height and shares its centre and its 160px gap to the name; like the face it runs off the top.
   const layout = () => {
     const vw = document.documentElement.clientWidth;
     if (vw === lastW) return;
     lastW = vw;
+    const vh = Math.round(probe.getBoundingClientRect().height);
     const mobile = vw < 760;
-    const W0 = Math.round((vw * (mobile ? 0.9 : 0.68)) / 2) * 2; // even, so the centre is a whole px
+    const nameTop = Math.round(vh * (mobile ? 0.715 : 0.772));
+    document.documentElement.style.setProperty('--intro-name-top', `${nameTop}px`);
+    const faceH = Math.round(((Math.round(vw * 1.15) * 249) / 559) / 2) * 2;
+    const W0 = mobile ? Math.round((vw * 0.9) / 2) * 2 : faceH; // even, so the centre is a whole px
+    const C = mobile ? Math.round(nameTop / 2) : nameTop - 160 - W0 / 2;
     const Wf = 54;
     const topF = mobile ? 32 : 44; // .shop-detail padding-top
     const titleF = topF + Wf + (mobile ? 96 : 130); // detail h1 top
     head.classList.remove('is-sda');
-    host.style.transform = 'none';
-    // desktop: centre on the viewport top (half cut off); phones: whole ring, 90% wide, its
-    // bottom 96px above the title, like the homepage face
-    host.style.top = '';
-    if (mobile) {
-      host.style.top = '0px';
-      const t = Math.round(title.getBoundingClientRect().top - host.getBoundingClientRect().top);
-      host.style.top = `${t - 96 - W0}px`;
-    }
-    const box = host.getBoundingClientRect();
-    const c0 = box.top + box.height / 2 + scrollY; // ring centre doc y (about 0)
+    layer.style.transform = 'none';
+    const L = Math.round(layer.getBoundingClientRect().top + scrollY);
+    host.style.top = `${C - W0 / 2 - L}px`;
     const titleTop = Math.round(title.getBoundingClientRect().top + scrollY);
     R = Math.max(1, titleTop - titleF);
     sMin = Wf / W0;
-    dy = R + topF + Wf / 2 - c0; // ring centre: doc y 0 -> viewport y topF + 27 at scroll R
+    dy = R + topF + Wf / 2 - C; // ring centre: doc y C -> viewport y topF + 27 at scroll R
     head.style.setProperty('--ring-w', `${W0}px`);
+    head.style.setProperty('--ring-origin', `${C - L}px`);
     head.style.setProperty('--ring-r', `${R}px`);
     head.style.setProperty('--ring-dy', `${Math.round(dy)}px`);
     head.style.setProperty('--ring-smin', String(sMin));
     head.dataset.ringR = String(R);
+    head.dataset.ringReady = '';
     cur = NaN;
     if (sda) {
-      host.style.transform = '';
+      layer.style.transform = '';
       head.classList.add('is-sda');
     } else write(performance.now());
   };
@@ -70,7 +78,7 @@ export function initShopIntro(head: HTMLElement) {
     if (reduced || Number.isNaN(cur)) cur = t;
     else cur += (t - cur) * (1 - Math.exp(-dt / TAU));
     if (Math.abs(t - cur) < 0.0005) cur = t;
-    host.style.transform = `translateY(${(dy * cur).toFixed(2)}px) scale(${1 + (sMin - 1) * cur})`;
+    layer.style.transform = `translateY(${(dy * cur).toFixed(2)}px) scale(${1 + (sMin - 1) * cur})`;
     head.toggleAttribute('data-ring-settled', cur === t);
     if (cur !== t) frame = requestAnimationFrame(write);
     else lastT = 0;
