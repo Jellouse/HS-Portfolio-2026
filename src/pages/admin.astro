@@ -8,6 +8,7 @@ import mark from '../assets/industrial-bloom-mark.svg?raw';
 import { cmsTokenFromRequest, hasRepoPushAccess } from '../lib/cms-auth';
 import { adminOverview, markShipped, restoreSerial, updateProduct } from '../lib/shop/store.mjs';
 import { getPool } from '../lib/shop/server.mjs';
+import { getCollection } from 'astro:content';
 
 Astro.response.headers.set('cache-control', 'no-store');
 Astro.response.headers.set('x-robots-tag', 'noindex');
@@ -55,6 +56,9 @@ if (allowed && !process.env.DATABASE_URL) {
   }
   try {
     data = await adminOverview(pool);
+    // Only products defined in Keystatic; ignore DB rows for unknown slugs.
+    const known = new Set((await getCollection('products')).map((p) => p.id));
+    data.vases = data.vases.filter((v) => known.has(v.slug));
   } catch (e) {
     error = `Database: ${e instanceof Error ? e.message : e}`;
   }
