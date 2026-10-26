@@ -43,11 +43,13 @@ blocks:
   - discriminant: image
     value:
       src: /src/content/projects/analogue-af1/blocks/3/value/src.jpg
+      alt: Render of the black Analogue AF1 camera from the front
       frame: default
       flush: false
   - discriminant: image
     value:
       src: /src/content/projects/analogue-af1/blocks/4/value/src.jpg
+      alt: Analogue AF1 camera rendered from all six sides
       frame: default
       flush: false
   - discriminant: image

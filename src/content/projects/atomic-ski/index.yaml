@@ -94,11 +94,13 @@ blocks:
   - discriminant: image
     value:
       src: /src/content/projects/atomic-ski/blocks/9/value/src.jpg
+      alt: Row of Atomic ski boots fading from white to black, Atomic Ski website
       frame: wide
       flush: false
   - discriminant: image
     value:
       src: /src/content/projects/atomic-ski/blocks/10/value/src.jpg
+      alt: White Atomic ski boot shown from the front and the side, Atomic Ski website
       frame: default
       flush: false
   - discriminant: video
@@ -145,36 +147,43 @@ blocks:
   - discriminant: image
     value:
       src: /src/content/projects/atomic-ski/blocks/17/value/src.jpg
+      alt: Close-up of a black ski goggle lens, Atomic Ski website
       frame: default
       flush: false
   - discriminant: image
     value:
       src: /src/content/projects/atomic-ski/blocks/18/value/src.jpg
+      alt: Close-up of a blue goggle strap with Live Fit lettering, Atomic Ski website
       frame: default
       flush: false
   - discriminant: image
     value:
       src: /src/content/projects/atomic-ski/blocks/19/value/src.jpg
+      alt: Laptop showing an Atomic goggle landing page, Atomic Ski website
       frame: default
       flush: false
   - discriminant: image
     value:
       src: /src/content/projects/atomic-ski/blocks/20/value/src.jpg
+      alt: Stack of Atomic ski goggles in different lens colours, Atomic Ski website
       frame: default
       flush: false
   - discriminant: image
     value:
       src: /src/content/projects/atomic-ski/blocks/21/value/src.jpg
+      alt: Atomic ski goggles arranged in a curve, Atomic Ski website
       frame: default
       flush: false
   - discriminant: image
     value:
       src: /src/content/projects/atomic-ski/blocks/22/value/src.jpg
+      alt: Phone screens showing the goggle field of view feature, Atomic Ski website
       frame: default
       flush: false
   - discriminant: image
     value:
       src: /src/content/projects/atomic-ski/blocks/23/value/src.jpg
+      alt: Billboard with Atomic goggles on a building, Atomic Ski website
       frame: default
       flush: false
   - discriminant: process

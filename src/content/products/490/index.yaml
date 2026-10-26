@@ -8,8 +8,8 @@ description: >-
 seo:
   title: Type-490 aluminium ring vase · Industrial Bloom · Humansize
   description: >-
-    A heavy aluminium vase made from four curved extrusion profiles joined into
-    a ring. 160 mm across, 250 mm high, edition of 2, handmade in Germany.
+    A heavy aluminium ring vase for a large bouquet, or for branches that need a
+    strong base. 160 mm across, 250 mm high, edition of 2, handmade in Germany.
 overview:
   show: true
   title: Type-490
@@ -18,11 +18,11 @@ overview:
     with an 80 mm opening, 250 mm high. Edition of 2, each numbered.
   left:
     src: /src/content/products/490/overview/left/src.jpg
-    alt: Type 490 vase
+    alt: Type-490 aluminium ring vase
     outline: false
   right:
     src: /src/content/products/490/overview/right/src.jpg
-    alt: Type 490 vase
+    alt: Type-490 aluminium ring vase
     outline: false
 detail:
   description: >-

@@ -91,6 +91,7 @@ const projects = defineCollection({
     yearEnd: z.number().int().nullish(),
     published: z.boolean().default(true),
     seoTitle: z.string().optional(),
+    seoDescription: z.string().optional(),
     summary: z.string(),
     cover: z.string().optional(),
     coverVideo: z.string().nullish(),

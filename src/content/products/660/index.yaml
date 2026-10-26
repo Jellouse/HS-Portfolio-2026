@@ -5,7 +5,9 @@ dimensions: 200 mm tall
 description: A tall, slim aluminium vase for a small bouquet or one large flower.
 seo:
   title: Type-660 tall aluminium vase · Industrial Bloom · Humansize
-  description: A tall, solid aluminium vase for long stems like branches and lilies. 200 mm high, 0.5 kg, raw finish, handmade in Germany.
+  description: >-
+    A tall, slim aluminium vase for a small bouquet or one large flower. 200 mm
+    high, 0.5 kg, raw finish, handmade in Germany.
 overview:
   show: true
   title: Type-660
@@ -14,11 +16,11 @@ overview:
     branches, lilies. Raw finish, 0.5 kg.
   left:
     src: /src/content/products/660/overview/left/src.jpg
-    alt: Type 660 vase
+    alt: Type-660 tall aluminium vase
     outline: false
   right:
     src: /src/content/products/660/overview/right/src.jpg
-    alt: Type 660 vase
+    alt: Type-660 tall aluminium vase
     outline: false
 detail:
   title: Type-660
@@ -33,6 +35,7 @@ detail:
       alt: Type 660 vase from above with an orange flower
       outline: false
     - src: /src/content/products/660/detail/images/2/src.png
+      alt: Technical drawing of the Type-660 vase
       outline: true
   sections:
     - heading: Cork Base

@@ -111,6 +111,11 @@ export default config({
           label: 'SEO title',
           description: 'Optional browser and search title; " · Humansize" is added. Empty uses the title and years.',
         }),
+        seoDescription: fields.text({
+          label: 'SEO description',
+          multiline: true,
+          description: 'Optional meta description for search. Empty uses the summary.',
+        }),
         summary: fields.text({
           label: 'Summary',
           multiline: true,

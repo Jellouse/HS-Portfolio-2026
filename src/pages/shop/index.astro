@@ -6,12 +6,25 @@ import Base from '../../layouts/Base.astro';
 import mark from '../../assets/industrial-bloom-mark.svg?raw';
 import { resolveImageSource } from '../../lib/images';
 import { getProducts, priceText, seedEur } from '../../lib/shop';
+import { absoluteUrl } from '../../lib/content';
 
 const products = (await getProducts()).filter((p) => p.data.overview.show !== false);
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'ItemList',
+  name: 'Industrial Bloom shop',
+  url: absoluteUrl(Astro.site, '/shop/'),
+  itemListElement: products.map((p, i) => ({
+    '@type': 'ListItem',
+    position: i + 1,
+    name: p.data.overview.title || p.data.name,
+    url: absoluteUrl(Astro.site, `/shop/${p.id}/`),
+  })),
+};
 const sizes = '(min-width: 1440px) 439px, (min-width: 760px) 30vw, calc(50vw - 30px)';
 ---
 
-<Base title="Industrial Bloom shop · Humansize" description="Industrial Bloom: solid aluminium vases made from extrusion profiles, handmade in Germany in small numbered editions.">
+<Base jsonLd={jsonLd} title="Industrial Bloom shop · Humansize" description="Industrial Bloom: solid aluminium vases made from extrusion profiles, handmade in Germany in small numbered editions.">
   <div class="shop-page page-grid">
     <header class="shop-head" data-shop-head>
       <div class="shop-ring-layer" data-shop-ring-layer>
