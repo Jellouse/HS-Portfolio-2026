@@ -32,7 +32,7 @@ detail:
   images:
     - src: /src/content/products/490/detail/images/0/src.webp
       alt: Type-490 aluminium ring vase from above
-      outline: false
+      outline: true
     - src: /src/content/products/490/detail/images/1/src.jpg
       alt: Type-490 vase from the side
       outline: false
