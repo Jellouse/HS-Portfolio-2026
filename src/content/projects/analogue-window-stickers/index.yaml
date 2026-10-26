@@ -10,6 +10,7 @@ cover: /src/content/projects/analogue-window-stickers/cover.jpg
 coverAlt: Film workshops window sticker, Analogue
 coverFrame: wide
 coverFlush: false
+coverOutline: false
 rounded: true
 info:
   - label: Production
@@ -30,12 +31,14 @@ blocks:
       alt: Film workshops window sticker, Analogue window stickers
       frame: default
       flush: false
+      outline: false
   - discriminant: image
     value:
       src: /src/content/projects/analogue-window-stickers/blocks/1/value/src.jpg
       alt: Illustrated figures sticker on a window, Analogue window stickers
       frame: default
       flush: false
+      outline: false
   - discriminant: pair
     value:
       layout: pair
@@ -44,12 +47,14 @@ blocks:
       right: /src/content/projects/analogue-window-stickers/blocks/2/value/right.jpg
       rightAlt: Applying the figures sticker, Analogue window stickers
       frame: default
+      outline: false
   - discriminant: image
     value:
       src: /src/content/projects/analogue-window-stickers/blocks/3/value/src.jpg
       alt: Summer focus window stickers on the shopfront, Analogue window stickers
       frame: wide
       flush: false
+      outline: false
   - discriminant: image
     value:
       src: /src/content/projects/analogue-window-stickers/blocks/4/value/src.jpg
@@ -58,75 +63,81 @@ blocks:
         stickers
       frame: default
       flush: false
+      outline: false
   - discriminant: image
     value:
       src: /src/content/projects/analogue-window-stickers/blocks/5/value/src.jpg
       alt: No filters, no apps window lettering, Analogue window stickers
       frame: default
       flush: false
+      outline: false
   - discriminant: image
     value:
       src: /src/content/projects/analogue-window-stickers/blocks/6/value/src.jpg
       alt: Shopfront with No filters window lettering, Analogue window stickers
       frame: wide
       flush: false
+      outline: false
   - discriminant: image
     value:
       src: /src/content/projects/analogue-window-stickers/blocks/7/value/src.jpg
       alt: Lettering sticker reflected on the pavement, Analogue window stickers
       frame: default
       flush: false
+      outline: false
   - discriminant: image
     value:
       src: /src/content/projects/analogue-window-stickers/blocks/8/value/src.jpg
       alt: Analogue logo sticker on a shop window, Analogue window stickers
       frame: default
       flush: false
+      outline: false
   - discriminant: image
     value:
       src: /src/content/projects/analogue-window-stickers/blocks/9/value/src.jpg
       alt: Shopfront with window stickers, Analogue window stickers
       frame: wide
       flush: false
+      outline: false
   - discriminant: image
     value:
       src: /src/content/projects/analogue-window-stickers/blocks/10/value/src.jpg
-      alt: Applying a logo sticker to a window, Analogue window stickers
-      frame: default
-      flush: false
-  - discriminant: image
-    value:
-      src: /src/content/projects/analogue-window-stickers/blocks/11/value/src.jpg
       alt: Window with camera brands lettering, Analogue window stickers
       frame: default
       flush: false
+      outline: false
   - discriminant: image
     value:
-      src: /src/content/projects/analogue-window-stickers/blocks/12/value/src.jpg
+      src: /src/content/projects/analogue-window-stickers/blocks/11/value/src.jpg
       alt: Applying camera brand lettering, Analogue window stickers
       frame: default
       flush: false
+      outline: false
   - discriminant: image
     value:
-      src: /src/content/projects/analogue-window-stickers/blocks/13/value/src.jpg
+      src: /src/content/projects/analogue-window-stickers/blocks/12/value/src.jpg
       alt: Applying a large sticker to a window, Analogue window stickers
       frame: default
       flush: false
+      outline: false
   - discriminant: image
     value:
-      src: /src/content/projects/analogue-window-stickers/blocks/14/value/src.jpg
+      src: /src/content/projects/analogue-window-stickers/blocks/13/value/src.jpg
       alt: Illuminated Analogue sign, Analogue window stickers
       frame: default
       flush: false
+      outline: false
   - discriminant: image
     value:
-      src: /src/content/projects/analogue-window-stickers/blocks/15/value/src.jpg
+      src: /src/content/projects/analogue-window-stickers/blocks/14/value/src.jpg
       alt: Placing a sidewalk sign, Analogue window stickers
       frame: default
       flush: false
+      outline: false
   - discriminant: image
     value:
-      src: /src/content/projects/analogue-window-stickers/blocks/16/value/src.jpg
+      src: /src/content/projects/analogue-window-stickers/blocks/15/value/src.jpg
       alt: Analogue sidewalk sign on the street, Analogue window stickers
       frame: default
       flush: false
+      outline: false
