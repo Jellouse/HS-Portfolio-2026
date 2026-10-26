@@ -5,6 +5,7 @@ import Header from '../components/Header.astro';
 import ContactSheet from '../components/ContactSheet.astro';
 import Seo from '../components/Seo.astro';
 import Analytics from '@vercel/analytics/astro';
+import SpeedInsights from '@vercel/speed-insights/astro';
 import { getSite } from '../lib/content';
 import type { ImageMetadata } from 'astro';
 
@@ -340,5 +341,7 @@ const site = await getSite();
     </script>
     <!-- Vercel Web Analytics (cookieless page views). -->
     <Analytics />
+    <!-- Vercel Speed Insights (real-user Core Web Vitals). -->
+    <SpeedInsights />
   </body>
 </html>

@@ -38,7 +38,7 @@ const errors = [];
 // Vercel serves the analytics script at /_vercel/insights/* only in production.
 // The stock API is a serverless route; the static test server has no functions.
 await page.route('**/api/shop/stock', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: '{}' }));
-await page.route('**/_vercel/insights/**', (r) => r.fulfill({ status: 200, contentType: 'text/javascript', body: '' }));
+await page.route(/\/_vercel\/(insights|speed-insights)\//, (r) => r.fulfill({ status: 200, contentType: 'text/javascript', body: '' }));
 page.on('console', (m) => m.type() === 'error' && errors.push(m.text()));
 page.on('pageerror', (e) => errors.push(String(e)));
 await page.addInitScript(() => {

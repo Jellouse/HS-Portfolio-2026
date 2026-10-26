@@ -41,6 +41,7 @@
     "@keystatic/astro": "^6.0.0",
     "@keystatic/core": "^0.6.9",
     "@vercel/analytics": "^2.0.1",
+    "@vercel/speed-insights": "^2.0.0",
     "astro": "^5.14.1",
     "pg": "^8.23.1",
     "react": "^19.3.1",
