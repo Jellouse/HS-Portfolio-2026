@@ -28,7 +28,7 @@ export const GET: APIRoute = async ({ site }) => {
     '## Projects',
     '',
     ...projects.flatMap((project) => {
-      const summary = plainText(project.data.summary);
+      const summary = project.data.seoDescription?.trim() || plainText(project.data.summary);
       return [
         `- [${projectLabel(project.data)}](${absoluteUrl(site, `/work/${project.id}/`)}): ${summary}`,
       ];
