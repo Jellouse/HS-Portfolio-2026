@@ -71,6 +71,7 @@ function escapeHtml(value: string): string {
 function safeHref(value: string): string | null {
   if (/^https?:\/\//i.test(value)) return value;
   if (/^mailto:/i.test(value)) return value;
+  if (value === '#contact') return value;
   if (value.startsWith('/') && !value.startsWith('//')) return value;
   return null;
 }
@@ -87,7 +88,9 @@ export function renderInline(text: string): string {
     html += escapeHtml(text.slice(last, index));
     const href = safeHref(match[2]);
     const label = escapeHtml(match[1]);
-    html += href ? `<a href="${escapeHtml(href)}">${label}</a>` : escapeHtml(match[0]);
+    // [label](#contact) opens the contact sheet, like the header Contact item.
+    const extra = href === '#contact' ? ' data-contact-open aria-haspopup="dialog"' : '';
+    html += href ? `<a href="${escapeHtml(href)}"${extra}>${label}</a>` : escapeHtml(match[0]);
     last = index + match[0].length;
   }
   html += escapeHtml(text.slice(last));

@@ -421,7 +421,7 @@ export default config({
           fields.markdoc.inline({
             label: 'Paragraph',
             description:
-              'Use the link mark for a name that has a project page. Leave other names as text. Markdoc fields cannot set isRequired.',
+              'Use the link mark for a name that has a project page; link to #contact to open the contact form. Leave other names as text. Markdoc fields cannot set isRequired.',
             options: inlineLink,
           }),
           {
