@@ -8,6 +8,7 @@
 
 <svg
   class="mark mark-face"
+  data-mark-face
   viewBox="0 0 559 249"
   fill="none"
   aria-hidden="true"
@@ -31,10 +32,10 @@
         seed="48"
         result="noise"
       ></feTurbulence>
-      
+      <feOffset in="noise" dx="0" dy="0" result="shifted" data-blob-offset></feOffset>
       <feDisplacementMap
         in="SourceGraphic"
-        in2="noise"
+        in2="shifted"
         scale="111"
         xChannelSelector="R"
         yChannelSelector="G"

@@ -3,6 +3,7 @@ export const prerender = true;
 
 import mark from '../../assets/industrial-bloom-mark.svg?raw';
 import BlurImage from '../../components/BlurImage.astro';
+import SmallMenu from '../../components/SmallMenu.astro';
 import Info from '../../components/Info.astro';
 import Base from '../../layouts/Base.astro';
 import { paragraphs, renderInline } from '../../lib/content';
@@ -64,11 +65,12 @@ const half = '(min-width: 760px) 272px, calc((100vw - 48px) / 2)';
   safeArea
 >
   <article class="shop-detail page-grid" data-slug={product.id}>
-    <p class="shop-detail-mark">
-      <a href="/shop/" aria-label="Industrial Bloom shop">
+    <div class="shop-detail-mark project-mark is-ring" data-project-menu>
+      <a href="/shop/" aria-label="Industrial Bloom shop" data-project-face>
         <span class="shop-mark" data-spin-mark set:html={mark} />
       </a>
-    </p>
+      <SmallMenu />
+    </div>
     <header class="shop-detail-head">
       <h1>{title}<br /><span data-price={product.id} data-price-style="suffix">{priceText(eur, 'suffix')}</span></h1>
     </header>
@@ -117,6 +119,8 @@ const half = '(min-width: 760px) 272px, calc((100vw - 48px) / 2)';
 
 <script>
   import { initSpinMark } from '../../scripts/spin-mark';
+  import { initProjectMenu } from '../../scripts/project-menu';
+  initProjectMenu();
 
   const start = () => {
     const el = document.querySelector<HTMLElement>('[data-spin-mark]');

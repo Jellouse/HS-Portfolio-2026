@@ -47,6 +47,9 @@
 }
 
 :root {
+  /* Small face mark at the top of project pages; the homepage intro shrinks to this. */
+  --mark-small-w: 64px;
+  --mark-small-top: 32px;
   --ink: #000;
   --ink-40: rgba(0, 0, 0, 0.4);
   --muted: var(--ink-40);
@@ -194,7 +197,9 @@ summary:hover {
 a:hover:has(img),
 a:hover:has(video),
 .site-header a:hover,
-.site-header button:hover {
+.site-header button:hover,
+.site-menu > a:hover,
+.site-menu > button:hover {
   opacity: 1;
 }
 
@@ -260,20 +265,6 @@ summary:active {
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
-}
-
-.skip {
-  position: absolute;
-  left: 12px;
-  top: 12px;
-  z-index: 50;
-  background: #fff;
-  padding: 8px 12px;
-  transform: translateY(-140%);
-}
-
-.skip:focus {
-  transform: none;
 }
 
 summary {
@@ -726,7 +717,7 @@ body:has(.project) .site-header {
 
 /* Distorted face mark: static, keeps its proportions (no cursor stretch). */
 .project-mark .mark-face {
-  width: 64px;
+  width: var(--mark-small-w);
   transform: none;
   overflow: visible;
 }
@@ -2174,4 +2165,846 @@ body:has(.shop-detail) .site-header {
     bottom: calc(20px + env(safe-area-inset-bottom, 0px));
     margin-top: 96px;
   }
+}
+
+/* Homepage intro (src/scripts/intro-face.ts): huge face pushed down to size by the name. */
+.hero[data-intro] {
+  padding-top: 0;
+  overflow-x: clip;
+}
+
+.hero[data-intro] .mark-wrap {
+  min-height: 100svh;
+}
+
+.hero[data-intro] [data-hero-variant="blob"] {
+  /* Extends above the page and past the sides so nothing crops the face (iOS rubber-band,
+     WebGL output region). Scaled as one composited layer. */
+  inset: -100lvh -50% 0;
+  transform-origin: 50% var(--intro-origin, 0);
+  will-change: transform;
+}
+
+.hero[data-intro] .mark-blob {
+  top: var(--intro-face-top, 0);
+  width: var(--intro-w, 500px);
+  transform: translateX(-50%);
+}
+
+body:has(.hero[data-intro]) .site-header {
+  top: var(--intro-name-top, round(77.2svh, 1px));
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0;
+  transform: translateX(-50%);
+}
+
+body:has(.hero[data-intro]) .site-header .who,
+body:has(.hero[data-intro]) .site-header .contact {
+  width: 100%;
+  text-align: center;
+}
+
+body:has(.hero[data-intro]) .site-header .contact-label {
+  margin-inline: auto;
+}
+
+body:has(.hero[data-intro]) .who .time {
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+body:has(.hero[data-intro]) .contact-menu {
+  top: calc(-2 * var(--lh-body));
+  right: auto;
+  left: 50%;
+  align-items: center;
+  transform: translateX(-50%) scale(0.95);
+  transform-origin: 50% 100%;
+}
+
+body:has(.hero[data-intro]) .contact:hover .contact-menu,
+body:has(.hero[data-intro]) .contact:focus-within .contact-menu,
+body:has(.hero[data-intro]) .contact.is-open .contact-menu {
+  transform: translateX(-50%) scale(1);
+}
+
+body:has(.hero[data-intro]) .site-header.page-grid {
+  display: flex;
+}
+
+body:has(.hero[data-intro]) .site-header .who,
+body:has(.hero[data-intro]) .site-header .contact {
+  grid-column: auto;
+}
+
+/* Preview-only intro smoothing dial (never rendered on production). */
+.intro-tune {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  /* under the header (z 5) so the open contact menu stays tappable */
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 200px;
+  padding: 12px;
+  font-size: 13px;
+  line-height: 16px;
+  color: #fff;
+  background: rgb(0 0 0 / 80%);
+  border-radius: 8px;
+}
+
+.intro-tune label {
+  display: flex;
+  justify-content: space-between;
+}
+
+.intro-tune button {
+  padding: 4px 0;
+  font: inherit;
+  color: inherit;
+  border: 1px solid rgb(255 255 255 / 40%);
+  border-radius: 4px;
+}
+
+/* Homepage name block (mock 2): "Humansize" over Home / Contact / Shop. */
+.site-header .brand {
+  margin: 0;
+  font-size: var(--text-body);
+  line-height: var(--lh-body);
+}
+
+.site-menu {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+}
+
+.site-menu > a,
+.site-menu > button,
+.project-menu > a,
+.project-menu > button {
+  padding: 0;
+  font: inherit;
+  font-size: var(--text-body);
+  line-height: var(--lh-body);
+  color: var(--ink);
+  text-decoration: none;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  transition: color 160ms ease;
+}
+
+/* Landing: all gray, the hovered one turns black. */
+.site-menu > a,
+.site-menu > button {
+  color: var(--muted);
+}
+
+.site-menu > :hover,
+.site-menu > :focus-visible {
+  color: var(--ink);
+}
+
+/* Project pages: face opens the menu; items come out from behind the face. */
+.project-mark {
+  position: relative;
+  transition: margin-bottom 300ms var(--ease-out);
+}
+
+.project-mark.is-open {
+  margin-bottom: var(--small-menu-push);
+}
+
+.project-mark.is-open::before {
+  /* the "general area": leaving it closes the menu */
+  content: "";
+  position: absolute;
+  top: -32px;
+  left: 50%;
+  width: 440px;
+  height: 176px;
+  transform: translateX(-50%);
+}
+
+.project-mark > a {
+  position: relative;
+  z-index: 2;
+}
+
+.project-menu {
+  position: absolute;
+  top: var(--small-menu-top);
+  left: 50%;
+  z-index: 1;
+  display: flex;
+  gap: 24px;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.project-menu > a,
+.project-menu > button {
+  opacity: 0;
+  transform: translate(calc(var(--i) * -48px), -56px) scale(0.6);
+  transition:
+    opacity 200ms ease,
+    transform 300ms var(--ease-out),
+    color 160ms ease;
+}
+
+.project-mark.is-open .project-menu {
+  pointer-events: auto;
+}
+
+.project-mark.is-open .project-menu > a,
+.project-mark.is-open .project-menu > button {
+  opacity: 1;
+  transform: none;
+}
+
+.project-menu:has(> :hover) > :not(:hover) {
+  color: var(--muted);
+}
+
+/* Contact sheet */
+.contact-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+}
+
+.contact-sheet[hidden] {
+  display: none;
+}
+
+html.is-contact-open {
+  overflow: hidden;
+}
+
+.contact-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgb(0 0 0 / 20%);
+  opacity: 0;
+  transition: opacity 500ms ease;
+}
+
+.contact-panel {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 435px;
+  padding: 49px 20px 0;
+  text-align: center;
+  background: #fff;
+  transform: translateY(100%);
+  transition: transform 500ms var(--ease-out);
+}
+
+.contact-sheet.is-open .contact-backdrop {
+  opacity: 1;
+}
+
+.contact-sheet.is-open .contact-panel {
+  transform: none;
+}
+
+.contact-step[hidden] {
+  display: none;
+}
+
+.contact-q,
+.contact-done {
+  display: block;
+  margin: 0;
+  font-size: var(--text-body);
+  line-height: var(--lh-body);
+  color: var(--ink);
+  transition: color 160ms ease;
+}
+
+.contact-q.is-muted {
+  color: var(--muted);
+}
+
+.contact-done {
+  padding-top: 116px;
+}
+
+.contact-options {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px 24px;
+  margin-top: 142px;
+}
+
+.contact-options button,
+.contact-nav button {
+  padding: 0;
+  font: inherit;
+  font-size: var(--text-body);
+  line-height: var(--lh-body);
+  color: var(--ink);
+  background: none;
+  border: 0;
+  cursor: pointer;
+  transition: color 160ms ease;
+}
+
+.contact-options:has(> :hover) > :not(:hover) {
+  color: var(--muted);
+}
+
+.contact-panel textarea,
+.contact-panel input {
+  display: block;
+  width: min(664px, 100%);
+  margin: 56px auto 0;
+  padding: 0;
+  font: inherit;
+  font-size: var(--text-body);
+  line-height: var(--lh-body);
+  color: var(--ink);
+  text-align: left;
+  background: none;
+  border: 0;
+  outline: none;
+  resize: none;
+}
+
+.contact-panel textarea {
+  height: 174px;
+}
+
+.contact-panel textarea:placeholder-shown {
+  padding-top: 86px;
+  text-align: center;
+}
+
+.contact-panel input {
+  margin-top: 142px;
+  text-align: center;
+}
+
+.contact-panel ::placeholder {
+  color: var(--muted);
+  opacity: 1;
+}
+
+.contact-nav {
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  height: 29px;
+  transform: translateX(-50%);
+}
+
+.contact-dots {
+  display: flex;
+  gap: 6px;
+  transition: gap 200ms var(--ease-out);
+}
+
+.contact-dots i {
+  width: 4px;
+  height: 4px;
+  background: var(--muted);
+  border-radius: 50%;
+  transition: background 160ms ease;
+}
+
+.contact-dots i.is-on {
+  background: var(--ink);
+}
+
+.contact-back,
+.contact-next {
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 200ms ease,
+    transform 250ms var(--ease-out),
+    color 160ms ease;
+}
+
+.contact-back {
+  transform: translateX(16px);
+}
+
+.contact-next {
+  transform: translateX(-16px);
+}
+
+.contact-nav button:disabled {
+  color: rgb(0 0 0 / 15%);
+  cursor: default;
+}
+
+/* From step 2 on: hovering the dots merges them into one and brings in Back / Next. */
+.contact-nav.has-controls:hover .contact-dots,
+.contact-nav.has-controls:focus-within .contact-dots {
+  gap: 0;
+}
+
+.contact-nav.has-controls:hover .contact-dots i:not(.is-on),
+.contact-nav.has-controls:focus-within .contact-dots i:not(.is-on) {
+  width: 0;
+}
+
+.contact-nav.has-controls:hover :is(.contact-back, .contact-next),
+.contact-nav.has-controls:focus-within :is(.contact-back, .contact-next) {
+  opacity: 1;
+  pointer-events: auto;
+  transform: none;
+}
+
+/* Touch: no hover, so Back / Next stay visible from step 2 on. */
+@media (hover: none) {
+  .contact-nav.has-controls :is(.contact-back, .contact-next) {
+    opacity: 1;
+    pointer-events: auto;
+    transform: none;
+  }
+}
+
+.contact-back,
+.contact-next {
+  position: absolute;
+  top: 0;
+}
+
+.contact-back {
+  right: calc(100% + 16px);
+}
+
+.contact-next {
+  left: calc(100% + 16px);
+}
+
+/* Touch intro: the scale runs as a scroll-driven animation on the compositor (no JS per frame),
+   so iOS momentum scrolling stays smooth. */
+@keyframes intro-face-scale {
+  from {
+    transform: scale(1) translateZ(0);
+  }
+
+  to {
+    transform: scale(var(--intro-smin)) translateZ(0);
+  }
+}
+
+.hero[data-intro].is-sda [data-hero-variant="blob"] {
+  animation: intro-face-scale linear both;
+  animation-timeline: scroll(root block);
+  animation-range: 0px var(--intro-r);
+}
+
+/* Round 5 ------------------------------------------------------------------ */
+
+/* Small-icon menus (project, /shop, /shop/<slug>): gray, the hovered one turns black. Items
+   blur in as they come out from behind the icon. */
+.project-menu > a,
+.project-menu > button {
+  color: var(--muted);
+  filter: blur(4px);
+  transition:
+    opacity 200ms ease,
+    filter 300ms var(--ease-out-expo),
+    transform 300ms var(--ease-out),
+    color 160ms ease;
+}
+
+.project-mark.is-open .project-menu > a,
+.project-mark.is-open .project-menu > button {
+  filter: none;
+}
+
+.project-menu:has(> :hover) > :not(:hover) {
+  color: var(--muted);
+}
+
+.project-menu > :hover,
+.project-menu > :focus-visible {
+  color: var(--ink);
+}
+
+/* Ring icons: the menu hangs 16px under the ring, with a 16px bridge so the pointer can cross. */
+.project-mark.is-ring .project-menu {
+  top: calc(var(--small-menu-top) - var(--small-menu-bridge));
+  padding-top: var(--small-menu-bridge);
+}
+
+/* /shop header (mock: shop header): big ring centred on the viewport top, title + subline at
+   75svh; shop-intro.ts scales the ring down onto the /shop/<slug> icon spot. */
+.shop-page {
+  position: relative;
+  padding-top: var(--intro-name-top, round(77.2svh, 1px));
+}
+
+.shop-head {
+  --ring-w: round(68vw, 1px);
+  display: block;
+  margin: 0 0 184px;
+  text-align: center;
+}
+
+.shop-head .shop-head-title,
+.shop-head .shop-head-sub {
+  text-align: center;
+}
+
+.shop-head .shop-head-sub {
+  color: var(--muted);
+}
+
+.shop-ring-layer {
+  /* Extends 100lvh above the page like the home face host, so elastic overscroll never crops the ring. */
+  position: absolute;
+  top: -100lvh;
+  right: 0;
+  left: 0;
+  z-index: 2;
+  height: 100lvh;
+  transform-origin: 50% var(--ring-origin, 100lvh);
+  will-change: transform;
+  pointer-events: none;
+}
+
+.shop-ring {
+  position: absolute;
+  top: calc(100lvh - var(--ring-w) / 2);
+  left: 50%;
+  width: var(--ring-w);
+  margin-left: calc(var(--ring-w) / -2);
+  pointer-events: auto;
+}
+
+.js .shop-head:not([data-ring-ready]) .shop-ring {
+  visibility: hidden;
+}
+
+.shop-ring .shop-mark {
+  display: block;
+  width: 100%;
+  margin: 0;
+}
+
+@keyframes shop-ring-scale {
+  from {
+    transform: translateY(0) scale(1) translateZ(0);
+  }
+
+  to {
+    transform: translateY(var(--ring-dy)) scale(var(--ring-smin)) translateZ(0);
+  }
+}
+
+.shop-head.is-sda .shop-ring-layer {
+  animation: shop-ring-scale linear both;
+  animation-timeline: scroll(root block);
+  animation-range: 0px var(--ring-r);
+}
+
+@media (max-width: 759px) {
+  .shop-page {
+    padding-top: var(--intro-name-top, round(71.5svh, 1px));
+  }
+
+  .shop-head {
+    --ring-w: round(90vw, 1px);
+    margin-bottom: 96px;
+  }
+}
+
+/* Contact: thank-you centred in the panel like the other steps' content; no dots there. */
+.contact-step[data-step="done"] {
+  position: absolute;
+  top: 220px;
+  right: 20px;
+  left: 20px;
+}
+
+.contact-done {
+  padding-top: 0;
+}
+
+.contact-sheet[data-step="done"] .contact-nav {
+  visibility: hidden;
+}
+
+/* Dots: one generous hover zone that covers the dots and both buttons. */
+.contact-nav::before {
+  content: "";
+  position: absolute;
+  inset: -32px -136px;
+}
+
+/* Project text: centred while it is one line, left from the second; the block stays
+   vertically centred in the area and only moves when the line count changes. */
+.contact-field {
+  position: relative;
+  width: min(664px, 100%);
+  height: 232px;
+  margin: 33px auto 0;
+}
+
+.contact-panel .contact-field textarea {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: calc(var(--lines, 1) * var(--lh-body));
+  max-height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  text-align: center;
+  transform: translateY(-50%);
+  transition: height 240ms var(--ease-out);
+}
+
+.contact-panel .contact-field textarea:placeholder-shown {
+  padding-top: 0;
+}
+
+.contact-field.is-multi textarea {
+  text-align: left;
+}
+
+.contact-field.is-full textarea {
+  overflow-y: auto;
+}
+
+.contact-mirror {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  font-size: var(--text-body);
+  line-height: var(--lh-body);
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* Blur reveal on text that appears: header name + menu, each contact step, the thank-you. */
+@media (prefers-reduced-motion: no-preference) {
+  .site-header .brand,
+  .site-menu > *,
+  .contact-step:not([hidden]) :is(.contact-q, .contact-options > button, textarea, input, .contact-done) {
+    animation: text-in 400ms var(--ease-out-expo) both;
+  }
+
+  .site-menu > :nth-child(2),
+  .contact-options > :nth-child(2) {
+    animation-delay: 30ms;
+  }
+
+  .site-menu > :nth-child(3),
+  .contact-options > :nth-child(3) {
+    animation-delay: 60ms;
+  }
+
+  .contact-options > :nth-child(4),
+  .contact-step:not([hidden]) :is(textarea, input) {
+    animation-delay: 90ms;
+  }
+}
+
+.contact-dots {
+  position: relative;
+}
+
+/* Round 6 ------------------------------------------------------------------ */
+
+/* Phones: menu items sit half as far under the small icon. */
+/* Small-icon menu (project face and product ring share these): offset from the icon top,
+   the hover bridge under a ring, and how far an open menu pushes the content down. */
+:root {
+  --small-menu-top: 70px;
+  --small-menu-bridge: 16px;
+  --small-menu-push: 162px;
+}
+
+@media (max-width: 759px) {
+  :root {
+    --small-menu-top: 57px;
+    --small-menu-bridge: 3px;
+    --small-menu-push: 124px;
+  }
+}
+
+/* Keyboard focus, in the site's style: a thin ink outline, offset, only for keyboard users. */
+:focus-visible {
+  outline: 1px solid var(--ink);
+  outline-offset: 4px;
+  border-radius: 2px;
+}
+
+.contact-panel :is(textarea, input):focus-visible {
+  outline: none;
+}
+
+[tabindex="-1"]:focus {
+  outline: none;
+}
+
+.shop-menu {
+  margin-top: 0;
+}
+
+/* Contact sheet, round 6: equal 40px space above the question and below the nav, so the
+   content line (options, text, email, thank-you) sits exactly on the panel's centre (217.5). */
+.contact-panel {
+  padding-top: 40px;
+}
+
+.contact-panel::after {
+  /* white under the panel: the iOS toolbar / keyboard never shows the page through */
+  content: "";
+  position: absolute;
+  top: 100%;
+  right: 0;
+  left: 0;
+  height: 100lvh;
+  background: #fff;
+}
+
+.contact-nav {
+  bottom: 40px;
+}
+
+.contact-options {
+  margin-top: 134px;
+}
+
+.contact-panel input {
+  margin-top: 134px;
+}
+
+.contact-step[data-step="done"] {
+  top: 203px;
+}
+
+.contact-field {
+  display: flex;
+  align-items: center;
+  height: 229px;
+  margin-top: 34px;
+}
+
+.contact-panel .contact-field textarea {
+  position: static;
+  height: var(--lh-body);
+  max-height: 100%;
+  transform: none;
+  transition: none;
+}
+
+html.is-contact-open,
+html.is-contact-open body {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+/* Steps: blur only (no rise), a little slower. */
+@keyframes text-blur-in {
+  from {
+    opacity: 0;
+    filter: blur(4px);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .contact-step:not([hidden]) :is(.contact-q, .contact-options > button, textarea, input, .contact-done) {
+    animation: text-blur-in 550ms var(--ease-out-expo) both;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .contact-panel,
+  .contact-backdrop,
+  .project-menu > a,
+  .project-menu > button,
+  .contact-dots,
+  .contact-back,
+  .contact-next {
+    transition: none;
+  }
+}
+
+@media (max-width: 759px) {
+  body:has(.hero[data-intro]) .site-header {
+    top: var(--intro-name-top, round(71.5svh, 1px));
+  }
+}
+
+/* Contact open: scroll lock without a non-passive touchmove (see touch-scroll-guard). */
+html.is-contact-open, html.is-contact-open body { overscroll-behavior: none; }
+.contact-root { overscroll-behavior: contain; }
+
+/* Face stays unpainted until JS has sized it, so it never jumps (CLS). */
+.js .hero[data-intro]:not([data-intro-ready]) .mark-blob { visibility: hidden; }
+
+/* Contact text field: the site's tracking, like every other text. */
+.contact-panel textarea {
+  letter-spacing: var(--track);
+}
+
+/* Home header: "Humansize" toggles the socials row (same place and style as the menu). */
+.brand-toggle {
+  padding: 0;
+  font: inherit;
+  letter-spacing: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.site-menu[hidden] {
+  display: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .site-header.did-swap .site-menu:not([hidden]) > * {
+    animation: text-blur-in 550ms var(--ease-out-expo) both;
+  }
+}
+
+/* /shop big ring: drawn into a canvas (see shop-intro.ts) so the half above the page top is
+   painted too and elastic overscroll reveals it. The SVG keeps the box size. */
+.shop-ring .shop-mark {
+  position: relative;
+}
+
+.shop-ring-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.shop-ring-canvas {
+  visibility: hidden;
+}
+
+.shop-ring .shop-mark.has-canvas.at-top .shop-ring-canvas {
+  visibility: visible;
+}
+
+.shop-ring .shop-mark.has-canvas.at-top svg {
+  visibility: hidden;
 }

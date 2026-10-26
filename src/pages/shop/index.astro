@@ -13,13 +13,21 @@ const sizes = '(min-width: 1440px) 439px, (min-width: 760px) 30vw, calc(50vw - 3
 
 <Base title="Industrial Bloom shop · Humansize" description="Industrial Bloom: solid aluminium vases made from extrusion profiles, handmade in Germany in small numbered editions.">
   <div class="shop-page page-grid">
-    <header class="shop-head">
+    <header class="shop-head" data-shop-head>
+      <div class="shop-ring-layer" data-shop-ring-layer>
+        <div class="shop-ring" data-shop-ring>
+          <div class="shop-mark" data-spin-mark aria-hidden="true" set:html={mark} />
+        </div>
+      </div>
       <h1 class="shop-head-title">Industrial Bloom</h1>
-      <div class="shop-mark" data-spin-mark role="img" aria-label="Industrial Bloom mark" set:html={mark} />
-      <p class="shop-head-sub">Aluminium Vases</p>
+      <nav class="site-menu shop-menu" aria-label="Main">
+        <a href="/">Home</a>
+        <a href="#shop-about" data-shop-about>About</a>
+        <button type="button" data-contact-open>Contact</button>
+      </nav>
     </header>
 
-    <section class="shop-intro" aria-label="About Industrial Bloom">
+    <section class="shop-intro" id="shop-about" tabindex="-1" aria-label="About Industrial Bloom">
       <p>
         Industrial Bloom is a range of solid aluminium vases. The name is a play on "industrial boom". Each vase is made
         from aluminium extrusion, a heavy-duty building material, and brings it into the home to hold something as
@@ -71,6 +79,18 @@ const sizes = '(min-width: 1440px) 439px, (min-width: 760px) 30vw, calc(50vw - 3
 <script>
   import { initSpinMark } from '../../scripts/spin-mark';
   import { initShopDetails } from '../../scripts/shop-details';
+  import { initShopIntro } from '../../scripts/shop-intro';
+  const head = document.querySelector<HTMLElement>('[data-shop-head]');
+  if (head) initShopIntro(head);
+  document.querySelector('[data-shop-about]')?.addEventListener('click', (e) => {
+    const about = document.getElementById('shop-about');
+    if (!about) return;
+    e.preventDefault();
+    const smooth = !matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const offset = matchMedia('(min-width: 760px)').matches ? 100 : 0;
+    scrollTo({ top: Math.max(0, about.getBoundingClientRect().top + scrollY - offset), behavior: smooth ? 'smooth' : 'auto' });
+    about.focus({ preventScroll: true });
+  });
 
   initShopDetails();
 

@@ -168,8 +168,13 @@ export async function mountHeroBlobGL(svg: SVGSVGElement, opts: Opts) {
     const hr = host.getBoundingClientRect();
     if (!r.width) return;
     const vb = svg.viewBox.baseVal;
+    // host may be scaled (homepage intro): rendered px for resolution, host px for placement
+    const k = host.offsetWidth ? hr.width / host.offsetWidth : 1;
     const cssPerUnit = r.width / vb.width;
-    const dpr = Math.min(window.devicePixelRatio || 1, 3);
+    let dpr = Math.min(window.devicePixelRatio || 1, 2);
+    // fixed internal budget (about 2.4 MP): per-frame cost stays flat on big or dense screens
+    const area = (r.width * r.height * dpr * dpr) || 1;
+    if (area > 2.4e6) dpr *= Math.sqrt(2.4e6 / area);
     pxPerUnit = cssPerUnit * dpr;
     // Output only where it can be seen: the filter region clipped to the host box. A canvas
     // as wide as the whole filter region (190%) stuck out past the viewport and made the
@@ -185,10 +190,10 @@ export async function mountHeroBlobGL(svg: SVGSVGElement, opts: Opts) {
     canvas.height = H;
     Object.assign(canvas.style, {
       position: 'absolute',
-      left: `${r.left - hr.left + (out[0] - vb.x) * cssPerUnit}px`,
-      top: `${r.top - hr.top + (out[1] - vb.y) * cssPerUnit}px`,
-      width: `${W / dpr}px`,
-      height: `${H / dpr}px`,
+      left: `${(r.left - hr.left + (out[0] - vb.x) * cssPerUnit) / k}px`,
+      top: `${(r.top - hr.top + (out[1] - vb.y) * cssPerUnit) / k}px`,
+      width: `${W / dpr / k}px`,
+      height: `${H / dpr / k}px`,
       pointerEvents: 'none',
     });
     // shape, rasterised once per size (anti-aliased like the SVG source graphic)

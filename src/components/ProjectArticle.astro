@@ -1,4 +1,5 @@
 ---
+import SmallMenu from './SmallMenu.astro';
 import Blocks from './Blocks.astro';
 import MarkFace from './MarkFace.astro';
 import ProjectHero from './ProjectHero.astro';
@@ -27,11 +28,12 @@ const info = (() => {
   class:list={['project', 'page-grid', { 'is-plain': project.data.rounded === false }]}
   data-slug={project.id}
 >
-  <p class="project-mark">
-    <a href="/" aria-label="Humansize">
+  <div class="project-mark" data-project-menu>
+    <a href="/" aria-label="Humansize" data-project-face>
       <MarkFace />
     </a>
-  </p>
+    <SmallMenu />
+  </div>
   <ProjectHero title={project.data.title} years={years} summary={project.data.summary} />
   <Blocks
     blocks={project.data.blocks}
@@ -41,3 +43,8 @@ const info = (() => {
     info={info}
   />
 </article>
+
+<script>
+  import { initProjectMenu } from '../scripts/project-menu';
+  initProjectMenu();
+</script>

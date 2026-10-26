@@ -5,41 +5,44 @@ interface Props {
   site: SiteData;
 }
 
+// Homepage name block: "Humansize" (no hover state) over About / Shop / Contact (Home off the homepage). Items start gray, the
+// hovered one turns black. Contact opens the contact sheet (ContactSheet.astro).
 const { site } = Astro.props;
-const hrefFor = (label: string) =>
-  site.socials.find((item) => item.label.toLowerCase() === label.toLowerCase())?.href;
-
-const menu = [
-  { label: 'Linkedin', href: hrefFor('LinkedIn'), quiet: true },
-  { label: 'Instagram', href: hrefFor('Instagram'), quiet: false },
-  { label: 'X', href: hrefFor('X'), quiet: true },
-  { label: 'Email', href: `mailto:${site.email}`, quiet: true },
-];
+const socials = [...site.socials.filter((s) => s.href), { label: 'Email', href: `mailto:${site.email}` }];
+const home = Astro.url.pathname === '/';
 ---
 
-<a class="skip" href="#content">Skip to content</a>
 
-<header class="site-header page-grid">
-  <div class="who">
-    <a href="/">{site.name}</a>
-    <p class="time" data-tokyo-time data-place={site.place || undefined} data-timezone={site.timezone}>
-      {site.place}
-    </p>
-  </div>
-  <div class="contact">
-    <button class="contact-label" type="button">@Humansize</button>
-    <div class="contact-menu">
-      {
-        menu.map((item) =>
-          item.href ? (
-            <a class:list={{ 'is-quiet': item.quiet }} href={item.href}>
-              {item.label}
-            </a>
-          ) : (
-            <span class:list={{ 'is-quiet': item.quiet }}>{item.label}</span>
-          ),
-        )
-      }
-    </div>
-  </div>
+<header class="site-header">
+  <p class="brand">
+    <button type="button" class="brand-toggle" aria-expanded="false" aria-controls="site-socials" data-socials-toggle>Humansize</button>
+  </p>
+  <nav class="site-menu" aria-label="Main" data-main-menu>
+    {home ? <a href="#about" data-about-link>About</a> : <a href="/">Home</a>}
+    <a href="/shop">Shop</a>
+    <button type="button" data-contact-open>Contact</button>
+  </nav>
+  <nav class="site-menu site-socials" id="site-socials" aria-label="Socials" data-socials hidden>
+    {socials.map((s) => (
+      <a href={s.href} {...(s.href.startsWith('mailto:') ? {} : { target: '_blank', rel: 'noopener' })}>{s.label}</a>
+    ))}
+  </nav>
 </header>
+
+<script>
+  import { initSocials } from '../scripts/socials';
+  initSocials();
+  // About: smooth-scroll to the about text (respects reduced motion).
+  document.querySelector('[data-about-link]')?.addEventListener('click', (e) => {
+    const about = document.getElementById('about');
+    if (!about) return;
+    e.preventDefault();
+    const smooth = !matchMedia('(prefers-reduced-motion: reduce)').matches;
+    // desktop: land about 100px above the text; phones: right at it
+    const offset = matchMedia('(min-width: 760px)').matches ? 100 : 0;
+    scrollTo({ top: Math.max(0, about.getBoundingClientRect().top + scrollY - offset), behavior: smooth ? 'smooth' : 'auto' });
+    // keyboard users land in the about text too
+    if (!about.hasAttribute('tabindex')) about.setAttribute('tabindex', '-1');
+    about.focus({ preventScroll: true });
+  });
+</script>

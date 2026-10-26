@@ -11,7 +11,7 @@
     "test:scroll": "node tests/mobile-scroll.spec.mjs",
     "test:canvas": "node tests/canvas-auth.spec.mjs",
     "test:shop-grid": "node tests/shop-grid.spec.mjs",
-    "test": "npm run test:shop && npm run test:touch-guard && npm run test:canvas && npm run test:scroll && npm run test:taps && npm run test:hscroll && npm run test:time && npm run test:reveal && npm run test:spin && npm run test:vt && npm run test:canvas-pages && npm run test:project-images && npm run test:shop-grid && npm run test:keystatic",
+    "test": "npm run test:shop && npm run test:touch-guard && npm run test:canvas && npm run test:scroll && npm run test:taps && npm run test:hscroll && npm run test:reveal && npm run test:spin && npm run test:vt && npm run test:canvas-pages && npm run test:project-images && npm run test:shop-grid && npm run test:keystatic && npm run test:intro && npm run test:contact && npm run test:shop-intro && npm run test:a11y",
     "test:preview-images": "node tests/preview-images.spec.mjs",
     "optimize:images": "node scripts/optimize-content-images.mjs",
     "test:keystatic": "node tests/keystatic-smoke.spec.mjs",
@@ -19,12 +19,15 @@
     "postinstall": "node scripts/patch-keystatic.mjs",
     "test:taps": "node tests/mobile-taps.spec.mjs",
     "test:hscroll": "node tests/no-hscroll.spec.mjs",
-    "test:time": "node tests/time-overlap.spec.mjs",
     "test:reveal": "node tests/text-reveal.spec.mjs",
     "test:spin": "node tests/spin-mark.spec.mjs",
     "test:vt": "node tests/view-transition.spec.mjs",
     "test:canvas-pages": "node tests/canvas-pages.spec.mjs",
-    "test:shop": "node tests/shop-checkout.spec.mjs"
+    "test:shop": "node tests/shop-checkout.spec.mjs",
+    "test:intro": "node tests/intro-face.spec.mjs",
+    "test:contact": "node tests/contact.spec.mjs",
+    "test:shop-intro": "node tests/shop-intro.spec.mjs",
+    "test:a11y": "node tests/a11y.spec.mjs"
   },
   "engines": {
     "node": ">=22"
@@ -45,6 +48,7 @@
     "stripe": "^23.0.1"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
     "playwright": "^1.64.1",
     "yaml": "^2.9.1"
   }

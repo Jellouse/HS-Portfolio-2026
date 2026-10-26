@@ -12,3 +12,5 @@ screenshots/
 # keystatic smoke harness
 tests/.tmp-*
 
+.vercel
+.env*

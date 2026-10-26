@@ -16,6 +16,8 @@ const cover = projects[0]?.data.cover;
 const image = cover ? resolveImage(cover) : undefined;
 const pageUrl = absoluteUrl(Astro.site, '/');
 const description = positioning.description;
+// Intro smoothing dial: preview/local builds only, never production.
+const tune = process.env.VERCEL_ENV !== 'production';
 ---
 
 <Base
@@ -25,7 +27,7 @@ const description = positioning.description;
   jsonLd={homeJsonLd(site, pageUrl)}
 >
   <h1 class="sr-only">{site.name}, {site.studio}</h1>
-  <section class="hero" aria-label="Humansize" data-hero-root>
+  <section class="hero" aria-label="Humansize" data-hero-root data-intro data-intro-tune={tune ? '' : undefined}>
     <div class="mark-wrap">
       {/* Blob is default. ?hero=gradient keeps the old little-man gradient for compare. */}
       <div class="hero-variant" data-hero-variant="blob">
@@ -42,6 +44,7 @@ const description = positioning.description;
 <script>
   import { initHeroBlob } from '../scripts/hero-blob';
   import { initHeroBlobDials } from '../scripts/hero-blob-dials';
+  import { initIntroFace } from '../scripts/intro-face';
 
   const root = document.querySelector<HTMLElement>('[data-hero-root]');
   if (root) {
@@ -52,6 +55,7 @@ const description = positioning.description;
       el.hidden = !on;
     });
     if (mode === 'blob') {
+      initIntroFace(root);
       initHeroBlob(root);
       initHeroBlobDials(root);
     }

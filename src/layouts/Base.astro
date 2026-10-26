@@ -2,6 +2,7 @@
 import '../styles/global.css';
 import Footer from '../components/Footer.astro';
 import Header from '../components/Header.astro';
+import ContactSheet from '../components/ContactSheet.astro';
 import Seo from '../components/Seo.astro';
 import Analytics from '@vercel/analytics/astro';
 import { getSite } from '../lib/content';
@@ -140,6 +141,7 @@ const site = await getSite();
       <slot />
     </main>
     <Footer site={site} />
+    <ContactSheet email={site.email} />
     <div class="grid-overlay" aria-hidden="true">
       <div class="page-grid">
         <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
