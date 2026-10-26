@@ -1,0 +1,8 @@
+tests/
+test-results/
+playwright-report/
+screenshots/
+*.png.diff
+.tmp*/
+dist/
+.astro/
