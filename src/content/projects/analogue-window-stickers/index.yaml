@@ -102,41 +102,47 @@ blocks:
   - discriminant: image
     value:
       src: /src/content/projects/analogue-window-stickers/blocks/10/value/src.jpg
-      alt: Window with camera brands lettering, Analogue window stickers
       frame: default
       flush: false
       outline: false
   - discriminant: image
     value:
       src: /src/content/projects/analogue-window-stickers/blocks/11/value/src.jpg
-      alt: Applying camera brand lettering, Analogue window stickers
+      alt: Window with camera brands lettering, Analogue window stickers
       frame: default
       flush: false
       outline: false
   - discriminant: image
     value:
       src: /src/content/projects/analogue-window-stickers/blocks/12/value/src.jpg
-      alt: Applying a large sticker to a window, Analogue window stickers
+      alt: Applying camera brand lettering, Analogue window stickers
       frame: default
       flush: false
       outline: false
   - discriminant: image
     value:
       src: /src/content/projects/analogue-window-stickers/blocks/13/value/src.jpg
-      alt: Illuminated Analogue sign, Analogue window stickers
+      alt: Applying a large sticker to a window, Analogue window stickers
       frame: default
       flush: false
       outline: false
   - discriminant: image
     value:
       src: /src/content/projects/analogue-window-stickers/blocks/14/value/src.jpg
-      alt: Placing a sidewalk sign, Analogue window stickers
+      alt: Illuminated Analogue sign, Analogue window stickers
       frame: default
       flush: false
       outline: false
   - discriminant: image
     value:
       src: /src/content/projects/analogue-window-stickers/blocks/15/value/src.jpg
+      alt: Placing a sidewalk sign, Analogue window stickers
+      frame: default
+      flush: false
+      outline: false
+  - discriminant: image
+    value:
+      src: /src/content/projects/analogue-window-stickers/blocks/16/value/src.jpg
       alt: Analogue sidewalk sign on the street, Analogue window stickers
       frame: default
       flush: false
