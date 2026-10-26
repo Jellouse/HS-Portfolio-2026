@@ -8,9 +8,10 @@ const services = ['Product', 'Retail', 'Website', 'Other'];
 <div class="contact-sheet" data-contact data-email={email} hidden>
   <div class="contact-backdrop" data-contact-close></div>
   <form class="contact-panel" role="dialog" aria-modal="true" aria-label="Contact" novalidate>
+    <p class="sr-only" aria-live="polite" data-contact-live></p>
     <section class="contact-step" data-step="1">
-      <p class="contact-q is-muted">Pick a service</p>
-      <div class="contact-options">
+      <p class="contact-q is-muted" id="contact-q1">Pick a service</p>
+      <div class="contact-options" role="group" aria-labelledby="contact-q1">
         {services.map((s) => <button type="button" data-service={s}>{s}</button>)}
       </div>
     </section>
@@ -18,7 +19,6 @@ const services = ['Product', 'Retail', 'Website', 'Other'];
       <label class="contact-q" for="contact-project">Describe your project</label>
       <div class="contact-field" data-contact-field>
         <textarea id="contact-project" name="project" rows="1" placeholder="Type here..."></textarea>
-        <div class="contact-mirror" aria-hidden="true" data-contact-mirror></div>
       </div>
     </section>
     <section class="contact-step" data-step="3" hidden>

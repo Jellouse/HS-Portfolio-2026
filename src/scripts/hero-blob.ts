@@ -41,10 +41,29 @@ export function initHeroBlob(root: ParentNode = document) {
   let frame = 0;
   let lastPointer = -Infinity;
 
+  // The big intro face draws through WebGL on desktop too: the SVG filter re-rasters the whole
+  // face on every offset change, which competed with the scroll scale. The canvas is drawn at a
+  // fixed internal size and only scaled by the compositor, so the breathing never has to pause.
+  let gl: { draw: () => void } | null = null;
   const paint = () => {
+    if (gl) return gl.draw();
     offset.setAttribute('dx', curX.toFixed(2));
     offset.setAttribute('dy', curY.toFixed(2));
   };
+  if (svg.hasAttribute('data-hero-blob') && !reduce.matches) {
+    import('./hero-blob-gl')
+      .then(({ mountHeroBlobGL }) => mountHeroBlobGL(svg, { offset: () => ({ x: curX, y: curY }) }))
+      .then((g) => {
+        if (!g) return;
+        gl = g;
+        g.draw();
+        svg.style.visibility = 'hidden';
+        svg.style.viewTransitionName = 'none';
+        g.canvas.style.viewTransitionName = 'hs-mark';
+        g.canvas.dataset.ready = '';
+      })
+      .catch(() => {});
+  }
 
   const tick = (now: number) => {
     if (reduce.matches) {
@@ -65,27 +84,18 @@ export function initHeroBlob(root: ParentNode = document) {
     curX += (tgtX - curX) * ease;
     curY += (tgtY - curY) * ease;
     paint();
-    frame = requestAnimationFrame(tick);
+    frame = onScreen && !document.hidden ? requestAnimationFrame(tick) : 0;
   };
+  let onScreen = true;
+  new IntersectionObserver(([e]) => {
+    onScreen = e.isIntersecting;
+    if (onScreen) wake();
+  }).observe(svg.parentElement || svg);
+  document.addEventListener('visibilitychange', () => wake());
 
-  // Hold the live filter while scrolling: re-filtering the big intro face per frame drops frames.
-  let scrolling = 0;
   const wake = () => {
-    if (!frame && !scrolling) frame = requestAnimationFrame(tick);
+    if (!frame) frame = requestAnimationFrame(tick);
   };
-  addEventListener(
-    'scroll',
-    () => {
-      clearTimeout(scrolling);
-      if (frame) cancelAnimationFrame(frame);
-      frame = 0;
-      scrolling = window.setTimeout(() => {
-        scrolling = 0;
-        wake();
-      }, 200);
-    },
-    { passive: true },
-  );
 
   if (reduce.matches) {
     paint();
@@ -142,29 +152,16 @@ async function initTouchLoop(svg: SVGSVGElement) {
 
   let visible = true;
   let frame = 0;
-  // Hold the noise loop while scrolling so the intro scale stays a pure compositor transform.
-  let scrolling = 0;
+  // Keeps breathing while scrolling: each frame is only the small fixed-size GL pass; the scale
+  // is the host's compositor transform, so the canvas is never re-rastered by it.
   const tick = (t: number) => {
     now = t;
     draw();
-    frame = visible && !document.hidden && !scrolling ? requestAnimationFrame(tick) : 0;
+    frame = visible && !document.hidden ? requestAnimationFrame(tick) : 0;
   };
   const wake = () => {
-    if (!frame && visible && !document.hidden && !scrolling) frame = requestAnimationFrame(tick);
+    if (!frame && visible && !document.hidden) frame = requestAnimationFrame(tick);
   };
-  addEventListener(
-    'scroll',
-    () => {
-      clearTimeout(scrolling);
-      if (frame) cancelAnimationFrame(frame);
-      frame = 0;
-      scrolling = window.setTimeout(() => {
-        scrolling = 0;
-        wake();
-      }, 200);
-    },
-    { passive: true },
-  );
   new IntersectionObserver(([e]) => {
     visible = e.isIntersecting;
     wake();

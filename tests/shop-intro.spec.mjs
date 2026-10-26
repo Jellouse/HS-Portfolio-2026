@@ -32,16 +32,18 @@ for (const [label, opt] of [['desktop', { viewport: { width: 1440, height: 900 }
   await p.goto(B + '/shop/', { waitUntil: 'load' });
   await p.waitForTimeout(1200);
   const top0 = await p.evaluate(() => { const r = document.querySelector('.shop-mark').getBoundingClientRect(); return Math.round(r.top + r.height / 2); });
-  check(Math.abs(top0) <= 1, `${label}: ring starts half cut off (centre y ${top0})`);
+  if (label === 'desktop') check(Math.abs(top0) <= 1, `${label}: ring starts half cut off (centre y ${top0})`);
+  else {
+    const r = await p.evaluate(() => { const b = document.querySelector('.shop-mark').parentElement.getBoundingClientRect(); return { t: b.top, w: b.width, c: b.left + b.width / 2 }; });
+    check(r.t >= 0 && Math.abs(r.w - 351) <= 2 && Math.abs(r.c - 195) <= 1, `mobile: ring whole, 90% wide, centred (top ${r.t.toFixed(1)}, w ${r.w.toFixed(1)})`);
+  }
   const R = Number(await p.getAttribute('[data-shop-head]', 'data-ring-r'));
   await p.evaluate((y) => scrollTo(0, y), R);
   await p.waitForTimeout(800);
   const a = await p.locator('.shop-mark').boundingBox();
-  if (label === 'desktop') await p.hover('[data-shop-ring]'); else await p.tap('[data-shop-ring]');
-  await p.waitForTimeout(500);
-  check(await p.evaluate(() => document.querySelector('.shop-ring-wrap').classList.contains('is-open')), `${label}: small ring opens the menu`);
-  const order = await p.evaluate(() => [...document.querySelectorAll('.shop-ring-wrap .project-menu > *')].map((e) => e.textContent.trim()).join(','));
-  check(order === 'Home,Shop,Contact', `${label}: shop menu order ${order}`);
+  check(await p.evaluate(() => !document.querySelector('.shop-ring-wrap, [data-shop-ring] .project-menu')), `${label}: no ring menu on /shop`);
+  const order = await p.evaluate(() => [...document.querySelectorAll('.shop-menu > *')].map((e) => e.textContent.trim()).join(','));
+  check(order === 'Home,About,Contact', `${label}: shop menu order ${order}`);
   await p.goto(B + (await p.getAttribute('.shop-title', 'href')), { waitUntil: 'load' });
   await p.waitForTimeout(3000); // load spin settles on 90deg
   const d = await p.locator('.shop-mark').boundingBox();
@@ -52,7 +54,7 @@ await p.goto(B + '/', { waitUntil: 'load' });
 await p.waitForTimeout(500);
 const home = await p.evaluate(() => [...document.querySelectorAll('.site-menu > *')].map((e) => e.textContent.trim()).join(','));
 check(home === 'About,Shop,Contact', `home menu ${home}`);
-check((await p.textContent('.brand')).trim() === '@Humansize', 'brand reads @Humansize');
+check((await p.textContent('.brand')).trim() === 'Humansize', 'brand reads Humansize');
 await p.click('.site-menu [data-contact-open]');
 await p.waitForTimeout(700);
 await p.click('[data-service="Other"]');

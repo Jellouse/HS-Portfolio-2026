@@ -37,11 +37,11 @@ export function initIntroFace(hero: HTMLElement) {
     const mobile = vw < 760;
     const Wf = px('--mark-small-w') || 64;
     const topF = px('--mark-small-top') || 32;
-    const W0 = Math.round(vw * 1.15); // largest size: laid out (and rastered) once at this
+    const W0 = Math.round(vw * (mobile ? 0.9 : 1.15)); // largest size: phones 90% wide, centred
     const H0 = (W0 * 249) / 559;
     const Hf = (Wf * 249) / 559;
     const gap = mobile ? 96 : 160;
-    const nameTop = Math.round(vh * 0.715);
+    const nameTop = Math.round(vh * (mobile ? 0.715 : 0.772)); // Figma home (round 6 SVG): "Humansize" baseline at 717 of 900
     const faceBottom = nameTop - gap;
     host.style.transform = 'none';
     hero.classList.remove('is-sda');
@@ -52,7 +52,9 @@ export function initIntroFace(hero: HTMLElement) {
     hero.style.setProperty('--intro-face-top', `${Math.round(faceBottom - H0) - hostTop}px`);
     hero.style.setProperty('--intro-origin', `${faceBottom - hostTop}px`);
     hero.style.setProperty('--intro-name-top', `${nameTop}px`);
+    document.documentElement.style.setProperty('--intro-name-top', `${nameTop}px`);
     hero.dataset.introR = String(R);
+    hero.dataset.introReady = '';
     hero.style.setProperty('--intro-r', `${R}px`);
     hero.style.setProperty('--intro-smin', String(sMin));
     lastS = NaN;
@@ -94,7 +96,7 @@ export function initIntroFace(hero: HTMLElement) {
   function mountTune() {
     const box = document.createElement('div');
     box.className = 'intro-tune';
-    box.innerHTML = `<label>Smoothing <output></output></label><input type="range" min="0" max="400" step="10"><button type="button">Copy value</button>`;
+    box.innerHTML = `<label>Smoothing <output></output></label><input type="range" min="0" max="400" step="10" aria-label="Intro smoothing in ms"><button type="button">Copy value</button>`;
     const input = box.querySelector('input')!;
     const out = box.querySelector('output')!;
     const btn = box.querySelector('button')!;

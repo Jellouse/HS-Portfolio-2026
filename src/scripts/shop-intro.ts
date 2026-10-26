@@ -36,6 +36,14 @@ export function initShopIntro(head: HTMLElement) {
     const titleF = topF + Wf + (mobile ? 96 : 130); // detail h1 top
     head.classList.remove('is-sda');
     host.style.transform = 'none';
+    // desktop: centre on the viewport top (half cut off); phones: whole ring, 90% wide, its
+    // bottom 96px above the title, like the homepage face
+    host.style.top = '';
+    if (mobile) {
+      host.style.top = '0px';
+      const t = Math.round(title.getBoundingClientRect().top - host.getBoundingClientRect().top);
+      host.style.top = `${t - 96 - W0}px`;
+    }
     const box = host.getBoundingClientRect();
     const c0 = box.top + box.height / 2 + scrollY; // ring centre doc y (about 0)
     const titleTop = Math.round(title.getBoundingClientRect().top + scrollY);
@@ -46,7 +54,6 @@ export function initShopIntro(head: HTMLElement) {
     head.style.setProperty('--ring-r', `${R}px`);
     head.style.setProperty('--ring-dy', `${Math.round(dy)}px`);
     head.style.setProperty('--ring-smin', String(sMin));
-    head.style.setProperty('--ring-menu-top', `${R + topF + Wf + 16}px`);
     head.dataset.ringR = String(R);
     cur = NaN;
     if (sda) {
