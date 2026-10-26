@@ -47,6 +47,9 @@
 }
 
 :root {
+  /* Small face mark at the top of project pages; the homepage intro shrinks to this. */
+  --mark-small-w: 64px;
+  --mark-small-top: 32px;
   --ink: #000;
   --ink-40: rgba(0, 0, 0, 0.4);
   --muted: var(--ink-40);
@@ -726,7 +729,7 @@ body:has(.project) .site-header {
 
 /* Distorted face mark: static, keeps its proportions (no cursor stretch). */
 .project-mark .mark-face {
-  width: 64px;
+  width: var(--mark-small-w);
   transform: none;
   overflow: visible;
 }
@@ -2187,7 +2190,11 @@ body:has(.shop-detail) .site-header {
 }
 
 .hero[data-intro] [data-hero-variant="blob"] {
+  /* Extends above the page and past the sides so nothing crops the face (iOS rubber-band,
+     WebGL output region). Scaled as one composited layer. */
+  inset: -100lvh -50% 0;
   transform-origin: 50% var(--intro-origin, 0);
+  will-change: transform;
 }
 
 .hero[data-intro] .mark-blob {

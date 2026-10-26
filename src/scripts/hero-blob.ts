@@ -68,9 +68,24 @@ export function initHeroBlob(root: ParentNode = document) {
     frame = requestAnimationFrame(tick);
   };
 
+  // Hold the live filter while scrolling: re-filtering the big intro face per frame drops frames.
+  let scrolling = 0;
   const wake = () => {
-    if (!frame) frame = requestAnimationFrame(tick);
+    if (!frame && !scrolling) frame = requestAnimationFrame(tick);
   };
+  addEventListener(
+    'scroll',
+    () => {
+      clearTimeout(scrolling);
+      if (frame) cancelAnimationFrame(frame);
+      frame = 0;
+      scrolling = window.setTimeout(() => {
+        scrolling = 0;
+        wake();
+      }, 200);
+    },
+    { passive: true },
+  );
 
   if (reduce.matches) {
     paint();
@@ -127,14 +142,29 @@ async function initTouchLoop(svg: SVGSVGElement) {
 
   let visible = true;
   let frame = 0;
+  // Hold the noise loop while scrolling so the intro scale stays a pure compositor transform.
+  let scrolling = 0;
   const tick = (t: number) => {
     now = t;
     draw();
-    frame = visible && !document.hidden ? requestAnimationFrame(tick) : 0;
+    frame = visible && !document.hidden && !scrolling ? requestAnimationFrame(tick) : 0;
   };
   const wake = () => {
-    if (!frame && visible && !document.hidden) frame = requestAnimationFrame(tick);
+    if (!frame && visible && !document.hidden && !scrolling) frame = requestAnimationFrame(tick);
   };
+  addEventListener(
+    'scroll',
+    () => {
+      clearTimeout(scrolling);
+      if (frame) cancelAnimationFrame(frame);
+      frame = 0;
+      scrolling = window.setTimeout(() => {
+        scrolling = 0;
+        wake();
+      }, 200);
+    },
+    { passive: true },
+  );
   new IntersectionObserver(([e]) => {
     visible = e.isIntersecting;
     wake();
