@@ -34,7 +34,7 @@ detail:
       outline: false
     - src: /src/content/products/120/detail/images/1/src.jpg
       alt: Type-120 aluminium vase, front view
-      outline: false
+      outline: true
     - src: /src/content/products/120/detail/images/2/src.jpg
       alt: Thistle in the Type-120 vase
       outline: false
