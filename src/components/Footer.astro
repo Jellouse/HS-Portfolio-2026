@@ -13,10 +13,10 @@ const { site } = Astro.props;
   <div class="footer-copy">
     <div class="page-grid">
       <div class="footer-text">
-        <p set:html={renderInline(site.intro)} />
+        <p set:html={renderInline(site.footerText)} />
         <p>
-          <a href={`mailto:${site.email}`}>{site.email}</a><br />
-          {site.studio}
+          <a href={`mailto:${site.email}`}>{site.email}</a>
+          {site.footerName && <><br />{site.footerName}</>}
         </p>
       </div>
     </div>

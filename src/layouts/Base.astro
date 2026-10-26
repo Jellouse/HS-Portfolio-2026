@@ -153,22 +153,6 @@ const site = await getSite();
     </script>
     <script is:inline>
       (function () {
-        function tick() {
-          document.querySelectorAll('[data-tokyo-time]').forEach(function (el) {
-            var zone = el.getAttribute('data-timezone') || 'Asia/Tokyo';
-            var place = el.getAttribute('data-place') || '';
-            var time = new Intl.DateTimeFormat('en-GB', {
-              timeZone: zone,
-              hour: '2-digit',
-              minute: '2-digit',
-              hourCycle: 'h23',
-            }).format(new Date());
-            el.textContent = place ? place + ', ' + time : time;
-          });
-        }
-        tick();
-        setInterval(tick, 30000);
-
         document.querySelectorAll('.frame img').forEach(function (img) {
           var mark = function () {
             img.classList.add('is-ready');

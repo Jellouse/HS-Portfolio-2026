@@ -405,17 +405,17 @@ export default config({
         intro: fields.markdoc.inline({
           label: 'Intro',
           description:
-            'Footer line and the page description. Use the link mark for a name that has a project page, such as /work/atomic. Required by the build; markdoc fields cannot set isRequired.',
+            'Page description for search and sharing. Use the link mark for a name that has a project page, such as /work/atomic. Required by the build; markdoc fields cannot set isRequired.',
           options: inlineLink,
         }),
-        timezone: fields.text({
-          label: 'Timezone',
-          description: 'IANA name, used for the clock. Example: Asia/Tokyo',
-          validation: { isRequired: true, length: { min: 1 } },
+        footerText: fields.markdoc.inline({
+          label: 'Footer text',
+          description: 'The paragraph at the top of the footer. Use the link mark for a name that has a project page.',
+          options: inlineLink,
         }),
-        place: fields.text({
-          label: 'Place label',
-          description: 'Optional city shown before the clock, e.g. Tokyo. Empty: only the time.',
+        footerName: fields.text({
+          label: 'Footer name',
+          description: 'The line under the email in the footer, e.g. Humansize. Empty hides it.',
         }),
         about: fields.array(
           fields.markdoc.inline({

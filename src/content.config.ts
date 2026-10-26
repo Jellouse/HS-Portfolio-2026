@@ -117,8 +117,8 @@ const site = defineCollection({
     studio: z.string(),
     email: z.string().email(),
     intro: z.string(),
-    timezone: z.string(),
-    place: z.string().default(''),
+    footerText: z.string(),
+    footerName: z.string().default(''),
     about: z.array(z.string()),
     socials: z
       .array(

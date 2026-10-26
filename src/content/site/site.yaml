@@ -5,8 +5,11 @@ intro: >
   Humansize is the studio of Johann Schnettker. I design things you can look at,
   click through and walk into, like retail spaces, websites built in Framer, and
   3D renders and artwork.
-timezone: Asia/Tokyo
-place: ''
+footerText: >
+  Humansize is the studio of Johann Schnettker. I design things you can look at,
+  click through and walk into, like retail spaces, websites built in Framer, and
+  3D renders and artwork.
+footerName: Humansize
 about:
   - >
     Humansize is the studio of Johann Schnettker. I design things you can look
