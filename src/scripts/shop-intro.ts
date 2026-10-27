@@ -116,7 +116,9 @@ export function initShopIntro(head: HTMLElement) {
   // translating -scrollY, clamped at 0 so a rubber-band pull keeps it whole. Touch: CSS scroll()
   // animation on `translate`.
   const follow = () => {
-    const y = Math.max(0, scrollY);
+    // Safari reports negative scrollY in a top rubber-band and drags fixed layers down with
+    // the bounce; follow it the other way so the layer stays put and no cut edge shows.
+    const y = scrollY;
     if (!sda) layer.style.translate = `0 ${-y}px`;
     else layer.style.translate = '';
   };

@@ -95,7 +95,9 @@ export function initIntroFace(hero: HTMLElement) {
   // position:fixed host (overscroll never crops it) that follows the page by -scrollY, clamped at
   // 0 for rubber-band pulls; touch uses a CSS scroll() animation on `translate`.
   function follow() {
-    const y = Math.max(0, scrollY);
+    // Safari reports negative scrollY in a top rubber-band and drags fixed layers down with
+    // the bounce; follow it the other way so the layer stays put and no cut edge shows.
+    const y = scrollY;
     host!.style.translate = sda ? '' : `0 ${-y}px`;
   }
   addEventListener('scroll', follow, { passive: true });

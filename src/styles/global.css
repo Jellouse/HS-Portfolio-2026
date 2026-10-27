@@ -937,9 +937,9 @@ body:has(.project) .site-header {
   width: 100%;
   margin: 0;
   padding: 0;
-  aspect-ratio: 100 / 52;
-  max-height: min(52vw, 60svh);
-  height: auto;
+  /* Explicit height, no aspect-ratio + max-height: WebKit transfers the max-height through the
+     ratio to the width, so the faces only filled ~2/3 of the width in Safari. */
+  height: min(52vw, 60svh);
   pointer-events: none;
 }
 
@@ -3032,3 +3032,11 @@ html.is-contact-open, html.is-contact-open body { overscroll-behavior: none; }
 
 /* No visibility toggle when scrolled off: the view-transition morph (ib-mark / hs-mark) must
    snapshot the graphic even off-screen, and the compositor already skips off-screen tiles. */
+
+/* A live price that changes after load blurs in again (scripts/shop-price.ts). */
+@media (prefers-reduced-motion: no-preference) {
+  .is-split .reveal-word.price-swap,
+  .price-swap {
+    animation: text-in 400ms var(--ease-out-expo) both;
+  }
+}

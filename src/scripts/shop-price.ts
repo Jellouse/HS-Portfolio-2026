@@ -9,7 +9,14 @@ export function applyPrices(data: Stock) {
     if (typeof cents !== 'number') return;
     const eur = cents / 100;
     const n = Number.isInteger(eur) ? String(eur) : eur.toFixed(2);
-    el.textContent = el.dataset.priceStyle === 'prefix' ? `€${n}` : `${n}€`;
+    const text = el.dataset.priceStyle === 'prefix' ? `€${n}` : `${n}€`;
+    if (el.textContent === text) return;
+    el.textContent = text;
+    // A changed price blurs in again instead of swapping sharp (see .price-swap).
+    el.classList.remove('price-swap');
+    void el.offsetWidth;
+    el.classList.add('price-swap');
+    el.addEventListener('animationend', () => el.classList.remove('price-swap'), { once: true });
   });
 }
 

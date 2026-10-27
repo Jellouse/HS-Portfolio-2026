@@ -33,9 +33,10 @@ function wrapWords(node: Node) {
     }
     (node as ChildNode).replaceWith(frag);
   } else if (node.nodeType === Node.ELEMENT_NODE) {
-    // A link reveals as one unit, so its underline blurs everywhere, the gaps between
+    // A link or a live price reveals as one unit (a price can be replaced later without
+    // losing its span). A link as one unit: so its underline blurs everywhere, the gaps between
     // words included (split words left sharp underline bits in the spaces).
-    if ((node as Element).tagName === 'A' && /\S/.test(node.textContent ?? '')) {
+    if ((node as Element).matches('a, [data-price]') && /\S/.test(node.textContent ?? '')) {
       (node as Element).classList.add('reveal-word');
       return;
     }
