@@ -39,8 +39,8 @@ blocks:
         sit in the best possible light.
   - discriminant: image
     value:
-      src: /src/content/projects/analogue-counters/blocks/2/value/src.png
-      frame: default
+      src: /src/content/projects/analogue-counters/blocks/2/value/src.jpg
+      frame: wide
       flush: false
       outline: false
   - discriminant: image
