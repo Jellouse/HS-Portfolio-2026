@@ -93,7 +93,7 @@ export const revealDuration = (host: HTMLElement) =>
 
 // One-way, class-driven reveal for every host. One IntersectionObserver (generous margin,
 // threshold 0) plus explicit passes (load, pageshow/bfcache, resize, fonts, scrollend and a
-// 0.5s safety tick) that reveal anything already in the viewport, so a missed IO callback can
+// 1s safety tick) that reveal anything already in the viewport, so a missed IO callback can
 // never leave text blurred. Hosts added later (MutationObserver) are picked up too.
 const revealed = new WeakSet<Element>();
 const pending = new Set<Host>();
@@ -154,7 +154,7 @@ export function initTextReveal() {
   addEventListener('load', pass);
   addEventListener('scrollend', pass, { passive: true });
   addEventListener('hashchange', () => requestAnimationFrame(pass));
-  setInterval(pass, 500);
+  setInterval(pass, 1000);
 
   const mo = new MutationObserver((records) => {
     for (const r of records)

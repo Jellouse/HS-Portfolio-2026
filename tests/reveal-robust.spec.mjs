@@ -42,7 +42,7 @@ for (const [label, opts] of [['desktop', { viewport: { width: 1440, height: 900 
   const ctx = await browser.newContext(opts);
   const page = await ctx.newPage();
   const check = async (what) => {
-    await page.waitForTimeout(1200);
+    await page.waitForTimeout(1000);
     const s = await stuck(page);
     if (s.length) failures.push(`${label} ${what}: ${s.slice(0, 3).join(' | ')}`);
     else console.log(`ok   ${label} ${what}`);
