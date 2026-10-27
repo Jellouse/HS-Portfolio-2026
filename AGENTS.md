@@ -117,3 +117,17 @@ Defined as custom properties in `src/styles/global.css`:
 - Don't add ad-hoc max-widths for these blocks; change the span tokens instead.
 - Press G to toggle the column overlay, in dev or on `/canvas` frames (`?canvas=1`). `?grid=1` also shows it.
 - Case page spacing tokens: `--space-block` (between images and pairs; 84px desktop, 56px mobile), `--space-text` (visible gap around text blocks; 240 / 160), `--space-section` (before Process and Info; 240 / 160). Pair and process inner gaps use `--gutter` (16px). Change the tokens, not per-block margins.
+
+## UI and motion skills
+
+Emil Kowalski's skills (github.com/emilkowalski/skills, commit 2d22863, MIT, see
+`.agents/skills/LICENSE-emilkowalski-skills`) are vendored in `.agents/skills/`. Load the
+relevant SKILL.md before any UI, animation, drawer, transition or polish work:
+
+- `animate` (+ RECIPES.md) to build motion, `review-animations` to critique it,
+  `improve-animations` for an audit, `animation-performance` and `performance-cheatsheet.md` for jank.
+- `emil-design-eng`, `apple-design`, `break-ui`, `find-animation-opportunities`,
+  `animation-vocabulary`, `pick-ui-library`, `prototype`.
+- Not relevant here (native or other libs): `mobile-native`, `write-swift`, `animate-expo`, `ask-sonner`.
+
+Site rules still win over the skills: whole-px values, keep link underlines, scroll-linked blur reveal.
