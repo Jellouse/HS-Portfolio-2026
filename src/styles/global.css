@@ -199,7 +199,8 @@ a:hover:has(video),
 .site-header a:hover,
 .site-header button:hover,
 .site-menu > a:hover,
-.site-menu > button:hover {
+.site-menu > button:hover,
+.contact-options > button:hover {
   opacity: 1;
 }
 
