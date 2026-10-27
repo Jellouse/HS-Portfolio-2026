@@ -1581,6 +1581,10 @@ html:active-view-transition-type(ib-shrink)::view-transition-new(ib-mark) {
 /* inline-block so transform applies; whitespace stays outside the spans, so wrapping is unchanged */
 .is-split .reveal-word {
   display: inline-block;
+}
+
+/* words inside a decorated parent inherit it; a link that is itself the unit keeps its own underline */
+.is-split .reveal-word:not(a) {
   text-decoration: inherit;
 }
 

@@ -22,6 +22,7 @@ const SPECS = [
   ['reveal', 'tests/text-reveal.spec.mjs'],
   ['reveal-first-paint', 'tests/reveal-first-paint.spec.mjs'],
   ['footer-faces', 'tests/footer-faces.spec.mjs'],
+  ['link-underline', 'tests/link-underline.spec.mjs'],
   ['spin', 'tests/spin-mark.spec.mjs'],
   ['vt', 'tests/view-transition.spec.mjs'],
   ['hscroll', 'tests/no-hscroll.spec.mjs'],
