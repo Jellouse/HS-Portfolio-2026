@@ -1,42 +1,8 @@
 ---
-// Contact form as a bottom sheet: 1 service, 2 project, 3 email, done.
-// Opened by any [data-contact-open]; logic in src/scripts/contact.ts.
+// Contact drawer, a Vaul bottom sheet as a React island (ContactDrawer.tsx).
+// Opened by any [data-contact-open].
+import ContactDrawer from './ContactDrawer';
 const { email } = Astro.props as { email: string };
-const services = ['Product', 'Retail', 'Website', 'Other'];
 ---
 
-<div class="contact-sheet" data-contact data-email={email} hidden>
-  <div class="contact-backdrop" data-contact-close></div>
-  <form class="contact-panel" role="dialog" aria-modal="true" aria-label="Contact" novalidate>
-    <p class="sr-only" aria-live="polite" data-contact-live></p>
-    <section class="contact-step" data-step="1">
-      <p class="contact-q is-muted" id="contact-q1">Pick a service</p>
-      <div class="contact-options" role="group" aria-labelledby="contact-q1">
-        {services.map((s) => <button type="button" data-service={s}>{s}</button>)}
-      </div>
-    </section>
-    <section class="contact-step" data-step="2" hidden>
-      <label class="contact-q" for="contact-project">Describe your project</label>
-      <div class="contact-field" data-contact-field>
-        <textarea id="contact-project" name="project" rows="1" placeholder="Type here..."></textarea>
-      </div>
-    </section>
-    <section class="contact-step" data-step="3" hidden>
-      <label class="contact-q" for="contact-email">Add your email</label>
-      <input id="contact-email" name="email" type="email" autocomplete="email" placeholder="name@mail.com" />
-    </section>
-    <section class="contact-step" data-step="done" hidden>
-      <p class="contact-done" data-contact-msg>Thank you, i’ll be in touch shortly!</p>
-    </section>
-    <div class="contact-nav" data-contact-nav>
-      <button type="button" class="contact-back" data-contact-back>Back</button>
-      <span class="contact-dots" aria-hidden="true"><i></i><i></i><i></i></span>
-      <button type="button" class="contact-next" data-contact-next>Next</button>
-    </div>
-  </form>
-</div>
-
-<script>
-  import { initContact } from '../scripts/contact';
-  initContact();
-</script>
+<ContactDrawer client:load email={email} />
