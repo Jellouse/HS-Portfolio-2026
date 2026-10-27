@@ -9,7 +9,7 @@ coverAlt: Tony's Chocolonely
 coverFrame: default
 coverFlush: false
 coverOutline: false
-rounded: false
+rounded: true
 info:
   - label: Design
     value: Johann Schnettker
@@ -28,7 +28,7 @@ blocks:
       src: >-
         https://humansize-media.schnettker-johann.workers.dev/projects/tonys-chocolonely/sejmigtui0qwuzhrgd6oh7upk0-mvqrmusr.mp4
       poster: /src/content/projects/tonys-chocolonely/blocks/0/value/poster.jpg
-      frame: default
+      frame: wide
       flush: false
   - discriminant: image
     value:
