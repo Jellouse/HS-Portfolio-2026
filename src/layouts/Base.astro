@@ -33,6 +33,7 @@ const site = await getSite();
          holds that first render until <main> is parsed, so the shared mark exists in it. -->
     <style is:inline>@view-transition{navigation:auto}@media (prefers-reduced-motion:reduce){@view-transition{navigation:none}}</style>
     <link rel="expect" href="#content" blocking="render" />
+    <style is:inline>.reveal-gate:not(.canvas-mode) :is(main :is(p,h1,h2,h3,h4,li,blockquote,figcaption,.caption,.project-summary),.site-footer :is(p,li)):not(.is-split,.is-split *,.sr-only,[data-no-reveal],[data-no-reveal] *){opacity:0}.is-split{transition:opacity 350ms cubic-bezier(.16,1,.3,1)}</style>
     <script is:inline>
       // Ring morph direction, so CSS can show only the larger (sharper) snapshot of the mark.
       addEventListener('pagereveal', function (e) {
@@ -49,6 +50,13 @@ const site = await getSite();
     <Seo title={title} description={description} image={image} type={type} jsonLd={jsonLd} noindex={noindex} />
     <script is:inline>
       document.documentElement.classList.add('js');
+      // Text reveal gate: text hosts stay transparent from first paint until text-reveal.ts
+      // has split them, then fade in, so text never shows sharp first and blurs after.
+      // Reduced motion skips the reveal, so no gate; the timeout is a failsafe if JS stalls.
+      if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        document.documentElement.classList.add('reveal-gate');
+        setTimeout(function () { document.documentElement.classList.remove('reveal-gate'); }, 3000);
+      }
       (function () {
         var q = new URLSearchParams(location.search);
         var value = q.get('grid');

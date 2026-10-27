@@ -20,6 +20,7 @@ const SPECS = [
   ['taps', 'tests/mobile-taps.spec.mjs'],
   ['scroll', 'tests/mobile-scroll.spec.mjs'],
   ['reveal', 'tests/text-reveal.spec.mjs'],
+  ['reveal-first-paint', 'tests/reveal-first-paint.spec.mjs'],
   ['spin', 'tests/spin-mark.spec.mjs'],
   ['vt', 'tests/view-transition.spec.mjs'],
   ['hscroll', 'tests/no-hscroll.spec.mjs'],
