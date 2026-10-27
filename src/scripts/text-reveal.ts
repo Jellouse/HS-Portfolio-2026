@@ -47,7 +47,7 @@ function wrapWords(node: Node) {
 export function split(host: Host) {
   if (host.__revealHtml === undefined) host.__revealHtml = host.innerHTML;
   else host.innerHTML = host.__revealHtml;
-  wrapWords(host);
+  [...host.childNodes].forEach(wrapWords); // children only: a host that is itself a link still splits
   let line = -1;
   let top = -Infinity;
   host.querySelectorAll<HTMLElement>('.reveal-word').forEach((word) => {
