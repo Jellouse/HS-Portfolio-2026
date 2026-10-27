@@ -12,11 +12,9 @@ coverOutline: false
 rounded: true
 info:
   - label: Design
-    value: Johann Schnettker
-  - label: Role
-    value: Website
+    value: Humansize
   - label: With
-    value: Analogue and Build
+    value: Analogue
   - label: Year
     value: '2025'
   - label: Client
