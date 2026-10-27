@@ -2386,53 +2386,47 @@ body:has(.hero[data-intro]) .site-header .contact {
   color: var(--muted);
 }
 
-/* Contact sheet */
-.contact-sheet {
-  position: fixed;
-  inset: 0;
-  z-index: 100;
-}
-
-.contact-sheet[hidden] {
-  display: none;
-}
-
+/* Contact sheet: a Vaul drawer. Vaul owns the slide (500ms, iOS drawer curve) and drag. */
 html.is-contact-open {
   overflow: hidden;
 }
 
 .contact-backdrop {
-  position: absolute;
+  position: fixed;
   inset: 0;
+  z-index: 100;
   background: rgb(0 0 0 / 20%);
-  opacity: 0;
-  transition: opacity var(--dur-sheet-out) var(--ease-out);
 }
 
 .contact-panel {
-  position: absolute;
+  position: fixed;
   right: 0;
   bottom: 0;
   left: 0;
+  z-index: 101;
   height: 435px;
   padding: 49px 20px 0;
   text-align: center;
   background: #fff;
-  transform: translateY(100%);
-  transition: transform var(--dur-sheet-out) var(--ease-out);
+  outline: none;
 }
 
-.contact-sheet.is-open .contact-backdrop {
-  opacity: 1;
-  transition-duration: var(--dur-sheet);
+/* Vaul keeps the drawer under the fold with a translate; extend its 1px hairline of white
+   so an iOS overscroll pull never shows the page under the sheet. */
+.contact-panel::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  right: 0;
+  left: 0;
+  height: 200px;
+  background: #fff;
 }
 
-.contact-sheet.is-open .contact-panel {
-  transition: transform var(--dur-sheet) var(--ease-drawer);
-}
-
-.contact-sheet.is-open .contact-panel {
-  transform: none;
+@media (prefers-reduced-motion: reduce) {
+  [data-vaul-drawer].contact-panel {
+    transition: none;
+  }
 }
 
 .contact-step[hidden] {
@@ -2759,7 +2753,7 @@ html.is-contact-open {
   padding-top: 0;
 }
 
-.contact-sheet[data-step="done"] .contact-nav {
+.contact-panel[data-step="done"] .contact-nav {
   visibility: hidden;
 }
 
@@ -2954,8 +2948,6 @@ html.is-contact-open body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .contact-sheet.is-open .contact-panel,
-  .contact-sheet.is-open .contact-backdrop,
   .contact-panel,
   .contact-backdrop,
   .project-menu > a,

@@ -96,7 +96,7 @@ try {
   check((await page.locator('[data-haptic-overlay]').count()) > 0, 'iOS haptic overlays active');
   await page.tap('.site-menu [data-contact-open]');
   await wait(700);
-  check(await page.evaluate(() => document.querySelector('.contact-sheet')?.classList.contains('is-open')), 'tap Contact opens the contact sheet');
+  check(await page.evaluate(() => document.querySelector('.contact-panel')?.dataset.state === 'open'), 'tap Contact opens the contact sheet');
   const hits = await page.evaluate(() =>
     [...document.querySelectorAll('.contact-options button')].map((a) => {
       const r = a.getBoundingClientRect();
@@ -105,8 +105,8 @@ try {
   );
   check(hits.length === 4 && hits.every(Boolean), `service options are the tap target (${hits.length})`);
   await page.touchscreen.tap(195, 120); // backdrop
-  await wait(700);
-  check(await page.evaluate(() => document.querySelector('.contact-sheet')?.hidden === true), 'tap outside closes the sheet');
+  await page.waitForFunction(() => !document.querySelector('.contact-panel'), null, { timeout: 5000 }).catch(() => {});
+  check(await page.evaluate(() => !document.querySelector('.contact-panel')), 'tap outside closes the sheet');
   const nav = page.waitForURL((u) => u.pathname.startsWith('/work/'), { timeout: 5000 }).then(() => true, () => false);
   await page.locator('.card a[href^="/work/"]').first().tap();
   check(await nav, 'tap a project card opens the case');

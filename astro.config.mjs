@@ -32,7 +32,7 @@ const site =
 const keystaticStorage = process.env.KEYSTATIC_STORAGE || '';
 
 // @astrojs/react 7 ships a Vite 8 refresh wrapper. Astro 5 runs Vite 6, and that
-// wrapper 500s the Keystatic admin in dev. The public site has no React islands.
+// wrapper 500s the Keystatic admin in dev. The contact drawer island does not need it.
 function dropVite8RefreshWrapper() {
   return {
     name: 'drop-vite8-refresh-wrapper',
