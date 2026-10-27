@@ -13,6 +13,7 @@ interface Props {
 
 const { src, poster, label, plain = false, flush = false, priority = false } = Astro.props;
 let posterSrc: string | undefined;
+const dims = poster && typeof poster !== 'string' ? { width: poster.width, height: poster.height } : {};
 if (typeof poster === 'string') {
   posterSrc = poster;
 } else if (poster) {
@@ -33,6 +34,7 @@ const type = ext === 'webm' ? 'video/webm' : ext === 'mov' ? 'video/quicktime' :
     playsinline
     preload={priority ? 'auto' : 'metadata'}
     poster={posterSrc}
+    {...dims}
     aria-label={label || undefined}
     data-autoplay
   >
@@ -54,4 +56,17 @@ const type = ext === 'webm' ? 'video/webm' : ext === 'mov' ? 'video/quicktime' :
   }
   apply();
   reduce.addEventListener('change', apply);
+
+  // Fade in once the first frame (or the poster) can be shown, never pop in.
+  document.querySelectorAll<HTMLVideoElement>('.frame video').forEach((video) => {
+    const ready = () => video.classList.add('is-ready');
+    if (video.readyState >= 2) return ready();
+    video.addEventListener('loadeddata', ready, { once: true });
+    if (video.poster) {
+      const img = new Image();
+      img.onload = img.onerror = ready;
+      img.src = video.poster;
+    }
+    setTimeout(ready, 4000); // never stays hidden
+  });
 </script>

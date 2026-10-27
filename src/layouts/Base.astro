@@ -39,6 +39,11 @@ const site = await getSite();
       addEventListener('pagereveal', function (e) {
         var vt = e.viewTransition;
         if (vt && vt.types) vt.types.add(document.querySelector('.shop-detail-mark') ? 'ib-shrink' : 'ib-grow');
+        if (vt) {
+          var html = document.documentElement;
+          html.classList.add('vt-incoming');
+          vt.finished.finally(function () { html.classList.remove('vt-incoming'); });
+        }
       });
     </script>
     <meta name="viewport" content={`width=device-width, initial-scale=1${safeArea ? ', viewport-fit=cover' : ''}`} />

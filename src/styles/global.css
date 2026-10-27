@@ -660,6 +660,24 @@ body:has(.hero) .site-header {
   transition: opacity 300ms var(--ease-out);
 }
 
+/* Videos wait for their first frame (or poster), then fade in like images; the box keeps its
+   size from the width/height attributes, so nothing jumps when it loads. */
+.js .frame video {
+  opacity: 0;
+}
+
+.js .frame video.is-ready {
+  opacity: 1;
+  transition: opacity 300ms var(--ease-out);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .js .frame img.is-ready,
+  .js .frame video.is-ready {
+    transition: none;
+  }
+}
+
 /* Year after a project title: 40% ink; size inherits from the title/caption. */
 .project-year {
   color: var(--ink-40);
@@ -1546,19 +1564,36 @@ html:active-view-transition-type(ib-shrink)::view-transition-new(ib-mark) {
   mix-blend-mode: normal;
 }
 
+/* One timeline: the old page fades out (0-200ms), then the new page fades in (150-450ms).
+   Its text and media run their own fades inside the live new snapshot, timed to start with it
+   (see .vt-incoming below), so everything lands together. The mark morph runs across both. */
 ::view-transition-old(root) {
-  animation: none;
-  opacity: 1;
+  animation: vt-out 200ms var(--ease-out-quad) both;
 }
 
 ::view-transition-new(root) {
-  animation: vt-in 300ms var(--ease-out-quad) both;
+  animation: vt-in 300ms var(--ease-out-quad) 150ms both;
+}
+
+@keyframes vt-out {
+  to {
+    opacity: 0;
+  }
 }
 
 @keyframes vt-in {
   from {
     opacity: 0;
   }
+}
+
+/* Incoming page during a transition: text reveals and media fades start with the page fade-in. */
+.vt-incoming .reveal-in .reveal-word {
+  transition-delay: calc(150ms + var(--line, 0) * 30ms);
+}
+.vt-incoming .frame img.is-ready,
+.vt-incoming .frame video.is-ready {
+  transition-delay: 150ms;
 }
 
 @media (prefers-reduced-motion: reduce) {
