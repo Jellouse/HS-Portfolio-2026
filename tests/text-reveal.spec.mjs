@@ -72,7 +72,7 @@ for (const url of urls) {
       const cs = getComputedStyle(el);
       const r = el.getBoundingClientRect();
       if (!r.width || !r.height || cs.visibility === 'hidden' || cs.display === 'none') continue;
-      if (r.top + scrollY < innerHeight + 60) continue; // first screen (plus a fold margin) shows immediately
+      if (r.top + scrollY < innerHeight) continue; // first screen shows immediately
       const host = el.closest('.is-split');
       const key = host || el;
       if (seen.has(key)) continue;
@@ -80,19 +80,18 @@ for (const url of urls) {
       key.dataset.revealTest = String(++id);
       const word = host?.querySelector('.reveal-word');
       const ws = word && getComputedStyle(word);
-      out.push({ id, text: (key.textContent || '').trim().slice(0, 50), host: !!host, shown: !!host?.classList.contains('reveal-in'), opacity: ws ? +ws.opacity : 1, filter: ws ? ws.filter : 'none' });
+      out.push({ id, text: (key.textContent || '').trim().slice(0, 50), host: !!host, opacity: ws ? +ws.opacity : 1, filter: ws ? ws.filter : 'none' });
     }
     return out;
   }, ALLOW);
   for (const b of blocks) {
     checked += 1;
     if (!b.host) { failures.push(`${url}: no text reveal on "${b.text}"`); continue; }
-    // one-way reveal: a block that was in view earlier (before images pushed it down) stays shown
-    if (!b.shown && !(b.opacity < 0.5 && /blur\((?!0px)/.test(b.filter))) failures.push(`${url}: "${b.text}" not in pre-animation state (opacity ${b.opacity}, ${b.filter})`);
+    if (!(b.opacity < 0.5 && /blur\((?!0px)/.test(b.filter))) failures.push(`${url}: "${b.text}" not in pre-animation state (opacity ${b.opacity}, ${b.filter})`);
   }
   for (const b of blocks.filter((x) => x.host)) {
     await page.evaluate((id) => document.querySelector(`[data-reveal-test="${id}"]`).scrollIntoView({ block: 'center' }), b.id);
-    await page.waitForTimeout(700); // class-driven reveal: 400ms + line stagger
+    await page.waitForTimeout(120);
     const end = await page.evaluate((id) => [...document.querySelectorAll(`[data-reveal-test="${id}"] .reveal-word`)].every((w) => { const s = getComputedStyle(w); return +s.opacity > 0.99 && !/blur\((?!0px)/.test(s.filter); }), b.id);
     if (!end) failures.push(`${url}: "${b.text}" did not reach the final state in view`);
   }
