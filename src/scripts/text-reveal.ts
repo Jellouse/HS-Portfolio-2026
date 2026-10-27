@@ -48,6 +48,12 @@ export function split(host: Host) {
   if (host.__revealHtml === undefined) host.__revealHtml = host.innerHTML;
   else host.innerHTML = host.__revealHtml;
   [...host.childNodes].forEach(wrapWords); // children only: a host that is itself a link still splits
+  measureLines(host);
+  host.classList.add('is-split');
+}
+
+// Line index per word from its current position; cheap, and keeps live content (prices) intact.
+function measureLines(host: Host) {
   let line = -1;
   let top = -Infinity;
   host.querySelectorAll<HTMLElement>('.reveal-word').forEach((word) => {
@@ -58,7 +64,6 @@ export function split(host: Host) {
     }
     word.style.setProperty('--line', String(line));
   });
-  host.classList.add('is-split');
 }
 
 const lineCount = (host: HTMLElement) =>
@@ -126,12 +131,26 @@ export function initTextReveal() {
     if (!scrollLinked) armFallback(hosts);
   });
 
+  // Recompute when layout may have settled or been restored (late images, bfcache), so no
+  // host keeps stale line positions or stays blurred while it is already on screen.
+  const settle = () => {
+    hosts.forEach((el) => el.classList.contains('is-split') && measureLines(el));
+    if (scrollLinked) return;
+    hosts.forEach((el) => {
+      if (el.classList.contains('reveal-in')) return;
+      const r = el.getBoundingClientRect();
+      if (r.top < window.innerHeight * 0.95 && r.bottom > 0) playIn(el, true);
+    });
+  };
+  window.addEventListener('load', () => document.fonts?.ready.then(settle) ?? settle());
+  window.addEventListener('pageshow', (e) => e.persisted && settle());
+
   let width = window.innerWidth;
   let timer = 0;
   window.addEventListener('resize', () => {
     if (window.innerWidth === width) return;
     width = window.innerWidth;
     clearTimeout(timer);
-    timer = window.setTimeout(run, 150);
+    timer = window.setTimeout(() => (run(), settle()), 150);
   });
 }
