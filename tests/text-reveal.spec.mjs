@@ -92,7 +92,7 @@ for (const url of urls) {
   }
   for (const b of blocks.filter((x) => x.host)) {
     await page.evaluate((id) => document.querySelector(`[data-reveal-test="${id}"]`).scrollIntoView({ block: 'center' }), b.id);
-    await page.waitForTimeout(1000); // class-driven reveal: 400ms + line stagger, slack for load
+    await page.waitForTimeout(700); // class-driven reveal: 400ms + line stagger
     const end = await page.evaluate((id) => [...document.querySelectorAll(`[data-reveal-test="${id}"] .reveal-word`)].every((w) => { const s = getComputedStyle(w); return +s.opacity > 0.99 && !/blur\((?!0px)/.test(s.filter); }), b.id);
     if (!end) failures.push(`${url}: "${b.text}" did not reach the final state in view`);
   }
