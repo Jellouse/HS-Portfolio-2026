@@ -97,11 +97,18 @@
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in-out-expo: cubic-bezier(0.65, 0, 0.15, 1);
   --ease-out-quad: cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  --ease-in-quad: cubic-bezier(0.55, 0.085, 0.68, 0.53);
-  /* Emil Kowalski UI curves — aliases over the site tokens above */
-  --ease-out: var(--ease-out-expo);
-  --ease-in-out: var(--ease-in-out-expo);
+  /* Motion tokens (Emil Kowalski's curves). UI = strong ease-out, never ease-in.
+     Expo stays for text blur reveals; the scroll-linked reveal is linear on its own timeline. */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
   --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+  --dur-hover: 160ms; /* colour, opacity feedback */
+  --dur-fast: 150ms; /* popover fade, sequenced */
+  --dur-ui: 200ms; /* popover scale, small moves */
+  --dur-menu: 240ms; /* icon menus, field growth */
+  --dur-media: 300ms; /* image fades, layout pushes */
+  --dur-sheet: 400ms; /* contact sheet enter */
+  --dur-sheet-out: 260ms; /* contact sheet exit, faster than enter */
   --page-bg: var(--bg);
   color: var(--ink);
   background: var(--page-bg);
@@ -319,7 +326,7 @@ body:has(.hero) .site-header {
   opacity: 0;
   pointer-events: none;
   /* Opacity only — no animation — so mouseleave/is-open removal can fade out. */
-  transition: opacity 150ms ease;
+  transition: opacity var(--dur-fast) var(--ease-out);
   filter: none;
 }
 
@@ -346,9 +353,9 @@ body:has(.hero) .site-header {
   visibility: visible;
   /* Closing: wait for options to leave, then fade label in */
   transition:
-    opacity 150ms ease 150ms,
+    opacity var(--dur-fast) var(--ease-out) var(--dur-fast),
     visibility 0s linear 150ms,
-    transform 160ms var(--ease-out);
+    transform var(--dur-hover) var(--ease-out);
 }
 
 .contact:hover .contact-label,
@@ -358,9 +365,9 @@ body:has(.hero) .site-header {
   visibility: hidden;
   /* Opening: fade label out immediately */
   transition:
-    opacity 150ms ease,
+    opacity var(--dur-fast) var(--ease-out),
     visibility 0s linear 150ms,
-    transform 160ms var(--ease-out);
+    transform var(--dur-hover) var(--ease-out);
 }
 
 .contact-menu {
@@ -379,9 +386,9 @@ body:has(.hero) .site-header {
   transform-origin: 100% 100%;
   /* Closing: shrink + fade out immediately */
   transition:
-    opacity 150ms ease,
+    opacity var(--dur-fast) var(--ease-out),
     visibility 0s linear 150ms,
-    transform 200ms var(--ease-out);
+    transform var(--dur-ui) var(--ease-out);
 }
 
 .contact:hover .contact-menu,
@@ -393,9 +400,9 @@ body:has(.hero) .site-header {
   transform: scale(1);
   /* Opening: wait for label, then fade + grow in */
   transition:
-    opacity 150ms ease 150ms,
+    opacity var(--dur-fast) var(--ease-out) var(--dur-fast),
     visibility 0s linear 150ms,
-    transform 200ms var(--ease-out) 150ms;
+    transform var(--dur-ui) var(--ease-out) var(--dur-fast);
 }
 
 .contact-menu a,
@@ -413,7 +420,7 @@ body:has(.hero) .site-header {
 }
 
 .contact-menu a {
-  transition: color 160ms ease;
+  transition: color var(--dur-hover) var(--ease-out);
 }
 
 .contact-menu a:hover,
@@ -658,7 +665,7 @@ body:has(.hero) .site-header {
 
 .js .frame img.is-ready {
   opacity: 1;
-  transition: opacity 300ms var(--ease-out);
+  transition: opacity var(--dur-media) var(--ease-out);
 }
 
 /* Year after a project title: 40% ink; size inherits from the title/caption. */
@@ -1102,9 +1109,9 @@ body:has(.project) .site-header {
     transform: translateX(-50%) scale(0.95);
     /* same as closed: options leave immediately */
     transition:
-      opacity 150ms ease,
+      opacity var(--dur-fast) var(--ease-out),
       visibility 0s linear 150ms,
-      transform 200ms var(--ease-out);
+      transform var(--dur-ui) var(--ease-out);
   }
 
   body:has(.hero) .contact:hover:not(.is-open) .contact-label,
@@ -1113,9 +1120,9 @@ body:has(.project) .site-header {
     visibility: visible;
     /* same as closed: label returns after options leave */
     transition:
-      opacity 150ms ease 150ms,
+      opacity var(--dur-fast) var(--ease-out) var(--dur-fast),
       visibility 0s linear 150ms,
-      transform 160ms var(--ease-out);
+      transform var(--dur-hover) var(--ease-out);
   }
 
   .feed {
@@ -1380,9 +1387,9 @@ html.show-grid .grid-overlay .page-grid {
 .site-footer a,
 .not-found a {
   transition:
-    opacity 160ms ease,
-    color 160ms ease,
-    transform 160ms var(--ease-out);
+    opacity var(--dur-hover) var(--ease-out),
+    color var(--dur-hover) var(--ease-out),
+    transform var(--dur-hover) var(--ease-out);
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -1421,7 +1428,7 @@ html.show-grid .grid-overlay .page-grid {
   }
 
   .js .frame img.is-ready {
-    transition: opacity 200ms ease;
+    transition: opacity var(--dur-ui) var(--ease-out);
   }
 }
 
@@ -1435,7 +1442,7 @@ html.show-grid .grid-overlay .page-grid {
 
 .js.fade-ready .fade-in.is-in {
   opacity: 1;
-  transition: opacity 400ms var(--ease-out);
+  transition: opacity var(--dur-sheet) var(--ease-out);
 }
 
 /* Homepage cards use display:contents on desktop — fade their grid children instead. */
@@ -1451,7 +1458,7 @@ html.show-grid .grid-overlay .page-grid {
 
   .js.fade-ready .card.fade-in.is-in > * {
     opacity: 1;
-    transition: opacity 400ms var(--ease-out);
+    transition: opacity var(--dur-sheet) var(--ease-out);
   }
 }
 
@@ -1751,14 +1758,14 @@ body .site-header.is-menu-open .who .time {
   opacity: 0;
 }
 body .site-header.is-menu-fade:not(.is-menu-open) .who .time {
-  transition: opacity 400ms ease;
+  transition: opacity var(--dur-sheet) var(--ease-out);
 }
 
 @media (hover: hover) {
   body .site-header:has(.contact:hover) .who .time,
   body .site-header:has(.contact:focus-within) .who .time {
     opacity: 0;
-    transition: opacity 150ms ease;
+    transition: opacity var(--dur-fast) var(--ease-out);
   }
 }
 
@@ -1796,7 +1803,7 @@ body .site-header.is-menu-fade:not(.is-menu-open) .who .time {
   corner-shape: squircle;
   color: var(--ink);
   text-decoration: none;
-  transition: background-color 150ms ease, color 150ms ease;
+  transition: background-color var(--dur-hover) var(--ease-out), color var(--dur-hover) var(--ease-out);
 }
 @media (hover: hover) {
   .shop-button:hover {
@@ -1977,7 +1984,7 @@ body:has(.shop-page) .site-header {
 }
 .shop-desc-wrap {
   grid-column: calc((var(--cols) - var(--content-span)) / 2 + 1) / span var(--content-span);
-  transition: height 400ms var(--ease-out-expo);
+  transition: height var(--dur-sheet) var(--ease-out);
 }
 .shop-desc-inner {
   display: flow-root;
@@ -2114,7 +2121,7 @@ body:has(.shop-detail) .site-header {
   color: var(--ink);
   text-decoration: none;
   white-space: nowrap;
-  transition: background-color 150ms ease, color 150ms ease;
+  transition: background-color var(--dur-hover) var(--ease-out), color var(--dur-hover) var(--ease-out);
 }
 @media (hover: hover) {
   .shop-buy-button:hover {
@@ -2304,7 +2311,7 @@ body:has(.hero[data-intro]) .site-header .contact {
   background: none;
   border: 0;
   cursor: pointer;
-  transition: color 160ms ease;
+  transition: color var(--dur-hover) var(--ease-out);
 }
 
 /* Landing: all gray, the hovered one turns black. */
@@ -2321,7 +2328,7 @@ body:has(.hero[data-intro]) .site-header .contact {
 /* Project pages: face opens the menu; items come out from behind the face. */
 .project-mark {
   position: relative;
-  transition: margin-bottom 300ms var(--ease-out);
+  transition: margin-bottom var(--dur-media) var(--ease-out);
 }
 
 .project-mark.is-open {
@@ -2360,9 +2367,9 @@ body:has(.hero[data-intro]) .site-header .contact {
   opacity: 0;
   transform: translate(calc(var(--i) * -48px), -56px) scale(0.6);
   transition:
-    opacity 200ms ease,
-    transform 300ms var(--ease-out),
-    color 160ms ease;
+    opacity var(--dur-ui) var(--ease-out),
+    transform var(--dur-media) var(--ease-out),
+    color var(--dur-hover) var(--ease-out);
 }
 
 .project-mark.is-open .project-menu {
@@ -2399,7 +2406,7 @@ html.is-contact-open {
   inset: 0;
   background: rgb(0 0 0 / 20%);
   opacity: 0;
-  transition: opacity 500ms ease;
+  transition: opacity var(--dur-sheet-out) var(--ease-out);
 }
 
 .contact-panel {
@@ -2412,11 +2419,16 @@ html.is-contact-open {
   text-align: center;
   background: #fff;
   transform: translateY(100%);
-  transition: transform 500ms var(--ease-out);
+  transition: transform var(--dur-sheet-out) var(--ease-out);
 }
 
 .contact-sheet.is-open .contact-backdrop {
   opacity: 1;
+  transition-duration: var(--dur-sheet);
+}
+
+.contact-sheet.is-open .contact-panel {
+  transition: transform var(--dur-sheet) var(--ease-drawer);
 }
 
 .contact-sheet.is-open .contact-panel {
@@ -2434,7 +2446,7 @@ html.is-contact-open {
   font-size: var(--text-body);
   line-height: var(--lh-body);
   color: var(--ink);
-  transition: color 160ms ease;
+  transition: color var(--dur-hover) var(--ease-out);
 }
 
 .contact-q.is-muted {
@@ -2463,7 +2475,7 @@ html.is-contact-open {
   background: none;
   border: 0;
   cursor: pointer;
-  transition: color 160ms ease;
+  transition: color var(--dur-hover) var(--ease-out);
 }
 
 .contact-options:has(> :hover) > :not(:hover) {
@@ -2520,7 +2532,7 @@ html.is-contact-open {
 .contact-dots {
   display: flex;
   gap: 6px;
-  transition: gap 200ms var(--ease-out);
+  transition: gap var(--dur-ui) var(--ease-out);
 }
 
 .contact-dots i {
@@ -2528,7 +2540,7 @@ html.is-contact-open {
   height: 4px;
   background: var(--muted);
   border-radius: 50%;
-  transition: background 160ms ease;
+  transition: background var(--dur-hover) var(--ease-out);
 }
 
 .contact-dots i.is-on {
@@ -2540,9 +2552,9 @@ html.is-contact-open {
   opacity: 0;
   pointer-events: none;
   transition:
-    opacity 200ms ease,
-    transform 250ms var(--ease-out),
-    color 160ms ease;
+    opacity var(--dur-ui) var(--ease-out),
+    transform var(--dur-ui) var(--ease-out),
+    color var(--dur-hover) var(--ease-out);
 }
 
 .contact-back {
@@ -2626,10 +2638,10 @@ html.is-contact-open {
   color: var(--muted);
   filter: blur(4px);
   transition:
-    opacity 200ms ease,
-    filter 300ms var(--ease-out-expo),
-    transform 300ms var(--ease-out),
-    color 160ms ease;
+    opacity var(--dur-ui) var(--ease-out),
+    filter var(--dur-menu) var(--ease-out),
+    transform var(--dur-media) var(--ease-out),
+    color var(--dur-hover) var(--ease-out);
 }
 
 .project-mark.is-open .project-menu > a,
@@ -2779,7 +2791,7 @@ html.is-contact-open {
   overflow: hidden;
   text-align: center;
   transform: translateY(-50%);
-  transition: height 240ms var(--ease-out);
+  transition: height var(--dur-menu) var(--ease-out);
 }
 
 .contact-panel .contact-field textarea:placeholder-shown {
@@ -2942,6 +2954,8 @@ html.is-contact-open body {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .contact-sheet.is-open .contact-panel,
+  .contact-sheet.is-open .contact-backdrop,
   .contact-panel,
   .contact-backdrop,
   .project-menu > a,
@@ -3043,5 +3057,32 @@ html.is-contact-open, html.is-contact-open body { overscroll-behavior: none; }
   .is-split .reveal-word.price-swap,
   .price-swap {
     animation: text-in 400ms var(--ease-out-expo) both;
+  }
+}
+
+/* Homepage + /shop: the header menu fades out as the intro scrolls away and back in on the
+   way up (scroll-linked, reversible). Focus brings it straight back so it stays keyboard
+   reachable. The socials row on "Humansize" is untouched. */
+@keyframes menu-scroll-out {
+  to {
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: scroll()) {
+    body:has(.hero) .site-menu[data-main-menu],
+    .shop-menu {
+      animation: menu-scroll-out linear both;
+      animation-timing-function: var(--ease-out);
+      animation-timeline: scroll(root);
+      animation-range: 40svh 80svh;
+    }
+
+    body:has(.hero) .site-menu[data-main-menu]:focus-within,
+    .shop-menu:focus-within {
+      animation: none;
+    }
   }
 }

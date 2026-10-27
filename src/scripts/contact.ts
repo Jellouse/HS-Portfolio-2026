@@ -51,7 +51,7 @@ export function initContact() {
     else if (text.selectionEnd === text.value.length) text.scrollTop = text.scrollHeight;
     if (lines && shown !== Math.min(lines, max) && !reduced()) {
       const d = before - text.getBoundingClientRect().top;
-      if (d) text.animate([{ transform: `translateY(${d}px)` }, { transform: 'none' }], { duration: 240, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' });
+      if (d) text.animate([{ transform: `translateY(${d}px)` }, { transform: 'none' }], { duration: 240, easing: 'cubic-bezier(0.23, 1, 0.32, 1)' });
     }
     lines = n;
   };
@@ -115,7 +115,7 @@ export function initContact() {
     closeTimer = window.setTimeout(() => {
       root.hidden = true;
       if (step === 4) reset();
-    }, 500);
+    }, 260); // --dur-sheet-out
   };
   const reset = () => {
     step = 1;
