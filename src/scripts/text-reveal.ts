@@ -91,47 +91,92 @@ export function playOut(host: Host) {
 export const revealDuration = (host: HTMLElement) =>
   400 + (Number(host.style.getPropertyValue('--lines')) - 1 || 0) * 30;
 
-function armFallback(hosts: Host[]) {
-  if (!('IntersectionObserver' in window)) return;
-  const io = new IntersectionObserver(
-    (entries) => {
-      for (const entry of entries) {
-        if (!entry.isIntersecting) continue;
-        const el = entry.target as Host;
-        io.unobserve(el);
-        // scrolled past fast: show instantly
-        playIn(el, entry.boundingClientRect.top < window.innerHeight * 0.5);
-      }
-    },
-    { rootMargin: '0px 0px -5% 0px' },
-  );
-  hosts.forEach((el) => {
-    if (el.classList.contains('reveal-in')) return;
-    if (el.getBoundingClientRect().top < window.innerHeight) return;
-    prepareReveal(el);
-    io.observe(el);
+// One-way, class-driven reveal for every host. One IntersectionObserver (generous margin,
+// threshold 0) plus explicit passes (load, pageshow/bfcache, resize, fonts, scrollend and a
+// 1s safety tick) that reveal anything already in the viewport, so a missed IO callback can
+// never leave text blurred. Hosts added later (MutationObserver) are picked up too.
+const revealed = new WeakSet<Element>();
+const pending = new Set<Host>();
+let io: IntersectionObserver | null = null;
+
+function reveal(el: Host) {
+  if (revealed.has(el)) return;
+  revealed.add(el);
+  pending.delete(el);
+  io?.unobserve(el);
+  playIn(el);
+}
+
+const inView = (el: Element) => {
+  const r = el.getBoundingClientRect();
+  return r.bottom > 0 && r.top < innerHeight && (r.width > 0 || r.height > 0);
+};
+
+function pass() {
+  pending.forEach((el) => {
+    if (!el.isConnected) pending.delete(el);
+    else if (inView(el)) reveal(el);
   });
 }
 
-export function initTextReveal() {
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  const all = [...document.querySelectorAll<Host>(SELECTOR)].filter((el) => !el.matches(EXCLUDE));
-  const hosts = all.filter((el) => !all.some((other) => other !== el && other.contains(el)));
-  if (!hosts.length) return;
-  const scrollLinked = CSS.supports('animation-timeline: view()');
+function findHosts(scope: ParentNode = document): Host[] {
+  const all = [...scope.querySelectorAll<Host>(SELECTOR)].filter((el) => !el.matches(EXCLUDE));
+  return all.filter((el) => !el.parentElement?.closest(SELECTOR) || el.parentElement.closest(SELECTOR)!.matches(EXCLUDE));
+}
 
-  const run = () => hosts.forEach(split);
-  (document.fonts?.ready ?? Promise.resolve()).then(() => {
-    run();
-    if (!scrollLinked) armFallback(hosts);
+function adopt(el: Host) {
+  if (revealed.has(el) || pending.has(el) || el.classList.contains('reveal-manual')) return;
+  split(el);
+  prepareReveal(el);
+  pending.add(el);
+  io?.observe(el);
+}
+
+export function initTextReveal() {
+  const root = document.documentElement;
+  const done = () => root.classList.remove('reveal-gate');
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return done();
+  if ('IntersectionObserver' in window) {
+    io = new IntersectionObserver(
+      (entries) => entries.forEach((e) => e.isIntersecting && reveal(e.target as Host)),
+      { rootMargin: '10% 0px 0px 0px', threshold: 0 },
+    );
+  }
+
+  const start = () => {
+    findHosts().forEach(adopt);
+    done();
+    requestAnimationFrame(pass);
+  };
+  (document.fonts?.ready ?? Promise.resolve()).then(start, start);
+
+  addEventListener('pageshow', () => requestAnimationFrame(pass));
+  addEventListener('load', pass);
+  addEventListener('scrollend', pass, { passive: true });
+  addEventListener('hashchange', () => requestAnimationFrame(pass));
+  setInterval(pass, 1000);
+
+  const mo = new MutationObserver((records) => {
+    for (const r of records)
+      r.addedNodes.forEach((n) => {
+        if (n.nodeType !== 1 || (n as Element).closest('.reveal-word, .is-split')) return;
+        const el = n as Host;
+        const hosts = el.matches(SELECTOR) && !el.matches(EXCLUDE) ? [el] : findHosts(el);
+        hosts.forEach(adopt);
+      });
+    pass();
   });
+  document.querySelectorAll('main, .site-footer').forEach((el) => mo.observe(el, { childList: true, subtree: true }));
 
   let width = window.innerWidth;
   let timer = 0;
   window.addEventListener('resize', () => {
-    if (window.innerWidth === width) return;
+    if (window.innerWidth === width) return pass();
     width = window.innerWidth;
     clearTimeout(timer);
-    timer = window.setTimeout(run, 150);
+    timer = window.setTimeout(() => {
+      document.querySelectorAll<Host>('.is-split:not(.reveal-manual)').forEach(split);
+      pass();
+    }, 150);
   });
 }

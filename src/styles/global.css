@@ -1585,13 +1585,6 @@ html:active-view-transition-type(ib-shrink)::view-transition-new(ib-mark) {
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  @supports (animation-timeline: view()) {
-    .is-split .reveal-word {
-      animation: text-in linear both;
-      animation-timeline: view();
-      animation-range: cover 0px cover 15vh;
-    }
-  }
 
   /* Class-driven reveal: the scroll fallback where view() timelines are missing, and
      in-place reveals (.reveal-manual, e.g. /shop Details). .reveal-out plays it in reverse. */
