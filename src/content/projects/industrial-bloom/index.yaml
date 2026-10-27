@@ -2,15 +2,16 @@ title: Industrial Bloom
 year: 2026
 published: true
 summary: >-
-  Industrial Bloom is a series of aluminium vases, handmade by Johann
-  Schnettker in Germany with laser cutting, 3D printing and embossing.
-  Available in the [Humansize shop](/shop/).
+  Industrial Bloom is a series of aluminium vases, handmade by Johann Schnettker
+  in Germany with laser cutting, 3D printing and embossing. Available in the
+  [Humansize shop](/shop/).
 cover: /src/content/projects/industrial-bloom/cover.jpg
 coverVideo: >-
   https://humansize-media.schnettker-johann.workers.dev/projects/industrial-bloom/render-7-base-11-mvevabg5.mp4
 coverAlt: Industrial Bloom
 coverFrame: default
 coverFlush: true
+coverOutline: false
 rounded: true
 info:
   - label: Design
@@ -30,12 +31,16 @@ blocks:
       alt: Industrial Bloom
       frame: default
       flush: false
+      outline: false
   - discriminant: image
     value:
       src: /src/content/projects/industrial-bloom/blocks/1/value/src.jpg
-      alt: "Purple thistle in a dark aluminium vase on a purple gradient, Industrial Bloom"
+      alt: >-
+        Purple thistle in a dark aluminium vase on a purple gradient, Industrial
+        Bloom
       frame: default
       flush: false
+      outline: false
   - discriminant: video
     value:
       src: >-
@@ -46,59 +51,78 @@ blocks:
   - discriminant: image
     value:
       src: /src/content/projects/industrial-bloom/blocks/3/value/src.jpg
-      alt: "Hydrangea in an aluminium vase under teal light, Industrial Bloom"
+      alt: Hydrangea in an aluminium vase under teal light, Industrial Bloom
       frame: default
       flush: false
+      outline: false
   - discriminant: pair
     value:
       layout: pair
       left: /src/content/projects/industrial-bloom/blocks/4/value/left.jpg
-      leftAlt: "Small lilac flowers spilling from a round aluminium vase, Industrial Bloom"
+      leftAlt: >-
+        Small lilac flowers spilling from a round aluminium vase, Industrial
+        Bloom
       right: /src/content/projects/industrial-bloom/blocks/4/value/right.jpg
-      rightAlt: "Pink pincushion flowers in a round aluminium vase, Industrial Bloom"
+      rightAlt: Pink pincushion flowers in a round aluminium vase, Industrial Bloom
       frame: default
+      outline: false
   - discriminant: image
     value:
       src: /src/content/projects/industrial-bloom/blocks/5/value/src.jpg
-      alt: "Silhouette of a thistle in an aluminium vase, Industrial Bloom"
+      alt: Silhouette of a thistle in an aluminium vase, Industrial Bloom
       frame: default
       flush: false
+      outline: true
   - discriminant: image
     value:
       src: /src/content/projects/industrial-bloom/blocks/6/value/src.jpg
-      alt: "Hand holding an aluminium vase with purple flowers against a blue sky, Industrial Bloom"
+      alt: >-
+        Hand holding an aluminium vase with purple flowers against a blue sky,
+        Industrial Bloom
       frame: default
       flush: false
+      outline: false
   - discriminant: image
     value:
       src: /src/content/projects/industrial-bloom/blocks/7/value/src.jpg
-      alt: "Dark spiky thistle head seen from above, Industrial Bloom"
+      alt: Dark spiky thistle head seen from above, Industrial Bloom
       frame: default
       flush: false
+      outline: false
   - discriminant: image
     value:
       src: /src/content/projects/industrial-bloom/blocks/8/value/src.jpg
-      alt: "Render of a tall aluminium extrusion vase on grey, Industrial Bloom"
+      alt: Render of a tall aluminium extrusion vase on grey, Industrial Bloom
       frame: default
       flush: false
+      outline: false
   - discriminant: image
     value:
       src: /src/content/projects/industrial-bloom/blocks/9/value/src.jpg
-      alt: "Orange poppy in a polished aluminium vase in soft light, Industrial Bloom"
+      alt: >-
+        Orange poppy in a polished aluminium vase in soft light, Industrial
+        Bloom
       frame: default
       flush: false
+      outline: false
   - discriminant: image
     value:
       src: /src/content/projects/industrial-bloom/blocks/10/value/src.jpg
-      alt: "Orange flower in front of an aluminium vase seen from above, Industrial Bloom"
+      alt: >-
+        Orange flower in front of an aluminium vase seen from above, Industrial
+        Bloom
       frame: default
       flush: false
+      outline: false
   - discriminant: image
     value:
       src: /src/content/projects/industrial-bloom/blocks/11/value/src.jpg
-      alt: "Orange poppies in a tall aluminium vase on a grey studio backdrop, Industrial Bloom"
+      alt: >-
+        Orange poppies in a tall aluminium vase on a grey studio backdrop,
+        Industrial Bloom
       frame: default
       flush: false
+      outline: false
   - discriminant: process
     value:
       images:
@@ -106,15 +130,19 @@ blocks:
             /src/content/projects/industrial-bloom/blocks/12/value/images/0/src.jpg
           alt: Industrial Bloom vase
           flush: false
+          outline: false
         - src: >-
             /src/content/projects/industrial-bloom/blocks/12/value/images/1/src.jpg
           alt: Industrial Bloom vase
           flush: false
+          outline: false
         - src: >-
             /src/content/projects/industrial-bloom/blocks/12/value/images/2/src.jpg
           alt: Industrial Bloom round vase
           flush: false
+          outline: false
         - src: >-
             /src/content/projects/industrial-bloom/blocks/12/value/images/3/src.jpg
           alt: Industrial Bloom vase
           flush: false
+          outline: false
