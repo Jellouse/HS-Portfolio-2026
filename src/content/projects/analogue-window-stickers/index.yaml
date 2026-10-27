@@ -1,9 +1,9 @@
 title: Analogue window stickers
 year: 2023
 yearEnd: 2026
-published: true
-seoDescription: Window sticker designs for the Analogue store in Amsterdam, 2023 to 2026.
+published: false
 seoTitle: Analogue window stickers, Amsterdam, 2023 to 2026
+seoDescription: Window sticker designs for the Analogue store in Amsterdam, 2023 to 2026.
 summary: >-
   Inspiring our local Amsterdam foot traffic with beautiful window stickers has
   been a delight.
@@ -103,7 +103,9 @@ blocks:
   - discriminant: image
     value:
       src: /src/content/projects/analogue-window-stickers/blocks/10/value/src.jpg
-      alt: Analogue store window with logo lettering above the counter, Analogue window stickers
+      alt: >-
+        Analogue store window with logo lettering above the counter, Analogue
+        window stickers
       frame: wide
       flush: false
       outline: false
