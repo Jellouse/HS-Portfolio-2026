@@ -84,8 +84,8 @@ blocks:
     value:
       src: /src/content/projects/industrial-bloom/blocks/7/value/src.jpg
       alt: >-
-        Orange flower in front of an aluminium vase seen from above, Industrial
-        Bloom
+        Orange poppies in a tall aluminium vase on a grey studio backdrop,
+        Industrial Bloom
       frame: default
       flush: false
       outline: false
@@ -93,8 +93,20 @@ blocks:
     value:
       src: /src/content/projects/industrial-bloom/blocks/8/value/src.jpg
       alt: >-
-        Orange poppies in a tall aluminium vase on a grey studio backdrop,
-        Industrial Bloom
+        Orange flower in front of an aluminium vase seen from above, Industrial
+        Bloom
+      frame: default
+      flush: false
+      outline: false
+  - discriminant: image
+    value:
+      src: /src/content/projects/industrial-bloom/blocks/9/value/src.jpg
+      frame: default
+      flush: false
+      outline: false
+  - discriminant: image
+    value:
+      src: /src/content/projects/industrial-bloom/blocks/10/value/src.jpg
       frame: default
       flush: false
       outline: false
@@ -102,22 +114,22 @@ blocks:
     value:
       images:
         - src: >-
-            /src/content/projects/industrial-bloom/blocks/9/value/images/0/src.jpg
+            /src/content/projects/industrial-bloom/blocks/11/value/images/0/src.jpg
           alt: Industrial Bloom vase
           flush: false
           outline: false
         - src: >-
-            /src/content/projects/industrial-bloom/blocks/9/value/images/1/src.jpg
+            /src/content/projects/industrial-bloom/blocks/11/value/images/1/src.jpg
           alt: Industrial Bloom vase
           flush: false
           outline: false
         - src: >-
-            /src/content/projects/industrial-bloom/blocks/9/value/images/2/src.jpg
+            /src/content/projects/industrial-bloom/blocks/11/value/images/2/src.jpg
           alt: Industrial Bloom round vase
           flush: false
           outline: false
         - src: >-
-            /src/content/projects/industrial-bloom/blocks/9/value/images/3/src.jpg
+            /src/content/projects/industrial-bloom/blocks/11/value/images/3/src.jpg
           alt: Industrial Bloom vase
           flush: false
           outline: false
