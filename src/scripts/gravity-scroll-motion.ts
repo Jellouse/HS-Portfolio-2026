@@ -3,8 +3,7 @@
  * Prefer ViewTimeline + WAAPI; fall back to rAF on scroll. Reversible both directions.
  */
 
-const MEDIA_FRAME =
-  '.feed .card .frame, .project .image-block .frame, .project .pair .frame, .project .process-grid .frame, .shop-pair .frame, .shop-detail-image .frame, .shop-wild-grid .frame';
+import { SCROLL_MEDIA_FRAME } from './scroll-media-selectors';
 
 const smoothstep = (a: number, b: number, v: number) => {
   const t = Math.min(1, Math.max(0, (v - a) / (b - a)));
@@ -19,14 +18,19 @@ const visibleFraction = (top: number, height: number, vh: number, scroll: number
   return Math.max(0, visibleBottom - visibleTop) / Math.max(1, height);
 };
 
-type Item = { el: HTMLElement; anim?: Animation };
+type Item = { el: HTMLElement; top: number; h: number; anim?: Animation };
 
 export type GravityScroll = { refresh: () => void; destroy: () => void };
 
-function measureTop(el: HTMLElement) {
+function layoutBox(el: HTMLElement) {
+  const prevTransform = el.style.transform;
+  const prevOpacity = el.style.opacity;
   el.style.transform = 'none';
+  el.style.opacity = '1';
   const r = el.getBoundingClientRect();
-  return { top: r.top + scrollY, h: r.height };
+  el.style.transform = prevTransform;
+  el.style.opacity = prevOpacity;
+  return { top: r.top + scrollY, h: Math.max(1, r.height) };
 }
 
 export function drumPose(top: number, height: number, vh: number, scroll: number) {
@@ -52,6 +56,10 @@ function supportsViewTimeline() {
   return typeof ViewTimeline !== 'undefined' && typeof Element.prototype.animate === 'function';
 }
 
+function entranceActive(el: HTMLElement) {
+  return el.classList.contains('has-load-entrance');
+}
+
 export function createGravityScroll(): GravityScroll {
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
   let items: Item[] = [];
@@ -62,7 +70,10 @@ export function createGravityScroll(): GravityScroll {
   const measure = () => {
     vh = document.documentElement.clientHeight;
     items.forEach(({ anim }) => anim?.cancel());
-    items = Array.from(document.querySelectorAll<HTMLElement>(MEDIA_FRAME)).map((el) => ({ el }));
+    items = Array.from(document.querySelectorAll<HTMLElement>(SCROLL_MEDIA_FRAME)).map((el) => {
+      const { top, h } = layoutBox(el);
+      return { el, top, h };
+    });
     dirty = false;
   };
 
@@ -84,7 +95,13 @@ export function createGravityScroll(): GravityScroll {
     }
     const scroll = scrollY;
     for (const it of items) {
-      const { top, h } = measureTop(it.el);
+      if (entranceActive(it.el)) {
+        it.el.classList.remove('is-drum');
+        it.el.style.removeProperty('transform');
+        it.el.style.removeProperty('opacity');
+        continue;
+      }
+      const { top, h } = layoutBox(it.el);
       const { transform, opacity } = drumPose(top, h, vh, scroll);
       it.el.classList.add('is-drum');
       it.el.style.transform = transform;
@@ -94,8 +111,9 @@ export function createGravityScroll(): GravityScroll {
 
   const bindNative = () => {
     items.forEach((it) => {
+      if (entranceActive(it.el)) return;
       it.anim?.cancel();
-      const { top, h } = measureTop(it.el);
+      const { top, h } = it;
       const start = Math.round(top - vh);
       const end = Math.round(top + h + vh);
       const keyframes: Keyframe[] = [];
@@ -136,6 +154,7 @@ export function createGravityScroll(): GravityScroll {
   addEventListener('resize', refresh);
   addEventListener('load', refresh);
   addEventListener('pageshow', refresh);
+  window.addEventListener('scroll-motion-refresh', refresh);
   document.fonts?.ready.then(refresh);
   if ('ResizeObserver' in window) new ResizeObserver(refresh).observe(document.body);
   render();
@@ -145,6 +164,7 @@ export function createGravityScroll(): GravityScroll {
     destroy: () => {
       reduced.removeEventListener?.('change', onReduced);
       removeEventListener('scroll', onScroll);
+      window.removeEventListener('scroll-motion-refresh', refresh);
       clear();
     },
   };
