@@ -1,5 +1,5 @@
 /**
- * Legible scroll-motion verification: 2×3 labelled grids + ~4s MP4 captures.
+ * Scroll motion verification: intro letter stagger (incl. nav) + media fade-in on scroll.
  *   npm run build && ARTIFACTS=/opt/cursor/artifacts node tests/scroll-motion-verify.spec.mjs
  */
 import { chromium } from 'playwright';
@@ -7,7 +7,6 @@ import { createServer } from 'node:http';
 import { readFileSync, existsSync, statSync, mkdirSync } from 'node:fs';
 import { join, extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { execFileSync } from 'node:child_process';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const ARTIFACTS = process.env.ARTIFACTS || join(ROOT, 'artifacts');
@@ -52,8 +51,7 @@ async function composeGrid(name, cellW, cellH, cellPaths, labels) {
   const labelH = 36;
   const sheet = await browser.newPage();
   const cols = 3;
-  const rows = 2;
-  await sheet.setViewportSize({ width: cols * cellW + pad * 2, height: rows * (cellH + labelH) + pad * 2 + 40 });
+  await sheet.setViewportSize({ width: cols * cellW + pad * 2, height: 2 * (cellH + labelH) + pad * 2 + 40 });
   const figures = cellPaths
     .map((p, i) => {
       const b64 = readFileSync(p).toString('base64');
@@ -65,146 +63,112 @@ async function composeGrid(name, cellW, cellH, cellPaths, labels) {
     body{background:#111;color:#ccc;padding:${pad}px}
     .grid{display:grid;grid-template-columns:repeat(3,${cellW}px);gap:${pad}px}
     figure{width:${cellW}px}
-    figcaption{padding:8px 0 4px;color:#8af}
+    figcaption{padding:8px 0 4px;color:#8af;min-height:${labelH}px}
     img{display:block;width:${cellW}px;height:${cellH}px;object-fit:cover;object-position:top center;background:#fff}
   </style><body><h1 style="margin-bottom:16px;font-size:16px">${name}</h1><div class="grid">${figures}</div></body>`;
-  await sheet.goto('about:blank');
   await sheet.setContent(html, { waitUntil: 'load' });
-  await sheet.waitForTimeout(200);
-  const out = join(ARTIFACTS, `${name}.png`);
-  await sheet.screenshot({ path: out, type: 'png' });
+  await sheet.waitForTimeout(150);
+  await sheet.screenshot({ path: join(ARTIFACTS, `${name}.png`), type: 'png' });
   await sheet.close();
-  console.log(`wrote ${out}`);
+  console.log(`wrote ${join(ARTIFACTS, `${name}.png`)}`);
 }
 
-async function waitIntroReady(page) {
-  await page.waitForFunction(() => document.documentElement.classList.contains('is-scroll-intro-ready'), null, {
-    timeout: 25000,
-  });
-}
-
-async function captureIntroMilestones(page, tmpDir, prefix, scrollY6) {
-  const paths = [];
-  await page.evaluate(() => scrollTo(0, 0));
-  await page.waitForTimeout(80);
-  paths.push(await writeSnap(page, join(tmpDir, `${prefix}-0.png`)));
-  await page.waitForTimeout(450);
-  paths.push(await writeSnap(page, join(tmpDir, `${prefix}-1.png`)));
-  await waitIntroReady(page);
-  paths.push(await writeSnap(page, join(tmpDir, `${prefix}-2.png`)));
-  await page.waitForTimeout(700);
-  paths.push(await writeSnap(page, join(tmpDir, `${prefix}-3.png`)));
-  await page.waitForTimeout(1600);
-  paths.push(await writeSnap(page, join(tmpDir, `${prefix}-4.png`)));
-  const y6 =
-    scrollY6 ??
-    (await page.evaluate(() => {
-      const frames = document.querySelectorAll('main .frame');
-      const f = frames[2] || frames[0];
-      if (!f) return Math.round(innerHeight * 0.55);
-      const r = f.getBoundingClientRect();
-      return Math.max(0, Math.round(r.top + scrollY + r.height / 2 - innerHeight / 2 + 280));
-    }));
-  await page.evaluate((y) => scrollTo(0, y), y6);
-  await page.waitForTimeout(500);
-  paths.push(await writeSnap(page, join(tmpDir, `${prefix}-5.png`)));
-  return paths;
-}
-
-async function writeSnap(page, path) {
-  await page.screenshot({ path, type: 'png' });
+async function headerClip(page, path) {
+  const box = await page.locator('.site-header').boundingBox();
+  if (!box) throw new Error('no header');
+  await page.screenshot({ path, clip: box });
   return path;
 }
 
-const labelSet = [
-  '1 · intro start',
-  '2 · mid-letters',
-  '3 · letters done',
-  '4 · media mid-entrance',
-  '5 · media settled',
-  '6 · mid-scroll (drum tilt)',
-];
+async function captureHomeIntroGrid(page, tmpDir, prefix, cellW, cellH) {
+  const labels = [
+    '1 · intro start',
+    '2 · mid Humansize letters',
+    '3 · Humansize done',
+    '4 · nav letters starting',
+    '5 · mid nav stagger',
+    '6 · all intro letters done',
+  ];
+  const paths = [];
+  await page.evaluate(() => scrollTo(0, 0));
+  await page.waitForTimeout(80);
+  paths.push(await headerClip(page, join(tmpDir, `${prefix}-0.png`)));
+  await page.waitForTimeout(420);
+  paths.push(await headerClip(page, join(tmpDir, `${prefix}-1.png`)));
+  await page.waitForTimeout(380);
+  paths.push(await headerClip(page, join(tmpDir, `${prefix}-2.png`)));
+  await page.waitForTimeout(350);
+  paths.push(await headerClip(page, join(tmpDir, `${prefix}-3.png`)));
+  await page.waitForTimeout(450);
+  paths.push(await headerClip(page, join(tmpDir, `${prefix}-4.png`)));
+  await page.waitForFunction(() => document.documentElement.classList.contains('is-letter-intro-done'), null, {
+    timeout: 20000,
+  });
+  await page.waitForTimeout(200);
+  paths.push(await headerClip(page, join(tmpDir, `${prefix}-5.png`)));
+  await composeGrid(prefix, cellW, cellH, paths, labels);
+}
 
-for (const [slug, url, vp, cellW, cellH] of [
-  ['home-intro-desktop', '/', { width: 1440, height: 900 }, 640, 400],
-  ['home-intro-mobile', '/', { width: 390, height: 844, isMobile: true, hasTouch: true }, 390, 520],
-  ['atomic-scroll-desktop', '/work/atomic-ski/', { width: 1440, height: 900 }, 640, 400],
+async function captureMediaScrollGrid(page, tmpDir, name, url, cellW, cellH) {
+  const labels = [
+    '1 · before scroll (hidden)',
+    '2 · approaching',
+    '3 · entering viewport',
+    '4 · mid fade-in',
+    '5 · fully visible',
+    '6 · still visible (no fade-out)',
+  ];
+  await page.goto(`${ORIGIN}${url}`, { waitUntil: 'load' });
+  await page.waitForFunction(() => document.documentElement.classList.contains('is-letter-intro-done'), null, {
+    timeout: 25000,
+  });
+  await page.waitForTimeout(400);
+
+  const frameIndex = url === '/' ? 0 : 2;
+  const scrollYs = await page.evaluate((idx) => {
+    const frame = document.querySelectorAll('main .frame')[idx];
+    if (!frame) return [0, 0, 0, 0, 0, 0];
+    const centre = frame.getBoundingClientRect().top + scrollY + frame.getBoundingClientRect().height / 2;
+    const vh = innerHeight;
+    return [
+      0,
+      Math.max(0, Math.round(centre - vh * 1.05)),
+      Math.max(0, Math.round(centre - vh * 0.85)),
+      Math.max(0, Math.round(centre - vh * 0.65)),
+      Math.max(0, Math.round(centre - vh * 0.45)),
+      Math.max(0, Math.round(centre - vh * 0.45)),
+    ];
+  }, frameIndex);
+
+  const paths = [];
+  for (let i = 0; i < scrollYs.length; i++) {
+    await page.evaluate((y) => scrollTo(0, y), scrollYs[i]);
+    await page.waitForTimeout(i === 0 ? 100 : 450);
+    const out = join(tmpDir, `${name}-${i}.png`);
+    await page.screenshot({ path: out, fullPage: false });
+    paths.push(out);
+  }
+  await composeGrid(name, cellW, cellH, paths, labels);
+}
+
+for (const [slug, vp, cellW, cellH] of [
+  ['home-intro-desktop', { width: 1440, height: 900 }, 640, 400],
+  ['home-intro-mobile', { width: 390, height: 844, isMobile: true, hasTouch: true }, 390, 520],
 ]) {
   const page = await browser.newPage({ viewport: vp, ...(vp.isMobile ? { isMobile: true, hasTouch: true } : {}) });
-  await page.goto(`${ORIGIN}${url}`, { waitUntil: 'load' });
-  const paths = await captureIntroMilestones(page, tmpRoot, slug);
-  await composeGrid(slug, cellW, cellH, paths, labelSet);
-  if (slug === 'home-intro-desktop') {
-    await captureBrandHoverAfterIntro(page, join(ARTIFACTS, 'home-brand-hover-after-intro.png'));
-  }
+  await page.goto(`${ORIGIN}/`, { waitUntil: 'load' });
+  await captureHomeIntroGrid(page, tmpRoot, slug, cellW, cellH);
   await page.close();
 }
 
-async function captureBrandHoverAfterIntro(page, outPath) {
-  await page.evaluate(() => scrollTo(0, 0));
-  await page.waitForTimeout(200);
-  await waitIntroReady(page);
-  await page.waitForTimeout(500);
-  await page.waitForFunction(() => {
-    const w = document.querySelector('.brand-stack')?.style.getPropertyValue('--brand-at-w');
-    return w && parseFloat(w) > 0;
-  });
-  const hoverMs = await page.evaluate(() => {
-    const raw = getComputedStyle(document.documentElement).getPropertyValue('--dur-hover').trim();
-    const n = parseFloat(raw);
-    return Number.isFinite(n) ? (raw.endsWith('ms') ? n : n * 1000) : 160;
-  });
-  await page.hover('.brand-toggle');
-  await page.waitForTimeout(hoverMs + 50);
-  const box = await page.locator('.brand-toggle').boundingBox();
-  if (!box) throw new Error('no brand-toggle box');
-  const pad = 12;
-  await page.screenshot({
-    path: outPath,
-    clip: {
-      x: Math.max(0, box.x - pad),
-      y: Math.max(0, box.y - pad),
-      width: box.width + pad * 2,
-      height: box.height + pad * 2,
-    },
-  });
-  console.log(`wrote ${outPath}`);
-}
-
-async function recordMp4(name, url, vp, run) {
-  const videoDir = join(ARTIFACTS, 'videos');
-  mkdirSync(videoDir, { recursive: true });
-  const context = await browser.newContext({
-    ...vp,
-    recordVideo: { dir: videoDir, size: { width: vp.width, height: vp.height } },
-  });
-  const page = await context.newPage();
-  await page.goto(`${ORIGIN}${url}`, { waitUntil: 'load' });
-  await run(page);
-  const webmPath = await page.video().path();
+for (const [name, url, vp, cellW, cellH] of [
+  ['home-media-scroll-desktop', '/', { width: 1440, height: 900 }, 640, 400],
+  ['atomic-media-scroll-desktop', '/work/atomic-ski/', { width: 1440, height: 900 }, 640, 400],
+]) {
+  const page = await browser.newPage({ viewport: vp });
+  await captureMediaScrollGrid(page, tmpRoot, name, url, cellW, cellH);
   await page.close();
-  await context.close();
-  const mp4 = join(ARTIFACTS, `${name}.mp4`);
-  execFileSync('ffmpeg', ['-y', '-i', webmPath, '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', mp4], {
-    stdio: 'ignore',
-  });
-  console.log(`wrote ${mp4}`);
 }
-
-await recordMp4('home-intro-desktop', '/', { width: 1440, height: 900 }, async (page) => {
-  await page.waitForTimeout(4200);
-});
-
-await recordMp4('atomic-scroll-desktop', '/work/atomic-ski/', { width: 1440, height: 900 }, async (page) => {
-  await waitIntroReady(page);
-  await page.waitForTimeout(1200);
-  const max = await page.evaluate(() => Math.min(document.body.scrollHeight - innerHeight, 2400));
-  const steps = 40;
-  for (let i = 0; i <= steps; i++) {
-    await page.evaluate((y) => scrollTo(0, y), Math.round((max * i) / steps));
-    await page.waitForTimeout(70);
-  }
-});
 
 await browser.close();
 server.close();

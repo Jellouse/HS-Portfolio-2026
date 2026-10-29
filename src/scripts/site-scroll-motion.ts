@@ -1,15 +1,17 @@
 /**
- * Site-wide scroll motion: letter intro, load-entrance, drum scroll, lazy video, header fade.
+ * Site-wide scroll motion: letter intro, viewport media entrance, lazy video, header fade.
  */
 
-import { createGravityScroll } from './gravity-scroll-motion';
-import { SCROLL_MEDIA_FRAME, SCROLL_MENU } from './scroll-media-selectors';
-import { letterIntroTargets, playLetterIntro } from './wordmark-intro';
+import { SCROLL_MEDIA_FRAME } from './scroll-media-selectors';
+import { introLetterSequence, playLetterIntro } from './wordmark-intro';
 
 const reduced = matchMedia('(prefers-reduced-motion: reduce)');
 const mobile = matchMedia('(max-width: 720px)');
 
 const viewportVideos = new Set<HTMLVideoElement>();
+
+const ENTRANCE_EASE = 'cubic-bezier(.22, 1, .36, 1)';
+const ENTRANCE_MS = 700;
 
 function doubleRaf() {
   return new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
@@ -26,17 +28,9 @@ function ensureFrameMedia(frame: HTMLElement) {
   video.load();
 }
 
-function armEntrance(frame: HTMLElement) {
-  if (!frame.classList.contains('has-load-entrance') || frame.classList.contains('is-entrance-armed')) return;
-  if (!frame.classList.contains('is-media-ready')) return;
-  frame.classList.add('is-entrance-armed');
-  ensureFrameMedia(frame);
-}
-
 function markMediaReady(frame: HTMLElement) {
   if (frame.classList.contains('is-media-ready')) return;
   frame.classList.add('is-media-ready');
-  armEntrance(frame);
 }
 
 function wireMediaReady() {
@@ -59,13 +53,58 @@ function wireMediaReady() {
   });
 }
 
-function primeVisibleMedia() {
-  document.querySelectorAll<HTMLImageElement>(`${SCROLL_MEDIA_FRAME} img`).forEach((img) => {
-    const frame = img.closest<HTMLElement>('.frame');
-    if (!frame) return;
+function revealFrame(frame: HTMLElement) {
+  if (frame.classList.contains('is-viewport-revealed')) return;
+  frame.classList.add('is-viewport-revealed');
+  ensureFrameMedia(frame);
+  if (reduced.matches) return;
+  frame.animate(
+    [{ opacity: 0, transform: 'scale(0.94) translate(0, 24px)' }, { opacity: 1, transform: 'none' }],
+    { duration: ENTRANCE_MS, easing: ENTRANCE_EASE, fill: 'both' },
+  );
+}
+
+function whenMediaReady(frame: HTMLElement, run: () => void) {
+  if (frame.classList.contains('is-media-ready')) {
+    run();
+    return;
+  }
+  const obs = new MutationObserver(() => {
+    if (!frame.classList.contains('is-media-ready')) return;
+    obs.disconnect();
+    run();
+  });
+  obs.observe(frame, { attributes: true, attributeFilter: ['class'] });
+  wireMediaReady();
+}
+
+function initMediaViewportEntrance() {
+  const frames = document.querySelectorAll<HTMLElement>(SCROLL_MEDIA_FRAME);
+  if (reduced.matches) {
+    frames.forEach((frame) => revealFrame(frame));
+    return;
+  }
+
+  const io = new IntersectionObserver(
+    (entries) => {
+      entries.forEach(({ target, isIntersecting }) => {
+        if (!isIntersecting) return;
+        const frame = target as HTMLElement;
+        whenMediaReady(frame, () => {
+          revealFrame(frame);
+          io.unobserve(frame);
+        });
+      });
+    },
+    { threshold: 0.12, rootMargin: '0px 0px 8% 0px' },
+  );
+
+  frames.forEach((frame) => {
+    if (frame.classList.contains('is-viewport-revealed')) return;
+    io.observe(frame);
     const r = frame.getBoundingClientRect();
-    if (r.bottom < -200 || r.top > innerHeight + 200) return;
-    if (img.complete && img.naturalWidth > 0) markMediaReady(frame);
+    const vh = innerHeight;
+    if (r.top < vh * 0.92 && r.bottom > 0) whenMediaReady(frame, () => revealFrame(frame));
   });
 }
 
@@ -140,38 +179,6 @@ function lazyVideos() {
   mobile.addEventListener?.('change', syncPlayback);
 }
 
-function entranceFrames() {
-  return Array.from(document.querySelectorAll<HTMLElement>(SCROLL_MEDIA_FRAME)).slice(0, 5);
-}
-
-function startLoadEntrance() {
-  document.querySelectorAll<HTMLElement>(SCROLL_MENU).forEach((el, index) => {
-    el.style.setProperty('--load-intro-order', String(index));
-    el.classList.add('has-load-entrance');
-    el.addEventListener('animationend', () => el.classList.remove('has-load-entrance'), { once: true });
-  });
-  entranceFrames().forEach((frame, index) => {
-    frame.style.setProperty('--load-intro-order', String(index));
-    frame.classList.add('has-load-entrance');
-    frame.addEventListener(
-      'animationend',
-      () => {
-        frame.classList.remove('has-load-entrance');
-        window.dispatchEvent(new Event('scroll-motion-refresh'));
-      },
-      { once: true },
-    );
-    if (frame.classList.contains('is-media-ready')) armEntrance(frame);
-  });
-  window.setTimeout(() => {
-    entranceFrames().forEach((frame) => {
-      if (!frame.classList.contains('has-load-entrance')) return;
-      frame.classList.remove('has-load-entrance');
-      window.dispatchEvent(new Event('scroll-motion-refresh'));
-    });
-  }, 4200);
-}
-
 function initHeaderScrollFade() {
   if (document.querySelector('[data-intro]')) return;
   const header = document.querySelector<HTMLElement>('.site-header');
@@ -200,12 +207,13 @@ const smoothstep = (a: number, b: number, v: number) => {
 
 export function initSiteScrollMotion() {
   document.documentElement.classList.add('has-scroll-motion');
+
   if (reduced.matches) {
-    document.documentElement.classList.add('is-scroll-intro-ready');
-    letterIntroTargets().forEach(({ shell }) => shell.classList.add('is-motion-ready'));
+    document.documentElement.classList.add('is-scroll-intro-ready', 'is-letter-intro-done');
+    introLetterSequence().forEach(({ shell }) => shell.classList.add('is-motion-ready'));
     wireMediaReady();
     lazyVideos();
-    createGravityScroll();
+    initMediaViewportEntrance();
     return;
   }
 
@@ -220,19 +228,9 @@ export function initSiteScrollMotion() {
       await playLetterIntro();
       document.documentElement.classList.remove('is-scroll-intro-pending');
       wireMediaReady();
-      primeVisibleMedia();
-      startLoadEntrance();
+      initMediaViewportEntrance();
       document.documentElement.classList.add('is-scroll-intro-ready');
-      const gravity = createGravityScroll();
       initHeaderScrollFade();
-      addEventListener('load', () => gravity.refresh());
-      addEventListener('pageshow', () => gravity.refresh());
-      window.addEventListener('scroll-motion-refresh', () => gravity.refresh());
-      new MutationObserver(() => {
-        document.querySelectorAll<HTMLElement>(`${SCROLL_MEDIA_FRAME}.has-load-entrance.is-media-ready`).forEach((frame) => {
-          armEntrance(frame);
-        });
-      }).observe(document.documentElement, { subtree: true, attributes: true, attributeFilter: ['class'] });
     } finally {
       document.documentElement.classList.remove('is-scroll-intro-pending');
     }

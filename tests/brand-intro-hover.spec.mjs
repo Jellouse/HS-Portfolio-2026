@@ -33,7 +33,7 @@ const check = (ok, msg) => {
 const browser = await chromium.launch();
 const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
 await page.goto('http://127.0.0.1:4342/', { waitUntil: 'load' });
-await page.waitForFunction(() => document.documentElement.classList.contains('is-scroll-intro-ready'), null, {
+await page.waitForFunction(() => document.documentElement.classList.contains('is-letter-intro-done'), null, {
   timeout: 25000,
 });
 await page.waitForTimeout(400);
