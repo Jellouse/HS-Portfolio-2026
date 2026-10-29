@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { getPool } from '../../lib/shop/server.mjs';
+import { contactConfirmationEmail } from '../../lib/contact-confirmation-email';
 
 export const prerender = false;
 
@@ -27,26 +28,42 @@ async function mail(service: string, project: string, email: string) {
   const key = env('RESEND_API_KEY');
   if (!key) return false;
   try {
-    const res = await fetch('https://api.resend.com/emails', {
+    const from = env('CONTACT_FROM') || 'Humansize <onboarding@resend.dev>';
+    const toJohann = env('CONTACT_TO') || 'schnettker.johann@gmail.com';
+    const notify = fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: { authorization: `Bearer ${key}`, 'content-type': 'application/json' },
       body: JSON.stringify({
-        from: env('CONTACT_FROM') || 'Humansize <onboarding@resend.dev>',
-        to: [env('CONTACT_TO') || 'schnettker.johann@gmail.com'],
+        from,
+        to: [toJohann],
         reply_to: email,
         subject: `New ${service} enquiry from ${email}`,
         text: `Service: ${service}\nFrom: ${email}\n\n${project}`,
       }),
       signal: AbortSignal.timeout(8000),
     });
-    if (!res.ok) console.error('[contact] resend', res.status, await res.text());
-    return res.ok;
+    const confirm = fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { authorization: `Bearer ${key}`, 'content-type': 'application/json' },
+      body: JSON.stringify({
+        from,
+        to: [email],
+        reply_to: toJohann,
+        subject: 'We received your message · Humansize',
+        text: contactConfirmationEmail(service, project),
+      }),
+      signal: AbortSignal.timeout(8000),
+    });
+    const [res, resConfirm] = await Promise.all([notify, confirm]);
+    if (!res.ok) console.error('[contact] resend notify', res.status, await res.text());
+    if (!resConfirm.ok) console.error('[contact] resend confirm', resConfirm.status, await resConfirm.text());
+    return res.ok || resConfirm.ok;
   } catch (e) {
     console.error('[contact] mail failed', e);
     return false;
   }
 }
-const SERVICES = new Set(['Product', 'Retail', 'Website', 'Other']);
+const SERVICES = new Set(['Retail', 'Website', 'Other']);
 
 export const POST: APIRoute = async ({ request }) => {
   let body: Record<string, unknown>;

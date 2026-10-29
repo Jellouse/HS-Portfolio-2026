@@ -15,7 +15,9 @@ const home = Astro.url.pathname === '/';
 
 <header class="site-header">
   <p class="brand">
-    <button type="button" class="brand-toggle" aria-expanded="false" aria-controls="site-socials" data-socials-toggle>Humansize</button>
+    <button type="button" class="brand-toggle" aria-expanded="false" aria-controls="site-socials" data-socials-toggle>
+      <span class="brand-stack"><span class="brand-word"><span class="brand-at" aria-hidden="true">@</span><span class="brand-name">Humansize</span></span></span>
+    </button>
   </p>
   <nav class="site-menu" aria-label="Main" data-main-menu>
     {home ? <a href="#about" data-about-link>About</a> : <a href="/">Home</a>}
@@ -31,7 +33,9 @@ const home = Astro.url.pathname === '/';
 
 <script>
   import { initSocials } from '../scripts/socials';
+  import { initBrandAtWidth } from '../scripts/brand-at-width';
   initSocials();
+  initBrandAtWidth();
   // About: smooth-scroll to the about text (respects reduced motion).
   document.querySelector('[data-about-link]')?.addEventListener('click', (e) => {
     const about = document.getElementById('about');

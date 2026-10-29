@@ -107,9 +107,13 @@ blocks:
   - discriminant: image
     value:
       src: /src/content/projects/industrial-bloom/blocks/10/value/src.jpg
+      alt: Industrial Bloom
       frame: default
       flush: false
       outline: false
+  - discriminant: text
+    value:
+      text: '[visit shop](/shop/)'
   - discriminant: process
     value:
       images:

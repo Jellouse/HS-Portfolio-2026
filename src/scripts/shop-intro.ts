@@ -1,3 +1,6 @@
+import { clearStableViewportHeight, stableViewportHeight } from '../lib/viewport-layout';
+import { introFaceLayout } from '../lib/intro-mobile-layout';
+
 /**
  * /shop header: the Industrial Bloom ring starts big with its centre on the viewport top (half
  * cut off), then scales down and drifts a little lower until, at scroll R, it sits exactly where
@@ -72,18 +75,23 @@ export function initShopIntro(head: HTMLElement) {
   const atTop = () => mark.classList.toggle('at-top', drawn > 0 && scrollY <= 1);
   addEventListener('scroll', atTop, { passive: true });
 
+  const forceLayout = () => {
+    lastW = -1;
+    head.removeAttribute('data-ring-ready');
+    layout();
+  };
+
   const layout = () => {
     const vw = document.documentElement.clientWidth;
-    if (vw === lastW) return;
+    if (vw !== lastW) clearStableViewportHeight();
+    if (vw === lastW && head.dataset.ringReady !== undefined) return;
     lastW = vw;
-    const vh = Math.round(probe.getBoundingClientRect().height);
+    const vh = stableViewportHeight(probe, vw);
     const mobile = vw < 760;
-    const nameTop = Math.round(vh * (mobile ? 0.715 : 0.772));
+    const { nameTop, faceCenter } = introFaceLayout(vh, vw);
     document.documentElement.style.setProperty('--intro-name-top', `${nameTop}px`);
-    const W0 = Math.round((vw * (mobile ? 0.9 : 0.68)) / 2) * 2; // even, so the centre is a whole px
-    // phones: centred between the viewport top and the name (equal space, same centre as the
-    // home face); desktop: round 5/6 placement, centre exactly on the page top (half above it)
-    const C = mobile ? Math.round(nameTop / 2) : 0;
+    const W0 = Math.round((vw * (mobile ? 0.9 : 0.68)) / 2) * 2;
+    const C = mobile ? (faceCenter ?? Math.round(nameTop / 2)) : 0;
     const Wf = 54;
     const topF = mobile ? 32 : 44; // .shop-detail padding-top
     const titleF = topF + Wf + (mobile ? 96 : 130); // detail h1 top
@@ -141,5 +149,9 @@ export function initShopIntro(head: HTMLElement) {
   if (sda) head.toggleAttribute('data-ring-settled', true);
   layout();
   if (!sda) addEventListener('scroll', () => frame || (frame = requestAnimationFrame(write)), { passive: true });
-  addEventListener('resize', layout, { passive: true });
+  addEventListener('resize', () => {
+    if (document.documentElement.clientWidth !== lastW) forceLayout();
+  }, { passive: true });
+  addEventListener('pagereveal', forceLayout, { passive: true });
+  addEventListener('pageshow', (e) => e.persisted && forceLayout(), { passive: true });
 }

@@ -33,11 +33,31 @@ for (const [label, opt] of [['desktop', { viewport: { width: 1440, height: 900 }
   await p.waitForTimeout(1200);
   const shop = await p.evaluate(() => { const t = document.querySelector('.shop-head-title').getBoundingClientRect(); const r = document.querySelector('.shop-ring').getBoundingClientRect(); return { text: t.top, c: (r.top + r.bottom) / 2, top: r.top, below: t.top - r.bottom, w: r.width, x: r.left + r.width / 2 }; });
   const hp = await (await browser.newContext(opt)).newPage();
-  await hp.goto(B + '/', { waitUntil: 'load' });
-  await hp.waitForTimeout(800);
-  const home = await hp.evaluate(() => { const t = document.querySelector('.site-header .brand').getBoundingClientRect(); const r = document.querySelector('.mark-blob').getBoundingClientRect(); return { text: t.top, c: (r.top + r.bottom) / 2, top: r.top, below: t.top - r.bottom }; });
+  await hp.goto(B + '/?intro=raf', { waitUntil: 'load' });
+  await hp.waitForSelector('[data-intro-ready]', { state: 'attached', timeout: 30000 });
+  await hp.waitForSelector('[data-intro-settled]', { state: 'attached', timeout: 30000 });
+  const home = await hp.evaluate(() => {
+    const t = document.querySelector('.site-header .brand').getBoundingClientRect();
+    const r = document.querySelector('[data-hero-blob]').getBoundingClientRect();
+    const copy = document.querySelector('.about p');
+    return {
+      text: t.top,
+      c: (r.top + r.bottom) / 2,
+      top: r.top,
+      bottom: r.bottom,
+      left: r.left,
+      right: r.right,
+      w: r.width,
+      below: t.top - r.bottom,
+      vw: innerWidth,
+      copyTop: copy ? Math.round(copy.getBoundingClientRect().top) : NaN,
+    };
+  });
+  const shopCopy = await p.evaluate(() => { const el = document.querySelector('.shop-intro p'); return el ? Math.round(el.getBoundingClientRect().top) : NaN; });
   await hp.close();
   check(Math.abs(shop.text - home.text) <= 1, `${label}: name blocks at the same top (home ${home.text}, shop ${shop.text})`);
+  check(Math.abs(home.copyTop - shopCopy) <= 2, `${label}: first body copy aligns (home ${home.copyTop}, shop ${shopCopy})`);
+  check(home.copyTop >= (label === 'mobile' ? 844 : 900) - 40, `${label}: home copy starts just below the viewport (${home.copyTop})`);
   if (label === 'mobile') check(Math.abs(shop.c - home.c) <= 1.5, `${label}: face and ring centres aligned (${home.c.toFixed(1)}/${shop.c.toFixed(1)})`);
   else check(Math.abs(shop.c) <= 1.5 && Math.abs(shop.w - 980) <= 2 && shop.text === 695, `desktop: ring 68vw, centre on the page top, name at 695 (c ${shop.c.toFixed(1)}, w ${shop.w.toFixed(0)}, text ${shop.text})`);
   // Overscroll: nothing between the ring and the root clips it, and the whole ring (incl. the
@@ -63,8 +83,9 @@ for (const [label, opt] of [['desktop', { viewport: { width: 1440, height: 900 }
   await hp2.close();
   check(Math.abs(shop.x - 195 * (label === 'mobile' ? 1 : 1440 / 390)) <= 1, `${label}: ring centred horizontally`);
   if (label === 'mobile') {
-    check(Math.abs(home.top - home.below) <= 2 && Math.abs(shop.top - shop.below) <= 2, `mobile: equal space above and below (face ${home.top.toFixed(0)}/${home.below.toFixed(0)}, ring ${shop.top.toFixed(0)}/${shop.below.toFixed(0)})`);
-    check(shop.top >= 0 && Math.abs(shop.w - 351) <= 2, `mobile: ring whole and 90% wide (top ${shop.top.toFixed(0)}, w ${shop.w.toFixed(0)})`);
+    check(Math.abs(shop.c - home.c) <= 2, `${label}: face and ring centres aligned (${home.c.toFixed(1)}/${shop.c.toFixed(1)})`);
+    check(Math.abs(home.w - 351) <= 2, `mobile: face 90% wide (${home.w.toFixed(0)})`);
+    check(home.top >= -2 && home.left >= -2 && home.right <= home.vw + 2, `mobile: face in viewport`);
   }
   const R = Number(await p.getAttribute('[data-shop-head]', 'data-ring-r'));
   await p.evaluate((y) => scrollTo(0, y), R);
@@ -97,7 +118,7 @@ await p.goto(B + '/', { waitUntil: 'load' });
 await p.waitForTimeout(500);
 const home = await p.evaluate(() => [...document.querySelectorAll('[data-main-menu] > *')].map((e) => e.textContent.trim()).join(','));
 check(home === 'About,Shop,Contact', `home menu ${home}`);
-check((await p.textContent('.brand')).trim() === 'Humansize', 'brand reads Humansize');
+check((await p.textContent('.brand-name')).trim() === 'Humansize', 'brand reads Humansize');
 // Socials: "Humansize" swaps the menu row; second click, Esc, far pointer and scroll close it.
 const soc = () => p.evaluate(() => ({ exp: document.querySelector('[data-socials-toggle]').getAttribute('aria-expanded'), menu: !document.querySelector('[data-main-menu]').hidden, items: [...document.querySelectorAll('[data-socials]:not([hidden]) > a')].map((a) => a.textContent.trim() + '=' + a.getAttribute('href')).join(',') }));
 await p.click('[data-socials-toggle]');

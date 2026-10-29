@@ -7,7 +7,6 @@ const textBlock = z.object({
   discriminant: z.literal('text'),
   value: z.object({
     heading: z.string().optional(),
-    year: z.string().optional(),
     text: z.string(),
   }),
 });
@@ -31,6 +30,7 @@ const videoBlock = z.object({
     alt: z.string().nullish(),
     frame: frame.default('default'),
     flush: z.boolean().default(false),
+    outline: z.boolean().default(false),
   }),
 });
 
