@@ -104,7 +104,7 @@ for (const [name, vp, url, scrollPrep] of [
         (video && (video.readyState >= 2 || video.poster || video.videoWidth > 0));
       if (!mediaOk) continue;
       const nw = img?.naturalWidth || video?.videoWidth || 0;
-      if (o > best.o) best = { ok: o > 0.4 && frame.classList.contains('is-viewport-revealed'), o, nw };
+      if (o > best.o) best = { ok: o > 0.95 && frame.classList.contains('is-viewport-locked'), o, nw };
     }
     return { ...best, pending: document.documentElement.classList.contains('is-scroll-intro-pending') };
   });

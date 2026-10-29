@@ -10,22 +10,20 @@ const mobile = matchMedia('(max-width: 720px)');
 
 const viewportVideos = new Set<HTMLVideoElement>();
 
-const ENTRANCE_EASE = 'cubic-bezier(.22, 1, .36, 1)';
-const ENTRANCE_MS = 700;
-
 function doubleRaf() {
   return new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
 }
 
 function ensureFrameMedia(frame: HTMLElement) {
   const video = frame.querySelector<HTMLVideoElement>('video');
-  if (!video?.dataset.src) return;
+  if (!video?.dataset.src || video.dataset.armed) return;
   const source = video.querySelector('source');
   const src = video.dataset.src;
   if (source && !source.getAttribute('src')) source.setAttribute('src', src);
   if (!video.getAttribute('src') && !source) video.setAttribute('src', src);
+  video.dataset.armed = '1';
   video.preload = 'auto';
-  video.load();
+  if (video.readyState < 2) video.load();
 }
 
 function markMediaReady(frame: HTMLElement) {
@@ -53,59 +51,50 @@ function wireMediaReady() {
   });
 }
 
-function revealFrame(frame: HTMLElement) {
-  if (frame.classList.contains('is-viewport-revealed')) return;
-  frame.classList.add('is-viewport-revealed');
-  ensureFrameMedia(frame);
-  if (reduced.matches) return;
-  frame.animate(
-    [{ opacity: 0, transform: 'scale(0.94) translate(0, 24px)' }, { opacity: 1, transform: 'none' }],
-    { duration: ENTRANCE_MS, easing: ENTRANCE_EASE, fill: 'both' },
-  );
-}
+/** 0 at the viewport bottom edge, 1 once the frame top is 40% up, then locked. Opacity only. */
+function initMediaScrollFade() {
+  const frames = [...document.querySelectorAll<HTMLElement>(SCROLL_MEDIA_FRAME)];
+  const locked = new WeakSet<HTMLElement>();
 
-function whenMediaReady(frame: HTMLElement, run: () => void) {
-  if (frame.classList.contains('is-media-ready')) {
-    run();
-    return;
-  }
-  const obs = new MutationObserver(() => {
-    if (!frame.classList.contains('is-media-ready')) return;
-    obs.disconnect();
-    run();
-  });
-  obs.observe(frame, { attributes: true, attributeFilter: ['class'] });
-  wireMediaReady();
-}
+  const lock = (frame: HTMLElement) => {
+    if (locked.has(frame)) return;
+    locked.add(frame);
+    frame.classList.add('is-viewport-locked');
+    frame.style.opacity = '1';
+    ensureFrameMedia(frame);
+  };
 
-function initMediaViewportEntrance() {
-  const frames = document.querySelectorAll<HTMLElement>(SCROLL_MEDIA_FRAME);
   if (reduced.matches) {
-    frames.forEach((frame) => revealFrame(frame));
+    frames.forEach(lock);
     return;
   }
 
-  const io = new IntersectionObserver(
-    (entries) => {
-      entries.forEach(({ target, isIntersecting }) => {
-        if (!isIntersecting) return;
-        const frame = target as HTMLElement;
-        whenMediaReady(frame, () => {
-          revealFrame(frame);
-          io.unobserve(frame);
-        });
-      });
-    },
-    { threshold: 0.12, rootMargin: '0px 0px 8% 0px' },
-  );
+  const paint = () => {
+    const vh = document.documentElement.clientHeight || innerHeight;
+    const start = vh;
+    const end = vh * 0.6;
+    const span = start - end;
+    for (const frame of frames) {
+      if (locked.has(frame)) continue;
+      const top = frame.getBoundingClientRect().top;
+      const opacity = Math.min(1, Math.max(0, (start - top) / span));
+      frame.style.opacity = opacity.toFixed(3);
+      if (opacity > 0) ensureFrameMedia(frame);
+      if (opacity >= 1) lock(frame);
+    }
+  };
 
-  frames.forEach((frame) => {
-    if (frame.classList.contains('is-viewport-revealed')) return;
-    io.observe(frame);
-    const r = frame.getBoundingClientRect();
-    const vh = innerHeight;
-    if (r.top < vh * 0.92 && r.bottom > 0) whenMediaReady(frame, () => revealFrame(frame));
-  });
+  let raf = 0;
+  const schedule = () => {
+    if (raf) return;
+    raf = requestAnimationFrame(() => {
+      raf = 0;
+      paint();
+    });
+  };
+  addEventListener('scroll', schedule, { passive: true });
+  addEventListener('resize', schedule);
+  paint();
 }
 
 function lazyVideos() {
@@ -142,12 +131,8 @@ function lazyVideos() {
     videos.forEach((video, index) => {
       if (!document.hidden && index < limit) {
         if (!video.dataset.src) return;
-        const source = video.querySelector('source');
-        const src = video.dataset.src;
-        if (source && !source.getAttribute('src')) source.setAttribute('src', src);
-        if (!video.getAttribute('src') && !source) video.setAttribute('src', src);
-        video.preload = 'auto';
-        video.load();
+        const host = video.closest<HTMLElement>(SCROLL_MEDIA_FRAME);
+        if (host) ensureFrameMedia(host);
         video.play().catch(() => {});
       } else video.pause();
     });
@@ -213,7 +198,7 @@ export function initSiteScrollMotion() {
     introLetterSequence().forEach(({ shell }) => shell.classList.add('is-motion-ready'));
     wireMediaReady();
     lazyVideos();
-    initMediaViewportEntrance();
+    initMediaScrollFade();
     return;
   }
 
@@ -228,7 +213,7 @@ export function initSiteScrollMotion() {
       await playLetterIntro();
       document.documentElement.classList.remove('is-scroll-intro-pending');
       wireMediaReady();
-      initMediaViewportEntrance();
+      initMediaScrollFade();
       document.documentElement.classList.add('is-scroll-intro-ready');
       initHeaderScrollFade();
     } finally {
