@@ -9,7 +9,7 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react
 import { Drawer } from 'vaul';
 
 const TITLES: Record<number, string> = { 1: 'Pick a service', 2: 'Describe your project', 3: 'Add your email' };
-const SERVICES = ['Product', 'Retail', 'Website', 'Other'];
+const SERVICES = ['Physical Build', 'Digital Build', 'Other'];
 const THANKS = 'Thank you, i’ll be in touch shortly!';
 
 export default function ContactDrawer({ email: address }: { email: string }) {

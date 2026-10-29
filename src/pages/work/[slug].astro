@@ -7,6 +7,7 @@ import Base from '../../layouts/Base.astro';
 import { absoluteUrl, getProjects, plainText, type ProjectEntry } from '../../lib/content';
 import { resolveImage } from '../../lib/images';
 import { projectJsonLd } from '../../lib/seo';
+import { getCollection } from 'astro:content';
 
 export async function getStaticPaths() {
   const projects = await getProjects();
@@ -24,6 +25,7 @@ const { project } = Astro.props;
 const summary = project.data.seoDescription?.trim() || plainText(project.data.summary);
 const image = project.data.cover ? resolveImage(project.data.cover) : undefined;
 const pageUrl = absoluteUrl(Astro.site, `/work/${project.id}/`);
+const service = (await getCollection('services')).find((s) => s.data.projects.includes(project.id));
 const title = `${project.data.seoTitle?.trim() || projectLabel(project.data)} · Humansize`;
 ---
 
@@ -35,4 +37,5 @@ const title = `${project.data.seoTitle?.trim() || projectLabel(project.data)} ·
   jsonLd={projectJsonLd(project, pageUrl)}
 >
   <ProjectArticle project={project} />
+  {service && <p class="project-service">Part of <a href={`/services/${service.id}/`}>{service.data.title}</a>.</p>}
 </Base>

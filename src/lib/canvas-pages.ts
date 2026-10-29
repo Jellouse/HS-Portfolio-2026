@@ -1,5 +1,6 @@
 // Every public page for /canvas, derived from the real routes in src/pages (and their
 // getStaticPaths), so a new page or product shows up on the board without a hand list.
+import { getCollection } from 'astro:content';
 import { getProjects, projectLabel } from './content';
 import { getProducts } from './shop';
 
@@ -14,6 +15,7 @@ const sources = import.meta.glob<string>('../pages/**/*.astro', { query: '?raw',
 const DYNAMIC: Record<string, () => Promise<string[]>> = {
   '/work/[slug]': async () => (await getProjects()).map((p) => `/work/${p.id}/`),
   '/shop/[slug]': async () => (await getProducts()).map((p) => `/shop/${p.id}/`),
+  '/services/[slug]': async () => (await getCollection('services')).map((s) => `/services/${s.id}/`),
 };
 
 const routeOf = (file: string) =>

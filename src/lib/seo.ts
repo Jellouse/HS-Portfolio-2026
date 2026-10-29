@@ -41,7 +41,7 @@ export function homeJsonLd(site: SiteData, pageUrl: string) {
           name: 'Services',
           itemListElement: positioning.services.map((name) => ({
             '@type': 'Offer',
-            itemOffered: { '@type': 'Service', name },
+            itemOffered: { '@type': 'Service', name, url: new URL(positioning.serviceUrls[name], pageUrl).href },
           })),
         },
         founder: { '@id': personId },

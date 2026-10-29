@@ -72,7 +72,7 @@ for (const [label, opt] of [['desktop', { viewport: { width: 1440, height: 900 }
   const a = await p.locator('.shop-mark').boundingBox();
   check(await p.evaluate(() => !document.querySelector('.shop-ring-wrap, [data-shop-ring] .project-menu')), `${label}: no ring menu on /shop`);
   const order = await p.evaluate(() => [...document.querySelectorAll('.shop-menu > *')].map((e) => e.textContent.trim()).join(','));
-  check(order === 'Home,About,Contact', `${label}: shop menu order ${order}`);
+  check(order === 'Home,Services,About,Contact', `${label}: shop menu order ${order}`);
   if (label === 'desktop') {
     await p.evaluate(() => scrollTo(0, 0));
     await p.waitForTimeout(400);
@@ -96,7 +96,7 @@ const p = await browser.newPage({ viewport: { width: 1440, height: 900 } });
 await p.goto(B + '/', { waitUntil: 'load' });
 await p.waitForTimeout(500);
 const home = await p.evaluate(() => [...document.querySelectorAll('[data-main-menu] > *')].map((e) => e.textContent.trim()).join(','));
-check(home === 'About,Shop,Contact', `home menu ${home}`);
+check(home === 'Services,Shop,Contact', `home menu ${home}`);
 check((await p.textContent('.brand')).trim() === 'Humansize', 'brand reads Humansize');
 // Socials: "Humansize" swaps the menu row; second click, Esc, far pointer and scroll close it.
 const soc = () => p.evaluate(() => ({ exp: document.querySelector('[data-socials-toggle]').getAttribute('aria-expanded'), menu: !document.querySelector('[data-main-menu]').hidden, items: [...document.querySelectorAll('[data-socials]:not([hidden]) > a')].map((a) => a.textContent.trim() + '=' + a.getAttribute('href')).join(',') }));

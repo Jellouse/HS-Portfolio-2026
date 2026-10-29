@@ -184,4 +184,17 @@ const products = defineCollection({
   }),
 });
 
-export const collections = { projects, site, projectOrder, products };
+// Services (Physical Build, Digital Build): one yaml per page, edited in Keystatic.
+const services = defineCollection({
+  loader: glob({ pattern: '*.yaml', base: './src/content/services' }),
+  schema: z.object({
+    title: z.string(),
+    seoTitle: z.string().default(''),
+    order: z.number().default(0),
+    summary: z.string(),
+    items: z.array(z.string()).default([]),
+    projects: z.array(z.string()).default([]),
+  }),
+});
+
+export const collections = { projects, site, projectOrder, products, services };

@@ -3078,3 +3078,56 @@ html.is-contact-open, html.is-contact-open body { overscroll-behavior: none; }
     }
   }
 }
+
+/* /services landing and pages */
+.services-page {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 160px 20px 136px;
+}
+.services-page h1 {
+  font: inherit;
+  margin: 0 0 29px;
+}
+.services-page p {
+  margin: 0 0 29px;
+}
+.services-list,
+.services-items {
+  list-style: none;
+  margin: 0 0 29px;
+  padding: 0;
+}
+.services-list li {
+  margin: 0 0 29px;
+}
+.services-page a,
+.services-cta {
+  color: inherit;
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  transition: opacity var(--dur-hover) var(--ease-out);
+}
+.services-cta {
+  font: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+.services-page a:hover,
+.services-cta:hover {
+  opacity: 0.6;
+}
+.project-service {
+  max-width: 640px;
+  margin: 0 auto 136px;
+  padding: 0 20px;
+}
+.project-service a {
+  color: inherit;
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}

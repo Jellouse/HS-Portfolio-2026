@@ -1,0 +1,37 @@
+---
+export const prerender = true;
+
+import { getCollection, type CollectionEntry } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import SmallMenu from '../../components/SmallMenu.astro';
+
+export async function getStaticPaths() {
+  return (await getCollection('services')).map((s) => ({ params: { slug: s.id }, props: { s } }));
+}
+const { s } = Astro.props as { s: CollectionEntry<'services'> };
+const all = await getCollection('projects');
+const cases = s.data.projects.map((id) => all.find((p) => p.id === id)).filter((p) => !!p);
+---
+
+<Base title={`${s.data.seoTitle || s.data.title} · Humansize`} description={s.data.summary}>
+  <SmallMenu />
+  <div class="services-page">
+    <h1>{s.data.title}</h1>
+    <p>{s.data.summary}</p>
+    <ul class="services-items">
+      {s.data.items.map((i) => <li>{i}</li>)}
+    </ul>
+    {cases.length > 0 && (
+      <p>
+        Case studies:{' '}
+        {cases.map((p, i) => (
+          <>
+            {i > 0 && ', '}
+            <a href={`/work/${p.id}/`}>{p.data.title}</a>
+          </>
+        ))}
+      </p>
+    )}
+    <p><button type="button" class="services-cta" data-contact-open>Start a project</button>, or see <a href="/services/">all services</a>.</p>
+  </div>
+</Base>

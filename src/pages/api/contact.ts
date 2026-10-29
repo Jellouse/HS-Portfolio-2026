@@ -46,7 +46,7 @@ async function mail(service: string, project: string, email: string) {
     return false;
   }
 }
-const SERVICES = new Set(['Product', 'Retail', 'Website', 'Other']);
+const SERVICES = new Set(['Physical Build', 'Digital Build', 'Other']);
 
 export const POST: APIRoute = async ({ request }) => {
   let body: Record<string, unknown>;

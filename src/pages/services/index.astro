@@ -1,0 +1,26 @@
+---
+export const prerender = true;
+
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import SmallMenu from '../../components/SmallMenu.astro';
+
+// /services: pick Physical Build or Digital Build. Text uses the site blur reveal (main p/h1/li).
+const services = (await getCollection('services')).sort((a, b) => a.data.order - b.data.order);
+---
+
+<Base title="Services · Humansize" description="Humansize services: Physical Build and Digital Build.">
+  <SmallMenu />
+  <div class="services-page">
+    <h1>Services</h1>
+    <ul class="services-list">
+      {services.map((s) => (
+        <li>
+          <a href={`/services/${s.id}/`}>{s.data.title}</a>
+          <br />
+          {s.data.summary}
+        </li>
+      ))}
+    </ul>
+  </div>
+</Base>
