@@ -33,7 +33,9 @@ const home = Astro.url.pathname === '/';
 
 <script>
   import { initSocials } from '../scripts/socials';
+  import { initBrandAtWidth } from '../scripts/brand-at-width';
   initSocials();
+  initBrandAtWidth();
   // About: smooth-scroll to the about text (respects reduced motion).
   document.querySelector('[data-about-link]')?.addEventListener('click', (e) => {
     const about = document.getElementById('about');

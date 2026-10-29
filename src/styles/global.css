@@ -2290,6 +2290,8 @@ body:has(.hero[data-intro]) .site-header .contact {
   margin: 0;
   font-size: var(--text-body);
   line-height: var(--lh-body);
+  letter-spacing: var(--track);
+  font-weight: 400;
 }
 
 .site-menu {
@@ -2981,7 +2983,10 @@ html.is-contact-open, html.is-contact-open body { overscroll-behavior: none; }
 .brand-toggle {
   padding: 0;
   font: inherit;
+  font-size: inherit;
+  line-height: inherit;
   letter-spacing: inherit;
+  font-weight: inherit;
   color: inherit;
   background: none;
   border: 0;
@@ -3002,35 +3007,46 @@ html.is-contact-open, html.is-contact-open body { overscroll-behavior: none; }
     display: inline-block;
   }
 
-  .brand-at {
+  .brand-stack {
+    position: relative;
     display: inline-block;
-    max-width: 0;
-    opacity: 0;
-    overflow: hidden;
     vertical-align: baseline;
-    transform: translateX(6px);
-    transition:
-      opacity var(--dur-hover) var(--ease-out),
-      transform var(--dur-hover) var(--ease-out),
-      max-width var(--dur-hover) var(--ease-out);
+  }
+
+  .brand-at,
+  .brand-name {
+    font: inherit;
+    font-size: inherit;
+    line-height: inherit;
+    letter-spacing: inherit;
+    font-weight: inherit;
+  }
+
+  .brand-at {
+    display: block;
+    position: absolute;
+    right: 100%;
+    top: 0;
+    opacity: 0;
+    overflow: visible;
+    white-space: nowrap;
+    transition: opacity var(--dur-hover) var(--ease-out);
   }
 
   .brand-name {
     display: inline-block;
-    transform: translateX(0.58ch);
+    transform: translateX(calc(var(--brand-at-w, 0px) * -0.5));
     transition: transform var(--dur-hover) var(--ease-out);
   }
 
   .brand-toggle:hover .brand-at,
   .brand-toggle:focus-visible .brand-at {
-    max-width: 1ch;
     opacity: 1;
-    transform: translateX(0);
   }
 
   .brand-toggle:hover .brand-name,
   .brand-toggle:focus-visible .brand-name {
-    transform: translateX(0);
+    transform: translateX(calc(var(--brand-at-w, 0px) * 0.5));
   }
 }
 
