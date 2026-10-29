@@ -129,13 +129,46 @@ for (const [slug, url, vp, cellW, cellH] of [
   ['home-intro-desktop', '/', { width: 1440, height: 900 }, 640, 400],
   ['home-intro-mobile', '/', { width: 390, height: 844, isMobile: true, hasTouch: true }, 390, 520],
   ['atomic-scroll-desktop', '/work/atomic-ski/', { width: 1440, height: 900 }, 640, 400],
-  ['atomic-scroll-mobile', '/work/atomic-ski/', { width: 390, height: 844, isMobile: true, hasTouch: true }, 390, 520],
 ]) {
   const page = await browser.newPage({ viewport: vp, ...(vp.isMobile ? { isMobile: true, hasTouch: true } : {}) });
   await page.goto(`${ORIGIN}${url}`, { waitUntil: 'load' });
   const paths = await captureIntroMilestones(page, tmpRoot, slug);
   await composeGrid(slug, cellW, cellH, paths, labelSet);
+  if (slug === 'home-intro-desktop') {
+    await captureBrandHoverAfterIntro(page, join(ARTIFACTS, 'home-brand-hover-after-intro.png'));
+  }
   await page.close();
+}
+
+async function captureBrandHoverAfterIntro(page, outPath) {
+  await page.evaluate(() => scrollTo(0, 0));
+  await page.waitForTimeout(200);
+  await waitIntroReady(page);
+  await page.waitForTimeout(500);
+  await page.waitForFunction(() => {
+    const w = document.querySelector('.brand-stack')?.style.getPropertyValue('--brand-at-w');
+    return w && parseFloat(w) > 0;
+  });
+  const hoverMs = await page.evaluate(() => {
+    const raw = getComputedStyle(document.documentElement).getPropertyValue('--dur-hover').trim();
+    const n = parseFloat(raw);
+    return Number.isFinite(n) ? (raw.endsWith('ms') ? n : n * 1000) : 160;
+  });
+  await page.hover('.brand-toggle');
+  await page.waitForTimeout(hoverMs + 50);
+  const box = await page.locator('.brand-toggle').boundingBox();
+  if (!box) throw new Error('no brand-toggle box');
+  const pad = 12;
+  await page.screenshot({
+    path: outPath,
+    clip: {
+      x: Math.max(0, box.x - pad),
+      y: Math.max(0, box.y - pad),
+      width: box.width + pad * 2,
+      height: box.height + pad * 2,
+    },
+  });
+  console.log(`wrote ${outPath}`);
 }
 
 async function recordMp4(name, url, vp, run) {

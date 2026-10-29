@@ -202,7 +202,7 @@ export function initSiteScrollMotion() {
   document.documentElement.classList.add('has-scroll-motion');
   if (reduced.matches) {
     document.documentElement.classList.add('is-scroll-intro-ready');
-    letterIntroTargets().forEach((root) => root.classList.add('is-motion-ready'));
+    letterIntroTargets().forEach(({ shell }) => shell.classList.add('is-motion-ready'));
     wireMediaReady();
     lazyVideos();
     createGravityScroll();

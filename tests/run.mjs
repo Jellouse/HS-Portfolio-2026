@@ -28,6 +28,7 @@ const SPECS = [
   ['project-images', 'tests/project-images.spec.mjs'],
   ['project-drum', 'tests/project-drum.spec.mjs'],
   ['scroll-media', 'tests/scroll-media-visible.spec.mjs'],
+  ['brand-intro-hover', 'tests/brand-intro-hover.spec.mjs'],
   ['touch-guard', 'tests/touch-scroll-guard.mjs'],
 ];
 

@@ -25,9 +25,11 @@ const fade = async (letters: HTMLElement[], color: string) => {
   }
 };
 
-export function splitLetterText(root: HTMLElement) {
+export type LetterIntroTarget = { shell: HTMLElement; textRoot: HTMLElement };
+
+export function splitLetterText(root: HTMLElement, { ariaLabel = true }: { ariaLabel?: boolean } = {}) {
   const color = getComputedStyle(root).color;
-  root.setAttribute('aria-label', root.textContent?.trim() || '');
+  if (ariaLabel) root.setAttribute('aria-label', root.textContent?.trim() || '');
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
   const textNodes: Text[] = [];
   while (walker.nextNode()) textNodes.push(walker.currentNode as Text);
@@ -49,25 +51,36 @@ export function splitLetterText(root: HTMLElement) {
   return { letters, color };
 }
 
-export function letterIntroTargets() {
-  const roots: HTMLElement[] = [];
-  document.querySelectorAll<HTMLElement>('.brand-toggle').forEach((el) => roots.push(el));
-  document.querySelectorAll<HTMLElement>('.project-hero h1, .shop-head-title').forEach((el) => roots.push(el));
-  return roots;
+export function letterIntroTargets(): LetterIntroTarget[] {
+  const targets: LetterIntroTarget[] = [];
+  document.querySelectorAll<HTMLElement>('.brand-toggle').forEach((shell) => {
+    const textRoot = shell.querySelector<HTMLElement>('.brand-name') ?? shell;
+    targets.push({ shell, textRoot });
+  });
+  document.querySelectorAll<HTMLElement>('.project-hero h1, .shop-head-title').forEach((textRoot) => {
+    targets.push({ shell: textRoot, textRoot });
+  });
+  return targets;
 }
 
 export async function playLetterIntro() {
+  const targets = letterIntroTargets();
   if (reduced.matches) {
-    letterIntroTargets().forEach((root) => root.classList.add('is-motion-ready'));
+    targets.forEach(({ shell }) => shell.classList.add('is-motion-ready'));
     return;
   }
-  const groups = letterIntroTargets().map((root) => {
-    root.classList.add('is-motion-ready');
-    const existing = [...root.querySelectorAll<HTMLElement>('.motion-letter')];
-    if (existing.length) {
-      return { letters: existing, color: getComputedStyle(root).color };
+  targets.forEach(({ shell, textRoot }) => {
+    shell.classList.add('is-motion-ready');
+    if (textRoot.classList.contains('brand-name')) {
+      shell.setAttribute('aria-label', textRoot.textContent?.trim() || 'Humansize');
     }
-    return splitLetterText(root);
+  });
+  const groups = targets.map(({ shell, textRoot }) => {
+    const existing = [...textRoot.querySelectorAll<HTMLElement>('.motion-letter')];
+    if (existing.length) {
+      return { letters: existing, color: getComputedStyle(textRoot).color };
+    }
+    return splitLetterText(textRoot, { ariaLabel: !textRoot.classList.contains('brand-name') });
   });
   await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
   for (const { letters, color } of groups) await fade(letters, color);
