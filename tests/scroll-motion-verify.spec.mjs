@@ -1,5 +1,8 @@
 /**
- * Scroll motion verification: intro letter stagger (incl. nav) + media fade-in on scroll.
+ * Timed proof of the letter intro and the media fade-in.
+ * Animations are paused at creation (capture hook) so frames land on exact times,
+ * including before the intro would have finished during navigation.
+ *
  *   npm run build && ARTIFACTS=/opt/cursor/artifacts node tests/scroll-motion-verify.spec.mjs
  */
 import { chromium } from 'playwright';
@@ -7,6 +10,7 @@ import { createServer } from 'node:http';
 import { readFileSync, existsSync, statSync, mkdirSync } from 'node:fs';
 import { join, extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { execFileSync } from 'node:child_process';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const ARTIFACTS = process.env.ARTIFACTS || join(ROOT, 'artifacts');
@@ -17,6 +21,7 @@ const MIME = {
   '.woff2': 'font/woff2',
   '.webp': 'image/webp',
   '.png': 'image/png',
+  '.svg': 'image/svg+xml',
 };
 const root = [join(ROOT, '.vercel', 'output', 'static'), join(ROOT, 'dist', 'client')].find((d) =>
   existsSync(join(d, 'index.html')),
@@ -44,131 +49,291 @@ mkdirSync(tmpRoot, { recursive: true });
 await new Promise((r) => server.listen(4338, '127.0.0.1', r));
 const ORIGIN = 'http://127.0.0.1:4338';
 
+function holdSource(pauseLetters) {
+  return `(() => {
+    const orig = Element.prototype.animate;
+    Element.prototype.animate = function (keyframes, options) {
+      const anim = orig.call(this, keyframes, options);
+      if (${pauseLetters} && this.classList && this.classList.contains('motion-letter')) {
+        anim.pause();
+        (window.__captureAnims ||= []).push(anim);
+      }
+      if (this.classList && this.classList.contains('frame')) {
+        anim.pause();
+        (window.__frameAnims ||= []).push(anim);
+      }
+      return anim;
+    };
+  })();`;
+}
+
 const browser = await chromium.launch();
 
-async function composeGrid(name, cellW, cellH, cellPaths, labels) {
-  const pad = 24;
-  const labelH = 36;
+async function composeGrid(name, cells) {
+  const pad = 20;
   const sheet = await browser.newPage();
   const cols = 3;
-  await sheet.setViewportSize({ width: cols * cellW + pad * 2, height: 2 * (cellH + labelH) + pad * 2 + 40 });
-  const figures = cellPaths
-    .map((p, i) => {
-      const b64 = readFileSync(p).toString('base64');
-      return `<figure><figcaption>${labels[i]}</figcaption><img src="data:image/png;base64,${b64}" width="${cellW}" height="${cellH}" alt=""></figure>`;
+  const cellW = cells[0].w;
+  const rows = Math.ceil(cells.length / cols);
+  const maxH = Math.max(...cells.map((c) => c.h));
+  await sheet.setViewportSize({
+    width: cols * cellW + pad * (cols + 1),
+    height: rows * (maxH + 56) + pad * 2 + 36,
+  });
+  const figures = cells
+    .map((c) => {
+      const b64 = readFileSync(c.path).toString('base64');
+      return `<figure style="width:${cellW}px"><figcaption>${c.label}</figcaption><img src="data:image/png;base64,${b64}" width="${c.w}" height="${c.h}" alt=""></figure>`;
     })
     .join('');
   const html = `<!doctype html><style>
-    *{box-sizing:border-box;margin:0;font:14px/18px ui-monospace,Menlo,monospace}
-    body{background:#111;color:#ccc;padding:${pad}px}
-    .grid{display:grid;grid-template-columns:repeat(3,${cellW}px);gap:${pad}px}
-    figure{width:${cellW}px}
-    figcaption{padding:8px 0 4px;color:#8af;min-height:${labelH}px}
-    img{display:block;width:${cellW}px;height:${cellH}px;object-fit:cover;object-position:top center;background:#fff}
-  </style><body><h1 style="margin-bottom:16px;font-size:16px">${name}</h1><div class="grid">${figures}</div></body>`;
+    *{box-sizing:border-box;margin:0;font:13px/18px ui-monospace,Menlo,monospace}
+    body{background:#111;color:#ddd;padding:${pad}px}
+    h1{margin-bottom:12px;font-size:15px;color:#fff}
+    .grid{display:grid;grid-template-columns:repeat(${cols},${cellW}px);gap:${pad}px;align-items:start}
+    figcaption{min-height:40px;padding:0 0 6px;color:#9cf;white-space:pre-wrap}
+    img{display:block;width:${cellW}px;height:auto;background:#fff}
+  </style><body><h1>${name}</h1><div class="grid">${figures}</div></body>`;
   await sheet.setContent(html, { waitUntil: 'load' });
-  await sheet.waitForTimeout(150);
-  await sheet.screenshot({ path: join(ARTIFACTS, `${name}.png`), type: 'png' });
+  await sheet.waitForTimeout(100);
+  const out = join(ARTIFACTS, `${name}.png`);
+  await sheet.screenshot({ path: out, fullPage: true });
   await sheet.close();
-  console.log(`wrote ${join(ARTIFACTS, `${name}.png`)}`);
+  console.log(`wrote ${out}`);
 }
 
-async function headerClip(page, path) {
+function context() {
+  return browser.newContext({
+    viewport: { width: 1440, height: 900 },
+    reducedMotion: 'no-preference',
+    deviceScaleFactor: 1,
+  });
+}
+
+async function seek(page, ms) {
+  await page.evaluate((t) => {
+    for (const anim of window.__captureAnims || []) anim.currentTime = t;
+  }, ms);
+}
+
+async function headerShot(page, path) {
   const box = await page.locator('.site-header').boundingBox();
   if (!box) throw new Error('no header');
-  await page.screenshot({ path, clip: box });
-  return path;
+  const y = Math.max(0, Math.floor(box.y - 16));
+  const height = Math.min(900 - y, Math.ceil(box.height + 32));
+  await page.screenshot({ path, clip: { x: 0, y, width: 1440, height } });
+  return { w: 1440, h: height };
 }
 
-async function captureHomeIntroGrid(page, tmpDir, prefix, cellW, cellH) {
-  const labels = [
-    '1 · intro start',
-    '2 · mid Humansize letters',
-    '3 · Humansize done',
-    '4 · nav letters starting',
-    '5 · mid nav stagger',
-    '6 · all intro letters done',
-  ];
-  const paths = [];
-  await page.evaluate(() => scrollTo(0, 0));
-  await page.waitForTimeout(80);
-  paths.push(await headerClip(page, join(tmpDir, `${prefix}-0.png`)));
-  await page.waitForTimeout(420);
-  paths.push(await headerClip(page, join(tmpDir, `${prefix}-1.png`)));
-  await page.waitForTimeout(380);
-  paths.push(await headerClip(page, join(tmpDir, `${prefix}-2.png`)));
-  await page.waitForTimeout(350);
-  paths.push(await headerClip(page, join(tmpDir, `${prefix}-3.png`)));
-  await page.waitForTimeout(450);
-  paths.push(await headerClip(page, join(tmpDir, `${prefix}-4.png`)));
-  await page.waitForFunction(() => document.documentElement.classList.contains('is-letter-intro-done'), null, {
-    timeout: 20000,
+async function letterProbe(page) {
+  return page.evaluate(() => {
+    const ink = (el) => (el ? getComputedStyle(el).color : 'missing');
+    const brand = document.querySelector('.brand-name .motion-letter');
+    const nav = document.querySelector('.site-menu[data-main-menu] .motion-letter');
+    const navLast = document.querySelector('.site-menu[data-main-menu] button:last-of-type .motion-letter:last-child');
+    const n = document.querySelectorAll('.brand-name .motion-letter, .site-menu[data-main-menu] .motion-letter').length;
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    return { brand: ink(brand), nav: ink(nav), navLast: ink(navLast), n, reduced, anims: (window.__captureAnims || []).length };
   });
-  await page.waitForTimeout(200);
-  paths.push(await headerClip(page, join(tmpDir, `${prefix}-5.png`)));
-  await composeGrid(prefix, cellW, cellH, paths, labels);
 }
 
-async function captureMediaScrollGrid(page, tmpDir, name, url, cellW, cellH) {
-  const labels = [
-    '1 · before scroll (hidden)',
-    '2 · approaching',
-    '3 · entering viewport',
-    '4 · mid fade-in',
-    '5 · fully visible',
-    '6 · still visible (no fade-out)',
-  ];
-  await page.goto(`${ORIGIN}${url}`, { waitUntil: 'load' });
-  await page.waitForFunction(() => document.documentElement.classList.contains('is-letter-intro-done'), null, {
-    timeout: 25000,
+const introTimes = [0, 150, 300, 450, 600, 900];
+const introCtx = await context();
+await introCtx.addInitScript({ content: holdSource(true) });
+const introPage = await introCtx.newPage();
+await introPage.goto(`${ORIGIN}/`, { waitUntil: 'load' });
+await introPage.waitForFunction(() => (window.__captureAnims || []).length >= 20, null, { timeout: 15000 });
+const probe0 = await letterProbe(introPage);
+if (probe0.reduced) throw new Error('intro skipped: prefers-reduced-motion is reduce');
+if (probe0.anims < 20) throw new Error(`intro did not start (${probe0.anims} animations)`);
+
+const introCells = [];
+for (const t of introTimes) {
+  await seek(introPage, t);
+  await introPage.waitForTimeout(30);
+  const p = await letterProbe(introPage);
+  const file = join(tmpRoot, `intro-${t}.png`);
+  const size = await headerShot(introPage, file);
+  introCells.push({
+    path: file,
+    w: size.w,
+    h: size.h,
+    label: `t=${t}ms\nHumansize ${p.brand}\nnav first ${p.nav}\nnav last ${p.navLast}`,
   });
-  await page.waitForTimeout(400);
+  console.log(`intro t=${t} brand=${p.brand} nav=${p.nav} last=${p.navLast}`);
+}
+const endMs = await introPage.evaluate(() => {
+  const anims = window.__captureAnims || [];
+  return Math.max(...anims.map((a) => a.effect.getTiming().delay + a.effect.getTiming().duration));
+});
+await seek(introPage, endMs);
+await introPage.waitForTimeout(30);
+const pend = await letterProbe(introPage);
+const endFile = join(tmpRoot, 'intro-end.png');
+const endSize = await headerShot(introPage, endFile);
+introCells.push({
+  path: endFile,
+  w: endSize.w,
+  h: endSize.h,
+  label: `t=${Math.round(endMs)}ms end\nHumansize ${pend.brand}\nnav first ${pend.nav}\nnav last ${pend.navLast}`,
+});
+console.log(`intro end t=${endMs} brand=${pend.brand} nav=${pend.nav} last=${pend.navLast}`);
+await composeGrid('home-intro-desktop', introCells);
+await introCtx.close();
 
-  const frameIndex = url === '/' ? 0 : 2;
-  const scrollYs = await page.evaluate((idx) => {
-    const frame = document.querySelectorAll('main .frame')[idx];
-    if (!frame) return [0, 0, 0, 0, 0, 0];
-    const centre = frame.getBoundingClientRect().top + scrollY + frame.getBoundingClientRect().height / 2;
-    const vh = innerHeight;
-    return [
-      0,
-      Math.max(0, Math.round(centre - vh * 1.05)),
-      Math.max(0, Math.round(centre - vh * 0.85)),
-      Math.max(0, Math.round(centre - vh * 0.65)),
-      Math.max(0, Math.round(centre - vh * 0.45)),
-      Math.max(0, Math.round(centre - vh * 0.45)),
-    ];
-  }, frameIndex);
+function alphaOf(color) {
+  const m = /rgba?\(([^)]+)\)/.exec(color);
+  if (!m) return 1;
+  const parts = m[1].split(',').map((s) => s.trim());
+  if (parts.length < 4) return 1;
+  return parseFloat(parts[3]);
+}
+const startA = alphaOf(introCells[0].label.split('\n')[1].replace('Humansize ', ''));
+const midBrand = introCells.find((c) => c.label.startsWith('t=300'));
+if (startA > 0.15) console.error('WARN intro t=0 Humansize is not light');
+if (midBrand && alphaOf(midBrand.label.split('\n')[2].replace('nav ', '')) > 0.85 && alphaOf(midBrand.label.split('\n')[1].replace('Humansize ', '')) < 0.2) {
+  console.error('WARN nav inked before Humansize');
+}
 
-  const paths = [];
-  for (let i = 0; i < scrollYs.length; i++) {
-    await page.evaluate((y) => scrollTo(0, y), scrollYs[i]);
-    await page.waitForTimeout(i === 0 ? 100 : 450);
-    const out = join(tmpDir, `${name}-${i}.png`);
-    await page.screenshot({ path: out, fullPage: false });
-    paths.push(out);
+async function frameOpacity(page) {
+  return page.evaluate(() => {
+    const frame = window.__frameAnims?.[0]?.effect?.target || document.querySelector('main .frame');
+    if (!frame) return { opacity: -1, revealed: false };
+    return {
+      opacity: parseFloat(getComputedStyle(frame).opacity),
+      revealed: frame.classList.contains('is-viewport-revealed'),
+    };
+  });
+}
+
+const mediaCtx = await context();
+await mediaCtx.addInitScript({ content: holdSource(false) });
+const mediaPage = await mediaCtx.newPage();
+await mediaPage.goto(`${ORIGIN}/`, { waitUntil: 'load' });
+await mediaPage.waitForFunction(() => document.documentElement.classList.contains('is-letter-intro-done'), null, {
+  timeout: 20000,
+});
+await mediaPage.evaluate(() => {
+  const frame = document.querySelector('main .frame');
+  const r = frame.getBoundingClientRect();
+  scrollTo(0, Math.max(0, scrollY + r.top - innerHeight * 0.45));
+});
+await mediaPage.waitForFunction(() => (window.__frameAnims || []).length > 0, null, { timeout: 15000 });
+
+async function shotMedia(page, file) {
+  const clip = await page.evaluate(() => {
+    const frame = window.__frameAnims[0].effect.target;
+    const r = frame.getBoundingClientRect();
+    const y = Math.max(0, Math.min(Math.floor(r.top - 24), 900 - 200));
+    const height = Math.min(560, Math.max(200, Math.ceil(Math.min(r.bottom, 900) - y)));
+    return { x: 0, y, width: 1440, height };
+  });
+  await page.screenshot({ path: file, clip });
+  return clip;
+}
+
+const mediaCells = [];
+async function pushMedia(label, file) {
+  const o = await frameOpacity(mediaPage);
+  const clip = await shotMedia(mediaPage, file);
+  mediaCells.push({
+    path: file,
+    w: 640,
+    h: Math.round((640 / clip.width) * clip.height),
+    label: `${label}\nopacity ${o.opacity.toFixed(2)}`,
+  });
+  console.log(`${label} opacity=${o.opacity.toFixed(3)} revealed=${o.revealed}`);
+  return o.opacity;
+}
+
+const frameAnimIndex = 0;
+await mediaPage.evaluate((idx) => {
+  window.__frameAnims[idx].currentTime = 0;
+}, frameAnimIndex);
+await pushMedia('entered, fade t=0', join(tmpRoot, 'media-0.png'));
+
+for (const target of [0.3, 0.7]) {
+  let lo = 0;
+  let hi = 700;
+  let opacity = 0;
+  for (let i = 0; i < 10; i++) {
+    const mid = (lo + hi) / 2;
+    await mediaPage.evaluate(
+      ({ idx, ms }) => {
+        window.__frameAnims[idx].currentTime = ms;
+      },
+      { idx: frameAnimIndex, ms: mid },
+    );
+    opacity = (await frameOpacity(mediaPage)).opacity;
+    if (opacity < target) lo = mid;
+    else hi = mid;
   }
-  await composeGrid(name, cellW, cellH, paths, labels);
+  await pushMedia(`about ${Math.round(target * 100)}% (t=${Math.round((lo + hi) / 2)}ms)`, join(tmpRoot, `media-${target}.png`));
 }
 
-for (const [slug, vp, cellW, cellH] of [
-  ['home-intro-desktop', { width: 1440, height: 900 }, 640, 400],
-  ['home-intro-mobile', { width: 390, height: 844, isMobile: true, hasTouch: true }, 390, 520],
-]) {
-  const page = await browser.newPage({ viewport: vp, ...(vp.isMobile ? { isMobile: true, hasTouch: true } : {}) });
-  await page.goto(`${ORIGIN}/`, { waitUntil: 'load' });
-  await captureHomeIntroGrid(page, tmpRoot, slug, cellW, cellH);
+await mediaPage.evaluate((idx) => {
+  const anim = window.__frameAnims[idx];
+  anim.currentTime = anim.effect.getTiming().duration;
+}, frameAnimIndex);
+await mediaPage.waitForTimeout(40);
+const full = await pushMedia('fully visible', join(tmpRoot, 'media-full.png'));
+
+await mediaPage.evaluate(() => {
+  scrollTo(0, 0);
+});
+await mediaPage.waitForTimeout(80);
+await mediaPage.evaluate((idx) => {
+  const frame = window.__frameAnims[idx].effect.target;
+  const r = frame.getBoundingClientRect();
+  scrollTo(0, Math.max(0, scrollY + r.top - innerHeight * 0.35));
+}, frameAnimIndex);
+await mediaPage.waitForTimeout(80);
+const back = await pushMedia('after scroll up and down', join(tmpRoot, 'media-back.png'));
+await composeGrid('home-media-scroll-desktop', mediaCells);
+
+if (full < 0.95) console.error('WARN full opacity', full);
+if (back < 0.95) console.error('WARN opacity dropped after scroll', back);
+
+await mediaCtx.close();
+
+async function recordMp4(name, run) {
+  const videoDir = join(ARTIFACTS, 'videos');
+  mkdirSync(videoDir, { recursive: true });
+  const ctx = await browser.newContext({
+    viewport: { width: 1440, height: 900 },
+    reducedMotion: 'no-preference',
+    recordVideo: { dir: videoDir, size: { width: 1440, height: 900 } },
+  });
+  const page = await ctx.newPage();
+  await run(page);
+  const webm = await page.video().path();
   await page.close();
+  await ctx.close();
+  const mp4 = join(ARTIFACTS, `${name}.mp4`);
+  execFileSync(
+    'ffmpeg',
+    ['-y', '-i', webm, '-t', '5', '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', mp4],
+    { stdio: 'ignore' },
+  );
+  console.log(`wrote ${mp4}`);
 }
 
-for (const [name, url, vp, cellW, cellH] of [
-  ['home-media-scroll-desktop', '/', { width: 1440, height: 900 }, 640, 400],
-  ['atomic-media-scroll-desktop', '/work/atomic-ski/', { width: 1440, height: 900 }, 640, 400],
-]) {
-  const page = await browser.newPage({ viewport: vp });
-  await captureMediaScrollGrid(page, tmpRoot, name, url, cellW, cellH);
-  await page.close();
-}
+await recordMp4('home-intro-desktop', async (page) => {
+  await page.goto(`${ORIGIN}/`, { waitUntil: 'commit' });
+  await page.waitForTimeout(5000);
+});
+
+await recordMp4('atomic-scroll-desktop', async (page) => {
+  await page.goto(`${ORIGIN}/work/atomic-ski/`, { waitUntil: 'load' });
+  await page.waitForTimeout(1400);
+  const max = await page.evaluate(() => Math.min(document.body.scrollHeight - innerHeight, 1600));
+  const steps = 28;
+  for (let i = 0; i <= steps; i++) {
+    await page.evaluate((y) => scrollTo(0, y), Math.round((max * i) / steps));
+    await page.waitForTimeout(120);
+  }
+});
 
 await browser.close();
 server.close();
+console.log('verify done');
