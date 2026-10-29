@@ -3032,14 +3032,11 @@ html.is-contact-open, html.is-contact-open body { overscroll-behavior: none; }
 
   .brand-at {
     display: block;
-    flex: 0 0 auto;
-    max-width: 0;
+    flex: 0 0 var(--brand-at-w, 0px);
+    width: var(--brand-at-w, 0px);
     opacity: 0;
-    overflow: visible;
     white-space: nowrap;
-    transition:
-      opacity var(--dur-hover) var(--ease-out),
-      max-width var(--dur-hover) var(--ease-out);
+    transition: opacity var(--dur-hover) var(--ease-out);
   }
 
   .brand-name {
@@ -3048,12 +3045,11 @@ html.is-contact-open, html.is-contact-open body { overscroll-behavior: none; }
 
   .brand-toggle:hover .brand-word,
   .brand-toggle:focus-visible .brand-word {
-    transform: translateX(calc(var(--brand-at-w, 0px) * 0.5));
+    transform: translateX(0);
   }
 
   .brand-toggle:hover .brand-at,
   .brand-toggle:focus-visible .brand-at {
-    max-width: var(--brand-at-w, 0px);
     opacity: 1;
   }
 }

@@ -1,5 +1,5 @@
 /**
- * Header @Humansize hover: cropped screenshots at rest, mid-transition, and settled hover.
+ * Header @Humansize hover crops: rest, 20%, 50%, 80%, end. Asserts no @/H overlap.
  *
  *   npm run build && node scripts/brand-hover-crops.mjs
  */
@@ -55,7 +55,6 @@ const hoverMs = await page.evaluate(() => {
   const n = parseFloat(raw);
   return Number.isFinite(n) ? (raw.endsWith('ms') ? n : n * 1000) : 160;
 });
-const midMs = Math.round(hoverMs * 0.4);
 
 const clipHeader = async (path) => {
   const box = await page.locator('.site-header').boundingBox();
@@ -80,25 +79,38 @@ const metrics = () =>
       atOpacity: csAt ? parseFloat(csAt.opacity) : 0,
       wordTranslate: m,
       pairGap: ar && nr ? nr.left - ar.right : 0,
+      overlap: ar && nr ? ar.right - nr.left : 0,
     };
   });
 
-await clipHeader(join(outDir, 'header-rest.png'));
-const rest = await metrics();
+const setProgress = (p) =>
+  page.evaluate((progress) => {
+    const stack = document.querySelector('.brand-stack');
+    const wa = parseFloat(stack.style.getPropertyValue('--brand-at-w'));
+    const at = document.querySelector('.brand-at');
+    const word = document.querySelector('.brand-word');
+    at.style.transition = 'none';
+    word.style.transition = 'none';
+    at.style.opacity = String(progress);
+    at.style.maxWidth = '';
+    at.style.width = '';
+    word.style.transform = `translateX(${(-wa / 2) * (1 - progress)}px)`;
+  }, p);
 
-await page.evaluate((p) => {
-  const stack = document.querySelector('.brand-stack');
-  const wa = parseFloat(stack.style.getPropertyValue('--brand-at-w'));
-  const at = document.querySelector('.brand-at');
-  const word = document.querySelector('.brand-word');
-  at.style.transition = 'none';
-  word.style.transition = 'none';
-  at.style.opacity = String(p);
-  at.style.maxWidth = `${wa * p}px`;
-  word.style.transform = `translateX(${wa * (-0.5 + p)}px)`;
-}, 0.4);
-await clipHeader(join(outDir, 'header-mid-hover.png'));
-const mid = await metrics();
+const snapshots = [];
+const crops = [];
+
+await clipHeader(join(outDir, 'header-rest.png'));
+snapshots.push({ label: 'rest', p: 0, ...(await metrics()) });
+crops.push(`${outDir}/header-rest.png`);
+
+for (const p of [0.2, 0.5, 0.8]) {
+  await setProgress(p);
+  const file = join(outDir, `header-hover-${Math.round(p * 100)}.png`);
+  await clipHeader(file);
+  snapshots.push({ label: `${Math.round(p * 100)}%`, p, ...(await metrics()) });
+  crops.push(file);
+}
 
 await page.reload({ waitUntil: 'networkidle' });
 await page.waitForFunction(() => {
@@ -108,39 +120,24 @@ await page.waitForFunction(() => {
 await page.hover('.brand-toggle');
 await page.waitForTimeout(hoverMs + 40);
 await clipHeader(join(outDir, 'header-hover-end.png'));
-const end = await metrics();
+snapshots.push({ label: 'end', p: 1, ...(await metrics()) });
+crops.push(`${outDir}/header-hover-end.png`);
 
 await browser.close();
 server.close();
 
 const failures = [];
-if (end.atOpacity < 0.95) failures.push(`hover end @ opacity ${end.atOpacity}`);
-if (Math.abs(end.pairGap) > 1) failures.push(`@–H box gap ${end.pairGap}px`);
-if (mid.atOpacity < 0.25 || mid.atOpacity > 0.55) failures.push(`mid @ opacity ${mid.atOpacity}`);
-const wa = end.tokenW;
-if (Math.abs(Math.abs(mid.wordTranslate) - wa * 0.1) > 2)
-  failures.push(`mid word translate ${mid.wordTranslate}px (want ~${(wa * 0.1).toFixed(1)}px)`);
-if (Math.abs(end.wordTranslate - wa * 0.5) > 2) failures.push(`end word translate ${end.wordTranslate}px`);
+const wa = snapshots.find((s) => s.label === 'end')?.tokenW ?? 0;
+for (const s of snapshots) {
+  if (s.overlap > 0.5) failures.push(`${s.label}: @ overlaps H by ${s.overlap.toFixed(2)}px`);
+}
+const end = snapshots.find((s) => s.label === 'end');
+if (end && end.atOpacity < 0.95) failures.push('end @ opacity');
+if (end && Math.abs(end.wordTranslate) > 1.5) failures.push(`end translate ${end.wordTranslate}px (want 0)`);
+const rest = snapshots.find((s) => s.label === 'rest');
+if (rest && Math.abs(rest.wordTranslate + wa / 2) > 2) failures.push(`rest translate ${rest.wordTranslate}px`);
 
-console.log(
-  JSON.stringify(
-    {
-      outDir,
-      hoverMs,
-      midMs,
-      rest,
-      mid,
-      end,
-      crops: [
-        `${outDir}/header-rest.png`,
-        `${outDir}/header-mid-hover.png`,
-        `${outDir}/header-hover-end.png`,
-      ],
-    },
-    null,
-    2,
-  ),
-);
+console.log(JSON.stringify({ outDir, hoverMs, snapshots, crops }, null, 2));
 if (failures.length) {
   console.error(failures.join('\n'));
   process.exit(1);
