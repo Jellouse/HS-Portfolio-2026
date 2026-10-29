@@ -27,6 +27,7 @@ const SPECS = [
   ['shop', 'tests/shop-checkout.spec.mjs'],
   ['project-images', 'tests/project-images.spec.mjs'],
   ['project-drum', 'tests/project-drum.spec.mjs'],
+  ['scroll-media', 'tests/scroll-media-visible.spec.mjs'],
   ['touch-guard', 'tests/touch-scroll-guard.mjs'],
 ];
 
