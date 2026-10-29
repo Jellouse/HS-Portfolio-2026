@@ -3009,7 +3009,6 @@ html.is-contact-open body {
   }
 }
 
-/* Viewport media entrance (scripts/site-scroll-motion.ts): scroll-linked opacity, no transform. */
 @media (prefers-reduced-motion: no-preference) {
   .brand-toggle:not(.is-motion-ready),
   .project-hero h1:not(.is-motion-ready),
@@ -3023,8 +3022,6 @@ html.is-contact-open body {
   html.is-scroll-intro-pending main .frame {
     visibility: hidden;
   }
-
-  /* Opacity is set inline from scroll position. No transform: a scaled frame widens scrollWidth on phones. */
 
   html.has-scroll-motion.js.fade-ready .fade-in,
   html.has-scroll-motion.js.fade-ready .fade-in:not(.is-in),

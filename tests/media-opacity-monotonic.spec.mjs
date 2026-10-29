@@ -1,7 +1,3 @@
-/**
- * Scroll a frame from below the viewport to above it. Opacity may only rise, then stay at 1.
- *   npm run build && node tests/media-opacity-monotonic.spec.mjs
- */
 import { chromium } from 'playwright';
 import { createServer } from 'node:http';
 import { readFileSync, existsSync, statSync, mkdirSync, writeFileSync } from 'node:fs';

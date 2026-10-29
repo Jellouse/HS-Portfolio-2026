@@ -1,7 +1,3 @@
-/**
- * Main nav letter intro runs once; scrolling and menu-scroll-out must not replay it.
- *   npm run build && node tests/nav-intro-once.spec.mjs
- */
 import { chromium } from 'playwright';
 import { createServer } from 'node:http';
 import { readFileSync, existsSync, statSync } from 'node:fs';

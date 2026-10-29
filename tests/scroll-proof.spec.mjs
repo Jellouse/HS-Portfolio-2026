@@ -1,7 +1,3 @@
-/**
- * Slow-scroll recordings at 390 and 1440 for home and /work/atomic-ski/.
- *   npm run build && ARTIFACTS=/opt/cursor/artifacts node tests/scroll-proof.spec.mjs
- */
 import { chromium } from 'playwright';
 import { createServer } from 'node:http';
 import { readFileSync, existsSync, statSync, mkdirSync } from 'node:fs';

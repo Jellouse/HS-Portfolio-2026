@@ -1,10 +1,3 @@
-/**
- * Timed proof of the letter intro and the media fade-in.
- * Animations are paused at creation (capture hook) so frames land on exact times,
- * including before the intro would have finished during navigation.
- *
- *   npm run build && ARTIFACTS=/opt/cursor/artifacts node tests/scroll-motion-verify.spec.mjs
- */
 import { chromium } from 'playwright';
 import { createServer } from 'node:http';
 import { readFileSync, existsSync, statSync, mkdirSync } from 'node:fs';

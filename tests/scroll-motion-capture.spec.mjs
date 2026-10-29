@@ -1,8 +1,3 @@
-/**
- * 10fps contact sheets for scroll motion verification.
- *   npm run build && ARTIFACTS=/opt/cursor/artifacts SHOTS=1 node tests/scroll-motion-capture.spec.mjs
- * Optional: BASE_URL=https://preview.vercel.app (uses live preview instead of local static)
- */
 import { chromium } from 'playwright';
 import { createServer } from 'node:http';
 import { readFileSync, existsSync, statSync, mkdirSync, writeFileSync } from 'node:fs';

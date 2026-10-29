@@ -1,4 +1,3 @@
-/** Long-task check while scrolling a project page (target: no tasks over 50ms). */
 import { chromium } from 'playwright';
 import { createServer } from 'node:http';
 import { readFileSync, existsSync, statSync } from 'node:fs';

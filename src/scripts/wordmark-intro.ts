@@ -1,5 +1,3 @@
-/** Per-letter colour fade for the Humansize wordmark, nav, and page titles (s.engineering values). */
-
 const reduced = matchMedia('(prefers-reduced-motion: reduce)');
 const clear = 'rgba(0, 0, 0, 0)';
 
@@ -33,7 +31,6 @@ export function splitLetterText(root: HTMLElement, { ariaLabel = true }: { ariaL
   return { letters, color };
 }
 
-/** One ordered sequence: brand name, then main nav, shop title/menu, project title, services nav. */
 export function introLetterSequence(): LetterIntroTarget[] {
   const seq: LetterIntroTarget[] = [];
   document.querySelectorAll<HTMLElement>('.brand-toggle').forEach((shell) => {
@@ -55,11 +52,6 @@ export function introLetterSequence(): LetterIntroTarget[] {
     seq.push({ shell: el, textRoot: el });
   });
   return seq;
-}
-
-/** @deprecated use introLetterSequence */
-export function letterIntroTargets(): LetterIntroTarget[] {
-  return introLetterSequence();
 }
 
 export async function playLetterIntro() {

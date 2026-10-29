@@ -1,7 +1,3 @@
-/**
- * After the letter intro, @Humansize hover still slides @ in without overlap (PR #16 markup).
- *   npm run build && node tests/brand-intro-hover.spec.mjs
- */
 import { chromium } from 'playwright';
 import { createServer } from 'node:http';
 import { readFileSync, existsSync, statSync } from 'node:fs';
@@ -37,10 +33,6 @@ await page.waitForFunction(() => document.documentElement.classList.contains('is
   timeout: 25000,
 });
 await page.waitForTimeout(400);
-await page.waitForFunction(() => {
-  const w = document.querySelector('.brand-stack')?.style.getPropertyValue('--brand-at-w');
-  return w && parseFloat(w) > 0;
-});
 check(
   (await page.locator('.brand-name .motion-letter').count()) === 'Humansize'.length,
   'letters live under .brand-name only',
@@ -58,12 +50,12 @@ await page.waitForTimeout(hoverMs + 50);
 const m = await page.evaluate(() => {
   const at = document.querySelector('.brand-at');
   const name = document.querySelector('.brand-name');
-  const word = document.querySelector('.brand-word');
+  const shift = document.querySelector('.brand-shift');
   const ar = at?.getBoundingClientRect();
   const nr = name?.getBoundingClientRect();
   const csAt = at ? getComputedStyle(at) : null;
-  const csWord = word ? getComputedStyle(word) : null;
-  const translate = csWord ? new DOMMatrix(csWord.transform).m41 : 0;
+  const csShift = shift ? getComputedStyle(shift) : null;
+  const translate = csShift && csShift.transform !== 'none' ? new DOMMatrix(csShift.transform).m41 : 0;
   return {
     atOpacity: csAt ? parseFloat(csAt.opacity) : 0,
     overlap: ar && nr ? ar.right - nr.left : 0,

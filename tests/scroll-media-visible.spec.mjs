@@ -1,7 +1,3 @@
-/**
- * Scroll motion: media must become visible after intro on home, shop, and project pages.
- *   npm run build && node tests/scroll-media-visible.spec.mjs
- */
 import { chromium } from 'playwright';
 import { createServer } from 'node:http';
 import { readFileSync, existsSync, statSync } from 'node:fs';

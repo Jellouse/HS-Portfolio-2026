@@ -1,7 +1,3 @@
-/**
- * Site-wide scroll motion: letter intro, viewport media entrance, lazy video, header fade.
- */
-
 import { SCROLL_MEDIA_FRAME } from './scroll-media-selectors';
 import { introLetterSequence, playLetterIntro } from './wordmark-intro';
 
@@ -51,7 +47,6 @@ function wireMediaReady() {
   });
 }
 
-/** 0 at the viewport bottom edge, 1 once the frame top is 40% up, then locked. Opacity only. */
 function initMediaScrollFade() {
   const frames = [...document.querySelectorAll<HTMLElement>(SCROLL_MEDIA_FRAME)];
   const locked = new WeakSet<HTMLElement>();
