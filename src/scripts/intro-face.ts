@@ -34,7 +34,11 @@ export function initIntroFace(hero: HTMLElement) {
   const KEY = 'intro-smooth-ms';
   const DEFAULT_TAU = 30;
   const stored = Number(localStorage.getItem(KEY));
-  let tau = hero.hasAttribute('data-intro-tune') && localStorage.getItem(KEY) !== null && stored >= 0 ? stored : DEFAULT_TAU;
+  const showIntroTune =
+    !reduced &&
+    (import.meta.env.DEV || new URLSearchParams(location.search).has('debug'));
+  let tau =
+    showIntroTune && localStorage.getItem(KEY) !== null && stored >= 0 ? stored : DEFAULT_TAU;
   if (reduced) tau = 0;
 
   const px = (name: string) => Math.round(parseFloat(getComputedStyle(document.documentElement).getPropertyValue(name)));
@@ -169,7 +173,7 @@ export function initIntroFace(hero: HTMLElement) {
   }
   layout();
   if (!sda) addEventListener('scroll', onScroll, opt);
-  if (hero.hasAttribute('data-intro-tune') && !sda) mountTune();
+  if (showIntroTune && !sda) mountTune();
   addEventListener('resize', () => {
     if (document.documentElement.clientWidth !== lastW) forceLayout();
   }, opt);

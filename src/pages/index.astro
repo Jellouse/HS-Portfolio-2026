@@ -16,8 +16,6 @@ const cover = projects[0]?.data.cover;
 const image = cover ? resolveImage(cover) : undefined;
 const pageUrl = absoluteUrl(Astro.site, '/');
 const description = positioning.description;
-// Intro smoothing dial: preview/local builds only, never production.
-const tune = process.env.VERCEL_ENV !== 'production';
 ---
 
 <Base
@@ -28,7 +26,7 @@ const tune = process.env.VERCEL_ENV !== 'production';
   header
 >
   <h1 class="sr-only">{site.name}, {site.studio}</h1>
-  <section class="hero" aria-label="Humansize" data-hero-root data-intro data-intro-tune={tune ? '' : undefined}>
+  <section class="hero" aria-label="Humansize" data-hero-root data-intro>
     <div class="mark-wrap">
       {/* Blob is default. ?hero=gradient keeps the old little-man gradient for compare. */}
       <div class="hero-variant" data-hero-variant="blob">
