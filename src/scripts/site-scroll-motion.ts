@@ -163,6 +163,13 @@ function startLoadEntrance() {
     );
     if (frame.classList.contains('is-media-ready')) armEntrance(frame);
   });
+  window.setTimeout(() => {
+    entranceFrames().forEach((frame) => {
+      if (!frame.classList.contains('has-load-entrance')) return;
+      frame.classList.remove('has-load-entrance');
+      window.dispatchEvent(new Event('scroll-motion-refresh'));
+    });
+  }, 4200);
 }
 
 function initHeaderScrollFade() {

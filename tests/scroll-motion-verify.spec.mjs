@@ -4,7 +4,7 @@
  */
 import { chromium } from 'playwright';
 import { createServer } from 'node:http';
-import { readFileSync, existsSync, statSync, mkdirSync, writeFileSync, renameSync } from 'node:fs';
+import { readFileSync, existsSync, statSync, mkdirSync } from 'node:fs';
 import { join, extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
@@ -43,18 +43,6 @@ mkdirSync(ARTIFACTS, { recursive: true });
 const tmpRoot = join(ARTIFACTS, 'scroll-motion-cells');
 mkdirSync(tmpRoot, { recursive: true });
 await new Promise((r) => server.listen(4338, '127.0.0.1', r));
-const cellServer = createServer((req, res) => {
-  const base = decodeURIComponent((req.url || '/').split('?')[0].replace(/^\//, ''));
-  const file = join(tmpRoot, base);
-  if (!file.startsWith(tmpRoot) || !existsSync(file)) {
-    res.writeHead(404);
-    return res.end();
-  }
-  res.writeHead(200, { 'content-type': 'image/png' });
-  res.end(readFileSync(file));
-});
-await new Promise((r) => cellServer.listen(4339, '127.0.0.1', r));
-const CELL_ORIGIN = 'http://127.0.0.1:4339';
 const ORIGIN = 'http://127.0.0.1:4338';
 
 const browser = await chromium.launch();
@@ -65,12 +53,12 @@ async function composeGrid(name, cellW, cellH, cellPaths, labels) {
   const sheet = await browser.newPage();
   const cols = 3;
   const rows = 2;
-  await sheet.setViewportSize({ width: cols * cellW + pad * 2, height: rows * (cellH + labelH) + pad * 2 });
+  await sheet.setViewportSize({ width: cols * cellW + pad * 2, height: rows * (cellH + labelH) + pad * 2 + 40 });
   const figures = cellPaths
-    .map(
-      (p, i) =>
-        `<figure><figcaption>${labels[i]}</figcaption><img src="${CELL_ORIGIN}/${p.split('/').pop()}" width="${cellW}" height="${cellH}" alt=""></figure>`,
-    )
+    .map((p, i) => {
+      const b64 = readFileSync(p).toString('base64');
+      return `<figure><figcaption>${labels[i]}</figcaption><img src="data:image/png;base64,${b64}" width="${cellW}" height="${cellH}" alt=""></figure>`;
+    })
     .join('');
   const html = `<!doctype html><style>
     *{box-sizing:border-box;margin:0;font:14px/18px ui-monospace,Menlo,monospace}
@@ -95,7 +83,7 @@ async function waitIntroReady(page) {
   });
 }
 
-async function captureIntroMilestones(page, labels, tmpDir, prefix) {
+async function captureIntroMilestones(page, tmpDir, prefix, scrollY6) {
   const paths = [];
   await page.evaluate(() => scrollTo(0, 0));
   await page.waitForTimeout(80);
@@ -108,7 +96,16 @@ async function captureIntroMilestones(page, labels, tmpDir, prefix) {
   paths.push(await writeSnap(page, join(tmpDir, `${prefix}-3.png`)));
   await page.waitForTimeout(1600);
   paths.push(await writeSnap(page, join(tmpDir, `${prefix}-4.png`)));
-  await page.evaluate(() => scrollTo(0, Math.round(innerHeight * 0.55)));
+  const y6 =
+    scrollY6 ??
+    (await page.evaluate(() => {
+      const frames = document.querySelectorAll('main .frame');
+      const f = frames[2] || frames[0];
+      if (!f) return Math.round(innerHeight * 0.55);
+      const r = f.getBoundingClientRect();
+      return Math.max(0, Math.round(r.top + scrollY + r.height / 2 - innerHeight / 2 + 280));
+    }));
+  await page.evaluate((y) => scrollTo(0, y), y6);
   await page.waitForTimeout(500);
   paths.push(await writeSnap(page, join(tmpDir, `${prefix}-5.png`)));
   return paths;
@@ -136,7 +133,7 @@ for (const [slug, url, vp, cellW, cellH] of [
 ]) {
   const page = await browser.newPage({ viewport: vp, ...(vp.isMobile ? { isMobile: true, hasTouch: true } : {}) });
   await page.goto(`${ORIGIN}${url}`, { waitUntil: 'load' });
-  const paths = await captureIntroMilestones(page, labelSet, tmpRoot, slug);
+  const paths = await captureIntroMilestones(page, tmpRoot, slug);
   await composeGrid(slug, cellW, cellH, paths, labelSet);
   await page.close();
 }
@@ -177,5 +174,4 @@ await recordMp4('atomic-scroll-desktop', '/work/atomic-ski/', { width: 1440, hei
 });
 
 await browser.close();
-cellServer.close();
 server.close();
