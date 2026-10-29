@@ -79,7 +79,7 @@ blocks:
       alt: Dark spiky thistle head seen from above, Industrial Bloom
       frame: default
       flush: false
-      outline: false
+      outline: true
   - discriminant: image
     value:
       src: /src/content/projects/industrial-bloom/blocks/7/value/src.jpg
