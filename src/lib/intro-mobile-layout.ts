@@ -1,4 +1,6 @@
-/** Mobile homepage intro face: Figma mock (390×844), shared by intro-face.ts and shop-intro.ts. */
+/** Mobile homepage intro face: Figma mock, shared by intro-face.ts and shop-intro.ts. */
+export const BLOB_ASPECT = 559 / 249;
+
 export type MobileIntroLayout = {
   nameTop: number;
   faceTop: number;
@@ -8,13 +10,21 @@ export type MobileIntroLayout = {
   W0: number;
 };
 
-export function mobileIntroLayout(vh: number): MobileIntroLayout {
+/** Height-first blob in the band above the name; width capped at the viewport (SVG aspect ratio). */
+export function mobileIntroLayout(vh: number, vw: number): MobileIntroLayout {
   const nameTop = Math.round(vh * 0.715);
-  const faceTop = 12;
+  const minTop = 12;
   const nameGap = 20;
   const faceBottom = nameTop - nameGap;
-  const H0 = Math.max(1, faceBottom - faceTop);
-  const W0 = Math.round((H0 * 559) / 249);
-  const faceCenter = Math.round((faceTop + faceBottom) / 2);
-  return { nameTop, faceTop, faceBottom, faceCenter, H0, W0 };
+  let faceTop = minTop;
+  let H0 = Math.max(1, faceBottom - faceTop);
+  let W0 = Math.round(H0 * BLOB_ASPECT);
+  if (W0 > vw) {
+    W0 = vw;
+    H0 = Math.round(W0 / BLOB_ASPECT);
+    faceTop = minTop;
+  }
+  const faceBottomFinal = faceTop + H0;
+  const faceCenter = Math.round((faceTop + faceBottomFinal) / 2);
+  return { nameTop, faceTop, faceBottom: faceBottomFinal, faceCenter, H0, W0 };
 }

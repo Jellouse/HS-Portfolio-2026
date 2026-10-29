@@ -155,6 +155,7 @@ export async function mountHeroBlobGL(svg: SVGSVGElement, opts: Opts) {
 
   let W = 0;
   let H = 0;
+  let lastLayoutW = 0;
   let pxPerUnit = 1;
   let out = region.slice();
   let LW = 1;
@@ -164,21 +165,21 @@ export async function mountHeroBlobGL(svg: SVGSVGElement, opts: Opts) {
   let b: ReturnType<typeof target> | null = null;
 
   const layout = () => {
+    const blob = svg.parentElement as HTMLElement | null;
+    const layoutCssW = blob?.clientWidth || svg.clientWidth;
+    if (!layoutCssW || layoutCssW === lastLayoutW) return;
+    lastLayoutW = layoutCssW;
+
     const r = svg.getBoundingClientRect();
     const hr = host.getBoundingClientRect();
-    if (!r.width) return;
     const vb = svg.viewBox.baseVal;
-    // host may be scaled (homepage intro): rendered px for resolution, host px for placement
     const k = host.offsetWidth ? hr.width / host.offsetWidth : 1;
-    const cssPerUnit = r.width / vb.width;
+    const cssPerUnit = layoutCssW / vb.width;
+    const layoutCssH = (layoutCssW * vb.height) / vb.width;
     let dpr = Math.min(window.devicePixelRatio || 1, 2);
-    // fixed internal budget (about 2.4 MP): per-frame cost stays flat on big or dense screens
-    const area = (r.width * r.height * dpr * dpr) || 1;
+    const area = layoutCssW * layoutCssH * dpr * dpr || 1;
     if (area > 2.4e6) dpr *= Math.sqrt(2.4e6 / area);
     pxPerUnit = cssPerUnit * dpr;
-    // Output only where it can be seen: the filter region clipped to the host box. A canvas
-    // as wide as the whole filter region (190%) stuck out past the viewport and made the
-    // page scroll sideways; the SVG's own filter spill is ink overflow and never did.
     const x0 = Math.max(region[0], vb.x + (hr.left - r.left) / cssPerUnit);
     const x1 = Math.min(region[0] + region[2], vb.x + (hr.right - r.left) / cssPerUnit);
     const y0 = Math.max(region[1], vb.y + (hr.top - r.top) / cssPerUnit);
@@ -192,8 +193,8 @@ export async function mountHeroBlobGL(svg: SVGSVGElement, opts: Opts) {
       position: 'absolute',
       left: `${(r.left - hr.left + (out[0] - vb.x) * cssPerUnit) / k}px`,
       top: `${(r.top - hr.top + (out[1] - vb.y) * cssPerUnit) / k}px`,
-      width: `${W / dpr / k}px`,
-      height: `${H / dpr / k}px`,
+      width: `${layoutCssW}px`,
+      height: `${layoutCssH}px`,
       pointerEvents: 'none',
     });
     // shape, rasterised once per size (anti-aliased like the SVG source graphic)
@@ -225,9 +226,21 @@ export async function mountHeroBlobGL(svg: SVGSVGElement, opts: Opts) {
     b = target(gl, LW, LH);
   };
   layout();
-  const ro = new ResizeObserver(layout);
-  ro.observe(svg);
-  ro.observe(host);
+  const blobEl = svg.parentElement;
+  const ro =
+    blobEl &&
+    new ResizeObserver(() => {
+      layout();
+    });
+  if (ro && blobEl) ro.observe(blobEl);
+  addEventListener(
+    'intro-layout',
+    () => {
+      lastLayoutW = 0;
+      layout();
+    },
+    { passive: true },
+  );
 
   const quad = (p: WebGLProgram) => {
     gl.useProgram(p);

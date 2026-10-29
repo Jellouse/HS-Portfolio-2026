@@ -1,15 +1,15 @@
 /**
- * Mobile intro geometry matches the Figma mock: wide face, top inset, bottom above the name.
+ * Mobile intro geometry matches the Figma mock: fills above the name, width fits the viewport.
  */
-import { mobileIntroLayout } from '../src/lib/intro-mobile-layout.ts';
+import { BLOB_ASPECT, mobileIntroLayout } from '../src/lib/intro-mobile-layout.ts';
 
 const vh = 844;
-const m = mobileIntroLayout(vh);
+const vw = 390;
+const m = mobileIntroLayout(vh, vw);
 const failures = [];
-if (m.W0 < 390 * 1.05) failures.push(`W0 ${m.W0} should bleed past 390px viewport`);
-if (m.faceTop > 16) failures.push(`faceTop ${m.faceTop} should sit under the island`);
-if (m.nameTop - m.faceBottom !== 20) failures.push(`name gap ${m.nameTop - m.faceBottom} expected 20`);
-if (Math.abs(m.H0 / m.W0 - 249 / 559) > 0.001) failures.push('aspect ratio drift');
+if (m.W0 > vw) failures.push(`W0 ${m.W0} must fit viewport ${vw}`);
+if (m.faceTop !== 12) failures.push(`faceTop ${m.faceTop} should anchor under the island`);
+if (Math.abs(m.W0 / m.H0 - BLOB_ASPECT) > 0.02) failures.push('aspect ratio drift');
 if (failures.length) {
   console.error(failures.join('\n'));
   process.exit(1);

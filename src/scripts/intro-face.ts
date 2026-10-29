@@ -30,7 +30,7 @@ export function initIntroFace(hero: HTMLElement) {
   let lastS = NaN;
   let cur = NaN;
   let lastT = 0;
-  let lastGlLayout = 1;
+  let settledAttr = false;
   const KEY = 'intro-smooth-ms';
   const DEFAULT_TAU = 30;
   const stored = Number(localStorage.getItem(KEY));
@@ -61,7 +61,7 @@ export function initIntroFace(hero: HTMLElement) {
     let nameTop: number;
     let faceBottom: number;
     if (mobile) {
-      const m = mobileIntroLayout(vh);
+      const m = mobileIntroLayout(vh, vw);
       nameTop = m.nameTop;
       W0 = m.W0;
       H0 = m.H0;
@@ -92,7 +92,7 @@ export function initIntroFace(hero: HTMLElement) {
     hero.style.setProperty('--intro-smin', String(sMin));
     lastS = NaN;
     cur = NaN;
-    lastGlLayout = 1;
+    host.dispatchEvent(new CustomEvent('intro-layout', { bubbles: true }));
     follow();
     if (sda) {
       host.style.transform = '';
@@ -111,12 +111,6 @@ export function initIntroFace(hero: HTMLElement) {
     return 1 + (sMin - 1) * t;
   };
 
-  const maybeRelayoutGl = (scale: number) => {
-    if (Math.abs(scale - lastGlLayout) < 0.04) return;
-    lastGlLayout = scale;
-    host.dispatchEvent(new CustomEvent('intro-scale', { detail: scale }));
-  };
-
   const write = (now: number) => {
     frame = 0;
     const goal = target();
@@ -128,9 +122,12 @@ export function initIntroFace(hero: HTMLElement) {
     if (cur !== lastS) {
       lastS = cur;
       host.style.transform = `scale(${cur})`;
-      maybeRelayoutGl(cur);
     }
-    hero.toggleAttribute('data-intro-settled', cur === goal);
+    const isSettled = cur === goal;
+    if (isSettled !== settledAttr) {
+      settledAttr = isSettled;
+      hero.toggleAttribute('data-intro-settled', isSettled);
+    }
     if (cur !== goal) frame = requestAnimationFrame(write);
     else lastT = 0;
   };

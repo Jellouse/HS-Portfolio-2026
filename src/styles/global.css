@@ -1967,7 +1967,7 @@ body .site-header.is-menu-fade:not(.is-menu-open) .who .time {
 }
 .shop-details[aria-expanded="true"] {
   color: var(--muted);
-  cursor: default;
+  cursor: pointer;
 }
 .shop-details:focus-visible,
 .shop-links a:focus-visible,
@@ -2986,21 +2986,30 @@ html.is-contact-open, html.is-contact-open body { overscroll-behavior: none; }
   display: none;
 }
 
+.brand-stack {
+  display: inline-grid;
+  place-items: center;
+}
+
+.brand-stack > * {
+  grid-area: 1 / 1;
+}
+
 @media (hover: hover) and (pointer: fine) and (min-width: 760px) {
   .brand-toggle {
-    position: relative;
     display: inline-block;
+  }
+
+  .brand-at {
+    display: block;
   }
 
   .brand-name,
   .brand-at {
-    display: block;
     transition: opacity var(--dur-hover) var(--ease-out);
   }
 
   .brand-at {
-    position: absolute;
-    inset: 0;
     opacity: 0;
   }
 

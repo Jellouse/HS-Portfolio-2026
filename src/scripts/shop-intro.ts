@@ -93,7 +93,7 @@ export function initShopIntro(head: HTMLElement) {
     let W0: number;
     let C: number;
     if (mobile) {
-      const m = mobileIntroLayout(vh);
+      const m = mobileIntroLayout(vh, vw);
       W0 = m.W0;
       C = m.faceCenter;
     } else {

@@ -67,7 +67,7 @@ for (const [label, opt] of [['desktop', { viewport: { width: 1440, height: 900 }
   check(Math.abs(shop.x - 195 * (label === 'mobile' ? 1 : 1440 / 390)) <= 1, `${label}: ring centred horizontally`);
   if (label === 'mobile') {
     check(Math.abs(shop.c - home.c) <= 2, `${label}: face and ring centres aligned (${home.c.toFixed(1)}/${shop.c.toFixed(1)})`);
-    check(home.w > home.vw * 1.05, `mobile: face wider than viewport (${home.w.toFixed(0)} / ${home.vw})`);
+    check(home.w <= home.vw + 1, `mobile: face fits viewport width (${home.w.toFixed(0)} / ${home.vw})`);
     check(home.top <= 20 && home.bottom <= home.text - 12, `mobile: face fills above name (top ${home.top.toFixed(0)}, gap ${home.below.toFixed(0)})`);
     check(Math.abs(shop.w - home.w) <= 3, `mobile: shop ring matches face width (${shop.w.toFixed(0)} / ${home.w.toFixed(0)})`);
   }
