@@ -65,7 +65,7 @@ blocks:
       right: /src/content/projects/industrial-bloom/blocks/4/value/right.jpg
       rightAlt: Pink pincushion flowers in a round aluminium vase, Industrial Bloom
       frame: default
-      outline: false
+      outline: true
   - discriminant: image
     value:
       src: /src/content/projects/industrial-bloom/blocks/5/value/src.jpg
