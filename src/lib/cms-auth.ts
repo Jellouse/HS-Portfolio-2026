@@ -1,5 +1,5 @@
-// Shared GitHub-session check for CMS-only routes (video upload, project preview).
-// The browser holds Keystatic's `keystatic-gh-access-token` cookie after sign-in.
+
+
 const REPO = 'Jellouse/HS-Portfolio-2026';
 const COOKIE = 'keystatic-gh-access-token';
 
@@ -21,7 +21,6 @@ export function cmsTokenFromRequest(request: Request): string | undefined {
   return undefined;
 }
 
-/** True when the token belongs to a user (or app) with push access to the site repo. */
 export async function hasRepoPushAccess(token: string): Promise<boolean> {
   const gh = await fetch(`https://api.github.com/repos/${REPO}`, {
     headers: {

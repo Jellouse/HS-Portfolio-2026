@@ -1,8 +1,4 @@
-/**
- * Header @Humansize hover crops: rest, 20%, 50%, 80%, end. Asserts no @/H overlap.
- *
- *   npm run build && node scripts/brand-hover-crops.mjs
- */
+
 import { chromium } from 'playwright';
 import { createServer } from 'node:http';
 import { readFileSync, existsSync, statSync, mkdirSync } from 'node:fs';
@@ -46,8 +42,8 @@ const browser = await chromium.launch();
 const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
 await page.goto('http://127.0.0.1:4337/', { waitUntil: 'networkidle' });
 await page.waitForFunction(() => {
-  const w = document.querySelector('.brand-stack')?.style.getPropertyValue('--brand-at-w');
-  return w && parseFloat(w) > 0;
+  const at = document.querySelector('.brand-at');
+  return !!at && at.getBoundingClientRect().width > 0;
 });
 
 const hoverMs = await page.evaluate(() => {
@@ -64,18 +60,17 @@ const clipHeader = async (path) => {
 
 const metrics = () =>
   page.evaluate(() => {
-    const stack = document.querySelector('.brand-stack');
     const at = document.querySelector('.brand-at');
     const name = document.querySelector('.brand-name');
-    const word = document.querySelector('.brand-word');
+    const shift = document.querySelector('.brand-shift');
     const ar = at?.getBoundingClientRect();
     const nr = name?.getBoundingClientRect();
     const csAt = at ? getComputedStyle(at) : null;
-    const csWord = word ? getComputedStyle(word) : null;
-    const m = csWord ? new DOMMatrix(csWord.transform).m41 : 0;
+    const csShift = shift ? getComputedStyle(shift) : null;
+    const m = csShift ? new DOMMatrix(csShift.transform).m41 : 0;
     return {
       atW: ar?.width ?? 0,
-      tokenW: parseFloat(stack?.style.getPropertyValue('--brand-at-w') || '0'),
+      tokenW: ar?.width ?? 0,
       atOpacity: csAt ? parseFloat(csAt.opacity) : 0,
       wordTranslate: m,
       pairGap: ar && nr ? nr.left - ar.right : 0,
@@ -85,16 +80,13 @@ const metrics = () =>
 
 const setProgress = (p) =>
   page.evaluate((progress) => {
-    const stack = document.querySelector('.brand-stack');
-    const wa = parseFloat(stack.style.getPropertyValue('--brand-at-w'));
     const at = document.querySelector('.brand-at');
-    const word = document.querySelector('.brand-word');
+    const shift = document.querySelector('.brand-shift');
+    const wa = at.getBoundingClientRect().width;
     at.style.transition = 'none';
-    word.style.transition = 'none';
+    shift.style.transition = 'none';
     at.style.opacity = String(progress);
-    at.style.maxWidth = '';
-    at.style.width = '';
-    word.style.transform = `translateX(${(-wa / 2) * (1 - progress)}px)`;
+    shift.style.transform = `translateX(${(-wa / 2) * (1 - progress)}px)`;
   }, p);
 
 const snapshots = [];
@@ -114,8 +106,8 @@ for (const p of [0.2, 0.5, 0.8]) {
 
 await page.reload({ waitUntil: 'networkidle' });
 await page.waitForFunction(() => {
-  const w = document.querySelector('.brand-stack')?.style.getPropertyValue('--brand-at-w');
-  return w && parseFloat(w) > 0;
+  const at = document.querySelector('.brand-at');
+  return !!at && at.getBoundingClientRect().width > 0;
 });
 await page.hover('.brand-toggle');
 await page.waitForTimeout(hoverMs + 40);

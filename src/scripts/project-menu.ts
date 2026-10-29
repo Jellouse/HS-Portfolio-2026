@@ -1,10 +1,4 @@
-/**
- * Small-icon header menu (project and product pages). Hover the icon (fine pointers), tap it
- * (touch) or Tab onto it (keyboard, opens on focus-within) to bring the items out from behind
- * it; leaving the area, tapping outside, focus leaving or Esc closes it (Esc returns focus to
- * the icon). Closed items are inert, so Tab never lands on invisible links. Items start gray;
- * the hovered one turns black (CSS). The face follows the mouse like the homepage face.
- */
+
 import { initHeroBlob } from './hero-blob';
 
 let n = 0;

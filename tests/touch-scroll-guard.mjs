@@ -1,15 +1,12 @@
-/**
- * Static guard: fail if touch/pointer listeners are non-passive, or if
- * touch-action:none appears outside the allowlist. Run from repo root.
- */
+
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 
 const ROOT = new URL('..', import.meta.url).pathname;
 const ALLOW_TOUCH_ACTION_NONE = [
-  // /canvas (dev/preview-only review board) handles its own pan and pinch.
+
   'src/pages/canvas.astro',
-  // none today — add a relative path only with a comment explaining why
+
 ];
 
 const CODE_EXT = new Set(['.ts', '.tsx', '.js', '.mjs', '.astro', '.css']);
@@ -48,7 +45,6 @@ for (const file of files) {
     failures.push(`${rel}: touch-action:none (not on allowlist)`);
   }
 
-  // A full-bleed switch under the finger is the known scroll killer (WebKit 321591).
   if (
     /setAttribute\(\s*['"]switch['"][\s\S]{0,500}inset\s*:\s*0/i.test(src) ||
     /type=['"]checkbox['"][\s\S]{0,200}switch[\s\S]{0,500}inset\s*:\s*0/i.test(src)

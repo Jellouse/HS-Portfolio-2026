@@ -1,21 +1,13 @@
-/**
- * Test runner: every spec is a standalone node script with its own static server on its own
- * port, so they can run side by side. Runs them in a pool (TEST_WORKERS, default half the CPUs,
- * max 6: the specs measure animations, so the box must not be starved), buffers each spec's
- * output and prints it whole, then a timing summary. Exits 1 if any spec failed.
- *   node tests/run.mjs            all specs (npm test)
- *   node tests/run.mjs intro shop  only specs whose name contains one of the words (test:quick)
- * Needs a fresh `npm run build` (npm test does it once up front).
- */
+
 import { spawn } from 'node:child_process';
 import { cpus } from 'node:os';
 
-// [name, file]. Order = longest first, so the pool finishes evenly.
 const SPECS = [
   ['a11y', 'tests/a11y.spec.mjs'],
   ['shop-intro', 'tests/shop-intro.spec.mjs'],
   ['intro', 'tests/intro-face.spec.mjs'],
-  ['intro-mobile-layout', 'tests/intro-mobile-layout.spec.mjs'],
+  ['intro-layout', 'tests/intro-layout.spec.mjs'],
+  ['type-scale', 'tests/type-scale.spec.mjs'],
   ['intro-nav', 'tests/intro-nav.spec.mjs'],
   ['viewport-height', 'tests/viewport-height.spec.mjs'],
   ['contact', 'tests/contact.spec.mjs'],

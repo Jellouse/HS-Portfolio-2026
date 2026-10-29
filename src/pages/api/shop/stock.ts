@@ -4,7 +4,6 @@ import { getPool } from '../../../lib/shop/server.mjs';
 
 export const prerender = false;
 
-// Feeds the Buy button label. Short CDN cache; the page falls back to "Buy" on any error.
 export const GET: APIRoute = async () => {
   try {
     const data = await stock(getPool());

@@ -93,15 +93,14 @@ const sizes = '(min-width: 1440px) 439px, (min-width: 760px) 30vw, calc(50vw - 3
   import { initSpinMark } from '../../scripts/spin-mark';
   import { initShopDetails } from '../../scripts/shop-details';
   import { initShopIntro } from '../../scripts/shop-intro';
+  import { scrollToId } from '../../scripts/scroll-to-id';
   const head = document.querySelector<HTMLElement>('[data-shop-head]');
   if (head) initShopIntro(head);
   document.querySelector('[data-shop-about]')?.addEventListener('click', (e) => {
-    const about = document.getElementById('shop-about');
-    if (!about) return;
+    if (!document.getElementById('shop-about')) return;
     e.preventDefault();
-    const smooth = !matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const offset = matchMedia('(min-width: 760px)').matches ? 100 : 0;
-    scrollTo({ top: Math.max(0, about.getBoundingClientRect().top + scrollY - offset), behavior: smooth ? 'smooth' : 'auto' });
+    const about = scrollToId('shop-about');
+    if (!about) return;
     about.focus({ preventScroll: true });
   });
 
@@ -110,7 +109,6 @@ const sizes = '(min-width: 1440px) 439px, (min-width: 760px) 30vw, calc(50vw - 3
   import { refreshPrices } from '../../scripts/shop-price';
   refreshPrices();
 
-  // Re-init after a back/forward cache restore (pagehide stops it cleanly).
   const start = () => {
     const el = document.querySelector<HTMLElement>('[data-spin-mark]');
     if (el) initSpinMark(el);

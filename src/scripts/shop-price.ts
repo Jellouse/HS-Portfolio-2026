@@ -1,5 +1,5 @@
-// Live prices from the shop DB (/admin is the one source). The static HTML carries the
-// seed price, so a slow or missing API (no DATABASE_URL yet) still shows a price.
+
+
 type Stock = Record<string, { price_cents?: number }> | null;
 
 export function applyPrices(data: Stock) {
@@ -12,7 +12,7 @@ export function applyPrices(data: Stock) {
     const text = el.dataset.priceStyle === 'prefix' ? `€${n}` : `${n}€`;
     if (el.textContent === text) return;
     el.textContent = text;
-    // A changed price blurs in again instead of swapping sharp (see .price-swap).
+
     el.classList.remove('price-swap');
     void el.offsetWidth;
     el.classList.add('price-swap');
@@ -25,11 +25,10 @@ export async function refreshPrices() {
     const res = await fetch('/api/shop/stock', { signal: AbortSignal.timeout(4000) });
     applyPrices(res.ok ? await res.json() : null);
   } catch {
-    // Keep the static price.
+
   }
 }
 
-// Messages after /api/shop/buy sends the visitor back (?checkout=soon|soldout|error).
 const NOTES: Record<string, string> = {
   soon: 'Checkout opens soon.',
   soldout: 'Sold out.',

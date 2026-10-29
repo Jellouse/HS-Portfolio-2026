@@ -19,6 +19,6 @@ export const POST: APIRoute = async ({ request }) => {
     return Response.json({ received: true, result });
   } catch (e) {
     console.error('[shop] webhook failed', event.type, e);
-    return new Response('Retry', { status: 500 }); // Stripe retries; handler is idempotent.
+    return new Response('Retry', { status: 500 });
   }
 };

@@ -1,7 +1,4 @@
-/**
- * Every project article must paint each image src as often as the data says —
- * no duplicate blocks, and process-folder images must not re-show body images.
- */
+
 import { readdirSync, readFileSync, existsSync, statSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';

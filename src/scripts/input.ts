@@ -1,6 +1,5 @@
-// Shared input for interactive marks: normalised cursor position (0..1 across the window),
-// or null when there is no live mouse. Phones have no tilt/orientation input: the marks
-// loop on their own there.
+
+
 type Pos = { u: number; v: number };
 
 let mouse: Pos | null = null;
@@ -17,7 +16,6 @@ export function startInput() {
   });
 }
 
-/** Live position, or null when the caller should fall back to its simulated cursor. */
 export function readInput(now: number): Pos | null {
   if (mouse && now - lastMouse < 2500) return mouse;
   return null;

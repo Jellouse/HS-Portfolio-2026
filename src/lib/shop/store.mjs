@@ -1,23 +1,20 @@
-// Industrial Bloom checkout on humansize.de. Plain JS so `npm test` can run it without Astro.
-// Two tables. A "hold" is simply a pending order with an expiry; no cart, no cron.
-// Expired holds are released lazily on the next read/buy, and by Stripe's expired webhook.
+
 
 import { serialLabel } from './label.mjs';
 export { serialLabel };
 
 export const SITE = 'humansize';
-// Stripe Checkout requires expires_at >= 30 min ahead, so the hold matches that (not 15 min).
+
 export const HOLD_MINUTES = 30;
-// A payment can complete right at the deadline; give the webhook a grace window before release.
+
 export const GRACE_MINUTES = 5;
 export const SHIPPING_CENTS = 1200;
 export const SHIPPING_DAYS = '3–7 business days';
-// The Info row on every product page; built from the same values Stripe charges.
+
 export const SHIPPING_TEXT = `€${SHIPPING_CENTS / 100} flat, EU only, ${SHIPPING_DAYS}`;
-// Copied from industrial-bloom lib/shop/shipping.js.
+
 export const SHIPPING_COUNTRIES = ['DE', 'AT', 'BE', 'CZ', 'DK', 'ES', 'FI', 'FR', 'IE', 'IT', 'LU', 'NL', 'PL', 'PT', 'SE'];
 
-// Starting prices and edition sizes (Oct 2026). Seeded only into an empty table; /admin owns them after that.
 export const SEED = [
   { slug: '660', code: '660', price_cents: 7000, edition_size: 8 },
   { slug: '120', code: '120', price_cents: 15000, edition_size: 2 },
@@ -54,9 +51,8 @@ CREATE TABLE IF NOT EXISTS shop_orders (
 CREATE INDEX IF NOT EXISTS shop_orders_pending ON shop_orders (expires_at) WHERE status = 'pending';
 `;
 
-
 const ready = new WeakMap();
-/** Creates tables and seeds on first use, so a fresh Neon DB needs no migration step. */
+
 export function ensureSchema(pool) {
   if (!ready.has(pool)) {
     ready.set(pool, (async () => {
@@ -90,12 +86,10 @@ async function tx(pool, fn) {
   }
 }
 
-// Puts a serial back in the free pool (sorted, no duplicates).
 const RESTORE = `UPDATE shop_products SET available_serials =
   (SELECT array_agg(DISTINCT s ORDER BY s) FROM unnest(array_append(available_serials, $2::int)) s),
   updated_at = now() WHERE slug = $1`;
 
-/** Releases one order's hold if it is still pending. Returns true when a serial went back. */
 async function releaseOrder(c, where, params, toStatus = 'expired') {
   const { rows } = await c.query(
     `UPDATE shop_orders SET status = '${toStatus}' WHERE ${where} AND status = 'pending' RETURNING slug, serial`,
@@ -110,7 +104,6 @@ export async function releaseStale(pool) {
     AND expires_at < now() - interval '${GRACE_MINUTES} minutes' FOR UPDATE SKIP LOCKED)`, []));
 }
 
-/** Next free serial per product. Held serials are already out of available_serials. */
 export async function stock(pool) {
   await releaseStale(pool);
   const { rows } = await pool.query('SELECT slug, code, price_cents, available_serials FROM shop_products ORDER BY slug');
@@ -120,10 +113,6 @@ export async function stock(pool) {
   }));
 }
 
-/**
- * Buy now: take the lowest free serial under a row lock, hold it, open Stripe Checkout.
- * If Stripe fails the hold is released at once.
- */
 export async function buy(pool, stripe, { slug, name, siteUrl, now = Date.now() }) {
   await releaseStale(pool);
   const expiresAt = new Date(now + HOLD_MINUTES * 60_000);
@@ -160,7 +149,6 @@ export async function buy(pool, stripe, { slug, name, siteUrl, now = Date.now() 
   }
 }
 
-/** Stripe webhook body, already signature-checked. Idempotent; ignores other sites. */
 export async function handleEvent(pool, event) {
   const s = event.data?.object || {};
   if (s.metadata?.site !== SITE) return 'ignored';
@@ -179,7 +167,7 @@ export async function handleEvent(pool, event) {
       if (!o || o.status === 'paid' || o.status === 'refunded') return 'noop';
       let fulfilment = 'unfulfilled', note = null;
       if (o.status === 'expired') {
-        // Paid after the hold was released: take the serial back if nobody else has it.
+
         const got = await c.query('UPDATE shop_products SET available_serials = array_remove(available_serials, $2::int) WHERE slug = $1 AND $2 = ANY(available_serials) RETURNING slug', [o.slug, o.serial]);
         if (!got.rowCount) { fulfilment = 'check'; note = 'Paid after hold expired; serial was taken again. Refund or swap serial.'; }
       }
@@ -195,7 +183,6 @@ export async function handleEvent(pool, event) {
   return 'ignored';
 }
 
-// ---------- admin ----------
 export async function adminOverview(pool) {
   await releaseStale(pool);
   const products = (await pool.query('SELECT * FROM shop_products ORDER BY price_cents')).rows;
@@ -217,7 +204,6 @@ export async function markShipped(pool, id, shipped = true) {
   await pool.query(`UPDATE shop_orders SET fulfilment = $2, shipped_at = $3 WHERE id = $1 AND status = 'paid'`, [id, shipped ? 'shipped' : 'unfulfilled', shipped ? new Date() : null]);
 }
 
-/** Refund flow: refund in Stripe, then put the serial back on sale here. */
 export async function restoreSerial(pool, orderId) {
   return tx(pool, async (c) => {
     const { rows } = await c.query("UPDATE shop_orders SET status = 'refunded' WHERE id = $1 AND status = 'paid' RETURNING slug, serial", [orderId]);
@@ -226,7 +212,6 @@ export async function restoreSerial(pool, orderId) {
   });
 }
 
-/** Price in euros; stock as "free serials" list like "3-8" or "1,2,5". */
 export async function updateProduct(pool, slug, { priceEur, freeSerials }) {
   return tx(pool, async (c) => {
     if (priceEur != null && priceEur !== '') {

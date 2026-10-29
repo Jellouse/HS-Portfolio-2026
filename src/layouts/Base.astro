@@ -16,9 +16,9 @@ interface Props {
   type?: 'website' | 'article';
   jsonLd?: unknown;
   noindex?: boolean;
-  /** viewport-fit=cover, so env(safe-area-inset-*) works (pages with bottom-pinned UI). */
+
   safeArea?: boolean;
-  /** The homepage name block + menu (Header.astro). Off by default: other pages bring their own. */
+
   header?: boolean;
 }
 
@@ -29,20 +29,17 @@ const site = await getSite();
 <html lang="en" data-dev={import.meta.env.DEV ? '' : undefined}>
   <head>
     <meta charset="utf-8" />
-    <!-- Cross-page view transitions: the opt-in lives inline at the top of <head>, so the
-         incoming page has it on its very first render even when the stylesheet is still
-         downloading (otherwise Chrome skips the morph: "opt-in disabled"). The expect link
-         holds that first render until <main> is parsed, so the shared mark exists in it. -->
+    
     <style is:inline>@view-transition{navigation:auto}@media (prefers-reduced-motion:reduce){@view-transition{navigation:none}}</style>
     <link rel="expect" href="#content" blocking="render" />
     <style is:inline>.reveal-gate:not(.canvas-mode) :is(main :is(p,h1,h2,h3,h4,li,blockquote,figcaption,.caption,.project-summary),.site-footer :is(p,li)):not(.is-split,.is-split *,.sr-only,[data-no-reveal],[data-no-reveal] *){opacity:0}.is-split{transition:opacity 350ms cubic-bezier(.16,1,.3,1)}</style>
     <script is:inline>
-      // Ring morph direction, so CSS can show only the larger (sharper) snapshot of the mark.
+
       addEventListener('pagereveal', function (e) {
         var vt = e.viewTransition;
         if (vt && vt.types) vt.types.add(document.querySelector('.shop-detail-mark') ? 'ib-shrink' : 'ib-grow');
       });
-    </script>
+</script>
     <meta name="viewport" content={`width=device-width, initial-scale=1${safeArea ? ', viewport-fit=cover' : ''}`} />
     <meta name="theme-color" content="#ffffff" />
     <meta name="google-site-verification" content="M6eRTJDg2gB4PMiLKpzNVeRX6jugbsgeBjGd_0ci2V4" />
@@ -52,9 +49,7 @@ const site = await getSite();
     <Seo title={title} description={description} image={image} type={type} jsonLd={jsonLd} noindex={noindex} />
     <script is:inline>
       document.documentElement.classList.add('js');
-      // Text reveal gate: text hosts stay transparent from first paint until text-reveal.ts
-      // has split them, then fade in, so text never shows sharp first and blurs after.
-      // Reduced motion skips the reveal, so no gate; the timeout is a failsafe if JS stalls.
+
       if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
         document.documentElement.classList.add('reveal-gate');
         setTimeout(function () { document.documentElement.classList.remove('reveal-gate'); }, 3000);
@@ -64,7 +59,7 @@ const site = await getSite();
         var value = q.get('grid');
         if (value !== null && value !== '0' && value !== 'false' && value !== 'off')
           document.documentElement.classList.add('show-grid');
-        // G toggles the column overlay, in dev or on the /canvas board only.
+
         if (!(document.documentElement.hasAttribute('data-dev') || q.get('canvas') === '1')) return;
         addEventListener('keydown', function (e) {
           if ((e.key !== 'g' && e.key !== 'G') || e.metaKey || e.ctrlKey || e.altKey) return;
@@ -73,18 +68,16 @@ const site = await getSite();
           document.documentElement.classList.toggle('show-grid');
         });
       })();
-    </script>
+</script>
     <script is:inline>
-      // ?canvas=1&vh=N (the /canvas board): the iframe is as tall as the page, so viewport
-      // units are re-based on N px, reveals show their end state, and the page height is
-      // posted to the parent. Without the param this does nothing.
+
       (function () {
         var q = new URLSearchParams(location.search);
         if (q.get('canvas') !== '1') return;
         var vh = Number(q.get('vh')) || 900;
         var root = document.documentElement;
         root.classList.add('canvas-mode');
-        // canvas frames are review copies: keep them out of search indexes
+
         var robots = document.querySelector('meta[name="robots"]') || document.head.appendChild(document.createElement('meta'));
         robots.setAttribute('name', 'robots');
         robots.setAttribute('content', 'noindex, nofollow');
@@ -128,14 +121,14 @@ const site = await getSite();
           addEventListener('load', post);
           post();
         }
-        // Esc inside a frame hands control back to the board.
+
         addEventListener('keydown', function (e) {
           if (e.key === 'Escape') parent.postMessage({ type: 'canvas-escape' }, '*');
         });
         if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', apply);
         else apply();
       })();
-    </script>
+</script>
   </head>
   <body>
     <svg class="squircle-def" width="0" height="0" aria-hidden="true">
@@ -160,7 +153,7 @@ const site = await getSite();
     </div>
     <script>
       import '../scripts/haptics';
-    </script>
+</script>
     <script is:inline>
       (function () {
         document.querySelectorAll('.frame img').forEach(function (img) {
@@ -171,9 +164,6 @@ const site = await getSite();
           else img.addEventListener('load', mark, { once: true });
         });
 
-        // Mirror the open states onto the header as plain classes. Safari does not reliably
-        // re-match .site-header:has(.who.is-open) when a child's class flips, so the time and
-        // @Humansize ended up visible on top of each other. Plain classes always restyle.
         document.querySelectorAll('.site-header').forEach(function (header) {
           var sync = function () {
             header.classList.toggle('is-time-open', !!header.querySelector('.who.is-open'));
@@ -181,7 +171,7 @@ const site = await getSite();
             var was = header.classList.contains('is-menu-open');
             header.classList.toggle('is-menu-open', open);
             if (open) header.classList.remove('is-menu-fade', 'is-menu-snap');
-            // Menu closing: the time comes back instantly, unless the 5s timer closed it (crossfade).
+
             if (was && !open) {
               var cls = window.__hsTimerClose ? 'is-menu-fade' : 'is-menu-snap';
               window.__hsTimerClose = false;
@@ -196,7 +186,6 @@ const site = await getSite();
           sync();
         });
 
-        // phones: an open menu or time closes itself after 5s
         var autoClose = 0;
         var armClose = function (el) {
           clearTimeout(autoClose);
@@ -224,7 +213,6 @@ const site = await getSite();
           });
         });
 
-        // touch phones: tapping the name toggles the Tokyo time instead of navigating
         document.querySelectorAll('.who').forEach(function (who) {
           var link = who.querySelector('a');
           if (!link) return;
@@ -242,9 +230,6 @@ const site = await getSite();
           });
         });
 
-        // a tap outside an open menu or time closes it
-        // iOS only fires click on "clickable" elements, so a tap on blank page never closed
-        // the menu. pointerdown fires on every tap.
         var closeOutside = function (event) {
           document.querySelectorAll('.contact.is-open, .who.is-open').forEach(function (el) {
             if (!el.contains(event.target)) el.classList.remove('is-open');
@@ -261,13 +246,13 @@ const site = await getSite();
         });
 
         var marks = Array.prototype.filter.call(document.querySelectorAll('.mark'), function (m) {
-          // Blob keeps source proportions; only gradient Mark stretches.
+
           return !m.closest('[hidden]') && !m.classList.contains('mark-blob') && !m.classList.contains('mark-face');
         });
         if (marks.length) {
           var fine = window.matchMedia('(hover: hover) and (pointer: fine)');
           var reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
-          // Blob rests wider; gradient mark rests at 1. Read from the visible mark.
+
           var restOf = function (el) {
             var raw = getComputedStyle(el).getPropertyValue('--mark-scale').trim();
             var n = parseFloat(raw);
@@ -324,7 +309,7 @@ const site = await getSite();
           });
         }
       })();
-    </script>
+</script>
     <script>
       import { startInput } from '../scripts/input';
       import { initTextReveal } from '../scripts/text-reveal';
@@ -332,10 +317,10 @@ const site = await getSite();
       startInput();
       initTextReveal();
       initScrollFade();
-    </script>
-    <!-- Vercel Web Analytics (cookieless page views). -->
+</script>
+    
     <Analytics />
-    <!-- Vercel Speed Insights (real-user Core Web Vitals). -->
+    
     <SpeedInsights />
   </body>
 </html>

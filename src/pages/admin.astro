@@ -1,6 +1,5 @@
 ---
-// Shop admin: orders, serials, price and stock. Same login as the CMS: the Keystatic GitHub
-// session cookie must belong to someone with push access to the site repo. No extra secret.
+
 export const prerender = false;
 
 import '../styles/global.css';
@@ -13,7 +12,6 @@ import { getCollection } from 'astro:content';
 Astro.response.headers.set('cache-control', 'no-store');
 Astro.response.headers.set('x-robots-tag', 'noindex');
 
-// Local dev only: SHOP_ADMIN_DEV=1 skips GitHub so the page can be built without a login.
 const devBypass = import.meta.env.DEV && process.env.SHOP_ADMIN_DEV === '1';
 const token = cmsTokenFromRequest(Astro.request);
 const allowed = devBypass || (token ? await hasRepoPushAccess(token).catch(() => false) : false);
@@ -56,7 +54,7 @@ if (allowed && !process.env.DATABASE_URL) {
   }
   try {
     data = await adminOverview(pool);
-    // Only products defined in Keystatic; ignore DB rows for unknown slugs.
+
     const known = new Set((await getCollection('products')).map((p) => p.id));
     data.vases = data.vases.filter((v) => known.has(v.slug));
   } catch (e) {
@@ -182,21 +180,21 @@ const names: Record<string, string> = { '660': 'Type 660', '120': 'Type 120', '4
     max-width: 1120px;
     margin-inline: auto;
     font-family: 'ABC Areal', system-ui, sans-serif;
-    font-size: 16px;
-    line-height: 22px;
+    font-size: var(--text-ui);
+    line-height: var(--lh-ui);
     letter-spacing: var(--track);
     color: var(--ink);
     background: var(--bg);
   }
   .admin a { color: inherit; }
-  .admin h1, .admin h2, .admin h3 { font-size: var(--text-title); line-height: var(--lh-title); font-weight: 400; margin: 0; }
-  .admin h3 { font-size: 16px; line-height: 22px; }
+  .admin h1, .admin h2, .admin h3 { font-size: var(--text); line-height: var(--lh); font-weight: 400; margin: 0; }
+  .admin h3 { font-size: var(--text-ui); line-height: var(--lh-ui); }
   .admin-head { display: flex; align-items: center; gap: var(--gutter); margin-bottom: 80px; flex-wrap: wrap; }
   .admin-head nav { margin-left: auto; color: var(--muted); }
   .admin-mark { display: block; width: 40px; height: 40px; }
   .admin-mark :global(svg) { display: block; width: 100%; height: 100%; }
   .admin-block { margin-bottom: 80px; }
-  .admin-block h2 { margin-bottom: 29px; }
+  .admin-block h2 { margin-bottom: var(--lh); }
   .admin-muted { color: var(--muted); margin: 0; }
   .admin-note { padding: 10px 20px; border-radius: var(--radius-sm); background: #f2f2f2; margin: 0 0 40px; }
   .admin-error { color: var(--red); }

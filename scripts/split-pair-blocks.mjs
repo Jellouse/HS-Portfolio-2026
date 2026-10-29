@@ -1,14 +1,4 @@
-/**
- * One-time / optional: turn Image pair blocks into two normal image blocks.
- * Keeps file paths as-is (left.jpg / right.jpg stay where they are).
- *
- *   node scripts/split-pair-blocks.mjs analogue-af1
- *   node scripts/split-pair-blocks.mjs --all
- *   node scripts/split-pair-blocks.mjs --all --only-stacked
- *
- * --only-stacked: only pairs with layout: stack
- * Dry-run by default; pass --write to save.
- */
+
 import { readFileSync, writeFileSync, readdirSync, statSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';

@@ -1,12 +1,11 @@
-// One-shot opacity fade when blocks enter view. First viewport shows immediately
-// (no load flash): mark those is-in, then enable hiding of the rest via .fade-ready.
+
 
 const SELECTOR = '.fade-in';
 
 function inFirstView(el: Element) {
   const rect = el.getBoundingClientRect();
   const vh = window.innerHeight || document.documentElement.clientHeight;
-  // Treat as already visible if any part sits in the top ~92% of the viewport
+
   return rect.top < vh * 0.92 && rect.bottom > 0;
 }
 
@@ -38,7 +37,6 @@ export function initScrollFade() {
     else pending.push(el);
   }
 
-  // Enable hide-until-in only after first-viewport items are marked visible
   document.documentElement.classList.add('fade-ready');
 
   if (!pending.length) return;
@@ -54,7 +52,7 @@ export function initScrollFade() {
     },
     {
       threshold: 0.12,
-      // Fire a little before the block is fully on screen
+
       rootMargin: '0px 0px 12% 0px',
     },
   );

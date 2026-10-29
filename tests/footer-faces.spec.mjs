@@ -1,4 +1,4 @@
-// Footer faces fill the full width in WebKit (Safari) and Chromium, desktop and mobile.
+
 import { chromium, webkit } from 'playwright';
 import { createServer } from 'node:http';
 import { readFileSync, existsSync, statSync } from 'node:fs';

@@ -1,11 +1,4 @@
-/**
- * Homepage intro: face scale falls monotonically with scroll, the gap between face bottom and
- * name top stays constant (±1px) until release, then the face moves 1:1 with the page.
- * Smoothing (scale chases the scroll target) is allowed; every assertion is on the settled state.
- * SHOTS=dir also saves screenshots at 0/25/50/75/100% of the intro.
- *
- *   npm run build && npm run test:intro
- */
+
 import { chromium } from 'playwright';
 import { createServer } from 'node:http';
 import { readFileSync, existsSync, statSync } from 'node:fs';

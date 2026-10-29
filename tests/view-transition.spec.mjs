@@ -1,11 +1,4 @@
-/**
- * Shared-element page transition: the Industrial Bloom ring (view-transition-name ib-mark)
- * morphs between /shop and /shop/<slug> in both directions. Checks the mark exists on both,
- * the morph actually runs, arrival is at the top, the load spin does not replay, the mark
- * ends on the 90deg grid, and there are no console errors.
- *
- *   npm run build && npm run test:vt
- */
+
 import { chromium } from 'playwright';
 import { createServer } from 'node:http';
 import { readFileSync, existsSync, statSync } from 'node:fs';
@@ -16,27 +9,24 @@ const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.jpg': 'image/jpeg', '.webp': 'image/webp', '.png': 'image/png', '.woff2': 'font/woff2', '.avif': 'image/avif' };
 const root = [join(ROOT, '.vercel', 'output', 'static'), join(ROOT, 'dist', 'client')].find((d) => existsSync(join(d, 'index.html')));
 if (!root) { console.error('Run npm run build first.'); process.exit(1); }
-// Assets arrive 250ms late, like a real network: with the opt-in only in the external
-// stylesheet, Chrome skipped every clicked morph on production ('opt-in disabled').
+
 const server = createServer(async (req, res) => {
   let path = decodeURIComponent((req.url || '/').split('?')[0]);
   if (path.endsWith('/')) path += 'index.html';
   const file = [join(root, path), join(root, path, 'index.html')].find((f) => f.startsWith(root) && existsSync(f) && statSync(f).isFile());
   if (!file) { res.writeHead(404); return res.end(); }
-  // Uncached and late, the worst case for the incoming page's first render.
+
   if (!file.endsWith('.html')) await new Promise((r) => setTimeout(r, 250));
   res.writeHead(200, { 'content-type': MIME[extname(file)] || 'application/octet-stream', 'cache-control': 'no-store' });
   res.end(readFileSync(file));
 });
 await new Promise((r) => server.listen(4344, '127.0.0.1', r));
 
-
 const BASE = 'http://127.0.0.1:4344';
 const browser = await chromium.launch();
 const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
 const errors = [];
-// Vercel serves the analytics script at /_vercel/insights/* only in production.
-// The stock API is a serverless route; the static test server has no functions.
+
 await page.route('**/api/shop/stock', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: '{}' }));
 await page.route(/\/_vercel\/(insights|speed-insights)\//, (r) => r.fulfill({ status: 200, contentType: 'text/javascript', body: '' }));
 page.on('console', (m) => m.type() === 'error' && errors.push(m.text()));
@@ -49,7 +39,7 @@ await page.addInitScript(() => {
     vt.ready.then(() => {
       window.__vt.morph = document.getAnimations().some((a) => /^::view-transition-group\((ib|hs)-mark\)$/.test(a.effect?.pseudoElement || ''));
       window.__vt.types = [...(vt.types || [])];
-      // the incoming mark must not be running the load spin
+
       window.__vt.spin = document.querySelector('[data-spin-mark]')?.getAnimations().length || 0;
     });
     vt.finished.then(() => (window.__vt.done = true), () => (window.__vt.done = 'skipped'));
@@ -60,8 +50,7 @@ const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 const vtName = (sel = '[data-spin-mark]') => page.evaluate((sel) => getComputedStyle(document.querySelector(sel)).viewTransitionName, sel);
 
 const go = async (label, click, expectPath, mark = 'ib-mark') => {
-  // Chrome skips a cross-document transition ('opt-in disabled') when you navigate again
-  // within about a second of arriving; let the page settle first, like a real visit.
+
   await page.waitForLoadState('load');
   await wait(1500);
   await page.evaluate(() => scrollTo(0, 200));
@@ -84,13 +73,13 @@ const go = async (label, click, expectPath, mark = 'ib-mark') => {
 await page.goto(`${BASE}/shop/`, { waitUntil: 'load' });
 await wait(1800);
 if ((await vtName()) !== 'ib-mark') failures.push('/shop: mark is not a shared element');
-// First product's detail URL (slugs are edited in Keystatic, so read it from the page).
+
 const firstDetail = await page.getAttribute('a.shop-pair >> nth=0', 'href');
 await go('/shop -> detail (click)', () => page.click('a.shop-pair >> nth=0'), firstDetail);
 await go('detail ring click -> /shop', () => page.click('.shop-detail-mark a'), '/shop/');
 await go('/shop -> detail again', () => page.click('a.shop-pair >> nth=0'), firstDetail);
 await go('detail ring click -> /shop again', () => page.click('.shop-detail-mark a'), '/shop/');
-// Project page: the small mark at the top morphs into the homepage mark (hs-mark).
+
 await page.goto(`${BASE}/work/atomic-ski/`, { waitUntil: 'load' });
 if ((await vtName('.project-mark .mark')) !== 'hs-mark') failures.push('project mark is not a shared element');
 await go('project mark click -> home', () => page.click('.project-mark a'), '/', 'hs-mark');

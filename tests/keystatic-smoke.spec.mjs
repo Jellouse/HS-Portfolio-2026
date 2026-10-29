@@ -1,12 +1,4 @@
-/**
- * 1) Module harness: classic-JSX bundle of image-field-optimize must evaluate
- *    without a React global (catches missing `import React`).
- * 2) Real page load: start `astro dev` (local Keystatic storage) and open
- *    /keystatic; fail on any pageerror or "is not defined" console error.
- *
- *   node tests/keystatic-smoke.spec.mjs
- *   BASE_URL=https://humansize.de node tests/keystatic-smoke.spec.mjs  # skip dev server
- */
+
 import { chromium } from 'playwright';
 import { readFileSync, existsSync, mkdirSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
@@ -98,7 +90,7 @@ async function waitForUrl(url, attempts = 60) {
       const res = await fetch(url, { redirect: 'manual' });
       if (res.status > 0) return;
     } catch {
-      /* not up yet */
+
     }
     await sleep(500);
   }
@@ -164,11 +156,11 @@ async function runKeystaticPage(base) {
 
   const url = `${base}/keystatic`;
   const res = await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 90000 });
-  // Allow the admin client bundle to evaluate (login screen or dashboard).
+
   await page.waitForTimeout(3500);
 
   const bad = errors.filter((e) => /React is not defined|is not defined/i.test(e));
-  // Any hard pageerror is a failure for this smoke — not only "is not defined".
+
   const hard = errors.filter((e) => e.startsWith('pageerror:'));
   await browser.close();
 

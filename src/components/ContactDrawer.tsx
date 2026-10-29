@@ -1,12 +1,7 @@
-/**
- * Contact drawer on Vaul: a bottom sheet with drag-to-dismiss, focus trap, Esc and an
- * aria-modal dialog from Radix. Opened by any [data-contact-open]; focus returns to it on close.
- * Steps: 1 service, 2 project, 3 email, done. Enter goes to the next step (Shift+Enter is a
- * newline in the project text). From step 2 on, hovering or focusing the dots brings in
- * Back / Next; Next is off while the step is empty. Changes are announced politely.
- */
+
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Drawer } from 'vaul';
+import { typePx } from '../lib/type-scale';
 
 const TITLES: Record<number, string> = { 1: 'Pick a service', 2: 'Describe your project', 3: 'Add your email' };
 const SERVICES = ['Retail', 'Website', 'Other'];
@@ -33,7 +28,6 @@ export default function ContactDrawer({ email: address }: { email: string }) {
     requestAnimationFrame(() => setLive(t));
   };
 
-  // Opener hook: any [data-contact-open] anywhere on the page.
   useEffect(() => {
     const onClick = (e: MouseEvent) => {
       const t = (e.target as Element).closest<HTMLElement>('[data-contact-open]');
@@ -49,7 +43,7 @@ export default function ContactDrawer({ email: address }: { email: string }) {
 
   useEffect(() => {
     document.documentElement.classList.toggle('is-contact-open', open);
-    // Focus goes back to the opener right away, not after the 500ms slide out.
+
     if (!open) opener.current?.focus({ preventScroll: true });
     if (!open && step === 4) {
       const t = setTimeout(reset, 500);
@@ -67,13 +61,11 @@ export default function ContactDrawer({ email: address }: { email: string }) {
     if (text.current) text.current.style.height = '';
   };
 
-  // Line count from the textarea itself, in one synchronous pass; a line-count change
-  // re-centres the block with a short FLIP.
   const measure = useCallback(() => {
     const el = text.current;
     const box = field.current;
     if (!el || !box) return;
-    const lh = parseFloat(getComputedStyle(el).lineHeight) || 29;
+    const lh = parseFloat(getComputedStyle(el).lineHeight) || typePx('lh');
     const before = el.getBoundingClientRect().top;
     el.style.height = `${lh}px`;
     const n = Math.max(1, Math.round(el.scrollHeight / lh));

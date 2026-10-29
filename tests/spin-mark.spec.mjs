@@ -1,9 +1,4 @@
-/**
- * /shop ring mark: rapid hovers (including mid-animation) mixed with scrolling must always
- * come to rest on the 90deg grid (within 0.01deg).
- *
- *   npm run build && npm run test:spin
- */
+
 import { chromium } from 'playwright';
 import { createServer } from 'node:http';
 import { readFileSync, existsSync, statSync } from 'node:fs';
@@ -28,7 +23,7 @@ const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 const browser = await chromium.launch();
 const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
 await page.goto('http://127.0.0.1:4332/shop/', { waitUntil: 'load' });
-await wait(1800); // load spin settles
+await wait(1800);
 const angle = () => page.evaluate(() => {
   const m = /rotate\(([-\d.e]+)deg\)/.exec(document.querySelector('[data-spin-mark]').style.transform);
   return m ? Number(m[1]) : NaN;
@@ -62,7 +57,7 @@ await check('hovers mixed with scroll');
 
 for (let i = 0; i < 5; i++) {
   await page.mouse.wheel(0, 37);
-  await wait(300); // the snap starts, then a hover lands mid-snap
+  await wait(300);
   await hoverOnce(50);
 }
 await check('hovers during snaps');

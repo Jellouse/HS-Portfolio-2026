@@ -1,5 +1,5 @@
-// Site positioning: the single source for homepage title, meta/og/twitter description,
-// JSON-LD (knowsAbout + services) and llms.txt. Project pages keep their own titles.
+
+
 export const positioning = {
   homeTitle: 'Johann Schnettker · Humansize',
   description:

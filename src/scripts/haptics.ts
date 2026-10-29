@@ -1,13 +1,4 @@
-// Light haptic tick on real taps of links and buttons, touch devices only.
-//
-// iOS only buzzes for a trusted activation of <input type=checkbox switch>.
-// A switch under the finger eats vertical pans (WebKit 321591); touch-action
-// does not help. So the switch stays visibility:hidden inside a <label> that
-// covers the host: pans hit the label (scroll-transparent), taps forward to
-// the switch for the tick. Media and captions sit above the label so
-// press-and-hold save and caption hits stay native.
-//
-// Android uses navigator.vibrate on the host's own click.
+
 
 const TARGETS = 'a[href], button, summary, [role="button"]';
 const MOVE_PX = 10;
@@ -59,7 +50,7 @@ function attachIOS(host: HTMLElement) {
   const label = document.createElement('label');
   label.setAttribute('data-haptic-overlay', '');
   label.setAttribute('aria-hidden', 'true');
-  // Label is scroll-transparent on iOS; never put the switch under the finger.
+
   label.style.cssText =
     'position:absolute;inset:0;z-index:0;margin:0;padding:0;border:0;cursor:inherit;touch-action:manipulation;-webkit-tap-highlight-color:transparent;';
 
@@ -67,20 +58,16 @@ function attachIOS(host: HTMLElement) {
   sw.type = 'checkbox';
   sw.setAttribute('switch', '');
   sw.tabIndex = -1;
-  // visibility:hidden keeps it out of hit-testing (WebKit 321591).
+
   sw.style.cssText = 'position:absolute;width:1px;height:1px;margin:0;padding:0;border:0;visibility:hidden;';
-  // Label re-dispatches to the switch; stop that copy bubbling back into host handlers.
+
   sw.addEventListener('click', (e) => e.stopPropagation());
 
   label.appendChild(sw);
 
-  // Gap taps land on the label (media/caption are stacked above). Replay a real host click
-  // only for a genuine tap so a scroll that ends on the label does not navigate.
   let replaying = false;
   label.addEventListener('click', (e) => {
-    // The label sits inside the host, so its own click would bubble to the host's handlers
-    // and the replay below would run them a second time (a toggle button opened and closed
-    // again: the menu and the name/time on phones did nothing). Only the replay may reach them.
+
     e.stopPropagation();
     if (!genuineTap()) {
       e.preventDefault();
@@ -95,8 +82,6 @@ function attachIOS(host: HTMLElement) {
     replaying = false;
   });
 
-  // Taps on media/caption (above the label) never hit the label. Trigger the switch
-  // during that user gesture so the tick still fires, without putting it under the finger.
   host.addEventListener(
     'click',
     (e) => {
@@ -106,7 +91,7 @@ function attachIOS(host: HTMLElement) {
       try {
         sw.click();
       } catch {
-        /* ignore */
+
       }
     },
     true,
@@ -124,8 +109,6 @@ function attachAndroid(host: HTMLElement) {
 if (window.matchMedia('(pointer: coarse)').matches && (isIOS || typeof navigator.vibrate === 'function')) {
   const attach = isIOS ? attachIOS : attachAndroid;
 
-  // One host per project card so a tap in the image–caption gap ticks once and opens
-  // the project. Skipped where the card is display:contents (no box of its own).
   document.querySelectorAll<HTMLElement>('.card').forEach((card) => {
     const link = card.querySelector<HTMLAnchorElement>('a[href]');
     if (!link || getComputedStyle(card).display === 'contents') return;

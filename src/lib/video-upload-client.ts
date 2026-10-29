@@ -1,4 +1,4 @@
-// Browser side of the R2 upload: get a presigned URL, then PUT the file with progress.
+
 export function cmsToken() {
   const m = document.cookie.match(/(?:^|;\s*)keystatic-gh-access-token=([^;]+)/);
   return m ? decodeURIComponent(m[1]) : '';

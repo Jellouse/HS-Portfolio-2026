@@ -1,8 +1,8 @@
 import React from 'react';
-// Keystatic input for video slots: the normal URL/path text input plus an
-// "Upload video" button that sends the file straight to R2 and fills in the URL.
+
 import { useRef, useState, type ReactNode } from 'react';
 import { isHevcRisk, uploadVideo } from './video-upload-client';
+import { typePx } from './type-scale';
 
 export function VideoUploadButton({ onDone }: { onDone: (url: string) => void }) {
   const input = useRef<HTMLInputElement>(null);
@@ -45,7 +45,7 @@ export function VideoUploadButton({ onDone }: { onDone: (url: string) => void })
           <div style={{ height: '100%', width: `${progress * 100}%`, background: '#111', transition: 'width 120ms linear' }} />
         </div>
       )}
-      {note && <p style={{ margin: 0, fontSize: 13, color: '#8a5a00' }}>{note}</p>}
+      {note && <p style={{ margin: 0, fontSize: typePx('text-meta'), color: '#8a5a00' }}>{note}</p>}
     </div>
   );
 }

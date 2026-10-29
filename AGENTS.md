@@ -1,30 +1,105 @@
 # Humansize
 
-Portfolio for Johann Schnettker. Static Astro site, content in the repo. Keystatic edits that content locally, and on the deployed site through GitHub.
+Portfolio and shop for Johann Schnettker. Static Astro 5 site. Content lives in the repo. Keystatic edits it locally, and on the deployed site through GitHub. The shop (Industrial Bloom) reads price and stock from Neon (`DATABASE_URL`) and checks out with Stripe.
 
-## Architecture
+## Structure
 
-- `src/pages/index.astro` is the homepage. The work is the page. The first project peeks above the fold.
-- `src/pages/work/[slug].astro` builds every published project from its block list. New projects do not need a new page. The mark at the top returns to the homepage.
+- `src/pages/index.astro` is the homepage. It opts into `Header`. The first project peeks above the fold.
+- `src/pages/work/[slug].astro` builds every published project from its block list. New projects do not need a new page.
+- `src/pages/shop/index.astro` and `src/pages/shop/[slug].astro` are the vase shop.
+- `src/pages/canvas.astro` is the review board. `src/pages/admin.astro` is shop admin. `src/pages/preview/[slug].astro` is the CMS preview.
 - `src/content.config.ts` is the typed schema. `keystatic.config.ts` edits the same files. Keep the two in step.
-- `src/components/` holds the UI. Header, Mark (gradient, `?hero=gradient`), MarkFace (static face mark on case pages), HeroBlob (+ `scripts/hero-blob-gl.ts` on touch devices), ProjectFeed, ProjectCard, About, ProjectHero, TextBlock, ImageBlock, ImagePair, Info, Footer.
+- `src/styles/type.css` is the only place font size, line height, and tracking are defined. `src/lib/type-scale.ts` mirrors those values for inline styles. `tests/type-scale.spec.mjs` fails if they drift.
+- `src/styles/global.css` is the layout. It imports `type.css`.
+- `src/components/` is the UI. `src/scripts/` is the page behaviour, one module per behaviour. `src/lib/` is shared server and content code. `src/lib/shop/` is Neon, Stripe, and stock.
 - Images live next to their project and go through `astro:assets` (`src/lib/images.ts`, `BlurImage.astro`).
-- `@astrojs/vercel` is the adapter. `output` stays `static`. Pages and the `llms.txt` and `robots.txt` endpoints export `prerender = true`. `@keystatic/astro` injects `/keystatic` with `prerender: false`. The API is `src/pages/api/keystatic/[...params].ts` (`prerender = false`). CMS project preview is `src/pages/preview/[slug].astro` (`prerender = false`): Keystatic `previewUrl` opens it; the route checks the Keystatic GitHub cookie (or `Authorization: Bearer`) for push access to this repo, reads the entry live from GitHub, and sends `noindex` plus `Cache-Control: private, no-store`. The integration would inject the same path, so `astro.config.mjs` drops that inject. On Vercel, Astro's `request.url` host is localhost, and Keystatic builds the GitHub `redirect_uri` from that URL. The route rebuilds it from `x-forwarded-host` and `x-forwarded-proto`, falling back to `host`. Leave Vercel's output directory empty so the adapter can publish both.
+- `@astrojs/vercel` is the adapter. `output` stays `static`. Pages and the `llms.txt` and `robots.txt` endpoints export `prerender = true`. `@keystatic/astro` injects `/keystatic` with `prerender: false`. The API is `src/pages/api/keystatic/[...params].ts` (`prerender = false`). CMS project preview checks the Keystatic GitHub cookie (or `Authorization: Bearer`) for push access, reads the entry live from GitHub, and sends `noindex` plus `Cache-Control: private, no-store`. On Vercel, Astro's `request.url` host is localhost, and Keystatic builds the GitHub `redirect_uri` from that URL. The route rebuilds it from `x-forwarded-host` and `x-forwarded-proto`, falling back to `host`. Leave Vercel's output directory empty so the adapter can publish both.
+
+File names are kebab-case. A module that both pages use lives in `src/lib/` or `src/scripts/`, not copied into the page.
 
 ## Where content lives
 
 - Site copy, email, about, socials: `src/content/site/site.yaml`
 - One folder per project: `src/content/projects/<slug>/index.yaml` plus images in that folder
-- Image paths in YAML are absolute from the repo, like `/src/content/projects/atomic/cover.jpg`
+- Products: `src/content/products/<slug>/index.yaml`
+- Image paths in YAML are absolute from the repo, like `/src/content/projects/atomic-ski/cover.jpg`
 
 ## Add a project
 
 1. `npm run dev` and open `/keystatic`, or duplicate a project folder.
 2. Set title, caption (`Name, Year`), order, summary (two or three sentences), cover, alt text, info lines (`Key: Value`, optional link on the value), and blocks. Leave out unknown info lines.
-3. Blocks are `text`, `image`, `pair`, or `process`. `process` is an optional centred Process label and a two-column grid of photos. The project page ends with a centred Info label and the info list, aligned to the image column.
+3. Blocks are `text`, `image`, `pair`, `video`, or `process`. `process` is an optional centred Process label and a two-column grid of photos. The project page ends with a centred Info label and the info list, aligned to the image column.
 4. Leave `published` off until the cover image and alt text exist.
 5. Put unknowns in `todo`. Those notes are not rendered.
 6. Update `src/pages/llms.txt.ts` only if you want a line the generator does not already build. It reads the collection.
+
+## Type tokens
+
+Defined in `src/styles/type.css`. Whole pixels. Use the variables. Do not write a raw `font-size`, `line-height`, or `letter-spacing` in a page.
+
+| Token | Value | Use |
+| --- | --- | --- |
+| `--text` / `--lh` | 23px / 29px | Body, titles, captions, footer, menus |
+| `--text-lead` / `--lh-lead` | 28px / 35px | Titled text blocks on desktop. Below 760 they alias `--text` / `--lh` |
+| `--text-ui` / `--lh-ui` | 16px / 22px | Admin and utility UI |
+| `--text-meta` / `--lh-meta` | 13px / 16px | Badges, canvas chrome, small CMS labels |
+| `--text-fine` / `--lh-fine` | 11px / 14px | Hero dials (`?dials` only) |
+| `--lh-snug` | 20px | Canvas group labels |
+| `--track` | -0.02em | Every line of site text |
+| `--track-none` | 0px | The preview badge, which opts out |
+
+`--text-title`, `--text-body`, `--lh-title`, and `--lh-body` alias `--text` and `--lh`. New CSS should use `--text` and `--lh`.
+
+`--track` stays `-0.02em`. A whole-pixel tracking value would reflow body copy. Inline styles in the Keystatic admin read the same numbers from `src/lib/type-scale.ts`.
+
+Sizes folded into the scale (these surfaces are tools, not the public pages):
+
+- 12px and its 1.4 line-height became `--text-meta` / `--lh-meta` (13px / 16px): canvas labels and the save-budget badge
+- 14px became `--text-meta` (13px): canvas sign-in and the upload status line
+- 15px with a 1.5 line-height (22.5px) became `--text-ui` / `--lh-ui` (16px / 22px): the process-photo upload page
+- 22px became `--text` (23px): that page's heading
+
+## Locked behaviour
+
+Do not change these. They are the design.
+
+- Scroll-linked blur reveal: `animation-range: cover 0px cover 15vh` on `.reveal-word` (`src/scripts/text-reveal.ts`).
+- Links: 1px underline, 3px offset (`text-underline-offset: 3px`).
+- `@Humansize` on desktop hover: the `@` fades in and the word slides so the pair stays centred on the same point. The shift is `translateX(-50%)` of the `@` itself (`Header.astro`, `.brand-shift`). No measured width.
+- Homepage face and shop ring: size and scroll distance come from `src/lib/intro-layout.ts` and `src/lib/viewport-layout.ts`. The face scales as one layer. Touch uses a scroll-driven animation. Desktop uses one rAF.
+- View transitions: `hs-mark` between home and a project, `ib-mark` between `/shop` and a product. The root transition fades the new page in over the old one.
+
+## Layout grid
+
+Defined in `src/styles/global.css`:
+
+- **Desktop (≥760):** `--cols: 10`, `--margin: 160px` (it clamps down to 20px below 1440), `--gutter: 16px`.
+- **Content span:** main images and body copy share `--content-span: 6`. Image pairs and process grids use it too.
+- **Wide span:** image and pair blocks with the Keystatic "Large" checkbox use `--wide-span: 8`.
+- **Mobile/tablet (<760):** 4 cols, 20px margins, 16px gutters. Copy and images take the full content width.
+- Don't add ad-hoc max-widths for these blocks. Change the span tokens.
+- Press G to toggle the column overlay, in dev or on `/canvas` frames (`?canvas=1`). `?grid=1` also shows it.
+- Case page spacing: `--space-block` (84px desktop, the margin on mobile), `--space-text` (240 / 160), `--space-section` (240 / 160). Pair and process gaps use `--gutter`. Paragraph gaps inside text use `--lh`.
+
+`--scroll-nudge` (100px desktop, 0 on phones) is how far About scrolls above the text. `src/scripts/scroll-to-id.ts` reads it.
+
+## Commands
+
+- `npm run dev` local site and CMS at `/keystatic` (local storage)
+- `KEYSTATIC_STORAGE=github npm run dev` local CMS in GitHub mode, for the one-time app setup
+- `npm run build` static pages plus the Keystatic server routes
+- `npm run preview` serve the build
+- `npm test` builds, then runs every spec in `tests/run.mjs`. It must pass before any merge.
+- `npm run test:quick` runs the specs without rebuilding. Filter with `node tests/run.mjs intro shop`.
+
+Set `SITE_URL` to the production origin (no trailing slash). On Vercel it falls back to `VERCEL_PROJECT_PRODUCTION_URL`.
+
+## Verification
+
+- `npm test` is the behaviour check: touch scroll, reveal, intro face, shop ring, view transitions, underlines, canvas auth, shop grid.
+- Pixel check, after two builds: `node scripts/visual-capture.mjs <static-root> <out-dir> <port>` then `node scripts/visual-diff.mjs <before-dir> <after-dir>`. Static root is `.vercel/output/static`. Captures `/`, `/shop/`, `/work/industrial-bloom/`, and `/work/tonys-chocolonely/` at 1440 and 390, full page, reduced motion, so the idle face and footer loop do not move between shots.
+- `node scripts/brand-hover-crops.mjs` checks the `@Humansize` hover does not overlap.
+- `BASE_URL=https://humansize.de npm run test:scroll` runs the touch scroll spec against a deployed site.
 
 ## Keystatic storage
 
@@ -34,7 +109,7 @@ Portfolio for Johann Schnettker. Static Astro site, content in the repo. Keystat
 - A production build uses GitHub storage on `Jellouse/HS-Portfolio-2026`.
 - `KEYSTATIC_STORAGE=local` or `KEYSTATIC_STORAGE=github` overrides that. Restart `npm run dev` after changing it. Leave it unset on Vercel.
 
-No `branchPrefix` is set, so a prefix is allowed and `main` and `v1` both stay selectable. The branch menu opens on the repository default branch, which is `main`. After this work is merged, edit `main`. Until then, choose `v1` in the menu, or open `/keystatic/branch/v1`.
+No `branchPrefix` is set, so a prefix is allowed and `main` stays selectable. The branch menu opens on the repository default branch, which is `main`.
 
 ### One-time GitHub setup
 
@@ -53,7 +128,6 @@ Keystatic's Create GitHub App screen writes the secrets into a local `.env`, and
 7. In the Vercel project, add those four for Production and Preview. Keep `KEYSTATIC_SECRET` as the long value Keystatic generated.
 8. Redeploy. Astro inlines `PUBLIC_KEYSTATIC_GITHUB_APP_SLUG` at build time.
 9. Open `https://<origin>/keystatic` on the deploy and sign in with a GitHub account that can write to the repo.
-10. Pick the branch. Use `main` once this work has merged. Use `v1` while the site still ships from `v1`.
 
 If GitHub says the redirect URI is not registered, add this callback on the GitHub App and save:
 
@@ -63,16 +137,7 @@ The local setup adds that callback when Deployed URL is filled in. Add another c
 
 A save commits through the GitHub App. Vercel rebuilds the static pages from that commit.
 
-## Commands
-
-- `npm run dev` local site and CMS at `/keystatic` (local storage)
-- `KEYSTATIC_STORAGE=github npm run dev` local CMS in GitHub mode, for the one-time app setup
-- `npm run build` static pages plus the Keystatic server routes
-- `npm run preview` serve the build
-- `npm test` must pass before any merge: static touch-scroll guard plus iPhone WebKit swipe scroll test
-- `npm run test:touch-guard` / `npm run test:scroll` run each part alone. For live: `BASE_URL=https://humansize.de npm run test:scroll`
-
-Set `SITE_URL` to the production origin (no trailing slash). On Vercel it falls back to `VERCEL_PROJECT_PRODUCTION_URL`.
+Shop env on Vercel: `DATABASE_URL` (Neon), `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`. Contact mail uses `RESEND_API_KEY` and optional `CONTACT_FROM` / `CONTACT_TO`.
 
 ## House rules
 
@@ -85,49 +150,27 @@ Set `SITE_URL` to the production origin (no trailing slash). On Vercel it falls 
 - Bodil Ouédraogo: the scans already exist. Johann makes sculptures from them. He does not do the scanning.
 - The design typeface is ABC Areal, self-hosted from `public/fonts`.
 - Spell Tony's Chocolonely with the h and the apostrophe.
-
-## Type scale
-
-One size for the whole site: 23px, line-height 29px. Hierarchy comes from spacing.
+- Whole pixels for type. Scroll and intro code writes whole pixels too.
 
 ## Design canvas (`/canvas`)
 
-`/canvas` is a pan-and-zoom board of every page (home, every published case, 404) as live iframes at 1440 and 390 wide. Pages sit side by side (each page's 1440 frame, then its 390 frame, top-aligned); compared hosts are extra rows below in the same column order. It is open in `astro dev` and on Vercel previews (which already sit behind Vercel login). On production (humansize.de/canvas) it requires GitHub sign-in:
+`/canvas` is a pan-and-zoom board of every page (home, every published case, shop, 404) as live iframes at 1440 and 390 wide. Pages sit side by side (each page's 1440 frame, then its 390 frame, top-aligned). Compared hosts are extra rows below in the same column order. It is open in `astro dev` and on Vercel previews. On production it requires GitHub sign-in:
 
-- It reuses Keystatic's GitHub session: the `keystatic-gh-access-token` cookie that Keystatic sets after `/keystatic` login.
-- `src/lib/canvas-auth.mjs` checks that token server-side against GitHub. It calls `GET /user`, then `GET /repos/Jellouse/HS-Portfolio-2026`, and requires `permissions.push`. The result is cached for 5 minutes per token hash. The token never goes into the page.
-- Not signed in (or token expired): a 401 page with "Sign in with GitHub". That link starts Keystatic's login, and `src/middleware.ts` sends you from `/keystatic` back to `/canvas` (via a 10-minute `canvas-return` cookie).
+- It reuses Keystatic's GitHub session: the `keystatic-gh-access-token` cookie.
+- `src/lib/canvas-auth.mjs` checks that token against GitHub (`GET /user`, then the repo) and requires `permissions.push`. Cached 5 minutes per token hash. The token never goes into the page.
+- Not signed in: 401 with "Sign in with GitHub". `src/middleware.ts` sends you from `/keystatic` back to `/canvas` (10-minute `canvas-return` cookie).
 - Signed in without push access: 403.
-- /canvas is noindex (meta and X-Robots-Tag), disallowed in robots, and excluded from the sitemap and llms.txt (`tests/canvas-auth.spec.mjs`).
-- Frames load public pages with `?canvas=1`. That param only changes layout and adds noindex, nothing secret.
+- `/canvas` is noindex, disallowed in robots, and excluded from the sitemap and llms.txt.
 
-- Controls: frames ignore the pointer so the board always pans and zooms. Turn on Interact (bottom-left button or I) or hold Alt/Option to scroll, click or hover inside frames; Esc turns it off. Drag, trackpad or space+drag to pan; ctrl/cmd+wheel, pinch or `+`/`-` to zoom; `0` fits all, `1` is 100%. Click a label to open that page in a new tab.
-- Frames load `<path>?canvas=1&vh=900` (desktop) or `vh=844` (mobile). The inline script in `src/layouts/Base.astro` then re-bases vh/svh units on that height, shows reveals in their final state and posts the page height to the board. Without `?canvas=1` it does nothing.
-- Compare mode: `/canvas?compare=<url1>,<url2>` adds a row per URL loading the same paths from other Vercel preview hosts, labelled by host, e.g. `/canvas?compare=https://hs-portfolio-2026-git-foo-jellouse.vercel.app`. The other host needs the same canvas script (any branch with this change) for full height, and you must be logged in to Vercel in the same browser for protected previews.
-- The page list is built from the Keystatic projects collection, so new cases appear automatically.
+Frames load public pages with `?canvas=1`. That param only changes layout and adds noindex.
 
-## Layout grid
-
-Defined as custom properties in `src/styles/global.css`:
-
-- **Desktop (≥760):** `--cols: 10`, `--margin: 160px` (it clamps down to 20px below 1440), `--gutter: 16px`, columns stretch (`--col` ≈ 97.6px at 1440).
-- **Content span:** main images and all body copy share ONE centred span, `--content-span: 6` (`--content-width` ≈ 666px at 1440, left edge 387). Image pairs and process grids use it too. This covers case text, the summary and info, homepage about and captions, and the footer text.
-- **Wide span:** image and pair blocks with the Keystatic "Large" checkbox and homepage wide cards use `--wide-span: 8` (≈ 893px).
-- **Mobile/tablet (<760):** 4 cols, 20px margins, 16px gutters. Copy and images both take the full content width.
-- Don't add ad-hoc max-widths for these blocks; change the span tokens instead.
-- Press G to toggle the column overlay, in dev or on `/canvas` frames (`?canvas=1`). `?grid=1` also shows it.
-- Case page spacing tokens: `--space-block` (between images and pairs; 84px desktop, 56px mobile), `--space-text` (visible gap around text blocks; 240 / 160), `--space-section` (before Process and Info; 240 / 160). Pair and process inner gaps use `--gutter` (16px). Change the tokens, not per-block margins.
+Controls: frames ignore the pointer so the board always pans and zooms. Turn on Interact (or I) or hold Alt/Option to use a frame. Esc turns it off. `0` fits all, `1` is 100%.
 
 ## UI and motion skills
 
-Emil Kowalski's skills (github.com/emilkowalski/skills, commit 2d22863, MIT, see
-`.agents/skills/LICENSE-emilkowalski-skills`) are vendored in `.agents/skills/`. Load the
-relevant SKILL.md before any UI, animation, drawer, transition or polish work:
+Emil Kowalski's skills (github.com/emilkowalski/skills, commit 2d22863, MIT, see `.agents/skills/LICENSE-emilkowalski-skills`) are vendored in `.agents/skills/`. Load the relevant SKILL.md before any UI, animation, drawer, transition, or polish work:
 
-- `animate` (+ RECIPES.md) to build motion, `review-animations` to critique it,
-  `improve-animations` for an audit, `animation-performance` and `performance-cheatsheet.md` for jank.
-- `emil-design-eng`, `apple-design`, `break-ui`, `find-animation-opportunities`,
-  `animation-vocabulary`, `pick-ui-library`, `prototype`.
-- Not relevant here (native or other libs): `mobile-native`, `write-swift`, `animate-expo`, `ask-sonner`.
+- `animate` (+ RECIPES.md) to build motion, `review-animations` to critique it, `improve-animations` for an audit, `animation-performance` for jank.
+- `emil-design-eng`, `apple-design`, `break-ui`, `find-animation-opportunities`, `animation-vocabulary`.
 
-Site rules still win over the skills: whole-px values, keep link underlines, scroll-linked blur reveal.
+Site rules still win: whole pixels, keep link underlines, scroll-linked blur reveal.

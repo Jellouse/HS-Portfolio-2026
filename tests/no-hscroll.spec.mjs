@@ -1,10 +1,4 @@
-/**
- * No sideways scroll on phones: document scrollWidth must equal the viewport width
- * at 375 / 390 / 430 on the homepage and every case page. Lists offending elements.
- *
- *   npm run build && npm run test:hscroll
- *   BASE_URL=https://humansize.de npm run test:hscroll
- */
+
 import { readdirSync } from 'node:fs';
 import { webkit, chromium, devices } from 'playwright';
 import { createServer } from 'node:http';
@@ -77,7 +71,6 @@ async function ensureServer() {
   };
 }
 
-
 const slugs = readdirSync(join(ROOT, 'src/content/projects'), { withFileTypes: true })
   .filter((d) => d.isDirectory())
   .map((d) => d.name);
@@ -94,10 +87,10 @@ try {
     const page = await context.newPage();
     for (const path of paths) {
       const res = await page.goto(url + path, { waitUntil: 'load' });
-      if (!res || res.status() >= 400) continue; // unpublished slug
-      await wait(1500); // let the hero blob mount its canvas
+      if (!res || res.status() >= 400) continue;
+      await wait(1500);
       const r = await page.evaluate((W) => {
-        // device width, not innerWidth: on mobile the layout viewport grows to fit overflow
+
         const off = [...document.querySelectorAll('body *')]
           .filter((e) => e.getBoundingClientRect().right > W + 0.5 && getComputedStyle(e).position !== 'fixed')
           .slice(0, 5)

@@ -1,8 +1,4 @@
-/**
- * Resize/re-encode project images for Keystatic GitHub saves.
- * Max 3200px long edge, JPEG mozjpeg q82, PNG→JPEG when no alpha.
- * Updates yaml paths when an extension changes.
- */
+
 import sharp from 'sharp';
 import {
   readdirSync,
@@ -37,7 +33,7 @@ const files = walk(ROOT);
 const before = totalBytes(files);
 console.log(`Before: ${files.length} files, ${(before / 1024 / 1024).toFixed(2)} MB`);
 
-const renames = []; // { from, to } repo-relative paths with leading /
+const renames = [];
 
 for (const file of files) {
   const ext = extname(file).toLowerCase();
@@ -47,7 +43,7 @@ for (const file of files) {
   const isPng = ext === '.png';
   const convertPng = isPng && !meta.hasAlpha;
 
-  let pipeline = sharp(file).rotate(); // honour EXIF then strip
+  let pipeline = sharp(file).rotate();
   if (needsResize) {
     pipeline = pipeline.resize({
       width: meta.width >= meta.height ? MAX : undefined,
@@ -61,7 +57,7 @@ for (const file of files) {
   let buf;
 
   if (convertPng || ext === '.jpg' || ext === '.jpeg' || (ext === '.webp' && !meta.hasAlpha)) {
-    // Re-encode as JPEG (webp without alpha → jpeg for CMS simplicity; keep webp if rare)
+
     const asJpeg = convertPng || ext === '.jpg' || ext === '.jpeg';
     if (asJpeg) {
       buf = await pipeline.jpeg({ quality: JPEG_Q, mozjpeg: true }).toBuffer();
@@ -80,7 +76,7 @@ for (const file of files) {
   }
 
   const originalSize = statSync(file).size;
-  // Only write if smaller or we resized/converted
+
   if (buf.length < originalSize || needsResize || convertPng || outPath !== file) {
     writeFileSync(outPath, buf);
     if (outPath !== file) {
@@ -97,7 +93,7 @@ for (const file of files) {
       );
     }
   } else {
-    // still strip/re-encode if roughly same — force write when within 5% to strip metadata
+
     if (buf.length <= originalSize * 1.02) {
       writeFileSync(file, buf);
       console.log(
@@ -109,7 +105,6 @@ for (const file of files) {
   }
 }
 
-// Update yaml references for renames
 if (renames.length) {
   function walkYaml(dir, out = []) {
     for (const name of readdirSync(dir)) {

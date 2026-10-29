@@ -12,7 +12,7 @@ interface Props {
 }
 
 const { title, description, image, type = 'website', jsonLd, noindex = false } = Astro.props;
-// Pages are canonical with a trailing slash (vercel.json 308s the bare form).
+
 const path = Astro.url.pathname;
 const canonical = new URL(path.endsWith('/') || /\.[a-z0-9]+$/i.test(path) ? path : `${path}/`, Astro.site);
 const og = image
@@ -26,7 +26,7 @@ const og = image
       background: '#ffffff',
     })
   : null;
-// Homepage (and pages without a cover) share the animated blob-face GIF; frame 0 is the resting hero.
+
 const useBlob = Astro.url.pathname === '/' || !og;
 const ogUrl = useBlob ? new URL('/og/humansize-blob.gif', Astro.site).href : new URL(og!.src, Astro.site).href;
 const ogW = useBlob ? 1200 : og!.attributes.width ?? Math.min(1200, image!.width);

@@ -1,9 +1,4 @@
-/**
- * CMS preview: every <img> on a live-preview page must actually load.
- * Needs a GitHub token with push access (gh auth, GITHUB_TOKEN, or PREVIEW_TOKEN).
- *
- *   PREVIEW_BASE=https://humansize.de node tests/preview-images.spec.mjs
- */
+
 import { chromium } from 'playwright';
 import { execSync } from 'node:child_process';
 
@@ -96,7 +91,7 @@ const context = await browser.newContext({
 });
 
 try {
-  // Unpublished: image + pair (+ video). Covers single image and pair resolution.
+
   {
     const page = await context.newPage();
     const url = `${BASE}/preview/conversation-design-institute?branch=main`;
@@ -110,7 +105,6 @@ try {
     await page.close();
   }
 
-  // Unpublished: pairs (the reported bug).
   {
     const page = await context.newPage();
     const url = `${BASE}/preview/analogue-af1?branch=main`;
@@ -124,7 +118,6 @@ try {
     await page.close();
   }
 
-  // Process grid images (only published projects use process today; preview still SSR).
   {
     const page = await context.newPage();
     const url = `${BASE}/preview/analogue-counters/?branch=main`;

@@ -21,7 +21,7 @@ if (typeof poster === 'string') {
     await getImage({ src: poster, width: Math.min(poster.width, 2000), format: 'webp' })
   ).src;
 }
-// local paths (/media/...) or full URLs (Cloudflare R2); ignore any query string
+
 const ext = src.toLowerCase().split(/[?#]/)[0].split('.').pop();
 const type = ext === 'webm' ? 'video/webm' : ext === 'mov' ? 'video/quicktime' : 'video/mp4';
 ---

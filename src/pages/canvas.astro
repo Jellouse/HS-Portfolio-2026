@@ -1,12 +1,11 @@
 ---
-// Live design board: every page as a live iframe at 1440 and 390. Open in dev and on Vercel
-// previews; on production only for GitHub users with push access to the repo (Keystatic's
-// GitHub session, verified server-side). ?compare=<host1>,<host2> adds other hosts.
+
 export const prerender = false;
 
 import { canvasPages } from '../lib/canvas-pages';
 import { canvasMode } from '../lib/canvas-env.mjs';
 import { checkCanvasAccess, RETURN_COOKIE, TOKEN_COOKIE } from '../lib/canvas-auth.mjs';
+import typeCss from '../styles/type.css?raw';
 
 const NOINDEX = { 'X-Robots-Tag': 'noindex, nofollow', 'Cache-Control': 'private, no-store' };
 const mode = canvasMode({ ...process.env, NODE_ENV: import.meta.env.DEV ? 'development' : 'production' });
@@ -20,7 +19,7 @@ if (mode === 'auth') {
     const msg = forbidden
       ? `Signed in as ${access.login.replace(/[^\w-]/g, '')}, which has no push access to the site repo.`
       : 'The canvas is for site editors. Sign in with the GitHub account you use for Keystatic.';
-    const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex, nofollow"><title>Canvas · Humansize</title><style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#1a1a1a;color:#8a8a8a;font:14px/20px ui-monospace,Menlo,monospace}main{max-width:360px;padding:20px}a{display:inline-block;margin-top:16px;padding:8px 12px;border-radius:4px;background:#fff;color:#000;text-decoration:none}</style></head><body><main><p>${msg}</p><a href="/api/keystatic/github/login">Sign in with GitHub</a></main></body></html>`;
+    const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex, nofollow"><title>Canvas · Humansize</title><style>${typeCss}body{margin:0;min-height:100vh;display:grid;place-items:center;background:#1a1a1a;color:#8a8a8a;font:var(--text-meta)/var(--lh-snug) ui-monospace,Menlo,monospace}main{max-width:360px;padding:20px}a{display:inline-block;margin-top:16px;padding:8px 12px;border-radius:4px;background:#fff;color:#000;text-decoration:none}</style></head><body><main><p>${msg}</p><a href="/api/keystatic/github/login">Sign in with GitHub</a></main></body></html>`;
     return new Response(html, {
       status: forbidden ? 403 : 401,
       headers: { ...NOINDEX, 'Content-Type': 'text/html; charset=utf-8' },
@@ -45,33 +44,33 @@ const widths = [
     <meta name="robots" content="noindex, nofollow" />
     <title>Canvas · Humansize</title>
     <style is:global>
+      @import '../styles/type.css';
       html, body { margin: 0; height: 100%; overflow: hidden; background: #1a1a1a; }
-      body { font: 12px/16px ui-monospace, SFMono-Regular, Menlo, monospace; color: #8a8a8a; }
+      body { font: var(--text-meta)/var(--lh-meta) ui-monospace, SFMono-Regular, Menlo, monospace; color: #8a8a8a; }
       #board { position: absolute; inset: 0; cursor: default; touch-action: none; }
       #board.is-panning, body.space #board { cursor: grab; }
       #board.is-panning { cursor: grabbing; }
       #world { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
       .frame { position: absolute; }
-      .frame-label { position: absolute; left: 0; bottom: 100%; padding-bottom: 8px; white-space: nowrap; color: #8a8a8a; text-decoration: none; font-size: 12px; line-height: 16px; }
+      .frame-label { position: absolute; left: 0; bottom: 100%; padding-bottom: 8px; white-space: nowrap; color: #8a8a8a; text-decoration: none; font-size: var(--text-meta); line-height: var(--lh-meta); }
       .frame-label:hover { color: #fff; }
       .frame-box { background: #fff; overflow: hidden; }
       .frame-box iframe { display: block; border: 0; width: 100%; height: 100%; background: #fff; }
-      .group-label { position: absolute; color: #fff; font-size: 16px; line-height: 20px; white-space: nowrap; }
-      /* Frames ignore the pointer so the board always pans and zooms. Interact mode
-         (button / I, or hold Alt/Option) hands the pointer to the frames; Esc turns it off. */
+      .group-label { position: absolute; color: #fff; font-size: var(--text-ui); line-height: var(--lh-snug); white-space: nowrap; }
+
       .frame-box iframe { pointer-events: none; }
       body.interact .frame-box iframe, body.alt .frame-box iframe { pointer-events: auto; }
       body.interact .frame-box, body.alt .frame-box { outline: 1px solid rgba(76, 141, 255, 0.6); outline-offset: 2px; }
       .is-panning iframe, body.space iframe, body.pinch iframe { pointer-events: none !important; }
-      #interact { font: inherit; border: 0; cursor: pointer; position: fixed; left: 16px; bottom: 16px; padding: 4px 8px; border-radius: 4px; background: #000; color: #8a8a8a; font-size: 12px; line-height: 16px; user-select: none; }
+      #interact { font: inherit; border: 0; cursor: pointer; position: fixed; left: 16px; bottom: 16px; padding: 4px 8px; border-radius: 4px; background: #000; color: #8a8a8a; font-size: var(--text-meta); line-height: var(--lh-meta); user-select: none; }
       body.interact #interact { color: #fff; }
-      #grid-toggle { font: inherit; border: 0; cursor: pointer; padding: 4px 8px; border-radius: 4px; background: #000; color: #8a8a8a; font-size: 12px; line-height: 16px; user-select: none; }
+      #grid-toggle { font: inherit; border: 0; cursor: pointer; padding: 4px 8px; border-radius: 4px; background: #000; color: #8a8a8a; font-size: var(--text-meta); line-height: var(--lh-meta); user-select: none; }
       .canvas-tools { position: fixed; left: 16px; bottom: 16px; display: flex; gap: 8px; }
       .canvas-tools #interact { position: static; }
       body.grid #grid-toggle { color: #fff; }
       astro-dev-toolbar { display: none !important; }
-      #zoom { position: fixed; right: 16px; bottom: 16px; padding: 4px 8px; border-radius: 4px; background: #000; color: #fff; font-size: 12px; line-height: 16px; user-select: none; }
-    </style>
+      #zoom { position: fixed; right: 16px; bottom: 16px; padding: 4px 8px; border-radius: 4px; background: #000; color: #fff; font-size: var(--text-meta); line-height: var(--lh-meta); user-select: none; }
+</style>
   </head>
   <body>
     <div id="board"><div id="world"></div></div>
@@ -84,6 +83,6 @@ const widths = [
     <script>
       import { mountCanvas } from '../scripts/canvas';
       mountCanvas();
-    </script>
+</script>
   </body>
 </html>

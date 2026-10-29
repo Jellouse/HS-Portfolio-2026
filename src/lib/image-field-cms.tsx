@@ -1,8 +1,9 @@
-// Keystatic image field extras: compress on upload, and a Download control
-// under every image (cover, image blocks, pair left/right, process).
+
+
 import React, { type ReactNode } from 'react';
 import { withImageOptimize } from './image-field-optimize';
 import { CMS_TOKEN_COOKIE } from './cms-auth';
+import { typePx } from './type-scale';
 
 type Asset = {
   data: Uint8Array;
@@ -38,7 +39,6 @@ function branchFromLocation(): string {
   return m ? decodeURIComponent(m[1]) : 'main';
 }
 
-/** Download bytes already loaded into the Keystatic image field. */
 function downloadFromAsset(value: Asset) {
   const blob = new Blob([value.data.buffer.slice(
     value.data.byteOffset,
@@ -55,15 +55,9 @@ function downloadFromAsset(value: Asset) {
   URL.revokeObjectURL(url);
 }
 
-/**
- * Prefer the authenticated preview-image proxy (GitHub cookie) when the
- * stored public path is known; otherwise fall back to the in-memory asset.
- * `storedPath` is optional — Keystatic's Input only has the Asset, so we
- * mainly use the blob path; the proxy helper is for callers that know a path.
- */
 export async function downloadCmsImage(opts: {
   asset?: Asset | null;
-  /** Repo public path like /src/content/projects/.../src.jpg */
+
   storedPath?: string | null;
 }) {
   const { asset, storedPath } = opts;
@@ -108,7 +102,7 @@ const linkStyle: React.CSSProperties = {
   background: 'none',
   color: 'var(--ks-colors-accent, #2563eb)',
   font: 'inherit',
-  fontSize: 13,
+  fontSize: typePx('text-meta'),
   textDecoration: 'underline',
   cursor: 'pointer',
 };

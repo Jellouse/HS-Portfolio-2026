@@ -1,5 +1,5 @@
-// schema.org Product for /shop/<slug>. Price, shipping and stock come from the store code
-// (the same values Stripe charges); availability is read from the DB when it is connected.
+
+
 import { SHIPPING_CENTS, SHIPPING_COUNTRIES, stock } from './store.mjs';
 
 async function availability(slug: string): Promise<'InStock' | 'SoldOut'> {

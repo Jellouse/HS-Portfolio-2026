@@ -1,14 +1,6 @@
 import { clearStableViewportHeight, stableViewportHeight } from '../lib/viewport-layout';
-import { introFaceLayout } from '../lib/intro-mobile-layout';
+import { introFaceLayout } from '../lib/intro-layout';
 
-/**
- * /shop header: the Industrial Bloom ring starts big with its centre on the viewport top (half
- * cut off), then scales down and drifts a little lower until, at scroll R, it sits exactly where
- * the small ring sits on /shop/<slug> (54px, top 44 / 32 mobile). After R it scrolls with the
- * page. Same mechanic as the homepage face: transform only, rAF with 30ms exponential smoothing,
- * or a CSS scroll-driven animation on touch. The spin (rotate) lives on the inner .shop-mark,
- * the scale on this host, so spin-mark.ts keeps working untouched.
- */
 export function initShopIntro(head: HTMLElement) {
   const host = head.querySelector<HTMLElement>('[data-shop-ring]');
   const title = head.querySelector<HTMLElement>('.shop-head-title');
@@ -33,14 +25,6 @@ export function initShopIntro(head: HTMLElement) {
   probe.style.cssText = 'position:absolute;top:0;left:0;width:1px;height:100svh;visibility:hidden;pointer-events:none';
   document.body.appendChild(probe);
 
-  // Shared with the homepage (intro-face.ts): the name block top, and the illustration centre.
-  // Phones: the ring is centred between the viewport top and the title (equal space above and
-  // below), on the same centre as the home face. Desktop: the ring is the size of the home face's
-  // height and shares its centre and its 160px gap to the name; like the face it runs off the top.
-  // Chrome only rasters DOM/SVG content inside the page's scrollable area (y >= 0), so the half
-  // of the ring above the page top was never painted and elastic overscroll showed it clipped.
-  // A canvas is uploaded whole as its own texture (like the home face's WebGL canvas), so the
-  // ring is drawn into one at its biggest size; the SVG stays for the view-transition fallback.
   const mark = host.querySelector<HTMLElement>('.shop-mark')!;
   const svg = mark.querySelector('svg')!;
   const canvas = document.createElement('canvas');
@@ -70,10 +54,7 @@ export function initShopIntro(head: HTMLElement) {
     img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(new XMLSerializer().serializeToString(src));
   };
 
-  // the canvas only shows while the page is at (or pulled past) its top; once scrolling, the
-  // crisp SVG takes over for the shrink to 54px
   const atTop = () => mark.classList.toggle('at-top', drawn > 0 && scrollY <= 1);
-  addEventListener('scroll', atTop, { passive: true });
 
   const forceLayout = () => {
     lastW = -1;
@@ -93,17 +74,17 @@ export function initShopIntro(head: HTMLElement) {
     const W0 = Math.round((vw * (mobile ? 0.9 : 0.68)) / 2) * 2;
     const C = mobile ? (faceCenter ?? Math.round(nameTop / 2)) : 0;
     const Wf = 54;
-    const topF = mobile ? 32 : 44; // .shop-detail padding-top
-    const titleF = topF + Wf + (mobile ? 96 : 130); // detail h1 top
+    const topF = mobile ? 32 : 44;
+    const titleF = topF + Wf + (mobile ? 96 : 130);
     head.classList.remove('is-sda');
     layer.style.transform = 'none';
     layer.style.translate = 'none';
-    const L = Math.round(layer.getBoundingClientRect().top); // fixed layer: viewport top = doc top at scroll 0
+    const L = Math.round(layer.getBoundingClientRect().top);
     host.style.top = `${C - W0 / 2 - L}px`;
     const titleTop = Math.round(title.getBoundingClientRect().top + scrollY);
     R = Math.max(1, titleTop - titleF);
     sMin = Wf / W0;
-    dy = R + topF + Wf / 2 - C; // ring centre: doc y C -> viewport y topF + 27 at scroll R
+    dy = R + topF + Wf / 2 - C;
     head.style.setProperty('--ring-w', `${W0}px`);
     head.style.setProperty('--ring-origin', `${C - L}px`);
     head.style.setProperty('--ring-r', `${R}px`);
@@ -120,17 +101,18 @@ export function initShopIntro(head: HTMLElement) {
     } else write(performance.now());
   };
 
-  // The layer is position:fixed (overscroll never crops fixed content); it follows the page by
-  // translating -scrollY, clamped at 0 so a rubber-band pull keeps it whole. Touch: CSS scroll()
-  // animation on `translate`.
   const follow = () => {
-    // Safari reports negative scrollY in a top rubber-band and drags fixed layers down with
-    // the bounce; follow it the other way so the layer stays put and no cut edge shows.
+
     const y = scrollY;
     if (!sda) layer.style.translate = `0 ${-y}px`;
     else layer.style.translate = '';
   };
-  addEventListener('scroll', follow, { passive: true });
+  const onScroll = () => {
+    atTop();
+    follow();
+    if (!sda && !frame) frame = requestAnimationFrame(write);
+  };
+  addEventListener('scroll', onScroll, { passive: true });
 
   const write = (now: number) => {
     frame = 0;
@@ -148,7 +130,6 @@ export function initShopIntro(head: HTMLElement) {
 
   if (sda) head.toggleAttribute('data-ring-settled', true);
   layout();
-  if (!sda) addEventListener('scroll', () => frame || (frame = requestAnimationFrame(write)), { passive: true });
   addEventListener('resize', () => {
     if (document.documentElement.clientWidth !== lastW) forceLayout();
   }, { passive: true });

@@ -33,7 +33,7 @@ const info = [
   ...(eur == null ? [] : [{ label: 'Price', value: priceText(eur, 'prefix'), priceSlug: product.id }]),
   { label: 'Shipping', value: SHIPPING },
 ];
-// og:image: the packshot (alt says so), else the first top image.
+
 const packshot = images.find((i) => /packshot/i.test(i.alt)) ?? images[0];
 const packshotSrc = packshot ? resolveImageSource(packshot.src) : undefined;
 const ogImage = packshotSrc && typeof packshotSrc !== 'string' ? packshotSrc : undefined;
@@ -104,10 +104,9 @@ const half = '(min-width: 760px) 272px, calc((100vw - 48px) / 2)';
     <section class="shop-detail-section shop-detail-info">
       <Info items={info} />
     </section>
-    <!-- Sticky, not fixed: pinned to the viewport bottom while the article scrolls,
-         then it rests after Info, so the footer is never covered. -->
+    
     <div class="shop-buy-bar">
-      <!-- Posts to the one Buy endpoint; the label is filled in live from /api/shop/stock. -->
+      
       <form class="shop-buy-form" method="post" action="/api/shop/buy">
         <input type="hidden" name="slug" value={product.id} />
         <button class="shop-buy-button" type="submit" data-buy={product.id}>Buy</button>
@@ -131,7 +130,7 @@ const half = '(min-width: 760px) 272px, calc((100vw - 48px) / 2)';
   import { applyStock } from '../../lib/shop/label.mjs';
   import { applyPrices, showBuyNote } from '../../scripts/shop-price';
   showBuyNote();
-  // Live serial on the Buy button. Any failure (API down, slow) leaves the static "Buy".
+
   const refreshBuy = async () => {
     const btn = document.querySelector<HTMLButtonElement>('[data-buy]');
     if (!btn) return;

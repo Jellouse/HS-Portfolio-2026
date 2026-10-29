@@ -1,18 +1,4 @@
-/**
- * iPhone touch scroll regression test.
- *
- * 1) Hit-test guard: the image–caption gap must not put a checkbox switch under
- *    the finger (WebKit 321591). Expect a LABEL overlay or normal content.
- * 2) Real touch swipes (CDP touch events, not wheel) starting on the image, gap,
- *    caption, below caption, and on project-page media/text must change scrollY.
- *
- * Browser: WebKit with iPhone descriptor when CDP touch works; otherwise Chromium
- * with the same iPhone + hasTouch profile (still real touch, not wheel). The static
- * touch-scroll-guard catches switch-under-finger in source for every merge.
- *
- *   npm run build && npm run test:scroll
- *   BASE_URL=https://humansize.de npm run test:scroll
- */
+
 import { webkit, chromium, devices } from 'playwright';
 import { createServer } from 'node:http';
 import { readFileSync, existsSync, statSync } from 'node:fs';
@@ -90,7 +76,7 @@ async function launchTouchBrowser() {
     try {
       Object.defineProperty(navigator, 'vibrate', { configurable: true, value: undefined });
     } catch {
-      /* ignore */
+
     }
   };
   try {
@@ -140,7 +126,7 @@ async function swipe(page, x, y, dy = -520) {
   try {
     await client.detach();
   } catch {
-    /* ignore */
+
   }
   return { startY, after, delta: after - startY };
 }

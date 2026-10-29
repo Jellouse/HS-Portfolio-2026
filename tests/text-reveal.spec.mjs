@@ -1,22 +1,4 @@
-/**
- * Every visible text block outside the first screen must get the site's scroll-in text
- * reveal (blur-to-sharp per line): it starts in the pre-animation state (words transparent
- * and blurred) and reaches the final state (opaque, no blur) once scrolled into view.
- * Crawls every built page, including /shop and /shop/*.
- *
- *   npm run build && npm run test:reveal
- *
- * Deliberate exceptions (ALLOW):
- * - .site-header: the fixed name/@Humansize header and Tokyo time (opacity-only by design).
- * - .skip, .sr-only: never visible.
- * - .shop-buy-bar: the bottom-pinned Buy button on /shop/<slug>. It is UI chrome that sits
- *   over content from first paint, so it must never be hidden or blurred mid-scroll.
- * - [data-no-reveal]: blocks that animate themselves (the /shop Details panel; tested below).
- * - .shop-head: the /shop title row sits in the first screen.
- * - .shop-button: the bordered Buy button on /shop/*; a control, so its label never blurs
- *   inside a static border.
- * Pages skipped: /canvas and /keystatic* (tools, not site pages), 404.
- */
+
 import { chromium } from 'playwright';
 import { createServer } from 'node:http';
 import { readFileSync, existsSync, statSync, readdirSync } from 'node:fs';
@@ -59,7 +41,7 @@ for (const url of urls) {
   await page.goto(BASE + url, { waitUntil: 'load' });
   await page.evaluate(() => document.fonts.ready);
   await page.waitForTimeout(400);
-  // Text blocks below the first screen, and whether each sits in a reveal host.
+
   const blocks = await page.evaluate((ALLOW) => {
     const out = [];
     let id = 0;
@@ -72,7 +54,7 @@ for (const url of urls) {
       const cs = getComputedStyle(el);
       const r = el.getBoundingClientRect();
       if (!r.width || !r.height || cs.visibility === 'hidden' || cs.display === 'none') continue;
-      if (r.top + scrollY < innerHeight) continue; // first screen shows immediately
+      if (r.top + scrollY < innerHeight) continue;
       const host = el.closest('.is-split');
       const key = host || el;
       if (seen.has(key)) continue;
@@ -98,12 +80,11 @@ for (const url of urls) {
   console.log(`${url}: ${blocks.length} below-the-fold text blocks`);
 }
 
-// /shop Details panel: closed by default, opens to the final state, closes again.
 await page.goto(BASE + '/shop/', { waitUntil: 'load' });
 const btn = page.locator('.shop-details').first();
 await btn.scrollIntoViewIfNeeded();
 if ((await btn.getAttribute('aria-expanded')) !== 'false') failures.push('/shop: Details not closed by default');
-// Per-line opacities (first and last line) plus whether any word is clipped by the panel.
+
 const sample = () => page.evaluate(() => {
   const b = document.querySelector('.shop-details');
   const p = document.getElementById(b.getAttribute('aria-controls'));
@@ -115,7 +96,7 @@ const sample = () => page.evaluate(() => {
   return { lines, clipped, expanded: b.getAttribute('aria-expanded'), hidden: p.hidden, h: p.getBoundingClientRect().height };
 });
 await btn.click();
-await page.waitForTimeout(200); // height has led; text is mid-reveal
+await page.waitForTimeout(200);
 const mid = await sample();
 if (mid.clipped) failures.push('/shop: Details panel clips its text (overflow not visible)');
 if (!(mid.lines.length >= 2 && mid.lines[0] > mid.lines.at(-1) + 0.02)) failures.push(`/shop: Details lines did not reveal one by one (${mid.lines})`);
@@ -123,7 +104,7 @@ await page.waitForTimeout(800);
 const open = await sample();
 if (!(open.expanded === 'true' && !open.hidden && open.h > 20 && open.lines.every((o) => o > 0.99))) failures.push('/shop: Details did not open fully');
 await btn.press('Enter');
-await page.waitForTimeout(90); // reverse: last line goes first
+await page.waitForTimeout(90);
 const out = await sample();
 if (!(out.lines.at(-1) < out.lines[0] - 0.02)) failures.push(`/shop: Details did not close in reverse, last line first (${out.lines})`);
 await page.waitForTimeout(1000);

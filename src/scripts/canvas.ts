@@ -1,4 +1,4 @@
-// Pan-and-zoom board of live iframes. Vanilla TS.
+
 type Page = { name: string; path: string };
 type Width = { w: number; vh: number };
 type Frame = { el: HTMLDivElement; box: HTMLDivElement; src: string; w: number; h: number; row: number; col: number; iframe?: HTMLIFrameElement };
@@ -29,8 +29,7 @@ export function mountCanvas() {
   ];
 
   const frames: Frame[] = [];
-  // Columns: each page is a group (1440 then 390, top-aligned), groups left to right.
-  // Rows: this host first, compared hosts below in the same column order.
+
   const cols: { x: number; w: number; vh: number; page: Page }[] = [];
   let x = 0;
   data.pages.forEach((page, pi) => {
@@ -88,7 +87,6 @@ export function mountCanvas() {
   };
   let bounds = { w: 0, h: 0 };
 
-  // view
   let s = 1;
   let tx = 0;
   let ty = 0;
@@ -105,14 +103,14 @@ export function mountCanvas() {
   };
   const pad = 48;
   const top = () => pad + LABEL + ROW_HEAD;
-  // 0: whole board width, top-aligned (frames are tall; scroll down to see more).
+
   const fit = () => {
     s = Math.min(MAX, Math.max(MIN, (innerWidth - pad * 2) / bounds.w));
     tx = (innerWidth - bounds.w * s) / 2;
     ty = top() * Math.min(1, s * 4);
     apply();
   };
-  // Initial: the first screen (900 px tall) of every frame fits the viewport height.
+
   const firstScreen = () => {
     const sh = (innerHeight - top() - pad) / data.widths[0].vh;
     s = Math.min(1, Math.max(MIN, sh));
@@ -122,8 +120,6 @@ export function mountCanvas() {
   };
   const actual = () => zoomAt(1, innerWidth / 2, innerHeight / 2);
 
-  // iframe heights
-  // Interact mode: frames take the pointer only when on (button / I) or while Alt is held.
   const hint = document.getElementById('interact') as HTMLButtonElement;
   let interact = false;
   const setInteract = (on: boolean) => {
@@ -135,8 +131,7 @@ export function mountCanvas() {
   };
   hint.addEventListener('click', () => setInteract(!interact));
   setInteract(false);
-  // Grid overlay: drawn inside each frame from the page's own --cols/--margin/--gutter tokens,
-  // so it always matches the live site grid (10 cols desktop, mobile grid on 390 frames).
+
   const gridBtn = document.getElementById('grid-toggle') as HTMLButtonElement;
   const GRID_KEY = 'canvas-grid';
   const GRID_CSS =
@@ -148,7 +143,7 @@ export function mountCanvas() {
   try { grid = localStorage.getItem(GRID_KEY) === '1'; } catch {}
   const applyGrid = (f: Frame) => {
     let doc: Document | null | undefined;
-    try { doc = f.iframe?.contentDocument; } catch { return; } // cross-origin compare rows
+    try { doc = f.iframe?.contentDocument; } catch { return; }
     if (!doc || !doc.body) return;
     let el = doc.getElementById('canvas-grid');
     if (!grid) { el?.remove(); return; }
@@ -159,7 +154,7 @@ export function mountCanvas() {
     el.setAttribute('aria-hidden', 'true');
     el.innerHTML = `<style>${GRID_CSS}</style><div>${'<span></span>'.repeat(12)}</div>`;
     doc.body.appendChild(el);
-    // Hide spare columns beyond the page's --cols.
+
     const cols = parseInt(getComputedStyle(doc.documentElement).getPropertyValue('--cols')) || 10;
     el.querySelectorAll('span').forEach((s, i) => { if (i >= cols) s.remove(); });
   };
@@ -187,7 +182,6 @@ export function mountCanvas() {
     layout();
   });
 
-  // lazy mount near the viewport
   const io = new IntersectionObserver(
     (entries) => {
       for (const en of entries) {
@@ -208,7 +202,6 @@ export function mountCanvas() {
   );
   frames.forEach((f) => io.observe(f.box));
 
-  // pan
   let panning = false;
   let space = false;
   let last = { x: 0, y: 0 };
@@ -290,7 +283,6 @@ export function mountCanvas() {
       document.body.classList.remove('space');
     }
   });
-  // Pan with space anywhere: a transparent shield is unnecessary since iframes ignore pointers while space is held.
 
   layout();
   firstScreen();

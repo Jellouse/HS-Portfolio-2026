@@ -1,9 +1,4 @@
-/**
- * Contact sheet: opens from the menu, Next stays off on an empty step, Enter advances, Back
- * works, submit posts the three answers and shows the thank-you; outside click closes.
- *
- *   npm run build && npm run test:contact
- */
+
 import { chromium } from 'playwright';
 import { createServer } from 'node:http';
 import { readFileSync, existsSync, statSync } from 'node:fs';
@@ -22,14 +17,14 @@ const server = createServer((req, res) => {
   res.writeHead(200, { 'content-type': MIME[extname(file)] || 'application/octet-stream' });
   res.end(readFileSync(file));
 });
-await new Promise((r) => server.listen(4334, '127.0.0.1', r));
+await new Promise((r) => server.listen(4355, '127.0.0.1', r));
 const browser = await chromium.launch();
 const failures = [];
 const check = (ok, label) => { console.log(`${ok ? 'ok  ' : 'FAIL'} ${label}`); if (!ok) failures.push(label); };
 const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
 let posted = null;
 await page.route('**/api/contact', (route) => { posted = JSON.parse(route.request().postData()); route.fulfill({ json: { ok: true } }); });
-await page.goto('http://127.0.0.1:4334/', { waitUntil: 'load' });
+await page.goto('http://127.0.0.1:4355/', { waitUntil: 'load' });
 await page.waitForTimeout(500);
 await page.click('.site-menu [data-contact-open]');
 await page.waitForTimeout(700);

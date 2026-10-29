@@ -1,8 +1,4 @@
-/**
- * Home header: "Humansize" swaps the menu row for the socials (and back). Closes on a second
- * click/tap, Esc (focus back on the name), scrolling 80px away, or the pointer moving 160px
- * outside the header block. The swap uses the shared blur reveal.
- */
+
 export function initSocials() {
   const btn = document.querySelector<HTMLButtonElement>('[data-socials-toggle]');
   const socials = document.querySelector<HTMLElement>('[data-socials]');

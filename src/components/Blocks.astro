@@ -13,13 +13,13 @@ interface Props {
   blocks: ProjectEntry['data']['blocks'];
   slug?: string;
   processFromFolder?: boolean;
-  /** When set (live preview), use these paths instead of the build-time process/ glob. */
+
   processFolderSrcs?: string[];
   info?: { label: string; value: string; href?: string }[];
 }
 
 const { blocks, slug, processFromFolder = false, processFolderSrcs, info = [] } = Astro.props;
-// Info sits right before the first Process section; without one it closes the page.
+
 let infoShown = false;
 const takeInfo = () => {
   if (infoShown) return false;
@@ -37,7 +37,7 @@ const folderSrcs = resolveProcessFolderForRender(
 const folder = folderSrcs.map((src) => ({ src, alt: processFolderAlt(src), flush: false }));
 const useFolder = Boolean(processFromFolder) && folder.length > 0;
 const hasProcessBlock = blocks.some((b) => b.discriminant === 'process');
-// First two content images load eagerly; the rest lazy + async decode.
+
 let imageCount = 0;
 const eager = () => imageCount++ < 2;
 ---

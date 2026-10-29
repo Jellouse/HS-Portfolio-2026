@@ -1,11 +1,5 @@
 #!/usr/bin/env node
-/**
- * Send one contact confirmation email through Resend (same copy as production).
- *
- *   RESEND_API_KEY=re_… node scripts/send-test-confirmation.mjs you@example.com
- *
- * Optional env: CONTACT_FROM, CONTACT_TO (reply-to defaults to CONTACT_TO or Johann's email).
- */
+
 import { contactConfirmationEmail } from '../src/lib/contact-confirmation-email.ts';
 
 const to = process.argv[2]?.trim();

@@ -1,16 +1,7 @@
-// Touch devices: the hero blob drawn on the GPU instead of through the live SVG filter.
-//
-// Why: the SVG filter (feTurbulence → feOffset → feDisplacementMap → blur → alpha cut) is
-// re-run from scratch whenever feOffset moves, over a 190% × 210% region at device pixel
-// ratio. Phones (WebKit runs SVG filters on the CPU) cannot do that every frame, so the
-// idle drift dropped frames in bursts. Here the same chain is split: the turbulence is
-// rendered once by the browser itself (same feTurbulence, same params, so the same noise)
-// and the shape once to a canvas; each frame only the cheap per-pixel steps run in WebGL
-// (shift noise, displace, Gaussian blur, alpha threshold, flat colour). Same look.
+
 
 const VERT = `attribute vec2 a;varying vec2 v;void main(){v=a*.5+.5;gl_Position=vec4(a,0.,1.);}`;
 
-// pass 1: displaced source alpha. p = user-space point of this pixel.
 const DISPLACE = `precision highp float;varying vec2 v;
 uniform sampler2D src,noise;uniform vec4 region,sreg,nreg;uniform vec2 off;uniform float scale;
 void main(){
@@ -22,13 +13,11 @@ void main(){
   gl_FragColor=vec4(a,0.,0.,1.);
 }`;
 
-// pass 2 and 3: separable Gaussian at half resolution (the field is smooth after the blur).
 const BLUR = `precision highp float;varying vec2 v;
 uniform sampler2D tex;uniform vec2 dir;uniform float sigma;uniform float last;
 void main(){
   vec2 c=v;
   float r=ceil(sigma*3.),s=texture2D(tex,c).r,w=1.;
-  // paired taps: one linear fetch between texels i and i+1 covers both weights
   for(int j=0;j<12;j++){
     float i=float(j)*2.+1.;if(i>r)break;
     float k1=exp(-i*i/(2.*sigma*sigma)),k2=exp(-(i+1.)*(i+1.)/(2.*sigma*sigma)),k=k1+k2,o=i+k2/k;
@@ -37,7 +26,6 @@ void main(){
   gl_FragColor=vec4(s/w,0.,0.,1.);
 }`;
 
-// pass 4: full resolution: discrete alpha table (hard edge, like feFuncA) and flat colour.
 const CUT = `precision highp float;varying vec2 v;uniform sampler2D tex;uniform vec3 colour;uniform float cut;
 void main(){float a=texture2D(tex,vec2(v.x,1.-v.y)).r;float o=step(cut,a);gl_FragColor=vec4(colour*o,o);}`;
 
@@ -90,7 +78,6 @@ const attr = (el: Element | null, name: string, fallback: number) => {
   return Number.isFinite(n) ? n : fallback;
 };
 
-/** Mounts the GPU blob over the SVG. Resolves to a draw(now) function, or null if WebGL is unavailable. */
 export async function mountHeroBlobGL(svg: SVGSVGElement, opts: Opts) {
   const group = svg.querySelector<SVGGElement>('g[filter]');
   const filter = svg.querySelector('filter');
@@ -103,7 +90,6 @@ export async function mountHeroBlobGL(svg: SVGSVGElement, opts: Opts) {
   const gl = canvas.getContext('webgl', { premultipliedAlpha: true, antialias: false, alpha: true });
   if (!gl) return null;
 
-  // Filter region in user units, exactly as the SVG filter computes it.
   const bb = group.getBBox();
   const fx = attr(filter, 'x', -10) / (filter.getAttribute('x')?.includes('%') ? 100 : 1);
   const fy = attr(filter, 'y', -10) / (filter.getAttribute('y')?.includes('%') ? 100 : 1);
@@ -117,13 +103,12 @@ export async function mountHeroBlobGL(svg: SVGSVGElement, opts: Opts) {
   const scale = attr(svg.querySelector('feDisplacementMap'), 'scale', 111);
   const blurUser = attr(svg.querySelector('feGaussianBlur'), 'stdDeviation', 2.2);
   const table = (svg.querySelector('feFuncA')?.getAttribute('tableValues') || '0 0 1 1 1 1 1 1').trim().split(/\s+/);
-  const cut = Math.max(0, table.indexOf('1')) / table.length; // discrete table: first index that is opaque
+  const cut = Math.max(0, table.indexOf('1')) / table.length;
   const colour = (svg.querySelector('feFlood')?.getAttribute('flood-color') || '#B70606').replace('#', '');
   const rgb = [0, 2, 4].map((i) => parseInt(colour.slice(i, i + 2), 16) / 255);
 
-  // Noise: rendered once by the browser's own feTurbulence over the region plus drift room.
   const PAD = 40;
-  const NRES = 2; // texels per user unit; the noise is smooth (period ~70 units)
+  const NRES = 2;
   const nreg = [region[0] - PAD, region[1] - PAD, region[2] + 2 * PAD, region[3] + 2 * PAD];
   const nw = Math.round(nreg[2] * NRES);
   const nh = Math.round(nreg[3] * NRES);
@@ -200,7 +185,7 @@ export async function mountHeroBlobGL(svg: SVGSVGElement, opts: Opts) {
       height: `${H / dpr / k}px`,
       pointerEvents: 'none',
     });
-    // shape, rasterised once per size (anti-aliased like the SVG source graphic)
+
     const sc = document.createElement('canvas');
     sc.width = Math.round(region[2] * pxPerUnit);
     sc.height = Math.round(region[3] * pxPerUnit);
@@ -258,7 +243,7 @@ export async function mountHeroBlobGL(svg: SVGSVGElement, opts: Opts) {
   const draw = () => {
     if (!a || !b || !srcTex || !W) return;
     const o = opts.offset();
-    // 1. displace, at half resolution (v=0 is the top row in user space throughout)
+
     gl.viewport(0, 0, LW, LH);
     gl.bindFramebuffer(gl.FRAMEBUFFER, a.fb);
     gl.useProgram(pDisp);
@@ -274,7 +259,7 @@ export async function mountHeroBlobGL(svg: SVGSVGElement, opts: Opts) {
     gl.uniform2f(u(pDisp, 'off'), o.x, o.y);
     gl.uniform1f(u(pDisp, 'scale'), scale);
     quad(pDisp);
-    // 2. horizontal and 3. vertical blur (sigma in half-res texels)
+
     gl.useProgram(pBlur);
     gl.uniform1f(u(pBlur, 'sigma'), (blurUser * pxPerUnit * LW) / W);
     gl.uniform1i(u(pBlur, 'tex'), 0);
@@ -287,7 +272,7 @@ export async function mountHeroBlobGL(svg: SVGSVGElement, opts: Opts) {
     gl.bindTexture(gl.TEXTURE_2D, b.t);
     gl.uniform2f(u(pBlur, 'dir'), 0, 1 / LH);
     quad(pBlur);
-    // 4. full-res threshold + colour to screen
+
     gl.viewport(0, 0, W, H);
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     gl.useProgram(pCut);
