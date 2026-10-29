@@ -2981,7 +2981,6 @@ html.is-contact-open body {
     animation: text-in 400ms var(--ease-out-expo) both;
   }
 }
-
 @keyframes menu-scroll-out {
   to {
     opacity: 0;
@@ -3006,21 +3005,74 @@ html.is-contact-open body {
   }
 }
 
-/* Project drum scroll motion (scripts/project-drum.ts): compositor-only props. */
-.project .image-block > .frame,
-.project .pair > .frame {
+/* Project drum scroll motion (scripts/gravity-scroll-motion.ts): compositor-only props. */
+main .frame {
   transform-origin: 50% 50%;
   backface-visibility: hidden;
 }
-.project .frame.is-drum {
+main .frame.is-drum {
   will-change: transform, opacity;
 }
 @media (prefers-reduced-motion: reduce) {
-  .project .frame.is-drum {
+  main .frame.is-drum {
     transform: none !important;
     opacity: 1 !important;
   }
 }
 
+@media (prefers-reduced-motion: no-preference) {
+  .brand-toggle:not(.is-motion-ready),
+  .project-hero h1:not(.is-motion-ready),
+  .shop-head-title:not(.is-motion-ready) {
+    visibility: hidden;
   }
+
+  html.is-scroll-intro-pending main .frame {
+    visibility: hidden;
+  }
+
+  @keyframes load-entrance {
+    from {
+      opacity: 0;
+      scale: 0.94;
+      translate: 0 24px;
+    }
+    to {
+      opacity: 1;
+      scale: 1;
+      translate: 0 0;
+    }
+  }
+
+  html.has-scroll-motion .site-header .site-menu:not(.site-socials) :is(a, button).has-load-entrance,
+  html.has-scroll-motion .shop-head .shop-menu :is(a, button).has-load-entrance,
+  html.has-scroll-motion main .services-menu :is(a, button).has-load-entrance,
+  html.has-scroll-motion main .frame.has-load-entrance {
+    animation: load-entrance 700ms cubic-bezier(.22, 1, .36, 1) both;
+    animation-delay: calc(var(--load-intro-order, 0) * 140ms);
+    animation-play-state: paused;
+  }
+
+  html.is-scroll-intro-ready .site-header .site-menu:not(.site-socials) :is(a, button).has-load-entrance,
+  html.is-scroll-intro-ready .shop-head .shop-menu :is(a, button).has-load-entrance,
+  html.is-scroll-intro-ready main .services-menu :is(a, button).has-load-entrance {
+    animation-play-state: running;
+  }
+
+  html.is-scroll-intro-ready main .frame.has-load-entrance.is-entrance-armed {
+    animation-play-state: running;
+  }
+
+  html.has-scroll-motion.js.fade-ready .fade-in,
+  html.has-scroll-motion.js.fade-ready .fade-in:not(.is-in),
+  html.has-scroll-motion.js.fade-ready .fade-in.is-in,
+  html.has-scroll-motion.js.fade-ready .card.fade-in:not(.is-in) > *,
+  html.has-scroll-motion.js.fade-ready .card.fade-in.is-in > * {
+    opacity: 1;
+    transition: none;
+  }
+}
+
+.site-header {
+  transform-origin: top center;
 }
