@@ -7,8 +7,9 @@ import { mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 
 const preview =
-  process.argv[2] || 'https://hs-portfolio-2026-git-feedback-batch-jellouse.vercel.app';
+  process.argv[2] || 'https://hs-portfolio-2026-git-feedback-batch-johanns-projects-b8b79093.vercel.app';
 const prod = process.argv[3] || 'https://humansize.de';
+const bypass = process.env.VERCEL_AUTOMATION_BYPASS_SECRET || process.env.VERCEL_PROTECTION_BYPASS;
 const outDir = process.env.ARTIFACT_DIR || '/opt/cursor/artifacts/screenshots/home-face-compare';
 mkdirSync(outDir, { recursive: true });
 
@@ -42,8 +43,8 @@ const measure = (page) =>
 async function shots(page, base, label, scrollY) {
   const url = `${base.replace(/\/$/, '')}/?intro=raf`;
   await page.goto(url, { waitUntil: 'networkidle', timeout: 120000 });
-  await page.waitForSelector('[data-intro-ready]', { timeout: 60000 });
-  await page.waitForSelector('[data-intro-settled]', { timeout: 60000 });
+  await page.waitForSelector('[data-intro-ready]', { state: 'attached', timeout: 120000 });
+  await page.waitForSelector('[data-intro-settled]', { state: 'attached', timeout: 120000 });
   await page.evaluate((y) => window.scrollTo(0, y), scrollY);
   await page.waitForTimeout(400);
   await page.waitForSelector('[data-intro-settled]', { timeout: 60000 });
@@ -67,13 +68,14 @@ for (const c of cases) {
       viewport: c.viewport,
       isMobile: c.mobile,
       hasTouch: c.mobile,
+      extraHTTPHeaders: bypass ? { 'x-vercel-protection-bypass': bypass } : undefined,
       ...(c.ua ? { userAgent: c.ua.userAgent, deviceScaleFactor: c.ua.deviceScaleFactor } : {}),
     };
     const context = await browser.newContext(ctxOpts);
     const page = await context.newPage();
     const R = await page
       .goto(`${host.replace(/\/$/, '')}/?intro=raf`, { waitUntil: 'networkidle', timeout: 120000 })
-      .then(() => page.waitForSelector('[data-intro-ready]', { timeout: 60000 }))
+      .then(() => page.waitForSelector('[data-intro-ready]', { state: 'attached', timeout: 120000 }))
       .then(() => page.getAttribute('[data-hero-root]', 'data-intro-r'))
       .then((r) => Number(r));
     await page.close();
