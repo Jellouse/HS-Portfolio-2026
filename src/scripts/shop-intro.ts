@@ -1,5 +1,5 @@
 import { clearStableViewportHeight, stableViewportHeight } from '../lib/viewport-layout';
-import { mobileIntroLayout } from '../lib/intro-mobile-layout';
+import { introFaceLayout } from '../lib/intro-mobile-layout';
 
 /**
  * /shop header: the Industrial Bloom ring starts big with its centre on the viewport top (half
@@ -88,18 +88,10 @@ export function initShopIntro(head: HTMLElement) {
     lastW = vw;
     const vh = stableViewportHeight(probe, vw);
     const mobile = vw < 760;
-    const nameTop = Math.round(vh * (mobile ? 0.715 : 0.772));
+    const { nameTop, faceCenter } = introFaceLayout(vh, vw);
     document.documentElement.style.setProperty('--intro-name-top', `${nameTop}px`);
-    let W0: number;
-    let C: number;
-    if (mobile) {
-      const m = mobileIntroLayout(vh, vw);
-      W0 = m.W0;
-      C = m.faceCenter;
-    } else {
-      W0 = Math.round((vw * 0.68) / 2) * 2;
-      C = 0;
-    }
+    const W0 = Math.round((vw * (mobile ? 0.9 : 0.68)) / 2) * 2;
+    const C = mobile ? (faceCenter ?? Math.round(nameTop / 2)) : 0;
     const Wf = 54;
     const topF = mobile ? 32 : 44; // .shop-detail padding-top
     const titleF = topF + Wf + (mobile ? 96 : 130); // detail h1 top

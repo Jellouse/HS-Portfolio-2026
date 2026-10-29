@@ -1969,6 +1969,12 @@ body .site-header.is-menu-fade:not(.is-menu-open) .who .time {
   color: var(--muted);
   cursor: pointer;
 }
+
+.shop-details[aria-expanded="true"]:hover,
+.shop-details[aria-expanded="true"]:focus-visible {
+  color: var(--ink);
+  opacity: 1;
+}
 .shop-details:focus-visible,
 .shop-links a:focus-visible,
 .shop-title:focus-visible {
@@ -2987,12 +2993,8 @@ html.is-contact-open, html.is-contact-open body { overscroll-behavior: none; }
 }
 
 .brand-stack {
-  display: inline-grid;
-  place-items: center;
-}
-
-.brand-stack > * {
-  grid-area: 1 / 1;
+  display: inline-block;
+  white-space: nowrap;
 }
 
 @media (hover: hover) and (pointer: fine) and (min-width: 760px) {
@@ -3001,26 +3003,34 @@ html.is-contact-open, html.is-contact-open body { overscroll-behavior: none; }
   }
 
   .brand-at {
-    display: block;
-  }
-
-  .brand-name,
-  .brand-at {
-    transition: opacity var(--dur-hover) var(--ease-out);
-  }
-
-  .brand-at {
+    display: inline-block;
+    max-width: 0;
     opacity: 0;
+    overflow: hidden;
+    vertical-align: baseline;
+    transform: translateX(6px);
+    transition:
+      opacity var(--dur-hover) var(--ease-out),
+      transform var(--dur-hover) var(--ease-out),
+      max-width var(--dur-hover) var(--ease-out);
   }
 
-  .brand-toggle:hover .brand-name,
-  .brand-toggle:focus-visible .brand-name {
-    opacity: 0;
+  .brand-name {
+    display: inline-block;
+    transform: translateX(0.58ch);
+    transition: transform var(--dur-hover) var(--ease-out);
   }
 
   .brand-toggle:hover .brand-at,
   .brand-toggle:focus-visible .brand-at {
+    max-width: 1ch;
     opacity: 1;
+    transform: translateX(0);
+  }
+
+  .brand-toggle:hover .brand-name,
+  .brand-toggle:focus-visible .brand-name {
+    transform: translateX(0);
   }
 }
 

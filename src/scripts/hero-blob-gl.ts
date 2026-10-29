@@ -166,17 +166,20 @@ export async function mountHeroBlobGL(svg: SVGSVGElement, opts: Opts) {
 
   const layout = () => {
     const blob = svg.parentElement as HTMLElement | null;
-    const layoutCssW = blob?.clientWidth || svg.clientWidth;
+    const heroRoot = host.closest('[data-hero-root]') as HTMLElement | null;
+    const introW = heroRoot ? parseFloat(getComputedStyle(heroRoot).getPropertyValue('--intro-w')) : 0;
+    const layoutCssW = introW || blob?.clientWidth || svg.clientWidth;
     if (!layoutCssW || layoutCssW === lastLayoutW) return;
     lastLayoutW = layoutCssW;
 
     const r = svg.getBoundingClientRect();
     const hr = host.getBoundingClientRect();
+    if (!r.width) return;
     const vb = svg.viewBox.baseVal;
     const k = host.offsetWidth ? hr.width / host.offsetWidth : 1;
     const cssPerUnit = layoutCssW / vb.width;
-    const layoutCssH = (layoutCssW * vb.height) / vb.width;
     let dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const layoutCssH = (layoutCssW * vb.height) / vb.width;
     const area = layoutCssW * layoutCssH * dpr * dpr || 1;
     if (area > 2.4e6) dpr *= Math.sqrt(2.4e6 / area);
     pxPerUnit = cssPerUnit * dpr;
@@ -193,8 +196,8 @@ export async function mountHeroBlobGL(svg: SVGSVGElement, opts: Opts) {
       position: 'absolute',
       left: `${(r.left - hr.left + (out[0] - vb.x) * cssPerUnit) / k}px`,
       top: `${(r.top - hr.top + (out[1] - vb.y) * cssPerUnit) / k}px`,
-      width: `${layoutCssW}px`,
-      height: `${layoutCssH}px`,
+      width: `${W / dpr / k}px`,
+      height: `${H / dpr / k}px`,
       pointerEvents: 'none',
     });
     // shape, rasterised once per size (anti-aliased like the SVG source graphic)

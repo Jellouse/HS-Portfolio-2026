@@ -7,7 +7,7 @@
  * scrolls with the page, so there is no sticky release to jump. Layout values are whole px.
  */
 import { clearStableViewportHeight, stableViewportHeight } from '../lib/viewport-layout';
-import { mobileIntroLayout } from '../lib/intro-mobile-layout';
+import { introFaceLayout } from '../lib/intro-mobile-layout';
 
 export function initIntroFace(hero: HTMLElement) {
   const host = hero.querySelector<HTMLElement>('[data-hero-variant="blob"]');
@@ -53,25 +53,12 @@ export function initIntroFace(hero: HTMLElement) {
     if (vw === lastW && hero.dataset.introReady !== undefined) return;
     lastW = vw;
     const vh = stableViewportHeight(probe, vw);
-    const mobile = vw < 760;
+    const { W0, H0, nameTop, faceBottom, faceCenter, mobile } = introFaceLayout(vh, vw);
     const Wf = px('--mark-small-w') || 64;
     const topF = px('--mark-small-top') || 32;
-    let W0: number;
-    let H0: number;
-    let nameTop: number;
-    let faceBottom: number;
-    if (mobile) {
-      const m = mobileIntroLayout(vh, vw);
-      nameTop = m.nameTop;
-      W0 = m.W0;
-      H0 = m.H0;
-      faceBottom = m.faceBottom;
-      hero.style.setProperty('--intro-face-center', `${m.faceCenter}px`);
+    if (mobile && faceCenter !== undefined) {
+      hero.style.setProperty('--intro-face-center', `${faceCenter}px`);
     } else {
-      W0 = Math.round(vw * 1.15);
-      H0 = (W0 * 249) / 559;
-      nameTop = Math.round(vh * 0.772);
-      faceBottom = nameTop - 160;
       hero.style.removeProperty('--intro-face-center');
     }
     const Hf = (Wf * 249) / 559;

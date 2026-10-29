@@ -33,9 +33,26 @@ for (const [label, opt] of [['desktop', { viewport: { width: 1440, height: 900 }
   await p.waitForTimeout(1200);
   const shop = await p.evaluate(() => { const t = document.querySelector('.shop-head-title').getBoundingClientRect(); const r = document.querySelector('.shop-ring').getBoundingClientRect(); return { text: t.top, c: (r.top + r.bottom) / 2, top: r.top, below: t.top - r.bottom, w: r.width, x: r.left + r.width / 2 }; });
   const hp = await (await browser.newContext(opt)).newPage();
-  await hp.goto(B + '/', { waitUntil: 'load' });
-  await hp.waitForTimeout(800);
-  const home = await hp.evaluate(() => { const t = document.querySelector('.site-header .brand').getBoundingClientRect(); const r = document.querySelector('.mark-blob').getBoundingClientRect(); const copy = document.querySelector('.about p'); return { text: t.top, c: (r.top + r.bottom) / 2, top: r.top, bottom: r.bottom, w: r.width, below: t.top - r.bottom, vw: innerWidth, copyTop: copy ? Math.round(copy.getBoundingClientRect().top) : NaN }; });
+  await hp.goto(B + '/?intro=raf', { waitUntil: 'load' });
+  await hp.waitForSelector('[data-intro-ready]', { state: 'attached', timeout: 30000 });
+  await hp.waitForSelector('[data-intro-settled]', { state: 'attached', timeout: 30000 });
+  const home = await hp.evaluate(() => {
+    const t = document.querySelector('.site-header .brand').getBoundingClientRect();
+    const r = document.querySelector('[data-hero-blob]').getBoundingClientRect();
+    const copy = document.querySelector('.about p');
+    return {
+      text: t.top,
+      c: (r.top + r.bottom) / 2,
+      top: r.top,
+      bottom: r.bottom,
+      left: r.left,
+      right: r.right,
+      w: r.width,
+      below: t.top - r.bottom,
+      vw: innerWidth,
+      copyTop: copy ? Math.round(copy.getBoundingClientRect().top) : NaN,
+    };
+  });
   const shopCopy = await p.evaluate(() => { const el = document.querySelector('.shop-intro p'); return el ? Math.round(el.getBoundingClientRect().top) : NaN; });
   await hp.close();
   check(Math.abs(shop.text - home.text) <= 1, `${label}: name blocks at the same top (home ${home.text}, shop ${shop.text})`);
@@ -67,9 +84,8 @@ for (const [label, opt] of [['desktop', { viewport: { width: 1440, height: 900 }
   check(Math.abs(shop.x - 195 * (label === 'mobile' ? 1 : 1440 / 390)) <= 1, `${label}: ring centred horizontally`);
   if (label === 'mobile') {
     check(Math.abs(shop.c - home.c) <= 2, `${label}: face and ring centres aligned (${home.c.toFixed(1)}/${shop.c.toFixed(1)})`);
-    check(home.w <= home.vw + 1, `mobile: face fits viewport width (${home.w.toFixed(0)} / ${home.vw})`);
-    check(home.top <= 20 && home.bottom <= home.text - 12, `mobile: face fills above name (top ${home.top.toFixed(0)}, gap ${home.below.toFixed(0)})`);
-    check(Math.abs(shop.w - home.w) <= 3, `mobile: shop ring matches face width (${shop.w.toFixed(0)} / ${home.w.toFixed(0)})`);
+    check(Math.abs(home.w - 351) <= 2, `mobile: face 90% wide (${home.w.toFixed(0)})`);
+    check(home.top >= -2 && home.left >= -2 && home.right <= home.vw + 2, `mobile: face in viewport`);
   }
   const R = Number(await p.getAttribute('[data-shop-head]', 'data-ring-r'));
   await p.evaluate((y) => scrollTo(0, y), R);

@@ -1,30 +1,13 @@
-/** Mobile homepage intro face: Figma mock, shared by intro-face.ts and shop-intro.ts. */
+/** SVG blob width:height (559×249 viewBox). Shared by intro-face and shop-intro. */
 export const BLOB_ASPECT = 559 / 249;
 
-export type MobileIntroLayout = {
-  nameTop: number;
-  faceTop: number;
-  faceBottom: number;
-  faceCenter: number;
-  H0: number;
-  W0: number;
-};
-
-/** Height-first blob in the band above the name; width capped at the viewport (SVG aspect ratio). */
-export function mobileIntroLayout(vh: number, vw: number): MobileIntroLayout {
-  const nameTop = Math.round(vh * 0.715);
-  const minTop = 12;
-  const nameGap = 20;
-  const faceBottom = nameTop - nameGap;
-  let faceTop = minTop;
-  let H0 = Math.max(1, faceBottom - faceTop);
-  let W0 = Math.round(H0 * BLOB_ASPECT);
-  if (W0 > vw) {
-    W0 = vw;
-    H0 = Math.round(W0 / BLOB_ASPECT);
-    faceTop = minTop;
-  }
-  const faceBottomFinal = faceTop + H0;
-  const faceCenter = Math.round((faceTop + faceBottomFinal) / 2);
-  return { nameTop, faceTop, faceBottom: faceBottomFinal, faceCenter, H0, W0 };
+export function introFaceLayout(vh: number, vw: number) {
+  const mobile = vw < 760;
+  const W0 = Math.round(vw * (mobile ? 0.9 : 1.15));
+  const H0 = (W0 * 249) / 559;
+  const gap = mobile ? 96 : 160;
+  const nameTop = Math.round(vh * (mobile ? 0.715 : 0.772));
+  const faceBottom = mobile ? Math.round(nameTop / 2 + H0 / 2) : nameTop - gap;
+  const faceCenter = mobile ? Math.round(nameTop / 2) : undefined;
+  return { W0, H0, nameTop, faceBottom, faceCenter, mobile };
 }

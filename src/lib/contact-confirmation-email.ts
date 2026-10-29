@@ -9,8 +9,6 @@ export function contactConfirmationEmail(service: string, project: string) {
     '',
     project,
     '',
-    'Johann will reply from Humansize when he can.',
-    '',
     'Humansize',
     'https://humansize.de',
   ];
