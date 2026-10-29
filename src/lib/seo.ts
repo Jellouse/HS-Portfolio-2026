@@ -2,7 +2,6 @@ import { projectLabel } from './content';
 import { positioning } from './positioning';
 import { plainText, type ProjectEntry, type SiteData } from './content';
 
-// Stable entity id: every project's creator points here.
 export const PERSON_ID = 'https://humansize.de/#johann-schnettker';
 
 export function homeJsonLd(site: SiteData, pageUrl: string) {

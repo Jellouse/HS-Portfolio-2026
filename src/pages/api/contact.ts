@@ -4,9 +4,6 @@ import { contactConfirmationEmail } from '../../lib/contact-confirmation-email';
 
 export const prerender = false;
 
-// Contact sheet submissions: saved in Neon (contact_messages, self-seeding) and emailed via
-// Resend when RESEND_API_KEY is set (CONTACT_TO, default schnettker.johann@gmail.com;
-// CONTACT_FROM, default the Resend test sender). Succeeds if either the save or the mail does.
 const env = (k: string) => (import.meta.env[k] as string | undefined) ?? process.env[k];
 
 async function store(service: string, project: string, email: string) {

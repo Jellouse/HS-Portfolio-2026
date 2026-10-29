@@ -34,7 +34,6 @@ export async function listProcessFolderFromGitHub(
     .sort((a, b) => collator.compare(a, b));
 }
 
-/** Shape compatible with ProjectEntry for the shared project article. */
 export function toProjectEntry(slug: string, data: Record<string, unknown>): ProjectEntry {
   const info = Array.isArray(data.info) ? data.info : [];
   return {

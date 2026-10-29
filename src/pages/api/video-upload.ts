@@ -1,6 +1,5 @@
-// Hands out a one-time presigned PUT URL for uploading a video straight to Cloudflare R2.
-// Only for people with push access to the repo: the caller sends the GitHub token that
-// Keystatic already holds in their browser, and we check it against GitHub.
+
+
 import type { APIRoute } from 'astro';
 import { S3Client, PutObjectCommand, ListObjectsV2Command } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
@@ -14,12 +13,10 @@ const TYPES: Record<string, string> = {
   'video/quicktime': 'mov',
 };
 
-// Stay inside Cloudflare R2's free tier (10 GB): cap single files and the whole bucket.
 const MAX_FILE = 200 * 1024 * 1024;
 const MAX_BUCKET = 8 * 1024 * 1024 * 1024;
 const mb = (n: number) => `${Math.round(n / 1024 / 1024)} MB`;
 
-// R2_PUBLIC_URL may be set without a scheme (e.g. "x.workers.dev"); always return an absolute URL
 const publicBase = (v: string) => {
   const base = String(v).trim().replace(/\/+$/, '');
   return /^https?:\/\//i.test(base) ? base : `https://${base}`;
@@ -38,7 +35,7 @@ export const POST: APIRoute = async ({ request }) => {
   const token = cmsTokenFromRequest(request);
   if (!token) return json({ error: 'Not signed in to the CMS.' }, 401);
   if (!(await hasRepoPushAccess(token))) {
-    // Mirror the old split: invalid token vs no push. Re-check with a cheap user call only when needed.
+
     const probe = await fetch('https://api.github.com/user', {
       headers: {
         authorization: `Bearer ${token}`,
@@ -69,7 +66,6 @@ export const POST: APIRoute = async ({ request }) => {
   const key = `projects/${dir}/${base}-${Date.now().toString(36)}.${ext}`;
   const contentType = type || (ext === 'mov' ? 'video/quicktime' : `video/${ext}`);
 
-  // bucket jurisdiction: 'eu' unless R2_JURISDICTION says otherwise ('default' = no jurisdiction)
   const jurisdiction = String(env.R2_JURISDICTION ?? 'eu').trim().toLowerCase() || 'eu';
   const jurisdictionHost = jurisdiction === 'default' ? '' : `.${jurisdiction}`;
   const s3 = new S3Client({
@@ -77,7 +73,7 @@ export const POST: APIRoute = async ({ request }) => {
     endpoint: `https://${R2_ACCOUNT_ID}${jurisdictionHost}.r2.cloudflarestorage.com`,
     credentials: { accessKeyId: R2_ACCESS_KEY_ID, secretAccessKey: R2_SECRET_ACCESS_KEY },
   });
-  // total bucket size, so we never leave the free tier
+
   let used = 0;
   let ContinuationToken: string | undefined;
   do {
@@ -92,7 +88,6 @@ export const POST: APIRoute = async ({ request }) => {
     );
   }
 
-  // ContentLength is signed, so a different (bigger) file can't be uploaded with this URL
   const uploadUrl = await getSignedUrl(
     s3,
     new PutObjectCommand({ Bucket: R2_BUCKET, Key: key, ContentType: contentType, ContentLength: bytes, CacheControl: 'public, max-age=31536000, immutable' }),

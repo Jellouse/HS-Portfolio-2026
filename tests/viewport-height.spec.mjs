@@ -1,9 +1,4 @@
-/**
- * Intro layout locks viewport height per width: a toolbar collapse (height-only resize) must
- * not shift --intro-name-top or re-measure the intro range.
- *
- *   npm run build && node tests/viewport-height.spec.mjs
- */
+
 import { chromium } from 'playwright';
 import { createServer } from 'node:http';
 import { readFileSync, existsSync, statSync } from 'node:fs';

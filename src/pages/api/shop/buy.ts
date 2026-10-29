@@ -5,15 +5,13 @@ import { getPool, getStripe } from '../../../lib/shop/server.mjs';
 
 export const prerender = false;
 
-// The detail page's Buy button is a plain <form method="post">, so it works without JS.
-// Never a 500: every failure goes back to the product page with a short note.
 export const POST: APIRoute = async ({ request, url, redirect }) => {
   const form = await request.formData().catch(() => null);
   const slug = String(form?.get('slug') || '');
   const entry = slug ? await getEntry('products', slug).catch(() => undefined) : undefined;
   if (!entry) return redirect('/shop/', 303);
   const back = (state: string) => redirect(`/shop/${slug}/?checkout=${state}`, 303);
-  // Not set up yet (no Stripe or DB env on Vercel): plain "opens soon".
+
   if (!process.env.DATABASE_URL || !process.env.STRIPE_SECRET_KEY) return back('soon');
   try {
     const siteUrl = process.env.SHOP_SITE_URL || url.origin;

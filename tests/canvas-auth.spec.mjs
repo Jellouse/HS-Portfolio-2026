@@ -1,6 +1,5 @@
-// /canvas on production is only for GitHub users with push access (Keystatic session).
-// Unauthenticated production requests must never get the canvas. Also: noindex, robots,
-// sitemap and llms.txt exclusion.
+
+
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { spawn } from 'node:child_process';
@@ -16,7 +15,6 @@ assert.equal(canvasMode({ VERCEL_ENV: 'preview', NODE_ENV: 'production' }), 'ope
 assert.equal(canvasMode({ NODE_ENV: 'development' }), 'open');
 assert.equal(canvasMode({ NODE_ENV: 'production' }), 'auth');
 
-// GitHub check with a fake fetch
 const fake = (user, repo) => {
   const calls = [];
   const f = async (url, init) => {
@@ -38,7 +36,6 @@ assert.equal(ok.calls[0][1], 'Bearer editor');
 await checkCanvasAccess('editor', ok);
 assert.equal(ok.calls.length, 2, 'result cached');
 
-// static guards
 const page = read('../src/pages/canvas.astro');
 assert.match(page, /prerender = false/);
 assert.match(page, /name="robots" content="noindex/);
@@ -46,7 +43,6 @@ assert.match(read('../astro.config.mjs'), /path === '\/canvas'\) return false/, 
 assert.match(read('../src/pages/robots.txt.ts'), /Disallow: \/canvas/, 'robots');
 assert.doesNotMatch(read('../src/pages/llms.txt.ts'), /canvas/, 'not in llms.txt');
 
-// Real request: dev server with VERCEL_ENV=production, no cookie / bogus cookie.
 const PORT = 4361;
 const server = spawn('node', ['node_modules/astro/astro.js', 'dev', '--host', '127.0.0.1', '--port', String(PORT)], {
   cwd: new URL('..', import.meta.url).pathname,

@@ -1,10 +1,4 @@
-/**
- * Shop pages sit on the same layout grid as project pages: shop text and images must share
- * the column edges of project text (Default, 6 cols) and Wide blocks (8 cols) at 1440 and 390.
- *
- *   npm run build && npm run test:shop-grid
- *   BASE_URL=https://humansize.de npm run test:shop-grid
- */
+
 import { chromium } from 'playwright';
 import { createServer } from 'node:http';
 import { readFileSync, existsSync, statSync, readdirSync } from 'node:fs';
@@ -41,11 +35,10 @@ async function ensureServer() {
   return { url: 'http://127.0.0.1:4341', stop: () => new Promise((r) => server.close(r)) };
 }
 
-// Project reference: Default text column and Wide image column.
 const PROJECT = '/work/industrial-bloom/';
 const WIDE_PROJECT = '/work/atomic-ski/';
 const REF = { text: '.project.page-grid > .text-block, .project.page-grid > .info', wide: '.project.page-grid > [data-frame="wide"]' };
-// Shop elements and which project column they must match.
+
 const SHOP = {
   '/shop/': { '.shop-intro': 'text', '.shop-pair': 'wide' },
 };

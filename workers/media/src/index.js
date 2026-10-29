@@ -1,8 +1,4 @@
-// Public read-only front for the humansize-media R2 bucket.
-// - GET/HEAD only, with Range support (video players request byte ranges)
-// - 300 requests/minute per IP via the free rate-limiting binding
-// - long immutable caching; on a custom domain the Cache API also keeps repeat views off R2
-//   (on *.workers.dev the Cache API is a no-op, the browser/CDN cache headers still apply)
+
 
 const CACHE = 'public, max-age=31536000, immutable';
 
@@ -20,7 +16,6 @@ export default {
     const key = decodeURIComponent(url.pathname.slice(1));
     if (!key || key.endsWith('/')) return new Response('Not found', { status: 404 });
 
-    // whole-file GETs can be served from the edge cache (custom domain only)
     const cache = caches.default;
     const ranged = request.headers.has('range');
     if (!ranged && request.method === 'GET') {

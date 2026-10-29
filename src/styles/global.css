@@ -1,3 +1,5 @@
+@import './type.css';
+
 @font-face {
   font-family: 'ABC Areal';
   src: url('/fonts/ABCAreal-Regular.woff2') format('woff2');
@@ -47,7 +49,7 @@
 }
 
 :root {
-  /* Small face mark at the top of project pages; the homepage intro shrinks to this. */
+
   --mark-small-w: 64px;
   --mark-small-top: 32px;
   --ink: #000;
@@ -55,36 +57,25 @@
   --muted: var(--ink-40);
   --bg: #fff;
   --bg-mobile: #fff;
-  --red: #b70606; /* the homepage faces SVG fill (#B70606) */
+  --red: #b70606;
   --line: #d6d6d6;
-  --image-stroke: #e5e5e5; /* 1px inside outline on images with Outline on (Keystatic) */
-  --button-fill: #f2f2f2; /* off-white light grey: the shop Buy button at rest */
-  --text-title: 23px;
-  --text-body: 23px;
-  --track: -0.02em;
-  --lh-title: 29px;
-  --lh-body: 29px;
-  /* text blocks with a title: larger copy */
-  --text-lead: 28px;
-  --lh-lead: 35px;
+  --image-stroke: #e5e5e5;
+  --button-fill: #f2f2f2;
+  --scroll-nudge: 100px;
   --space-title: 80px;
   --cols: 10;
   --margin: 160px;
   --gutter: 16px;
-  /* gap between images inside pairs/process grids */
+
   --image-gap: var(--gutter);
-  /* Grid: 10 cols, 160 margins, 16 gutters at 1440 (col = 97.6px). Main images and body
-     copy share ONE centred span: 6 cols = 666px at 1440. Wider blocks (large image/pair blocks,
-     homepage wide cards) snap to --wide-span: 8 cols = 893px. */
+
   --content-span: 6;
   --wide-span: 8;
   --col: calc((min(100vw, 1440px) - 2 * var(--margin) - (var(--cols) - 1) * var(--gutter)) / var(--cols));
   --content-width: calc(var(--content-span) * var(--col) + (var(--content-span) - 1) * var(--gutter));
   --measure: var(--content-width);
   --card: 1120px;
-  /* Case page rhythm (3x the old 28 / 80 / 188px). --space-block: between images and
-     pairs. --space-text: visible gap around text blocks. --space-section: before the
-     Process and Info sections. */
+
   --space-block: 84px;
   --space-text: 240px;
   --space-text-titled: 150px;
@@ -93,53 +84,50 @@
   --radius-sm: 15px;
   --pad: 20px;
   --mark-stretch-max: 1.35;
-  /* easing, after s-p.studio */
+
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in-out-expo: cubic-bezier(0.65, 0, 0.15, 1);
   --ease-out-quad: cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  /* Motion tokens (Emil Kowalski's curves). UI = strong ease-out, never ease-in.
-     Expo stays for text blur reveals; the scroll-linked reveal is linear on its own timeline. */
+
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
   --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
-  --dur-hover: 160ms; /* colour, opacity feedback */
-  --dur-fast: 150ms; /* popover fade, sequenced */
-  --dur-ui: 200ms; /* popover scale, small moves */
-  --dur-menu: 240ms; /* icon menus, field growth */
-  --dur-media: 300ms; /* image fades, layout pushes */
-  --dur-sheet: 400ms; /* contact sheet enter */
-  --dur-sheet-out: 260ms; /* contact sheet exit, faster than enter */
+  --dur-hover: 160ms;
+  --dur-fast: 150ms;
+  --dur-ui: 200ms;
+  --dur-menu: 240ms;
+  --dur-media: 300ms;
+  --dur-sheet: 400ms;
+  --dur-sheet-out: 260ms;
   --page-bg: var(--bg);
   color: var(--ink);
   background: var(--page-bg);
   color-scheme: light;
   font-family: 'ABC Areal', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  font-size: 23px;
-  line-height: 29px;
+  font-size: var(--text);
+  line-height: var(--lh);
   letter-spacing: var(--track);
   font-weight: 400;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
 }
 
-/* Below the 1440 frame, keep the 1120px track until the side space would drop under 20px. */
 @media (max-width: 1439px) {
   :root {
     --margin: clamp(20px, calc((100vw - 1120px) / 2), 160px);
   }
 }
 
-/* Tablet/mobile: 4 cols, 20px margins, 16px gutters; copy and images share the full width. */
 @media (max-width: 759px) {
   :root {
-    /* mobile: image-to-image gaps equal the side margin (20px) */
+
     --space-block: var(--margin);
     --image-gap: var(--margin);
     --space-text: 160px;
     --space-text-titled: 100px;
     --space-section: 160px;
-    --text-lead: var(--text-body);
-    --lh-lead: var(--lh-body);
+    --text-lead: var(--text);
+    --lh-lead: var(--lh);
     --space-title: 48px;
     --cols: 4;
     --content-span: 4;
@@ -147,7 +135,6 @@
   }
 }
 
-/* Below the grid, block margins collapse, so the section gap is set directly. */
 @media (max-width: 759px) {
   .project .process {
     margin-top: var(--space-section);
@@ -211,7 +198,6 @@ a:hover:has(video),
   opacity: 1;
 }
 
-/* Inline text stays the text colour, with one thin solid line. */
 .about a,
 .text-block a,
 .summary a,
@@ -297,8 +283,8 @@ summary::-webkit-details-marker {
   justify-content: space-between;
   width: min(var(--card), calc(100% - 40px));
   margin: 32px auto 0;
-  font-size: 23px;
-  line-height: 29px;
+  font-size: var(--text);
+  line-height: var(--lh);
   position: relative;
   z-index: 5;
 }
@@ -318,14 +304,14 @@ body:has(.hero) .site-header {
 
 .who .time {
   position: absolute;
-  top: 29px;
+  top: var(--lh);
   left: 0;
   margin: 0;
   color: var(--muted);
   white-space: nowrap;
   opacity: 0;
   pointer-events: none;
-  /* Opacity only — no animation — so mouseleave/is-open removal can fade out. */
+
   transition: opacity var(--dur-fast) var(--ease-out);
   filter: none;
 }
@@ -341,17 +327,14 @@ body:has(.hero) .site-header {
   text-align: right;
 }
 
-/* Sequenced menu: label out → options in on open; reverse on close.
-   Each state carries the delay for the element that is arriving.
-   Label stays in flow (visibility:hidden) so the hover hit area never collapses. */
 .contact-label {
   display: block;
   padding: 0;
   font: inherit;
-  line-height: 29px;
+  line-height: var(--lh);
   opacity: 1;
   visibility: visible;
-  /* Closing: wait for options to leave, then fade label in */
+
   transition:
     opacity var(--dur-fast) var(--ease-out) var(--dur-fast),
     visibility 0s linear 150ms,
@@ -363,7 +346,7 @@ body:has(.hero) .site-header {
 .contact.is-open .contact-label {
   opacity: 0;
   visibility: hidden;
-  /* Opening: fade label out immediately */
+
   transition:
     opacity var(--dur-fast) var(--ease-out),
     visibility 0s linear 150ms,
@@ -372,7 +355,7 @@ body:has(.hero) .site-header {
 
 .contact-menu {
   position: absolute;
-  top: calc(-1 * var(--lh-body));
+  top: calc(-1 * var(--lh));
   right: 0;
   display: flex;
   flex-direction: column;
@@ -381,10 +364,10 @@ body:has(.hero) .site-header {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  /* Grow out of @Humansize (bottom-right toward the label) */
+
   transform: scale(0.95);
   transform-origin: 100% 100%;
-  /* Closing: shrink + fade out immediately */
+
   transition:
     opacity var(--dur-fast) var(--ease-out),
     visibility 0s linear 150ms,
@@ -398,7 +381,7 @@ body:has(.hero) .site-header {
   visibility: visible;
   pointer-events: auto;
   transform: scale(1);
-  /* Opening: wait for label, then fade + grow in */
+
   transition:
     opacity var(--dur-fast) var(--ease-out) var(--dur-fast),
     visibility 0s linear 150ms,
@@ -408,7 +391,7 @@ body:has(.hero) .site-header {
 .contact-menu a,
 .contact-menu span {
   display: block;
-  line-height: var(--lh-body);
+  line-height: var(--lh);
   white-space: nowrap;
   filter: none;
   transform: none;
@@ -459,7 +442,7 @@ body:has(.hero) .site-header {
 
 .hero:has(.mark-blob:not([hidden])),
 .hero:has([data-hero-variant="blob"]:not([hidden])) {
-  /* No horizontal shape stretch — texture moves, silhouette stays */
+
   --mark-stretch-max: 1;
 }
 
@@ -467,7 +450,7 @@ body:has(.hero) .site-header {
   display: flex;
   flex-direction: column;
   align-items: center;
-  /* Full first viewport; bio peeks ~one line below */
+
   min-height: 100svh;
   padding: 72px var(--pad) 0;
 }
@@ -498,17 +481,15 @@ body:has(.hero) .site-header {
   display: none !important;
 }
 
-/* Blob: same little-man paths, sized and stretched to read like the mockup splat. */
 .hero .mark-blob {
   --mark-scale: 1;
-  /* Align vertical centre with name/@Humansize row (header at 50svh) */
+
   top: 50svh;
   width: min(500px, 46vw);
   height: auto;
   transform: translate(-50%, -50%);
   overflow: visible;
 }
-
 
 .feed {
   position: relative;
@@ -548,8 +529,6 @@ body:has(.hero) .site-header {
   corner-shape: inherit;
 }
 
-/* Outline: an overlay, so it sits on top of both the blur placeholder (frame background)
-   and the loaded image, follows the frame's corners and never changes the layout size. */
 .frame.is-outlined::after {
   content: '';
   position: absolute;
@@ -622,7 +601,7 @@ body:has(.hero) .site-header {
 }
 
 .peeps-row {
-  /* spans the full red box height (box is ~3.52x the static mark) so tall faces have room */
+
   position: absolute;
   left: 0;
   right: 0;
@@ -644,14 +623,7 @@ body:has(.hero) .site-header {
   fill: #f8f8f8;
 }
 
-.frame img {
-  display: block;
-  width: 100%;
-  height: auto;
-  border-radius: inherit;
-}
-
-.frame video {
+.frame :is(img, video) {
   display: block;
   width: 100%;
   height: auto;
@@ -667,7 +639,6 @@ body:has(.hero) .site-header {
   transition: opacity var(--dur-media) var(--ease-out);
 }
 
-/* Year after a project title: 40% ink; size inherits from the title/caption. */
 .project-year {
   color: var(--ink-40);
 }
@@ -676,29 +647,28 @@ body:has(.hero) .site-header {
   display: block;
   margin-top: 100px;
   margin-bottom: 247px;
-  font-size: 23px;
-  line-height: 29px;
+  font-size: var(--text);
+  line-height: var(--lh);
   text-align: center;
 }
 
 .about {
   width: min(100%, var(--card));
   margin: 8px auto 140px;
-  font-size: 23px;
-  line-height: 29px;
+  font-size: var(--text);
+  line-height: var(--lh);
   text-align: left;
 }
 
 .about p,
 .text-block p {
-  margin: 0 0 29px;
+  margin: 0 0 var(--lh);
 }
 
 .about p:last-child,
 .text-block p:last-child {
   margin-bottom: 0;
 }
-
 
 .project {
   padding: 32px var(--pad) 40px;
@@ -719,7 +689,6 @@ body:has(.hero) .site-header {
   transform-origin: center center;
 }
 
-/* Distorted face mark: static, keeps its proportions (no cursor stretch). */
 .project-mark .mark-face {
   width: var(--mark-small-w);
   transform: none;
@@ -738,23 +707,23 @@ body:has(.hero) .site-header {
 
 .project-hero h1 {
   margin: 0;
-  font-size: var(--text-title);
+  font-size: var(--text);
   font-weight: 400;
-  line-height: var(--lh-title);
+  line-height: var(--lh);
   letter-spacing: var(--track);
 }
 
 .project-summary {
   width: min(100%, var(--measure));
-  margin: 29px auto 0;
-  font-size: var(--text-body);
-  line-height: var(--lh-body);
+  margin: var(--lh) auto 0;
+  font-size: var(--text);
+  line-height: var(--lh);
   letter-spacing: var(--track);
   text-align: left;
 }
 
 .project-summary p {
-  margin: 0 0 29px;
+  margin: 0 0 var(--lh);
 }
 
 .project-summary p:last-child {
@@ -765,19 +734,18 @@ body:has(.hero) .site-header {
   width: min(100%, var(--measure));
   margin: 0 auto var(--space-text);
   padding-top: calc(var(--space-text) - var(--space-block));
-  font-size: var(--text-title);
-  line-height: var(--lh-title);
+  font-size: var(--text);
+  line-height: var(--lh);
 }
 
 .text-block h2 {
   margin: 0 0 16px;
-  font-size: var(--text-body);
+  font-size: var(--text);
   font-weight: 400;
-  line-height: var(--lh-body);
+  line-height: var(--lh);
   letter-spacing: var(--track);
 }
 
-/* Titled text block: centred title + gray year, then body, both at lead size. Tighter gap around it. */
 .text-block[data-titled] {
   margin-bottom: var(--space-text-titled);
   padding-top: calc(var(--space-text-titled) - var(--space-block));
@@ -821,9 +789,9 @@ body:has(.hero) .site-header {
 .process-label,
 .info-label {
   margin: 0 0 72px;
-  font-size: var(--text-title);
+  font-size: var(--text);
   font-weight: 400;
-  line-height: var(--lh-title);
+  line-height: var(--lh);
   letter-spacing: var(--track);
   text-align: center;
 }
@@ -859,16 +827,14 @@ body:has(.hero) .site-header {
   padding: 0;
   list-style: none;
   text-align: left;
-  font-size: 23px;
-  line-height: 29px;
+  font-size: var(--text);
+  line-height: var(--lh);
 }
 
 .info-list li {
   margin: 0;
 }
 
-/* 1px hairline on the footer's top edge, full viewport width: when scrolled to the
-   bottom (the footer is one screen tall) it sits at the top of the viewport. */
 .site-footer::before {
   content: '';
   position: absolute;
@@ -893,7 +859,6 @@ body:has(.hero) .site-header {
   max-height: 100svh;
 }
 
-/* Text band above the faces; page-grid + footer-text share the about column. */
 .footer-copy {
   position: absolute;
   top: 0;
@@ -908,30 +873,28 @@ body:has(.hero) .site-header {
 }
 
 .footer-copy .page-grid {
-  /* Do not force width:100% — on desktop .page-grid is min(100%, 1440px) centered, same as .about. */
+
   box-sizing: border-box;
   padding-inline: var(--pad);
 }
 
-/* Same width token as .about on mobile. */
 .footer-text {
   width: min(100%, var(--card));
   margin: 0 auto;
   box-sizing: border-box;
   text-align: left;
-  font-size: 23px;
-  line-height: 29px;
+  font-size: var(--text);
+  line-height: var(--lh);
 }
 
 .footer-text p {
-  margin: 0 0 29px;
+  margin: 0 0 var(--lh);
 }
 
 .footer-text p:last-child {
   margin-bottom: 0;
 }
 
-/* Faces pinned to the bottom edge; rest height half of a 2x stretch box. */
 .footer-faces {
   position: absolute;
   left: 0;
@@ -941,8 +904,7 @@ body:has(.hero) .site-header {
   width: 100%;
   margin: 0;
   padding: 0;
-  /* Explicit height, no aspect-ratio + max-height: WebKit transfers the max-height through the
-     ratio to the width, so the faces only filled ~2/3 of the width in Safari. */
+
   height: min(52vw, 60svh);
   pointer-events: none;
 }
@@ -983,7 +945,6 @@ body:has(.hero) .site-header {
   fill: var(--red);
 }
 
-
 .not-found {
   min-height: 100svh;
   display: grid;
@@ -994,7 +955,7 @@ body:has(.hero) .site-header {
 
 .not-found h1 {
   margin: 0 0 12px;
-  font-size: var(--text-title);
+  font-size: var(--text);
   font-weight: 400;
 }
 
@@ -1025,14 +986,14 @@ body:has(.hero) .site-header {
 
   .hero .mark-blob {
     --mark-scale: 1;
-    /* Intro scroll sets --intro-w / --intro-face-top on [data-intro] home. */
+
     top: 41.5svh;
     width: 73vw;
     transform: translate(-50%, -50%);
   }
 
   body:has(.hero) .site-header {
-    /* ~150px under blob bottom → first name line ~72.5svh; stacked + centred */
+
     top: 72.5svh;
     flex-direction: column;
     align-items: center;
@@ -1052,7 +1013,6 @@ body:has(.hero) .site-header {
     margin-inline: auto;
   }
 
-  /* Fixed block: an open menu or time overlays the lines and hides what it covers. */
   body:has(.hero) .who .time {
     left: 50%;
     transform: translateX(-50%);
@@ -1079,11 +1039,8 @@ body:has(.hero) .site-header {
     text-align: center;
   }
 
-  /* Stacked name + @Humansize: the 4 links sit on the same 29px line grid, centred on the
-     two buttons: Linkedin one row above, Instagram + X on the name and @Humansize rows,
-     Email one row below. */
   body:has(.hero) .contact-menu {
-    top: calc(-2 * var(--lh-body));
+    top: calc(-2 * var(--lh));
     right: auto;
     left: 50%;
     align-items: center;
@@ -1103,7 +1060,7 @@ body:has(.hero) .site-header {
     visibility: hidden;
     pointer-events: none;
     transform: translateX(-50%) scale(0.95);
-    /* same as closed: options leave immediately */
+
     transition:
       opacity var(--dur-fast) var(--ease-out),
       visibility 0s linear 150ms,
@@ -1114,7 +1071,7 @@ body:has(.hero) .site-header {
   body:has(.hero) .contact:focus-within:not(.is-open) .contact-label {
     opacity: 1;
     visibility: visible;
-    /* same as closed: label returns after options leave */
+
     transition:
       opacity var(--dur-fast) var(--ease-out) var(--dur-fast),
       visibility 0s linear 150ms,
@@ -1149,7 +1106,6 @@ body:has(.hero) .site-header {
     border-radius: var(--radius);
   }
 
-  /* Image pair: side by side with equal heights (cover). Stacked below 760. */
   .pair {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     align-items: stretch;
@@ -1223,7 +1179,6 @@ body:has(.hero) .site-header {
     padding-inline: var(--margin);
   }
 
-  /* Header stays full page-grid width. Do not remove — footer must not shrink it. */
   body:has(.hero) .site-header.page-grid {
     width: min(100%, 1440px);
   }
@@ -1306,7 +1261,6 @@ body:has(.hero) .site-header {
     margin-right: 0;
   }
 
-  /* Keystatic Frame: Wide on image, video and pair blocks: one column more on each side. */
   .project.page-grid > .image-block[data-frame='wide'],
   .project.page-grid > .pair[data-frame='wide'] {
     grid-column: calc((var(--cols) - var(--wide-span)) / 2 + 1) / span var(--wide-span);
@@ -1316,7 +1270,6 @@ body:has(.hero) .site-header {
     margin-right: 0;
   }
 
-  /* all project text shares the summary's measure and left edge */
   .project.page-grid > .text-block,
   .project.page-grid > .info {
     grid-column: calc((var(--cols) - var(--content-span)) / 2 + 1) / span var(--content-span);
@@ -1370,9 +1323,6 @@ html.show-grid .grid-overlay .page-grid {
   }
 }
 
-/* Quiet press + hover feedback (Emil): transform/opacity/color only.
-   No press scale on media cards — keeps native press-and-hold save.
-   Hover motion gated to fine pointers; reduced-motion drops transforms. */
 .caption,
 .site-header .who > a,
 .project-mark a,
@@ -1428,9 +1378,6 @@ html.show-grid .grid-overlay .page-grid {
   }
 }
 
-
-/* Scroll fade: opacity only. Hidden only after JS marks .fade-ready and skips first-viewport items.
-   No transition on hide (avoids a 1→0 flash when .fade-ready lands); only animate reveal. */
 .js.fade-ready .fade-in:not(.is-in) {
   opacity: 0;
   transition: none;
@@ -1441,10 +1388,9 @@ html.show-grid .grid-overlay .page-grid {
   transition: opacity var(--dur-sheet) var(--ease-out);
 }
 
-/* Homepage cards use display:contents on desktop — fade their grid children instead. */
 @media (min-width: 760px) {
   .js.fade-ready .card.fade-in:not(.is-in) {
-    opacity: 1; /* contents box itself isn't painted */
+    opacity: 1;
   }
 
   .js.fade-ready .card.fade-in:not(.is-in) > * {
@@ -1458,7 +1404,6 @@ html.show-grid .grid-overlay .page-grid {
   }
 }
 
-/* Don't double-fade: while the block is still hidden, keep images opaque (parent hides them). */
 .js.fade-ready .fade-in:not(.is-in) .frame img {
   opacity: 1;
   transition: none;
@@ -1475,16 +1420,12 @@ html.show-grid .grid-overlay .page-grid {
   }
 }
 
-/* Invisible haptic label over links and buttons on iOS. Never visible. */
 [data-haptic-overlay] {
   z-index: 0;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
 }
 
-/* Cross-page transition: the small project mark grows into the homepage mark.
-   Native cross-document view transitions, so page scripts load as usual;
-   browsers without support just change page. */
 @view-transition {
   navigation: auto;
 }
@@ -1494,9 +1435,6 @@ html.show-grid .grid-overlay .page-grid {
   view-transition-name: hs-mark;
 }
 
-/* The Industrial Bloom ring is the same kind of shared element between /shop (big, centred)
-   and /shop/<slug> (small, top): one eased move + scale. spin-mark.ts freezes and hands over
-   its angle on pageswap so both snapshots match. */
 .shop-mark {
   view-transition-name: ib-mark;
 }
@@ -1506,10 +1444,6 @@ html.show-grid .grid-overlay .page-grid {
   animation-timing-function: var(--ease-out-expo);
 }
 
-/* Only the vector mark moves: no crossfade between its two snapshots (a small raster
-   blown up under the big one read as a JPG-like haze). Show only the larger snapshot,
-   which is the sharper one, for the whole morph: the new one when growing into /shop,
-   the old one when shrinking into a detail page. */
 ::view-transition-image-pair(ib-mark) {
   isolation: auto;
 }
@@ -1534,9 +1468,6 @@ html:active-view-transition-type(ib-shrink)::view-transition-new(ib-mark) {
   animation-timing-function: var(--ease-out-expo);
 }
 
-/* Page change: the old page stays fully opaque underneath and the new page fades in on
-   top with normal blending. The default crossfade fades both and adds them with
-   plus-lighter, which Safari can render brighter than the page (an HDR-like flash). */
 ::view-transition {
   background: var(--page-bg, var(--bg));
 }
@@ -1571,9 +1502,6 @@ html:active-view-transition-type(ib-shrink)::view-transition-new(ib-mark) {
   }
 }
 
-/* Text reveal: a quick blur-to-sharp per visual line as text enters.
-   Scroll-linked where supported; otherwise a 400ms fallback with a tiny stagger.
-   Never touches the faces or the mark. */
 @keyframes text-in {
   from {
     opacity: 0;
@@ -1582,12 +1510,10 @@ html:active-view-transition-type(ib-shrink)::view-transition-new(ib-mark) {
   }
 }
 
-/* inline-block so transform applies; whitespace stays outside the spans, so wrapping is unchanged */
 .is-split .reveal-word {
   display: inline-block;
 }
 
-/* words inside a decorated parent inherit it; a link that is itself the unit keeps its own underline */
 .is-split .reveal-word:not(a) {
   text-decoration: inherit;
 }
@@ -1601,8 +1527,6 @@ html:active-view-transition-type(ib-shrink)::view-transition-new(ib-mark) {
     }
   }
 
-  /* Class-driven reveal: the scroll fallback where view() timelines are missing, and
-     in-place reveals (.reveal-manual, e.g. /shop Details). .reveal-out plays it in reverse. */
   .reveal-manual .reveal-word {
     animation: none;
   }
@@ -1628,7 +1552,6 @@ html:active-view-transition-type(ib-shrink)::view-transition-new(ib-mark) {
     transition: none;
   }
 
-  /* Menu + Tokyo time: opacity transition only — no keyframes, no translate, no blur. */
   .contact-menu,
   .contact-menu > *,
   .who .time,
@@ -1640,9 +1563,6 @@ html:active-view-transition-type(ib-shrink)::view-transition-new(ib-mark) {
   }
 }
 
-/* iOS haptics: label overlay stays under media and captions. Media keeps native
-   press-and-hold save; caption stays a real link. The gap hits the label, which
-   is scroll-transparent (the hidden switch never sits under the finger). */
 [data-haptic] :is(.frame, img, video),
 [data-haptic] a:has(.frame, img, video),
 [data-haptic] .caption {
@@ -1650,8 +1570,6 @@ html:active-view-transition-type(ib-shrink)::view-transition-new(ib-mark) {
   z-index: 1;
 }
 
-
-/* CMS live preview marker — quiet, grey, out of the way. */
 .preview-badge {
   position: fixed;
   top: 12px;
@@ -1662,15 +1580,13 @@ html:active-view-transition-type(ib-shrink)::view-transition-new(ib-mark) {
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.92);
   color: #8a8a8a;
-  font-size: 13px;
-  line-height: 16px;
-  letter-spacing: 0;
+  font-size: var(--text-meta);
+  line-height: var(--lh-meta);
+  letter-spacing: var(--track-none);
   pointer-events: none;
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.06);
 }
 
-
-/* Hero blob dials — only mounted when ?dials is in the URL */
 .hero-dials {
   position: fixed;
   right: 12px;
@@ -1682,14 +1598,14 @@ html:active-view-transition-type(ib-shrink)::view-transition-new(ib-mark) {
   background: rgba(255, 255, 255, 0.92);
   border: 1px solid rgba(0, 0, 0, 0.12);
   box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
-  font-size: 11px;
-  line-height: 14px;
+  font-size: var(--text-fine);
+  line-height: var(--lh-fine);
   color: #111;
   backdrop-filter: blur(8px);
 }
 .hero-dials__title {
-  font-size: 11px;
-  line-height: 14px;
+  font-size: var(--text-fine);
+  line-height: var(--lh-fine);
   font-weight: 600;
   margin: 0 0 6px;
 }
@@ -1702,8 +1618,8 @@ html:active-view-transition-type(ib-shrink)::view-transition-new(ib-mark) {
 }
 .hero-dials__label,
 .hero-dials__value {
-  font-size: 11px;
-  line-height: 14px;
+  font-size: var(--text-fine);
+  line-height: var(--lh-fine);
   white-space: nowrap;
 }
 .hero-dials__value {
@@ -1735,17 +1651,14 @@ html:active-view-transition-type(ib-shrink)::view-transition-new(ib-mark) {
   border-radius: 4px;
   border: 1px solid rgba(0, 0, 0, 0.16);
   background: #fff;
-  font-size: 11px;
-  line-height: 14px;
+  font-size: var(--text-fine);
+  line-height: var(--lh-fine);
   cursor: pointer;
 }
 .hero-dials__btn:hover {
   background: #f4f4f4;
 }
 
-/* The Tokyo time never shows behind an open @Humansize menu: it goes instantly when the
-   menu opens and stays gone while it is open. A tap outside brings it back instantly;
-   the 5s auto-close crossfades it back in. */
 body .site-header.is-menu-open .who .time,
 body .site-header.is-menu-snap .who .time {
   transition: none;
@@ -1765,7 +1678,6 @@ body .site-header.is-menu-fade:not(.is-menu-open) .who .time {
   }
 }
 
-/* Phones (no hover): menu links are black by default; desktop keeps the quiet gray + hover. */
 @media (hover: none) {
   .contact-menu a,
   .contact-menu span {
@@ -1773,7 +1685,6 @@ body .site-header.is-menu-fade:not(.is-menu-open) .who .time {
   }
 }
 
-/* Info sits before Process: one section gap between them, the 40px tail stays at page end. */
 .project .info:has(+ .process) {
   margin-bottom: 0;
 }
@@ -1781,12 +1692,11 @@ body .site-header.is-menu-fade:not(.is-menu-open) .who .time {
   margin-top: var(--space-section);
 }
 
-/* Shop draft: price line + one quiet buy button (same type, squircle radius, greys). */
 .shop-buy {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: var(--lh-body);
+  gap: var(--lh);
 }
 .shop-price {
   margin: 0;
@@ -1808,9 +1718,6 @@ body .site-header.is-menu-fade:not(.is-menu-open) .who .time {
   }
 }
 
-/* Shop overview (desktop mock, 1440): title row with the Industrial Bloom mark centred,
-   intro on the content span, then one section per product: image pair on the Wide span,
-   centred caption, optional description on the content span. */
 .shop-page {
   padding-top: 216px;
   padding-bottom: 150px;
@@ -1825,9 +1732,9 @@ body .site-header.is-menu-fade:not(.is-menu-open) .who .time {
 .shop-head-title,
 .shop-head-sub {
   margin: 0;
-  font-size: var(--text-body);
+  font-size: var(--text);
   font-weight: 400;
-  line-height: var(--lh-body);
+  line-height: var(--lh);
   white-space: nowrap;
 }
 .shop-head-title {
@@ -1857,7 +1764,7 @@ body .site-header.is-menu-fade:not(.is-menu-open) .who .time {
   margin-bottom: 136px;
 }
 .shop-intro p {
-  margin: 0 0 29px;
+  margin: 0 0 var(--lh);
 }
 .shop-intro p:last-child {
   margin-bottom: 0;
@@ -1901,7 +1808,7 @@ body .site-header.is-menu-fade:not(.is-menu-open) .who .time {
 }
 .shop-links {
   display: block;
-  margin-top: 29px;
+  margin-top: var(--lh);
 }
 .shop-desc {
   margin: 84px 0 0;
@@ -1951,8 +1858,6 @@ body .site-header.is-menu-fade:not(.is-menu-open) .who .time {
   }
 }
 
-/* /shop Details panel: height eases open (no clipping, overflow stays visible) and the copy
-   plays the shared class-driven text reveal; closing reverses it, then the height closes. */
 .shop-details {
   padding: 0;
   border: 0;
@@ -2001,10 +1906,6 @@ body .site-header.is-menu-fade:not(.is-menu-open) .who .time {
   display: none;
 }
 
-/* Shop detail (/shop/<slug>): same grid as project pages. Everything sits on the project
-   Default column (--content-span, 6 cols = 666 at 1440), Industrial Bloom mark on top, centred title + price,
-   sections of centred heading / text / image, a two-column gallery, Info, and a
-   bottom-pinned Buy button. */
 .shop-detail {
   padding-top: 44px;
   padding-bottom: 116px;
@@ -2029,16 +1930,16 @@ body .site-header.is-menu-fade:not(.is-menu-open) .who .time {
 .shop-detail-head h1,
 .shop-detail-heading {
   margin: 0 0 60px;
-  font-size: var(--text-body);
+  font-size: var(--text);
   font-weight: 400;
-  line-height: var(--lh-body);
+  line-height: var(--lh);
   text-align: center;
 }
 .shop-detail-text {
   margin-bottom: 122px;
 }
 .shop-detail-text p {
-  margin: 0 0 var(--lh-body);
+  margin: 0 0 var(--lh);
 }
 .shop-detail-text p:last-child {
   margin-bottom: 0;
@@ -2084,10 +1985,7 @@ body .site-header.is-menu-fade:not(.is-menu-open) .who .time {
 .shop-detail-info .info-label {
   margin-bottom: 60px;
 }
-/* Buy: sticky, not fixed. It pins to the viewport bottom (plus the iOS home
-   indicator inset) while the article scrolls, then rests after Info, so it never
-   covers the footer. Rest: --button-fill, black label; hover: the faces red with a
-   white label (7.1:1), quiet 150ms. */
+
 .shop-buy-bar {
   position: sticky;
   bottom: calc(56px + env(safe-area-inset-bottom, 0px));
@@ -2153,7 +2051,7 @@ body .site-header.is-menu-fade:not(.is-menu-open) .who .time {
   }
   .shop-detail-head h1,
   .shop-detail-heading {
-    margin-bottom: var(--lh-body);
+    margin-bottom: var(--lh);
   }
   .shop-detail-text {
     margin-bottom: 48px;
@@ -2171,7 +2069,7 @@ body .site-header.is-menu-fade:not(.is-menu-open) .who .time {
     margin-top: 96px;
   }
   .shop-detail-info .info-label {
-    margin-bottom: var(--lh-body);
+    margin-bottom: var(--lh);
   }
   .shop-buy-bar {
     bottom: calc(20px + env(safe-area-inset-bottom, 0px));
@@ -2179,7 +2077,6 @@ body .site-header.is-menu-fade:not(.is-menu-open) .who .time {
   }
 }
 
-/* Homepage intro (src/scripts/intro-face.ts): huge face pushed down to size by the name. */
 .hero[data-intro] {
   padding-top: 0;
   overflow-x: clip;
@@ -2190,8 +2087,7 @@ body .site-header.is-menu-fade:not(.is-menu-open) .who .time {
 }
 
 .hero[data-intro] [data-hero-variant="blob"] {
-  /* Extends above the page and past the sides so nothing crops the face (iOS rubber-band,
-     WebGL output region). Scaled as one composited layer. */
+
   position: fixed;
   inset: -100lvh -50% auto;
   height: calc(100lvh + 100svh);
@@ -2230,7 +2126,7 @@ body:has(.hero[data-intro]) .who .time {
 }
 
 body:has(.hero[data-intro]) .contact-menu {
-  top: calc(-2 * var(--lh-body));
+  top: calc(-2 * var(--lh));
   right: auto;
   left: 50%;
   align-items: center;
@@ -2253,20 +2149,19 @@ body:has(.hero[data-intro]) .site-header .contact {
   grid-column: auto;
 }
 
-/* Preview-only intro smoothing dial (never rendered on production). */
 .intro-tune {
   position: fixed;
   right: 16px;
   bottom: 16px;
-  /* under the header (z 5) so the open contact menu stays tappable */
+
   z-index: 4;
   display: flex;
   flex-direction: column;
   gap: 6px;
   width: 200px;
   padding: 12px;
-  font-size: 13px;
-  line-height: 16px;
+  font-size: var(--text-meta);
+  line-height: var(--lh-meta);
   color: #fff;
   background: rgb(0 0 0 / 80%);
   border-radius: 8px;
@@ -2285,11 +2180,10 @@ body:has(.hero[data-intro]) .site-header .contact {
   border-radius: 4px;
 }
 
-/* Homepage name block (mock 2): "Humansize" over Home / Contact / Shop. */
 .site-header .brand {
   margin: 0;
-  font-size: var(--text-body);
-  line-height: var(--lh-body);
+  font-size: var(--text);
+  line-height: var(--lh);
   letter-spacing: var(--track);
   font-weight: 400;
 }
@@ -2306,8 +2200,8 @@ body:has(.hero[data-intro]) .site-header .contact {
 .project-menu > button {
   padding: 0;
   font: inherit;
-  font-size: var(--text-body);
-  line-height: var(--lh-body);
+  font-size: var(--text);
+  line-height: var(--lh);
   color: var(--ink);
   text-decoration: none;
   background: none;
@@ -2316,7 +2210,6 @@ body:has(.hero[data-intro]) .site-header .contact {
   transition: color var(--dur-hover) var(--ease-out);
 }
 
-/* Landing: all gray, the hovered one turns black. */
 .site-menu > a,
 .site-menu > button {
   color: var(--muted);
@@ -2327,7 +2220,6 @@ body:has(.hero[data-intro]) .site-header .contact {
   color: var(--ink);
 }
 
-/* Project pages: face opens the menu; items come out from behind the face. */
 .project-mark {
   position: relative;
   transition: margin-bottom var(--dur-media) var(--ease-out);
@@ -2338,7 +2230,7 @@ body:has(.hero[data-intro]) .site-header .contact {
 }
 
 .project-mark.is-open::before {
-  /* the "general area": leaving it closes the menu */
+
   content: "";
   position: absolute;
   top: -32px;
@@ -2388,7 +2280,6 @@ body:has(.hero[data-intro]) .site-header .contact {
   color: var(--muted);
 }
 
-/* Contact sheet: a Vaul drawer. Vaul owns the slide (500ms, iOS drawer curve) and drag. */
 html.is-contact-open {
   overflow: hidden;
 }
@@ -2413,8 +2304,6 @@ html.is-contact-open {
   outline: none;
 }
 
-/* Vaul keeps the drawer under the fold with a translate; extend its 1px hairline of white
-   so an iOS overscroll pull never shows the page under the sheet. */
 .contact-panel::after {
   content: "";
   position: absolute;
@@ -2439,8 +2328,8 @@ html.is-contact-open {
 .contact-done {
   display: block;
   margin: 0;
-  font-size: var(--text-body);
-  line-height: var(--lh-body);
+  font-size: var(--text);
+  line-height: var(--lh);
   color: var(--ink);
   transition: color var(--dur-hover) var(--ease-out);
 }
@@ -2465,8 +2354,8 @@ html.is-contact-open {
 .contact-nav button {
   padding: 0;
   font: inherit;
-  font-size: var(--text-body);
-  line-height: var(--lh-body);
+  font-size: var(--text);
+  line-height: var(--lh);
   color: var(--ink);
   background: none;
   border: 0;
@@ -2485,8 +2374,8 @@ html.is-contact-open {
   margin: 56px auto 0;
   padding: 0;
   font: inherit;
-  font-size: var(--text-body);
-  line-height: var(--lh-body);
+  font-size: var(--text);
+  line-height: var(--lh);
   color: var(--ink);
   text-align: left;
   background: none;
@@ -2521,7 +2410,7 @@ html.is-contact-open {
   display: flex;
   align-items: center;
   gap: 16px;
-  height: 29px;
+  height: var(--lh);
   transform: translateX(-50%);
 }
 
@@ -2566,7 +2455,6 @@ html.is-contact-open {
   cursor: default;
 }
 
-/* From step 2 on: hovering the dots merges them into one and brings in Back / Next. */
 .contact-nav.has-controls:hover .contact-dots,
 .contact-nav.has-controls:focus-within .contact-dots {
   gap: 0;
@@ -2584,7 +2472,6 @@ html.is-contact-open {
   transform: none;
 }
 
-/* Touch: no hover, so Back / Next stay visible from step 2 on. */
 @media (hover: none) {
   .contact-nav.has-controls :is(.contact-back, .contact-next) {
     opacity: 1;
@@ -2607,8 +2494,6 @@ html.is-contact-open {
   left: calc(100% + 16px);
 }
 
-/* Touch intro: the scale runs as a scroll-driven animation on the compositor (no JS per frame),
-   so iOS momentum scrolling stays smooth. */
 @keyframes intro-face-scale {
   from {
     transform: scale(1) translateZ(0);
@@ -2625,10 +2510,6 @@ html.is-contact-open {
   animation-range: 0px var(--intro-r);
 }
 
-/* Round 5 ------------------------------------------------------------------ */
-
-/* Small-icon menus (project, /shop, /shop/<slug>): gray, the hovered one turns black. Items
-   blur in as they come out from behind the icon. */
 .project-menu > a,
 .project-menu > button {
   color: var(--muted);
@@ -2654,14 +2535,11 @@ html.is-contact-open {
   color: var(--ink);
 }
 
-/* Ring icons: the menu hangs 16px under the ring, with a 16px bridge so the pointer can cross. */
 .project-mark.is-ring .project-menu {
   top: calc(var(--small-menu-top) - var(--small-menu-bridge));
   padding-top: var(--small-menu-bridge);
 }
 
-/* /shop header (mock: shop header): big ring centred on the viewport top, title + subline at
-   75svh; shop-intro.ts scales the ring down onto the /shop/<slug> icon spot. */
 .shop-page {
   position: relative;
   padding-top: var(--intro-name-top, round(77.2svh, 1px));
@@ -2684,8 +2562,7 @@ html.is-contact-open {
 }
 
 .shop-ring-layer {
-  /* position:fixed so elastic overscroll never crops it (content above doc y 0 is never painted);
-     shop-intro.ts / the scroll() animation translate it by -scrollY so it scrolls with the page. */
+
   position: fixed;
   top: -100lvh;
   right: 0;
@@ -2743,7 +2620,6 @@ html.is-contact-open {
   }
 }
 
-/* Contact: thank-you centred in the panel like the other steps' content; no dots there. */
 .contact-step[data-step="done"] {
   position: absolute;
   top: 220px;
@@ -2759,15 +2635,12 @@ html.is-contact-open {
   visibility: hidden;
 }
 
-/* Dots: one generous hover zone that covers the dots and both buttons. */
 .contact-nav::before {
   content: "";
   position: absolute;
   inset: -32px -136px;
 }
 
-/* Project text: centred while it is one line, left from the second; the block stays
-   vertically centred in the area and only moves when the line count changes. */
 .contact-field {
   position: relative;
   width: min(664px, 100%);
@@ -2780,7 +2653,7 @@ html.is-contact-open {
   top: 50%;
   left: 0;
   width: 100%;
-  height: calc(var(--lines, 1) * var(--lh-body));
+  height: calc(var(--lines, 1) * var(--lh));
   max-height: 100%;
   margin: 0;
   padding: 0;
@@ -2807,15 +2680,14 @@ html.is-contact-open {
   top: 0;
   left: 0;
   width: 100%;
-  font-size: var(--text-body);
-  line-height: var(--lh-body);
+  font-size: var(--text);
+  line-height: var(--lh);
   white-space: pre-wrap;
   overflow-wrap: break-word;
   visibility: hidden;
   pointer-events: none;
 }
 
-/* Blur reveal on text that appears: header name + menu, each contact step, the thank-you. */
 @media (prefers-reduced-motion: no-preference) {
   .site-header .brand,
   .site-menu > *,
@@ -2843,11 +2715,6 @@ html.is-contact-open {
   position: relative;
 }
 
-/* Round 6 ------------------------------------------------------------------ */
-
-/* Phones: menu items sit half as far under the small icon. */
-/* Small-icon menu (project face and product ring share these): offset from the icon top,
-   the hover bridge under a ring, and how far an open menu pushes the content down. */
 :root {
   --small-menu-top: 70px;
   --small-menu-bridge: 16px;
@@ -2862,7 +2729,6 @@ html.is-contact-open {
   }
 }
 
-/* Keyboard focus, in the site's style: a thin ink outline, offset, only for keyboard users. */
 :focus-visible {
   outline: 1px solid var(--ink);
   outline-offset: 4px;
@@ -2881,14 +2747,12 @@ html.is-contact-open {
   margin-top: 0;
 }
 
-/* Contact sheet, round 6: equal 40px space above the question and below the nav, so the
-   content line (options, text, email, thank-you) sits exactly on the panel's centre (217.5). */
 .contact-panel {
   padding-top: 40px;
 }
 
 .contact-panel::after {
-  /* white under the panel: the iOS toolbar / keyboard never shows the page through */
+
   content: "";
   position: absolute;
   top: 100%;
@@ -2923,7 +2787,7 @@ html.is-contact-open {
 
 .contact-panel .contact-field textarea {
   position: static;
-  height: var(--lh-body);
+  height: var(--lh);
   max-height: 100%;
   transform: none;
   transition: none;
@@ -2935,7 +2799,6 @@ html.is-contact-open body {
   overscroll-behavior: none;
 }
 
-/* Steps: blur only (no rise), a little slower. */
 @keyframes text-blur-in {
   from {
     opacity: 0;
@@ -2967,19 +2830,14 @@ html.is-contact-open body {
   }
 }
 
-/* Contact open: scroll lock without a non-passive touchmove (see touch-scroll-guard). */
-html.is-contact-open, html.is-contact-open body { overscroll-behavior: none; }
 .contact-root { overscroll-behavior: contain; }
 
-/* Face stays unpainted until JS has sized it, so it never jumps (CLS). */
 .js .hero[data-intro]:not([data-intro-ready]) .mark-blob { visibility: hidden; }
 
-/* Contact text field: the site's tracking, like every other text. */
 .contact-panel textarea {
   letter-spacing: var(--track);
 }
 
-/* Home header: "Humansize" toggles the socials row (same place and style as the menu). */
 .brand-toggle {
   padding: 0;
   font: inherit;
@@ -2993,13 +2851,15 @@ html.is-contact-open, html.is-contact-open body { overscroll-behavior: none; }
   cursor: pointer;
 }
 
-.brand-at {
+.brand-at,
+.brand-pad {
   display: none;
 }
 
-.brand-stack {
-  display: inline-block;
-  white-space: nowrap;
+.brand-stack,
+.brand-word,
+.brand-shift {
+  display: inline;
 }
 
 @media (hover: hover) and (pointer: fine) and (min-width: 760px) {
@@ -3009,6 +2869,7 @@ html.is-contact-open, html.is-contact-open body { overscroll-behavior: none; }
 
   .brand-stack {
     display: inline-block;
+    white-space: nowrap;
     vertical-align: baseline;
   }
 
@@ -3017,35 +2878,48 @@ html.is-contact-open, html.is-contact-open body { overscroll-behavior: none; }
     align-items: baseline;
     gap: 0;
     letter-spacing: var(--track);
-    transform: translateX(calc(var(--brand-at-w, 0px) * -0.5));
+  }
+
+  .brand-shift {
+    position: relative;
+    display: block;
+    flex: 0 0 auto;
+    transform: translateX(-50%);
     transition: transform var(--dur-hover) var(--ease-out);
   }
 
   .brand-at,
-  .brand-name {
+  .brand-name,
+  .brand-pad {
     font: inherit;
     font-size: inherit;
     line-height: inherit;
     letter-spacing: inherit;
     font-weight: inherit;
+    white-space: nowrap;
   }
 
   .brand-at {
     display: block;
-    flex: 0 0 var(--brand-at-w, 0px);
-    width: var(--brand-at-w, 0px);
     opacity: 0;
-    white-space: nowrap;
     transition: opacity var(--dur-hover) var(--ease-out);
   }
 
   .brand-name {
-    flex: 0 0 auto;
+    position: absolute;
+    left: 100%;
+    top: 0;
   }
 
-  .brand-toggle:hover .brand-word,
-  .brand-toggle:focus-visible .brand-word {
-    transform: translateX(0);
+  .brand-pad {
+    display: block;
+    visibility: hidden;
+    user-select: none;
+  }
+
+  .brand-toggle:hover .brand-shift,
+  .brand-toggle:focus-visible .brand-shift {
+    transform: none;
   }
 
   .brand-toggle:hover .brand-at,
@@ -3064,8 +2938,6 @@ html.is-contact-open, html.is-contact-open body { overscroll-behavior: none; }
   }
 }
 
-/* /shop big ring: drawn into a canvas (see shop-intro.ts) so the half above the page top is
-   painted too and elastic overscroll reveals it. The SVG keeps the box size. */
 .shop-ring .shop-mark {
   position: relative;
 }
@@ -3075,9 +2947,6 @@ html.is-contact-open, html.is-contact-open body { overscroll-behavior: none; }
   inset: 0;
   width: 100%;
   height: 100%;
-}
-
-.shop-ring-canvas {
   visibility: hidden;
 }
 
@@ -3089,7 +2958,6 @@ html.is-contact-open, html.is-contact-open body { overscroll-behavior: none; }
   visibility: hidden;
 }
 
-/* Fixed intro graphics follow the page: touch path translates by -scroll on the compositor. */
 @keyframes intro-follow {
   from { translate: 0 0; }
   to { translate: 0 -100000px; }
@@ -3107,10 +2975,6 @@ html.is-contact-open, html.is-contact-open body { overscroll-behavior: none; }
   animation-range: 0px var(--ring-r), 0px 100000px;
 }
 
-/* No visibility toggle when scrolled off: the view-transition morph (ib-mark / hs-mark) must
-   snapshot the graphic even off-screen, and the compositor already skips off-screen tiles. */
-
-/* A live price that changes after load blurs in again (scripts/shop-price.ts). */
 @media (prefers-reduced-motion: no-preference) {
   .is-split .reveal-word.price-swap,
   .price-swap {
@@ -3118,9 +2982,6 @@ html.is-contact-open, html.is-contact-open body { overscroll-behavior: none; }
   }
 }
 
-/* Homepage + /shop: the header menu fades out as the intro scrolls away and back in on the
-   way up (scroll-linked, reversible). Focus brings it straight back so it stays keyboard
-   reachable. The socials row on "Humansize" is untouched. */
 @keyframes menu-scroll-out {
   to {
     opacity: 0;

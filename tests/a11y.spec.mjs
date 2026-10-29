@@ -1,9 +1,4 @@
-/**
- * Accessibility: axe on every page, keyboard menus and dialog, scroll lock,
- * and the project textarea never clips a line (typing, wrapping, Shift+Enter, paste).
- *
- *   npm run build && npm run test:shop-intro
- */
+
 import { chromium } from 'playwright';
 import { createServer } from 'node:http';
 import { readFileSync, existsSync, statSync } from 'node:fs';
@@ -47,12 +42,10 @@ for (const path of pages) {
 }
 console.log(`  contrast notes (not failing): ${[...new Set(contrast.values())].join(', ') || 'none'} on ${contrast.size} nodes`);
 
-// No skip link (removed in round 7: the menus are short).
 let p = await desk.newPage();
 await p.goto(B + '/work/' + work[0] + '/', { waitUntil: 'load' });
 check(!(await p.evaluate(() => document.querySelector('.skip'))), 'no skip link');
 
-// Project menu: Tab opens it, items reachable, closed items not tabbable, Esc closes + returns focus.
 await p.keyboard.press('Tab');
 check(await p.evaluate(() => document.activeElement.matches('[data-project-face]') && document.querySelector('[data-project-menu]').classList.contains('is-open')), 'Tab onto the icon opens the menu');
 await p.keyboard.press('Tab');
@@ -61,7 +54,6 @@ await p.keyboard.press('Escape');
 check(await p.evaluate(() => document.activeElement.matches('[data-project-face]') && !document.querySelector('[data-project-menu]').classList.contains('is-open')), 'Esc closes the menu and returns focus');
 check(await p.evaluate(() => document.querySelector('.project-menu').inert), 'closed menu is inert');
 
-// Dialog: role, initial focus, trap, Esc returns focus.
 await p.goto(B + '/', { waitUntil: 'load' });
 await p.waitForTimeout(400);
 await p.focus('.site-menu [data-contact-open]');
@@ -79,7 +71,6 @@ await p.keyboard.press('Escape');
 await p.waitForTimeout(100);
 check(await p.evaluate(() => document.activeElement.matches('.site-menu [data-contact-open]')), 'dialog: Esc returns focus to Contact');
 
-// Textarea never clips: long wrap, Shift+Enter lines, paste, delete; desktop and phone.
 for (const [label, opt] of [['desktop', { viewport: { width: 1440, height: 900 } }], ['mobile', { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true }]]) {
   const ctx = await browser.newContext(opt);
   const q = await ctx.newPage();

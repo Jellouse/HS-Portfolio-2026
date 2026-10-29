@@ -1,4 +1,4 @@
-/** Stable viewport height for intro layout: locked per width so iOS toolbar collapse does not jump the hero. */
+
 export function stableViewportHeight(probe: HTMLElement, vw: number): number {
   const root = document.documentElement;
   const wAttr = 'data-layout-vw';

@@ -1,12 +1,4 @@
-/**
- * iPhone tap regression: the controls under the hero face must work on phones.
- * Taps the @Humansize menu button (menu must open, links must be the hit target),
- * taps the name (Tokyo time must toggle), as an iPhone (no navigator.vibrate, so the
- * iOS haptic label overlay is active) with real touch taps.
- *
- *   npm run build && npm run test:taps
- *   BASE_URL=https://humansize.de npm run test:taps
- */
+
 import { webkit, chromium, devices } from 'playwright';
 import { createServer } from 'node:http';
 import { readFileSync, existsSync, statSync } from 'node:fs';
@@ -88,7 +80,7 @@ const check = (ok, msg) => {
 try {
   const context = await browser.newContext({ ...iphone, defaultBrowserType: undefined, hasTouch: true, isMobile: true });
   await context.addInitScript(() => {
-    delete Navigator.prototype.vibrate; // behave like iOS Safari for the haptics script
+    delete Navigator.prototype.vibrate;
   });
   const page = await context.newPage();
   await page.goto(url + '/', { waitUntil: 'load' });
@@ -104,7 +96,7 @@ try {
     }),
   );
   check(hits.length === 3 && hits.every(Boolean), `service options are the tap target (${hits.length})`);
-  await page.touchscreen.tap(195, 120); // backdrop
+  await page.touchscreen.tap(195, 120);
   await page.waitForFunction(() => !document.querySelector('.contact-panel'), null, { timeout: 5000 }).catch(() => {});
   check(await page.evaluate(() => !document.querySelector('.contact-panel')), 'tap outside closes the sheet');
   const nav = page.waitForURL((u) => u.pathname.startsWith('/work/'), { timeout: 5000 }).then(() => true, () => false);

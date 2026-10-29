@@ -15,7 +15,6 @@ async function getProjectOrderSlugs(): Promise<string[]> {
   return entry?.data.projects ?? [];
 }
 
-/** Homepage / feed order from the Project order singleton. Missing slugs go last by year, then title. */
 export function sortProjectsByOrder<T extends { id: string; data: { title: string; year?: number | null } }>(
   projects: T[],
   order: string[],
@@ -49,7 +48,6 @@ export async function getProjects(): Promise<ProjectEntry[]> {
   return sorted;
 }
 
-/** All projects (including drafts), same order as the CMS list. */
 export async function getAllProjectsOrdered(): Promise<ProjectEntry[]> {
   const all = await getCollection('projects');
   const order = await getProjectOrderSlugs();
@@ -88,7 +86,7 @@ export function renderInline(text: string): string {
     html += escapeHtml(text.slice(last, index));
     const href = safeHref(match[2]);
     const label = escapeHtml(match[1]);
-    // [label](#contact) opens the contact sheet, like the header Contact item.
+
     const extra = href === '#contact' ? ' data-contact-open aria-haspopup="dialog"' : '';
     html += href ? `<a href="${escapeHtml(href)}"${extra}>${label}</a>` : escapeHtml(match[0]);
     last = index + match[0].length;

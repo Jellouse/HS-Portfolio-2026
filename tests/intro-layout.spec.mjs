@@ -1,7 +1,5 @@
-/**
- * introFaceLayout matches main branch geometry.
- */
-import { BLOB_ASPECT, introFaceLayout } from '../src/lib/intro-mobile-layout.ts';
+
+import { BLOB_ASPECT, introFaceLayout } from '../src/lib/intro-layout.ts';
 
 const d = introFaceLayout(844, 390);
 const failures = [];
@@ -11,4 +9,4 @@ if (failures.length) {
   console.error(failures.join('\n'));
   process.exit(1);
 }
-console.log('intro-mobile-layout: ok');
+console.log('intro-layout: ok');

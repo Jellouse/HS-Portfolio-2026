@@ -1,4 +1,4 @@
-// Dev-only tuning panel for hero blob. Mounted only when ?dials is in the URL.
+
 
 import { heroBlobDrift } from './hero-blob';
 

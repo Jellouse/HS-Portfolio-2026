@@ -1,6 +1,5 @@
-/** @typedef {{ discriminant: string, value?: Record<string, any> }} Block */
 
-/** Image paths that appear as full-bleed / pair / process slots in the article body. */
+
 export function collectBlockImageSrcs(blocks) {
   const srcs = [];
   for (const block of blocks || []) {
@@ -19,17 +18,12 @@ export function collectBlockImageSrcs(blocks) {
   return srcs;
 }
 
-/**
- * Process-folder images to show. When the toggle is on, skip any path that is
- * already a body image/pair/process block so the same photo cannot appear twice.
- */
 export function resolveProcessFolderForRender(processFromFolder, folderSrcs, blocks) {
   if (!processFromFolder || !folderSrcs?.length) return [];
   const inBlocks = new Set(collectBlockImageSrcs(blocks));
   return folderSrcs.filter((src) => !inBlocks.has(src));
 }
 
-/** Every image src the article body will paint, in order (blocks then folder). */
 export function planArticleImageSrcs(blocks, options = {}) {
   const processFromFolder = Boolean(options.processFromFolder);
   const folder = resolveProcessFolderForRender(

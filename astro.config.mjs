@@ -9,7 +9,6 @@ import { hiddenProductSlugs } from './src/lib/shop/hidden.mjs';
 
 const hiddenShop = new Set(hiddenProductSlugs().map((s) => `/shop/${s}`));
 
-// Sitemap lastmod: last git commit touching the page's content, else file mtime, else build time.
 function lastModified(paths) {
   try {
     const out = execFileSync('git', ['log', '-1', '--format=%cI', '--', ...paths], { encoding: 'utf8' }).trim();
@@ -27,12 +26,8 @@ const site =
     ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
     : 'https://humansize.de');
 
-// Inlined into the client and the server so both agree. `npm run dev` defaults
-// to local storage. Production defaults to GitHub. KEYSTATIC_STORAGE overrides.
 const keystaticStorage = process.env.KEYSTATIC_STORAGE || '';
 
-// @astrojs/react 7 ships a Vite 8 refresh wrapper. Astro 5 runs Vite 6, and that
-// wrapper 500s the Keystatic admin in dev. The contact drawer island does not need it.
 function dropVite8RefreshWrapper() {
   return {
     name: 'drop-vite8-refresh-wrapper',
@@ -49,8 +44,6 @@ function dropVite8RefreshWrapper() {
   };
 }
 
-// The integration always injects /api/keystatic/[...params]. We own that
-// route so the GitHub callback host comes from the forwarded headers.
 function keystaticAdmin() {
   const integration = keystatic();
   const setup = integration.hooks['astro:config:setup'];
@@ -74,8 +67,7 @@ export default defineConfig({
   site,
   output: 'static',
   adapter: vercel(),
-  // Vercel's function socket is plain http, so without trusted forwarded hosts Astro sees
-  // http://humansize.de and its origin check 403s every same-site form POST (Buy, /admin).
+
   security: {
     allowedDomains: [
       { hostname: 'humansize.de', protocol: 'https' },
@@ -117,7 +109,7 @@ export default defineConfig({
     define: {
       'import.meta.env.KEYSTATIC_STORAGE': JSON.stringify(keystaticStorage),
     },
-    // Keystatic's dep scan imports astro:env/server, which esbuild cannot resolve.
+
     optimizeDeps: {
       esbuildOptions: {
         plugins: [

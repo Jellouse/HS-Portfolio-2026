@@ -1,13 +1,6 @@
-/**
- * Homepage intro: the face is laid out at its biggest size and only ever scaled down, as one
- * composited layer (transform only, one rAF write per frame, no layout or re-raster per frame).
- * Its bottom sits at a fixed document y (name top - gap) and it scales from its bottom centre,
- * so the gap to the name stays constant: the name pushes it, 1:1 with scroll. At scroll R it
- * reaches the project-page mark size/top (--mark-small-w / --mark-small-top) and then simply
- * scrolls with the page, so there is no sticky release to jump. Layout values are whole px.
- */
+
 import { clearStableViewportHeight, stableViewportHeight } from '../lib/viewport-layout';
-import { introFaceLayout } from '../lib/intro-mobile-layout';
+import { introFaceLayout } from '../lib/intro-layout';
 
 export function initIntroFace(hero: HTMLElement) {
   const host = hero.querySelector<HTMLElement>('[data-hero-variant="blob"]');
@@ -128,9 +121,9 @@ export function initIntroFace(hero: HTMLElement) {
     host!.style.translate = sda ? '' : `0 ${-y}px`;
   }
 
-  addEventListener('scroll', follow, opt);
   const onScroll = () => {
-    if (!frame) frame = requestAnimationFrame(write);
+    follow();
+    if (!sda && !frame) frame = requestAnimationFrame(write);
   };
 
   function mountTune() {
@@ -166,13 +159,13 @@ export function initIntroFace(hero: HTMLElement) {
     CSS.supports('animation-timeline: scroll()') &&
     new URLSearchParams(location.search).get('intro') !== 'raf';
 
+  addEventListener('scroll', onScroll, opt);
   hero.dataset.intro = '';
   if (sda) {
     hero.classList.add('is-sda');
     hero.toggleAttribute('data-intro-settled', true);
   }
   layout();
-  if (!sda) addEventListener('scroll', onScroll, opt);
   if (showIntroTune && !sda) mountTune();
   addEventListener('resize', () => {
     if (document.documentElement.clientWidth !== lastW) forceLayout();

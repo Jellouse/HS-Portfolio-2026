@@ -1,11 +1,9 @@
-// /shop "Details" toggles. Open: the panel height eases open (overflow visible, so nothing is
-// clipped) and leads; the copy then plays the site's text reveal (shared code path in
-// text-reveal.ts: per-line split, 400ms, 30ms per line). Close: the exact reverse, last line
-// first, then the height closes. Reduced motion: instant.
+
+
 import { playIn, playOut, prepareReveal, revealDuration } from './text-reveal';
 
 const HEIGHT_MS = 400;
-const LEAD_MS = 120; // height leads the text by this much
+const LEAD_MS = 120;
 
 export function initShopDetails() {
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;

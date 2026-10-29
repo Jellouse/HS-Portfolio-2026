@@ -1,4 +1,4 @@
-// Links in split reveal hosts keep a visible underline at rest.
+
 import { chromium, webkit } from 'playwright';
 import { createServer } from 'node:http';
 import { readFileSync, existsSync, statSync } from 'node:fs';

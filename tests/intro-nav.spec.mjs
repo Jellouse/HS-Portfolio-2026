@@ -1,9 +1,4 @@
-/**
- * Homepage intro after in-site navigation: layout must stay correct so scale tracks scroll
- * smoothly (no hang). Mirrors intro-face checks after project mark -> home view transition.
- *
- *   npm run build && node tests/intro-nav.spec.mjs
- */
+
 import { chromium } from 'playwright';
 import { createServer } from 'node:http';
 import { readFileSync, existsSync, statSync } from 'node:fs';

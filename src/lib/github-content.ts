@@ -1,6 +1,5 @@
 import { CMS_REPO } from './cms-auth';
 
-/** Repo-relative path from a Keystatic image publicPath (/src/content/...). */
 export function contentPathFromSrc(src: string): string {
   const cleaned = src.replace(/^\.\//, '').replace(/^\//, '');
   if (cleaned.startsWith('src/content/')) return cleaned;

@@ -1,9 +1,4 @@
-/**
- * Round 5: /shop ring lands on the /shop/<slug> icon spot, shop menu opens when small,
- * contact text centred on one line then left, block only moves when lines change, menu order.
- *
- *   npm run build && npm run test:shop-intro
- */
+
 import { chromium } from 'playwright';
 import { createServer } from 'node:http';
 import { readFileSync, existsSync, statSync } from 'node:fs';
@@ -60,14 +55,12 @@ for (const [label, opt] of [['desktop', { viewport: { width: 1440, height: 900 }
   check(home.copyTop >= (label === 'mobile' ? 844 : 900) - 40, `${label}: home copy starts just below the viewport (${home.copyTop})`);
   if (label === 'mobile') check(Math.abs(shop.c - home.c) <= 1.5, `${label}: face and ring centres aligned (${home.c.toFixed(1)}/${shop.c.toFixed(1)})`);
   else check(Math.abs(shop.c) <= 1.5 && Math.abs(shop.w - 980) <= 2 && shop.text === 695, `desktop: ring 68vw, centre on the page top, name at 695 (c ${shop.c.toFixed(1)}, w ${shop.w.toFixed(0)}, text ${shop.text})`);
-  // Overscroll: nothing between the ring and the root clips it, and the whole ring (incl. the
-  // half above the page top) is painted into the canvas that shows at the top.
+
   const clipper = await p.evaluate(() => { let e = document.querySelector('.shop-ring-canvas').parentElement; const bad = []; while (e && e !== document.documentElement) { const c = getComputedStyle(e); if (/hidden|clip|scroll|auto/.test(c.overflowX + c.overflowY) || c.clipPath !== 'none' || /paint|strict|content/.test(c.contain)) bad.push(e.tagName + '.' + e.className); e = e.parentElement; } return bad.join(','); });
   check(clipper === '', `${label}: no ancestor clips the ring (${clipper || 'none'})`);
   const painted = await p.evaluate(() => { const c = document.querySelector('.shop-ring-canvas'); const m = c.closest('.shop-mark'); if (!m.classList.contains('at-top') || getComputedStyle(c).visibility !== 'visible') return 'canvas not shown'; const x = c.getContext('2d'); const h = c.height; let top = 0, bot = 0; const row = (y) => { const d = x.getImageData(0, y, c.width, 1).data; let n = 0; for (let i = 3; i < d.length; i += 4) n += d[i] > 0; return n; }; for (let y = 0; y < h / 2; y += 8) top += row(y); for (let y = Math.ceil(h / 2); y < h; y += 8) bot += row(y); return top > 0 && Math.abs(top - bot) / bot < 0.1 ? 'ok' : `top ${top} bottom ${bot}`; });
   check(painted === 'ok', `${label}: full ring painted, both halves (${painted})`);
-  // Structural overscroll fix: the graphic lives in a viewport-fixed layer (no ancestor turns
-  // fixed into absolute), so a rubber-band shift cannot crop it at doc y 0.
+
   const fixedCheck = (sel) => `(() => { const l = document.querySelector('${sel}'); if (getComputedStyle(l).position !== 'fixed') return 'not fixed'; let e = l.parentElement; while (e && e !== document.documentElement) { const c = getComputedStyle(e); if (c.transform !== 'none' || c.filter !== 'none' || c.perspective !== 'none' || /transform|filter|perspective/.test(c.willChange) || /paint|layout|strict|content/.test(c.contain) || (c.backdropFilter && c.backdropFilter !== 'none')) return 'containing block ' + e.tagName + '.' + e.className; e = e.parentElement; } return 'ok'; })()`;
   check((await p.evaluate(fixedCheck('.shop-ring-layer'))) === 'ok', `${label}: ring layer is viewport-fixed (${await p.evaluate(fixedCheck('.shop-ring-layer'))})`);
   const hp2 = await (await browser.newContext(opt)).newPage();
@@ -109,7 +102,7 @@ for (const [label, opt] of [['desktop', { viewport: { width: 1440, height: 900 }
     await p.waitForTimeout(800);
   }
   await p.goto(B + (await p.getAttribute('.shop-title', 'href')), { waitUntil: 'load' });
-  await p.waitForTimeout(3000); // load spin settles on 90deg
+  await p.waitForTimeout(3000);
   const d = await p.locator('.shop-mark').boundingBox();
   check(Math.abs(a.y - d.y) <= 2 && Math.abs(a.width - d.width) <= 1 && Math.abs(a.x - d.x) <= 1, `${label}: ring at R matches detail icon (${a.y.toFixed(1)}/${d.y.toFixed(1)}, ${a.width.toFixed(1)}/${d.width.toFixed(1)})`);
 }
@@ -119,7 +112,7 @@ await p.waitForTimeout(500);
 const home = await p.evaluate(() => [...document.querySelectorAll('[data-main-menu] > *')].map((e) => e.textContent.trim()).join(','));
 check(home === 'About,Shop,Contact', `home menu ${home}`);
 check((await p.textContent('.brand-name')).trim() === 'Humansize', 'brand reads Humansize');
-// Socials: "Humansize" swaps the menu row; second click, Esc, far pointer and scroll close it.
+
 const soc = () => p.evaluate(() => ({ exp: document.querySelector('[data-socials-toggle]').getAttribute('aria-expanded'), menu: !document.querySelector('[data-main-menu]').hidden, items: [...document.querySelectorAll('[data-socials]:not([hidden]) > a')].map((a) => a.textContent.trim() + '=' + a.getAttribute('href')).join(',') }));
 await p.click('[data-socials-toggle]');
 let st0 = await soc();
@@ -139,7 +132,7 @@ await p.evaluate(() => scrollTo(0, 200));
 await p.waitForTimeout(200);
 check((await soc()).menu, 'scrolling away closes socials');
 await p.evaluate(() => scrollTo(0, 0));
-// Small-icon menus: one shared offset per viewport on project and product pages.
+
 for (const [lab, o, top] of [['desktop', { viewport: { width: 1440, height: 900 } }, 70], ['mobile', { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true }, 57]]) {
   const q = await (await browser.newContext(o)).newPage();
   const off = [];
@@ -166,7 +159,12 @@ const s1b = await st();
 check(s1.align === 'center' && s1.top === s1b.top, `one line: centred, no move while typing (${s1.align}, ${s1.top}/${s1b.top})`);
 await p.focus('#contact-project');
 await p.keyboard.insertText(' and more words so that it wraps well past the first line of this field');
-await p.waitForTimeout(500);
+await p.waitForFunction((top) => {
+  const t = document.querySelector('#contact-project');
+  if (!t) return false;
+  const r = t.getBoundingClientRect();
+  return getComputedStyle(t).textAlign === 'left' && Math.round(r.height) === 58 && Math.round(r.top) < top;
+}, s1.top);
 const s2 = await st();
 check(s2.align === 'left' && s2.h === 58 && s2.top < s1.top, `two lines: left, grew, re-centred (${s2.align}, h ${s2.h}, top ${s2.top})`);
 const hover = await p.evaluate(() => { const r = document.querySelector('.contact-dots').getBoundingClientRect(); return [r.left - 100, r.top + 2]; });

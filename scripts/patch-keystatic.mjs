@@ -1,9 +1,5 @@
-// Exposes Keystatic's own save inputs to the admin so the CMS can estimate the
-// size of the next save (see src/lib/save-budget.ts). Keystatic sends, as
-// base64, every file of the entry whose git blob differs from the branch tree:
-// new uploads, plus existing images whose path changed (blocks moved/removed).
-// Runs on postinstall. If Keystatic changes shape, it warns and skips: the CMS
-// keeps working, only the size guard is off.
+
+
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 
 const file = 'node_modules/@keystatic/core/dist/keystatic-core-ui.js';

@@ -1,5 +1,5 @@
-// /canvas must show every public page. Compares the canvas page list (rendered by the built
-// Vercel function) with every HTML page in the static build. Run `npm run build` first.
+
+
 import assert from 'node:assert/strict';
 import http from 'node:http';
 import { readdirSync, existsSync, readFileSync, statSync } from 'node:fs';
@@ -9,7 +9,6 @@ const root = '.vercel/output/static';
 const fn = '.vercel/output/functions/_render.func/dist/server/entry.mjs';
 if (!existsSync(fn)) { console.error('Run npm run build first.'); process.exit(1); }
 
-// Not public pages (tools); keep in sync with EXCLUDE in src/lib/canvas-pages.ts.
 const NOT_PUBLIC = new Set(['/keystatic-upload/']);
 const built = [];
 const walk = (dir) => {
@@ -24,9 +23,9 @@ const walk = (dir) => {
 walk(root);
 const expected = built.filter((p) => !NOT_PUBLIC.has(p)).sort();
 
-process.env.VERCEL_ENV = 'preview'; // open mode, no GitHub login
+process.env.VERCEL_ENV = 'preview';
 const { default: handler } = await import(new URL('../' + fn, import.meta.url));
-// Static assets from the build (as on Vercel), everything else through the function.
+
 const TYPES = { js: 'text/javascript', css: 'text/css', svg: 'image/svg+xml', webp: 'image/webp', woff2: 'font/woff2' };
 const server = http.createServer((q, r) => {
   const file = join(root, decodeURIComponent(q.url.split('?')[0]));
@@ -49,8 +48,6 @@ assert.deepEqual(extra, [], `/canvas lists pages that are not built: ${extra.joi
 assert.ok(listed.includes('/shop/') && listed.some((p) => /^\/shop\/[^/]+\/$/.test(p)), 'shop pages on /canvas');
 assert.ok(!listed.includes('/admin/') && !listed.includes('/admin'), '/admin is not on /canvas');
 
-// Board layout: a regular grid on a dark board. Page styles must not leak onto /canvas
-// (global.css has its own .frame rule: position relative + radius, which stairsteps the board).
 const { chromium } = await import('playwright');
 const browser = await chromium.launch();
 const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
@@ -77,7 +74,7 @@ for (const f of board.frames) rows.set(f.top, [...(rows.get(f.top) || []), f]);
 for (const [top, fs] of rows) {
   assert.equal(new Set(fs.map((f) => f.y)).size, 1, `frames in the row at ${top} do not share one y (stairstep)`);
 }
-// Pages are columns (each at every width), rows are hosts: every page has its frames in each row.
+
 for (const [top, fs] of rows) {
   assert.ok(fs.length >= listed.length, `row at ${top} has ${fs.length} frames for ${listed.length} pages`);
   assert.equal(new Set(fs.map((f) => f.left)).size, fs.length, `frames in the row at ${top} overlap`);

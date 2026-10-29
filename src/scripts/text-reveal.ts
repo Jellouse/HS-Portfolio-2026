@@ -1,12 +1,5 @@
-// Per-line text reveal. After fonts load, every word gets an inline-block span (links and
-// inline elements stay intact, whitespace stays as real text nodes so wrapping is unchanged),
-// and words are grouped into visual lines by offsetTop (--line). Scroll-linked browsers animate
-// each word against its own position, so a whole line reveals together; others get a 250ms
-// fallback staggered per line. Re-split on resize, restoring the original HTML first.
-// Every text block in the page content and footer reveals by default, so new pages and
-// components get it without opting in. (A hard-coded class list used to miss new markup,
-// e.g. the /shop overview.) Hosts nested inside another host are skipped; [data-no-reveal]
-// opts a block out (it animates itself, like the /shop Details panel).
+
+
 const SELECTOR = [
   'main :is(p, h1, h2, h3, h4, li, blockquote, figcaption, .caption, .project-summary)',
   '.site-footer :is(p, li)',
@@ -20,7 +13,7 @@ function wrapWords(node: Node) {
     const text = node.textContent ?? '';
     if (!/\S/.test(text)) return;
     const frag = document.createDocumentFragment();
-    // words split after hyphens too, so the original break opportunities stay
+
     for (const part of text.match(/\s+|[^\s-]+-*|-+/g) ?? []) {
       if (/^\s+$/.test(part)) {
         frag.appendChild(document.createTextNode(part));
@@ -33,9 +26,7 @@ function wrapWords(node: Node) {
     }
     (node as ChildNode).replaceWith(frag);
   } else if (node.nodeType === Node.ELEMENT_NODE) {
-    // A link or a live price reveals as one unit (a price can be replaced later without
-    // losing its span). A link as one unit: so its underline blurs everywhere, the gaps between
-    // words included (split words left sharp underline bits in the spaces).
+
     if ((node as Element).matches('a, [data-price]') && /\S/.test(node.textContent ?? '')) {
       (node as Element).classList.add('reveal-word');
       return;
@@ -47,17 +38,18 @@ function wrapWords(node: Node) {
 export function split(host: Host) {
   if (host.__revealHtml === undefined) host.__revealHtml = host.innerHTML;
   else host.innerHTML = host.__revealHtml;
-  [...host.childNodes].forEach(wrapWords); // children only: a host that is itself a link still splits
+  [...host.childNodes].forEach(wrapWords);
   measureLines(host);
   host.classList.add('is-split');
 }
 
-// Line index per word from its current position; cheap, and keeps live content (prices) intact.
 function measureLines(host: Host) {
+  const words = [...host.querySelectorAll<HTMLElement>('.reveal-word')];
+  const tops = words.map((word) => word.getBoundingClientRect().top);
   let line = -1;
   let top = -Infinity;
-  host.querySelectorAll<HTMLElement>('.reveal-word').forEach((word) => {
-    const t = word.getBoundingClientRect().top;
+  words.forEach((word, i) => {
+    const t = tops[i];
     if (Math.abs(t - top) > 2) {
       line += 1;
       top = t;
@@ -69,8 +61,6 @@ function measureLines(host: Host) {
 const lineCount = (host: HTMLElement) =>
   new Set([...host.querySelectorAll<HTMLElement>('.reveal-word')].map((w) => w.style.getPropertyValue('--line'))).size;
 
-// Class-driven reveal, shared by the scroll fallback and in-place reveals (the /shop Details
-// panel): words blur in line by line (400ms, 30ms per line); playOut reverses it, last line first.
 export function prepareReveal(host: Host, manual = false) {
   if (manual) {
     split(host);
@@ -104,7 +94,7 @@ function armFallback(hosts: Host[]) {
         if (!entry.isIntersecting) continue;
         const el = entry.target as Host;
         io.unobserve(el);
-        // scrolled past fast: show instantly
+
         playIn(el, entry.boundingClientRect.top < window.innerHeight * 0.5);
       }
     },
@@ -131,8 +121,6 @@ export function initTextReveal() {
     if (!scrollLinked) armFallback(hosts);
   });
 
-  // Recompute when layout may have settled or been restored (late images, bfcache), so no
-  // host keeps stale line positions or stays blurred while it is already on screen.
   const settle = () => {
     hosts.forEach((el) => el.classList.contains('is-split') && measureLines(el));
     if (scrollLinked) return;

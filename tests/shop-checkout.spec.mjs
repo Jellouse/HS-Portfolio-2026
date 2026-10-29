@@ -1,8 +1,4 @@
-/**
- * Checkout logic against a real Postgres (local: see docs/shop.md).
- *   TEST_DATABASE_URL=postgres://shop:shop@localhost/shop_test npm run test:shop
- * Stripe is faked for session creation; webhook signatures use the real Stripe SDK.
- */
+
 import pg from 'pg';
 import Stripe from 'stripe';
 import assert from 'node:assert/strict';
@@ -20,7 +16,7 @@ let n = 0;
 const fakeStripe = { checkout: { sessions: { create: async (p) => { await new Promise((r) => setTimeout(r, Math.random() * 20)); return { id: `cs_test_${++n}`, url: `https://checkout.stripe.test/${n}`, params: p }; } } } };
 const reset = async () => {
   await pool.query('DROP TABLE IF EXISTS shop_orders, shop_products');
-  const fresh = new pg.Pool({ connectionString: url, max: 20 }); // ensureSchema runs once per pool
+  const fresh = new pg.Pool({ connectionString: url, max: 20 });
   await ensureSchema(fresh);
   return fresh;
 };
@@ -73,16 +69,16 @@ await test('expiry restores the serial (webhook and lazy timeout)', async () => 
   const a = await buy(p, fakeStripe, { slug: '120', siteUrl: 'http://x' });
   const b = await buy(p, fakeStripe, { slug: '120', siteUrl: 'http://x' });
   assert.equal((await stock(p))['120'].soldOut, true);
-  // Stripe says session A expired.
+
   assert.equal(await handleEvent(p, ev('checkout.session.expired', { ...a, slug: '120' })), 'released');
   assert.equal(await handleEvent(p, ev('checkout.session.expired', { ...a, slug: '120' })), 'noop', 'second delivery is a no-op');
   assert.equal((await stock(p))['120'].label, 'IB-120-001');
-  // B is abandoned and its webhook never arrives: past expiry + grace it comes back by itself.
+
   await p.query(`UPDATE shop_orders SET expires_at = now() - interval '${GRACE_MINUTES + 1} minutes' WHERE id = $1`, [b.orderId]);
   await releaseStale(p);
   const s = (await stock(p))['120'];
   assert.equal(s.free, 2);
-  // Within the grace window it is still held.
+
   const c = await buy(p, fakeStripe, { slug: '120', siteUrl: 'http://x' });
   await p.query(`UPDATE shop_orders SET expires_at = now() - interval '1 minute' WHERE id = $1`, [c.orderId]);
   assert.equal((await stock(p))['120'].free, 1);
@@ -101,7 +97,7 @@ await test('webhook is idempotent', async () => {
   assert.equal(rows[0].status, 'paid');
   assert.equal(rows[0].shipping.city, 'Berlin');
   assert.equal((await stock(p))['660'].label, 'IB-660-002');
-  // Refund: restore puts serial 1 back as the next one.
+
   assert.equal(await restoreSerial(p, rows[0].id), true);
   assert.equal(await restoreSerial(p, rows[0].id), false);
   assert.equal((await stock(p))['660'].label, 'IB-660-001');
@@ -159,7 +155,7 @@ await test('button label updates', async () => {
   applyStock(c, '120', await stock(p));
   assert.equal(c.textContent, 'Sold out');
   assert.equal(c.disabled, true);
-  // API down or unknown: plain, enabled "Buy".
+
   for (const data of [null, { error: 'unavailable' }, {}]) {
     const d = btn(); applyStock(d, '120', data);
     assert.equal(d.textContent, 'Buy'); assert.equal(d.disabled, false);
@@ -192,7 +188,7 @@ await test('every product on /shop has a store entry (catches Keystatic slug ren
   for (const slug of await readdir(dir)) {
     const yaml = await readFile(`${dir}/${slug}/index.yaml`, 'utf8').catch(() => null);
     if (yaml === null) continue;
-    // Same rule as /shop: hidden only with overview.show: false.
+
     const hidden = /^overview:\n(?:[ ].*\n)*?  show: false\b/m.test(yaml);
     if (!hidden) listed.push(slug);
   }

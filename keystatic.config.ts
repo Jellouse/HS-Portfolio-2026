@@ -4,10 +4,6 @@ import { config, fields, collection, singleton } from '@keystatic/core';
 
 const repo = 'Jellouse/HS-Portfolio-2026';
 
-// `npm run dev` writes files locally. A production build commits through GitHub.
-// KEYSTATIC_STORAGE=local or KEYSTATIC_STORAGE=github overrides that, on both
-// the admin UI and the API. No branchPrefix: any prefix is allowed, and the
-// branch menu opens on the repository default branch (main).
 function storage() {
   const selected = import.meta.env.KEYSTATIC_STORAGE;
   if (selected === 'local') return { kind: 'local' as const };
@@ -46,8 +42,6 @@ const frame = fields.select({
   defaultValue: 'default',
 });
 
-// Videos: a URL (Cloudflare R2, uploaded with the button) or an older local path under
-// /media/projects/. Not processed by Astro, served as-is.
 function videoField(label: string, description?: string) {
   const field = fields.text({
     label,
@@ -56,7 +50,6 @@ function videoField(label: string, description?: string) {
   return { ...field, Input: withUpload(field.Input as any) };
 }
 
-// Thin light grey inside stroke for images whose edge disappears into the page.
 const outline = fields.checkbox({
   label: 'Outline',
   defaultValue: false,
@@ -74,7 +67,7 @@ function imageField(
     ...(opts?.description ? { description: opts.description } : {}),
     ...(opts?.required ? { validation: { isRequired: true as const } } : {}),
   });
-  // Compress in the browser before the file enters form state / the GitHub commit.
+
   return { ...field, Input: withImageCms(field.Input as any) };
 }
 
@@ -91,7 +84,7 @@ export default config({
       path: 'src/content/projects/*/',
       format: { data: 'yaml' },
       columns: ['title', 'year', 'published'],
-      // Live SSR preview for signed-in editors with push access. {branch} is the CMS branch.
+
       previewUrl: '/preview/{slug}/?branch={branch}',
       schema: {
         title: fields.slug({

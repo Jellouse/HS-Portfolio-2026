@@ -1,8 +1,4 @@
-// Spinning mark, ported from the worksurface.co logo (Jellouse/industrial-bloom website/index.html).
-// Load: constant spin (1 turn / 4800ms, linear) until fonts + window load (min 650ms, fallback
-// 4000ms), then settle to the next quarter turn over 900ms. Scroll: +0.18deg per px, snapping to
-// the nearest 90deg 260ms after scrolling stops. Hover: +90deg. Reduced motion skips the load spin.
-// The Industrial Bloom ring is 4-fold symmetric, so the 90deg rest looks the same as 0deg.
+
 
 const SPIN_MS = 4800;
 const REST = 90;
@@ -13,9 +9,7 @@ const DEG_PER_PX = 0.18;
 const SNAP_DELAY = 260;
 const MIN_LOAD = 650;
 const MAX_LOAD = 4000;
-// Shared element across /shop and /shop/<slug> (view-transition-name: ib-mark). On pageswap
-// the outgoing page freezes the mark and hands its angle over, so the incoming mark starts on
-// the same angle (no jump between snapshots) and skips the load spin.
+
 const HANDOFF_KEY = 'ib-mark-handoff';
 const HANDOFF_TTL = 5000;
 
@@ -31,7 +25,6 @@ function takeHandoff(): number | null {
   }
 }
 
-// pagereveal can fire before or after module scripts run; remember its transition either way.
 let revealTransition: ViewTransition | null | undefined;
 addEventListener('pagereveal', (e) => {
   revealTransition = (e as PageRevealEvent).viewTransition ?? null;
@@ -41,7 +34,7 @@ export function initSpinMark(el: HTMLElement): () => void {
   const started = performance.now();
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const handoff = takeHandoff();
-  // In-site arrival from the other shop page: no load spin, start where the old mark was.
+
   const loading = !reduced && handoff === null;
   let rotation = handoff ?? REST;
   let lastY = scrollY;
@@ -56,10 +49,6 @@ export function initSpinMark(el: HTMLElement): () => void {
     el.style.transform = `rotate(${rotation}deg)`;
   };
 
-  // One integer quarter-turn target and one rAF loop. Hover adds a quarter turn to the
-  // target; the post-scroll snap sets it to round(angle / 90). Each retarget eases from the
-  // current angle (650ms ease-out cubic), and the loop always lands exactly on target * 90,
-  // so nothing can finish off the 90deg grid.
   let quarter = Math.round(rotation / 90);
   let from = rotation;
   let t0 = 0;
@@ -102,7 +91,6 @@ export function initSpinMark(el: HTMLElement): () => void {
     );
   };
 
-  // Load spin
   render();
   if (loading && !reduced && el.animate) {
     rotation = REST;
@@ -123,7 +111,7 @@ export function initSpinMark(el: HTMLElement): () => void {
   } else {
     settled = true;
     if (handoff !== null && rotation !== quarter * 90) {
-      // Ease onto the 90deg grid only after the morph, so the shared element stays frozen.
+
       const settleAfter = () => retarget(Math.round(rotation / 90));
       const vt = revealTransition ?? (document as Document & { activeViewTransition?: ViewTransition }).activeViewTransition;
       if (vt) vt.finished.then(settleAfter, settleAfter);
@@ -131,7 +119,6 @@ export function initSpinMark(el: HTMLElement): () => void {
     }
   }
 
-  // Scroll and hover act on the resting mark; during the load spin they wait for the settle.
   const onScroll = () => {
     const delta = scrollY - lastY;
     lastY = scrollY;
@@ -165,8 +152,7 @@ export function initSpinMark(el: HTMLElement): () => void {
     rotation = REST;
     render();
   };
-  // Outgoing navigation with a view transition: freeze at the current angle (the old snapshot
-  // is taken after this handler) and hand it to the next page.
+
   const onSwap = (e: Event) => {
     const vt = (e as PageSwapEvent).viewTransition;
     if (!vt) return;
@@ -188,7 +174,7 @@ export function initSpinMark(el: HTMLElement): () => void {
     try {
       sessionStorage.setItem(HANDOFF_KEY, JSON.stringify({ angle, at: Date.now() }));
     } catch {
-      /* private mode: the next page just starts at rest */
+
     }
   };
   addEventListener('pageswap', onSwap);

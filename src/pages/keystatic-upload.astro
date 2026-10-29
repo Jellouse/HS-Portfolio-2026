@@ -1,8 +1,5 @@
 ---
-// Batch upload of process photos. Uses the GitHub session Keystatic already
-// holds in this browser (the keystatic-gh-access-token cookie that the
-// Keystatic admin itself reads client-side). No secrets ship with the page.
-// All dropped files go into src/content/projects/<slug>/process/ in one commit.
+
 import { getAllProjectsOrdered } from '../lib/content';
 
 export const prerender = true;
@@ -23,8 +20,9 @@ const branch = 'main';
     <meta name="robots" content="noindex, nofollow" />
     <title>Process photo upload</title>
     <style>
-      body { font: 15px/1.5 system-ui, sans-serif; max-width: 640px; margin: 40px auto; padding: 0 20px; color: #111; }
-      h1 { font-size: 22px; margin: 0 0 8px; }
+      @import '../styles/type.css';
+      body { font: var(--text-ui)/var(--lh-ui) system-ui, sans-serif; max-width: 640px; margin: 40px auto; padding: 0 20px; color: #111; }
+      h1 { font-size: var(--text); margin: 0 0 8px; }
       p { margin: 0 0 16px; color: #555; }
       select, button { font: inherit; padding: 8px 12px; border-radius: 8px; border: 1px solid #ccc; background: #fff; }
       button { background: #111; color: #fff; border-color: #111; cursor: pointer; }
@@ -32,11 +30,11 @@ const branch = 'main';
       #drop { margin: 16px 0; border: 2px dashed #bbb; border-radius: 16px; padding: 40px 20px; text-align: center; color: #666; cursor: pointer; }
       #drop.over { border-color: #111; color: #111; background: #f5f5f5; }
       ul { padding: 0; list-style: none; margin: 0 0 16px; max-height: 300px; overflow: auto; }
-      li { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #eee; font-size: 13px; }
-      #status { white-space: pre-wrap; font-size: 14px; }
+      li { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #eee; font-size: var(--text-meta); }
+      #status { white-space: pre-wrap; font-size: var(--text-meta); }
       .row { display: flex; gap: 8px; align-items: center; }
       a { color: inherit; }
-    </style>
+</style>
   </head>
   <body>
     <h1>Process photos</h1>
@@ -60,8 +58,8 @@ const branch = 'main';
     <p id="status"></p>
 
     <script define:vars={{ repo, branch }}>
-      const MAX_EDGE = 2400; // Site renders at most 2000px wide.
-      const BATCH_BYTES = 25 * 1024 * 1024; // Stay well under GitHub's request limit.
+      const MAX_EDGE = 2400;
+      const BATCH_BYTES = 25 * 1024 * 1024;
       const OK = /\.(jpe?g|png|webp|avif)$/i;
       const $ = (id) => document.getElementById(id);
       const drop = $('drop'), input = $('input'), list = $('list'), status = $('status'), btn = $('upload');
@@ -103,7 +101,6 @@ const branch = 'main';
       drop.ondrop = (e) => { e.preventDefault(); drop.classList.remove('over'); add(e.dataTransfer.files); };
       $('clear').onclick = () => { files = []; status.textContent = ''; render(); };
 
-      // Shrink big JPEG/WebP photos so the repo stays small. PNGs keep transparency untouched.
       async function prepare(f) {
         if (/\.(jpe?g|webp)$/i.test(f.name)) {
           try {
@@ -190,7 +187,7 @@ const branch = 'main';
           btn.disabled = false;
         }
       };
-    </script>
+</script>
     <hr style="margin:40px 0;border:0;border-top:1px solid #eee" />
     <h1>Video</h1>
     <p>Upload a video to the video storage, then paste the URL into a video field in the CMS (or use the Upload video button there).</p>
@@ -226,6 +223,6 @@ const branch = 'main';
         prog.style.display = 'none';
       });
       $('vcopy').addEventListener('click', () => navigator.clipboard.writeText($('vurl').value));
-    </script>
+</script>
   </body>
 </html>

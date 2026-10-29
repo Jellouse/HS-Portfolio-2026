@@ -51,8 +51,7 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
 
 const summary = plainText(project.data.summary);
 const title = `${projectLabel(project.data)} · Preview · Humansize`;
-// Skip Astro ImageMetadata → /_image for OG: that endpoint 404s on this deploy,
-// and preview is noindex anyway.
+
 const unpublished = project.data.published === false;
 const badge = unpublished ? 'Preview, unpublished' : 'Preview';
 ---

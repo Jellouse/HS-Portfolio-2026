@@ -1,6 +1,5 @@
-// Streams a content image for the CMS preview route. Browser requests carry the
-// Keystatic GitHub cookie; we re-fetch from GitHub with that token so private
-// branches and files missing from this build still render.
+
+
 import type { APIRoute } from 'astro';
 import { cmsTokenFromRequest, hasRepoPushAccess, CMS_REPO } from '../../lib/cms-auth';
 import { normalizePreviewRef } from '../../lib/preview';

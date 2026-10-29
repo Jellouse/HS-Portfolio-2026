@@ -26,9 +26,6 @@ function splitHost(host: string): { hostname: string; port?: string } {
   return { hostname: host };
 }
 
-// On Vercel, Astro builds request.url from the Host header and ignores
-// x-forwarded-host unless security.allowedDomains is set. That header is
-// localhost, so Keystatic sends GitHub redirect_uri=https://localhost/...
 function requestWithPublicUrl(request: Request): Request {
   const host = firstHeader(request, 'x-forwarded-host') ?? firstHeader(request, 'host');
   if (!host || /[/\\\s]/.test(host)) return request;

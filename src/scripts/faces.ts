@@ -1,5 +1,5 @@
-// Interactive row of faces (Tilt mode from /lab/faces, fixed settings).
-// Faces always touch and fill the row; each frame is a pure function of the input position.
+
+
 import { readInput, startInput } from './input';
 
 const S = {
@@ -23,7 +23,6 @@ const rnd = (i: number, k: number) => {
 };
 const noise = (s: number, t: number) => Math.sin(t * 1.3 + s) * 0.6 + Math.sin(t * 2.7 + s * 1.7) * 0.4;
 
-// soft clamp in log space; k = 0 is a hard clamp, larger k eases in earlier
 const sp = (z: number, k: number) => (k <= 1e-4 ? Math.max(0, z) : z / k > 30 ? z : k * Math.log1p(Math.exp(z / k)));
 function soft(x: number, lo: number, hi: number, k: number) {
   const a = Math.log(lo);
@@ -41,7 +40,6 @@ const faces = Array.from({ length: COUNT }, (_, i) => ({
   hdir: rnd(i, 4) * 2 - 1,
 }));
 
-/** Widths (multiples of base width, summing to COUNT) and heights for one frame. */
 export function layout(u0: number, v0: number, t: number, maxH = S.maxH) {
   const I = S.independence;
   const raw = faces.map((f) => {
@@ -54,7 +52,7 @@ export function layout(u0: number, v0: number, t: number, maxH = S.maxH) {
     const h = S.height * x * (v - 0.5) * 4 * g * (1 - I + I * f.hdir);
     return { w: Math.exp(lw + j * 0.5), h: soft(Math.exp(h + j * 0.2), S.minH, maxH, S.softness) };
   });
-  // one scale factor so the soft-clamped widths fill the row exactly
+
   let lo = -12;
   let hi = 12;
   let ws: number[] = [];
@@ -92,8 +90,6 @@ export function mountFaces(host: HTMLElement) {
   row.style.setProperty('--rest', `${rest}%`);
   startInput();
 
-  // Sub-pixel transforms only: no layout widths, no rounding. Faces are laid edge to edge
-  // from the left, each scaled from its left-middle point, so the row stays filled and centred.
   let rowW = row.clientWidth;
   new ResizeObserver(() => {
     rowW = row.clientWidth;
@@ -117,7 +113,7 @@ export function mountFaces(host: HTMLElement) {
 
   paint(0.5, 0.5, 0);
   const frame = (now: number) => {
-    // reduced motion: hold the rest layout. Touch: no tilt, a quieter self-running loop.
+
     if (!reduce.matches) {
       const t = (now / 1000) * S.speed;
       const k = fine.matches ? 1 : 0.6;

@@ -1,9 +1,4 @@
-/**
- * First paint after a hard reload: text that the reveal will animate must never be shown
- * sharp before the reveal takes over (it used to flash, then blur). Samples every frame from
- * the first one until the text is split, on desktop and mobile, for home, a project, /shop
- * and a product page. Then checks the first-screen text ends fully visible.
- */
+
 import { chromium, devices } from 'playwright';
 import { createServer } from 'node:http';
 import { readFileSync, existsSync, statSync } from 'node:fs';
@@ -19,7 +14,7 @@ const server = createServer((req, res) => {
   if (path.endsWith('/')) path += 'index.html';
   const file = [join(root, path), join(root, path, 'index.html')].find((f) => f.startsWith(root) && existsSync(f) && statSync(f).isFile());
   if (!file) { res.writeHead(404); return res.end(); }
-  // slow the font a little so the old gap (sharp text before the split) would show up
+
   const send = () => { res.writeHead(200, { 'content-type': MIME[extname(file)] || 'application/octet-stream' }); res.end(readFileSync(file)); };
   extname(file) === '.woff2' ? setTimeout(send, 300) : send();
 });
@@ -29,7 +24,6 @@ const URLS = ['/', '/work/industrial-bloom/', '/shop/', '/shop/660/'];
 const SEL = "main :is(p,h1,h2,h3,h4,li,blockquote,figcaption,.caption,.project-summary), .site-footer :is(p,li)";
 const SKIP = '.sr-only, [data-no-reveal], [data-no-reveal] *';
 
-// runs in the page before any of its scripts: sample each frame until all hosts are split
 const probe = ({ SEL, SKIP }) => {
   const bad = new Set();
   let frames = 0;
@@ -41,7 +35,7 @@ const probe = ({ SEL, SKIP }) => {
       const r = el.getBoundingClientRect();
       if (!r.height || r.top > innerHeight || r.bottom < 0) continue;
       pending += 1;
-      // visible unless it, or an ancestor, is transparent
+
       let o = 1;
       for (let n = el; n && n.nodeType === 1; n = n.parentElement) o *= Number(getComputedStyle(n).opacity);
       if (o > 0.05 && el.textContent.trim()) bad.add(el.tagName + ': ' + el.textContent.trim().slice(0, 40));

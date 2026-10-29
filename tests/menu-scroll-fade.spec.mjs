@@ -1,4 +1,4 @@
-/** Homepage + /shop header menu fades out past the intro, back in on scroll up and on focus. */
+
 import { chromium } from 'playwright';
 import { createServer } from 'node:http';
 import { readFileSync, existsSync, statSync } from 'node:fs';

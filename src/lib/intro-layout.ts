@@ -1,4 +1,4 @@
-/** SVG blob width:height (559×249 viewBox). Shared by intro-face and shop-intro. */
+
 export const BLOB_ASPECT = 559 / 249;
 
 export function introFaceLayout(vh: number, vw: number) {

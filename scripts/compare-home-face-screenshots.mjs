@@ -1,7 +1,4 @@
-/**
- * Screenshot homepage face at rest + mid-scroll; compare preview vs production (main).
- * Usage: node scripts/compare-home-face-screenshots.mjs [previewBase] [prodBase]
- */
+
 import { chromium, devices } from 'playwright';
 import { mkdirSync } from 'node:fs';
 import { join } from 'node:path';
