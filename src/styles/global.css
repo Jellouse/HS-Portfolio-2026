@@ -3008,9 +3008,17 @@ html.is-contact-open, html.is-contact-open body { overscroll-behavior: none; }
   }
 
   .brand-stack {
-    position: relative;
     display: inline-block;
     vertical-align: baseline;
+  }
+
+  .brand-word {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0;
+    letter-spacing: var(--track);
+    transform: translateX(calc(var(--brand-at-w, 0px) * -0.5));
+    transition: transform var(--dur-hover) var(--ease-out);
   }
 
   .brand-at,
@@ -3024,29 +3032,29 @@ html.is-contact-open, html.is-contact-open body { overscroll-behavior: none; }
 
   .brand-at {
     display: block;
-    position: absolute;
-    right: 100%;
-    top: 0;
+    flex: 0 0 auto;
+    max-width: 0;
     opacity: 0;
     overflow: visible;
     white-space: nowrap;
-    transition: opacity var(--dur-hover) var(--ease-out);
+    transition:
+      opacity var(--dur-hover) var(--ease-out),
+      max-width var(--dur-hover) var(--ease-out);
   }
 
   .brand-name {
-    display: inline-block;
-    transform: translateX(calc(var(--brand-at-w, 0px) * -0.5));
-    transition: transform var(--dur-hover) var(--ease-out);
+    flex: 0 0 auto;
+  }
+
+  .brand-toggle:hover .brand-word,
+  .brand-toggle:focus-visible .brand-word {
+    transform: translateX(calc(var(--brand-at-w, 0px) * 0.5));
   }
 
   .brand-toggle:hover .brand-at,
   .brand-toggle:focus-visible .brand-at {
+    max-width: var(--brand-at-w, 0px);
     opacity: 1;
-  }
-
-  .brand-toggle:hover .brand-name,
-  .brand-toggle:focus-visible .brand-name {
-    transform: translateX(calc(var(--brand-at-w, 0px) * 0.5));
   }
 }
 
