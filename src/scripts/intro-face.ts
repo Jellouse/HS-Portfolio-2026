@@ -6,49 +6,79 @@
  * reaches the project-page mark size/top (--mark-small-w / --mark-small-top) and then simply
  * scrolls with the page, so there is no sticky release to jump. Layout values are whole px.
  */
+import { clearStableViewportHeight, stableViewportHeight } from '../lib/viewport-layout';
+import { mobileIntroLayout } from '../lib/intro-mobile-layout';
+
 export function initIntroFace(hero: HTMLElement) {
   const host = hero.querySelector<HTMLElement>('[data-hero-variant="blob"]');
   if (!host) return;
+  if (hero.dataset.introBound === '1') return;
+  hero.dataset.introBound = '1';
+
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const probe = document.createElement('div');
   probe.style.cssText = 'position:absolute;top:0;left:0;width:1px;height:100svh;visibility:hidden;pointer-events:none';
   document.body.appendChild(probe);
+
+  const ac = new AbortController();
+  const opt = { passive: true as const, signal: ac.signal };
 
   let sMin = 1;
   let R = 1;
   let lastW = -1;
   let frame = 0;
   let lastS = NaN;
-  let cur = NaN; // rendered scale; chases the scroll target
+  let cur = NaN;
   let lastT = 0;
+  let lastGlLayout = 1;
   const KEY = 'intro-smooth-ms';
-  const DEFAULT_TAU = 30; // Johann's pick
+  const DEFAULT_TAU = 30;
   const stored = Number(localStorage.getItem(KEY));
   let tau = hero.hasAttribute('data-intro-tune') && localStorage.getItem(KEY) !== null && stored >= 0 ? stored : DEFAULT_TAU;
   if (reduced) tau = 0;
 
   const px = (name: string) => Math.round(parseFloat(getComputedStyle(document.documentElement).getPropertyValue(name)));
 
+  const measureHostTop = () => {
+    const saved = host.style.translate;
+    host.style.translate = 'none';
+    const top = Math.round(host.getBoundingClientRect().top);
+    host.style.translate = saved;
+    return top;
+  };
+
   const layout = () => {
     const vw = document.documentElement.clientWidth;
-    if (vw === lastW) return; // iOS address bar changes height only: no redraw
+    if (vw !== lastW) clearStableViewportHeight();
+    if (vw === lastW && hero.dataset.introReady !== undefined) return;
     lastW = vw;
-    const vh = Math.round(probe.getBoundingClientRect().height);
+    const vh = stableViewportHeight(probe, vw);
     const mobile = vw < 760;
     const Wf = px('--mark-small-w') || 64;
     const topF = px('--mark-small-top') || 32;
-    const W0 = Math.round(vw * (mobile ? 0.9 : 1.15)); // largest size: phones 90% wide, centred
-    const H0 = (W0 * 249) / 559;
+    let W0: number;
+    let H0: number;
+    let nameTop: number;
+    let faceBottom: number;
+    if (mobile) {
+      const m = mobileIntroLayout(vh);
+      nameTop = m.nameTop;
+      W0 = m.W0;
+      H0 = m.H0;
+      faceBottom = m.faceBottom;
+      hero.style.setProperty('--intro-face-center', `${m.faceCenter}px`);
+    } else {
+      W0 = Math.round(vw * 1.15);
+      H0 = (W0 * 249) / 559;
+      nameTop = Math.round(vh * 0.772);
+      faceBottom = nameTop - 160;
+      hero.style.removeProperty('--intro-face-center');
+    }
     const Hf = (Wf * 249) / 559;
-    const gap = mobile ? 96 : 160;
-    const nameTop = Math.round(vh * (mobile ? 0.715 : 0.772)); // Figma home (round 6 SVG): "Humansize" baseline at 717 of 900
-    // phones: centred between the viewport top and the name (equal space above and below);
-    // desktop: Figma, 160px above the name, running off the top. /shop's ring shares this centre.
-    const faceBottom = mobile ? Math.round(nameTop / 2 + H0 / 2) : nameTop - gap;
     host.style.transform = 'none';
     hero.classList.remove('is-sda');
     host.style.translate = 'none';
-    const hostTop = Math.round(host.getBoundingClientRect().top); // fixed host: viewport = doc at scroll 0
+    const hostTop = measureHostTop();
     R = Math.max(1, Math.round(faceBottom - Hf - topF));
     sMin = Wf / W0;
     hero.style.setProperty('--intro-w', `${W0}px`);
@@ -62,20 +92,31 @@ export function initIntroFace(hero: HTMLElement) {
     hero.style.setProperty('--intro-smin', String(sMin));
     lastS = NaN;
     cur = NaN;
+    lastGlLayout = 1;
     follow();
     if (sda) {
       host.style.transform = '';
       hero.classList.add('is-sda');
-    }
-    else write(performance.now());
+    } else write(performance.now());
+  };
+
+  const forceLayout = () => {
+    lastW = -1;
+    hero.removeAttribute('data-intro-ready');
+    layout();
   };
 
   const target = () => {
-    // clamp: rubber-band overscroll (negative scrollY) holds the start state
     const t = reduced ? 1 : Math.min(1, Math.max(0, scrollY / R));
     return 1 + (sMin - 1) * t;
   };
-  // One rAF loop: frame-rate independent exponential smoothing (1 - e^(-dt/tau)); stops when settled.
+
+  const maybeRelayoutGl = (scale: number) => {
+    if (Math.abs(scale - lastGlLayout) < 0.04) return;
+    lastGlLayout = scale;
+    host.dispatchEvent(new CustomEvent('intro-scale', { detail: scale }));
+  };
+
   const write = (now: number) => {
     frame = 0;
     const goal = target();
@@ -87,24 +128,22 @@ export function initIntroFace(hero: HTMLElement) {
     if (cur !== lastS) {
       lastS = cur;
       host.style.transform = `scale(${cur})`;
+      maybeRelayoutGl(cur);
     }
     hero.toggleAttribute('data-intro-settled', cur === goal);
     if (cur !== goal) frame = requestAnimationFrame(write);
     else lastT = 0;
   };
-  // position:fixed host (overscroll never crops it) that follows the page by -scrollY, clamped at
-  // 0 for rubber-band pulls; touch uses a CSS scroll() animation on `translate`.
+
   function follow() {
-    // Safari reports negative scrollY in a top rubber-band and drags fixed layers down with
-    // the bounce; follow it the other way so the layer stays put and no cut edge shows.
     const y = scrollY;
     host!.style.translate = sda ? '' : `0 ${-y}px`;
   }
-  addEventListener('scroll', follow, { passive: true });
+
+  addEventListener('scroll', follow, opt);
   const onScroll = () => {
     if (!frame) frame = requestAnimationFrame(write);
   };
-
 
   function mountTune() {
     const box = document.createElement('div');
@@ -133,8 +172,6 @@ export function initIntroFace(hero: HTMLElement) {
     document.body.appendChild(box);
   }
 
-  // Touch: scroll-driven CSS animation where supported (compositor, follows momentum scroll
-  // exactly); rAF + smoothing elsewhere.
   const sda =
     !reduced &&
     matchMedia('(pointer: coarse)').matches &&
@@ -147,7 +184,12 @@ export function initIntroFace(hero: HTMLElement) {
     hero.toggleAttribute('data-intro-settled', true);
   }
   layout();
-  if (!sda) addEventListener('scroll', onScroll, { passive: true });
+  if (!sda) addEventListener('scroll', onScroll, opt);
   if (hero.hasAttribute('data-intro-tune') && !sda) mountTune();
-  addEventListener('resize', layout, { passive: true });
+  addEventListener('resize', () => {
+    if (document.documentElement.clientWidth !== lastW) forceLayout();
+  }, opt);
+  addEventListener('pagereveal', forceLayout, opt);
+  addEventListener('pageshow', (e) => e.persisted && forceLayout(), opt);
+  addEventListener('pagehide', () => ac.abort(), { once: true });
 }

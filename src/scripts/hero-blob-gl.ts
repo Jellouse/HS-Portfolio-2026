@@ -225,7 +225,9 @@ export async function mountHeroBlobGL(svg: SVGSVGElement, opts: Opts) {
     b = target(gl, LW, LH);
   };
   layout();
-  new ResizeObserver(layout).observe(svg);
+  const ro = new ResizeObserver(layout);
+  ro.observe(svg);
+  ro.observe(host);
 
   const quad = (p: WebGLProgram) => {
     gl.useProgram(p);
@@ -279,5 +281,5 @@ export async function mountHeroBlobGL(svg: SVGSVGElement, opts: Opts) {
     gl.uniform1f(u(pCut, 'cut'), cut);
     quad(pCut);
   };
-  return { canvas, draw };
+  return { canvas, draw, layout };
 }

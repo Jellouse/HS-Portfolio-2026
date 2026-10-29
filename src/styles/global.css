@@ -513,8 +513,7 @@ body:has(.hero) .site-header {
 .feed {
   position: relative;
   z-index: 1;
-  /* ~one bio line peeks at the bottom edge */
-  margin-top: -36px;
+  margin-top: 0;
   padding: 0 var(--pad) 40px;
 }
 
@@ -1026,7 +1025,7 @@ body:has(.hero) .site-header {
 
   .hero .mark-blob {
     --mark-scale: 1;
-    /* Mobile ref: ~73% wide, centre ~41.5svh */
+    /* Intro scroll sets --intro-w / --intro-face-top on [data-intro] home. */
     top: 41.5svh;
     width: 73vw;
     transform: translate(-50%, -50%);
@@ -1123,7 +1122,7 @@ body:has(.hero) .site-header {
   }
 
   .feed {
-    margin-top: -36px;
+    margin-top: 0;
   }
 
   .about {
@@ -1821,7 +1820,7 @@ body .site-header.is-menu-fade:not(.is-menu-open) .who .time {
   display: grid;
   grid-template-columns: subgrid;
   align-items: center;
-  margin: 0 0 184px;
+  margin: 0;
 }
 .shop-head-title,
 .shop-head-sub {
@@ -1854,9 +1853,8 @@ body .site-header.is-menu-fade:not(.is-menu-open) .who .time {
 }
 .shop-intro {
   grid-column: calc((var(--cols) - var(--content-span)) / 2 + 1) / span var(--content-span);
-}
-.shop-intro {
-  margin: 0 0 136px;
+  margin-top: calc(100svh - var(--intro-name-top) - 90px);
+  margin-bottom: 136px;
 }
 .shop-intro p {
   margin: 0 0 29px;
@@ -1911,7 +1909,7 @@ body .site-header.is-menu-fade:not(.is-menu-open) .who .time {
 
 @media (max-width: 759px) {
   .shop-page {
-    padding: 96px var(--margin);
+    padding: var(--intro-name-top, round(71.5svh, 1px)) var(--margin) 96px;
   }
   .shop-product {
     display: block;
@@ -1922,7 +1920,7 @@ body .site-header.is-menu-fade:not(.is-menu-open) .who .time {
     align-items: center;
     justify-items: center;
     text-align: center;
-    margin-bottom: 96px;
+    margin-bottom: 0;
   }
   .shop-head-title,
   .shop-head-sub,
@@ -1936,6 +1934,7 @@ body .site-header.is-menu-fade:not(.is-menu-open) .who .time {
     margin-bottom: 48px;
   }
   .shop-intro {
+    margin-top: calc(100svh - var(--intro-name-top) - 58px);
     margin-bottom: 96px;
   }
   .shop-product {
@@ -1965,6 +1964,10 @@ body .site-header.is-menu-fade:not(.is-menu-open) .who .time {
   text-decoration-thickness: 1px;
   text-underline-offset: 3px;
   cursor: pointer;
+}
+.shop-details[aria-expanded="true"] {
+  color: var(--muted);
+  cursor: default;
 }
 .shop-details:focus-visible,
 .shop-links a:focus-visible,
@@ -2659,7 +2662,7 @@ html.is-contact-open {
 .shop-head {
   --ring-w: round(68vw, 1px);
   display: block;
-  margin: 0 0 184px;
+  margin: 0;
   text-align: center;
 }
 
@@ -2977,6 +2980,39 @@ html.is-contact-open, html.is-contact-open body { overscroll-behavior: none; }
   background: none;
   border: 0;
   cursor: pointer;
+}
+
+.brand-at {
+  display: none;
+}
+
+@media (hover: hover) and (pointer: fine) and (min-width: 760px) {
+  .brand-toggle {
+    position: relative;
+    display: inline-block;
+  }
+
+  .brand-name,
+  .brand-at {
+    display: block;
+    transition: opacity var(--dur-hover) var(--ease-out);
+  }
+
+  .brand-at {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+  }
+
+  .brand-toggle:hover .brand-name,
+  .brand-toggle:focus-visible .brand-name {
+    opacity: 0;
+  }
+
+  .brand-toggle:hover .brand-at,
+  .brand-toggle:focus-visible .brand-at {
+    opacity: 1;
+  }
 }
 
 .site-menu[hidden] {

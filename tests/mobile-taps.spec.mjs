@@ -103,7 +103,7 @@ try {
       return a.contains(document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2));
     }),
   );
-  check(hits.length === 4 && hits.every(Boolean), `service options are the tap target (${hits.length})`);
+  check(hits.length === 3 && hits.every(Boolean), `service options are the tap target (${hits.length})`);
   await page.touchscreen.tap(195, 120); // backdrop
   await page.waitForFunction(() => !document.querySelector('.contact-panel'), null, { timeout: 5000 }).catch(() => {});
   check(await page.evaluate(() => !document.querySelector('.contact-panel')), 'tap outside closes the sheet');

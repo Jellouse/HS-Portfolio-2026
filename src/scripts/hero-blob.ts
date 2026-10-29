@@ -61,6 +61,7 @@ export function initHeroBlob(root: ParentNode = document) {
         svg.style.viewTransitionName = 'none';
         g.canvas.style.viewTransitionName = 'hs-mark';
         g.canvas.dataset.ready = '';
+        root.querySelector('[data-hero-root]')?.addEventListener('intro-scale', () => g.layout(), { passive: true });
       })
       .catch(() => {});
   }

@@ -100,7 +100,7 @@ export default config({
             validation: { isRequired: true, length: { min: 1 } },
           },
         }),
-        year: fields.integer({ label: 'Start year' }),
+        year: fields.integer({ label: 'Year' }),
         yearEnd: fields.integer({ label: 'End year', description: 'Leave empty for ongoing' }),
         published: fields.checkbox({
           label: 'Published',
@@ -189,7 +189,6 @@ export default config({
                   label: 'Title',
                   description: 'Optional. Shown centred above the text, like the case title. With a title the text is set larger.',
                 }),
-                year: fields.text({ label: 'Year', description: 'Optional. Shown in gray after the title, e.g. 2024.' }),
                 text: fields.text({
                   label: 'Text',
                   multiline: true,
@@ -229,6 +228,7 @@ export default config({
                   description:
                     'White or transparent edges. No rounded corners and no padding.',
                 }),
+                outline,
               }),
             },
             pair: {

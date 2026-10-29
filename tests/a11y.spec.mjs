@@ -87,7 +87,7 @@ for (const [label, opt] of [['desktop', { viewport: { width: 1440, height: 900 }
   await q.waitForTimeout(400);
   await q.evaluate(() => document.querySelector('.site-menu [data-contact-open]').click());
   await q.waitForTimeout(600);
-  await q.evaluate(() => document.querySelector('[data-service="Product"]').click());
+  await q.evaluate(() => document.querySelector('[data-service="Retail"]').click());
   await q.waitForTimeout(300);
   const fits = () => q.evaluate(() => { const t = document.querySelector('#contact-project'); return t.scrollHeight <= t.clientHeight + 1 || t.clientHeight >= t.parentElement.clientHeight - 29; });
   let ok = true;

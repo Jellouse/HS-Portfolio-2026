@@ -15,7 +15,10 @@ const home = Astro.url.pathname === '/';
 
 <header class="site-header">
   <p class="brand">
-    <button type="button" class="brand-toggle" aria-expanded="false" aria-controls="site-socials" data-socials-toggle>Humansize</button>
+    <button type="button" class="brand-toggle" aria-expanded="false" aria-controls="site-socials" data-socials-toggle>
+      <span class="brand-at" aria-hidden="true">@Humansize</span>
+      <span class="brand-name">Humansize</span>
+    </button>
   </p>
   <nav class="site-menu" aria-label="Main" data-main-menu>
     {home ? <a href="#about" data-about-link>About</a> : <a href="/">Home</a>}
