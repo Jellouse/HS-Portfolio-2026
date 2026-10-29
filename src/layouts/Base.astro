@@ -18,9 +18,11 @@ interface Props {
   noindex?: boolean;
   /** viewport-fit=cover, so env(safe-area-inset-*) works (pages with bottom-pinned UI). */
   safeArea?: boolean;
+  /** The homepage name block + menu (Header.astro). Off by default: other pages bring their own. */
+  header?: boolean;
 }
 
-const { title, description, image, type, jsonLd, noindex = false, safeArea = false } = Astro.props;
+const { title, description, image, type, jsonLd, noindex = false, safeArea = false, header = false } = Astro.props;
 const site = await getSite();
 ---
 
@@ -145,7 +147,7 @@ const site = await getSite();
         </clipPath>
       </defs>
     </svg>
-    <Header site={site} />
+    {header && <Header site={site} />}
     <main id="content">
       <slot />
     </main>

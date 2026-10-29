@@ -700,9 +700,6 @@ body:has(.hero) .site-header {
   margin-bottom: 0;
 }
 
-body:has(.project) .site-header {
-  display: none;
-}
 
 .project {
   padding: 32px var(--pad) 40px;
@@ -1815,9 +1812,6 @@ body .site-header.is-menu-fade:not(.is-menu-open) .who .time {
 /* Shop overview (desktop mock, 1440): title row with the Industrial Bloom mark centred,
    intro on the content span, then one section per product: image pair on the Wide span,
    centred caption, optional description on the content span. */
-body:has(.shop-page) .site-header {
-  display: none;
-}
 .shop-page {
   padding-top: 216px;
   padding-bottom: 150px;
@@ -2002,9 +1996,6 @@ body:has(.shop-page) .site-header {
    Default column (--content-span, 6 cols = 666 at 1440), Industrial Bloom mark on top, centred title + price,
    sections of centred heading / text / image, a two-column gallery, Info, and a
    bottom-pinned Buy button. */
-body:has(.shop-detail) .site-header {
-  display: none;
-}
 .shop-detail {
   padding-top: 44px;
   padding-bottom: 116px;

@@ -25,6 +25,7 @@ const tune = process.env.VERCEL_ENV !== 'production';
   description={description}
   image={image}
   jsonLd={homeJsonLd(site, pageUrl)}
+  header
 >
   <h1 class="sr-only">{site.name}, {site.studio}</h1>
   <section class="hero" aria-label="Humansize" data-hero-root data-intro data-intro-tune={tune ? '' : undefined}>
