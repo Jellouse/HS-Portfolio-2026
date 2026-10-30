@@ -26,6 +26,10 @@ const SPECS = [
   ['canvas', 'tests/canvas-auth.spec.mjs'],
   ['shop', 'tests/shop-checkout.spec.mjs'],
   ['project-images', 'tests/project-images.spec.mjs'],
+  ['scroll-media', 'tests/scroll-media-visible.spec.mjs'],
+  ['media-opacity', 'tests/media-opacity-monotonic.spec.mjs'],
+  ['brand-intro-hover', 'tests/brand-intro-hover.spec.mjs'],
+  ['nav-intro-once', 'tests/nav-intro-once.spec.mjs'],
   ['touch-guard', 'tests/touch-scroll-guard.mjs'],
 ];
 

@@ -24,6 +24,7 @@ function reveal(el: Element) {
 }
 
 export function initScrollFade() {
+  if (document.documentElement.classList.contains('has-scroll-motion')) return;
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   if (!('IntersectionObserver' in window)) return;
 

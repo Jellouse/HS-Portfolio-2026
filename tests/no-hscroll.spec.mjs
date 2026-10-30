@@ -1,4 +1,3 @@
-
 import { readdirSync } from 'node:fs';
 import { webkit, chromium, devices } from 'playwright';
 import { createServer } from 'node:http';
@@ -78,28 +77,60 @@ const shopSlugs = readdirSync(join(ROOT, 'src/content/products'), { withFileType
   .filter((d) => d.isDirectory())
   .map((d) => d.name);
 const paths = ['/', ...slugs.map((s) => `/work/${s}/`), '/shop/', ...shopSlugs.map((s) => `/shop/${s}/`)];
+const thorough = new Set(['/', '/shop/', ...slugs.map((s) => `/work/${s}/`)]);
 const { url, stop } = await ensureServer();
 const browser = await chromium.launch();
 let failed = false;
+
+async function measure(page, width) {
+  return page.evaluate((W) => {
+    const off = [...document.querySelectorAll('body *')]
+      .filter((e) => {
+        const r = e.getBoundingClientRect();
+        if (r.width < 1 && r.height < 1) return false;
+        if (getComputedStyle(e).position === 'fixed') return false;
+        return r.right > W + 1 || r.left < -1;
+      })
+      .slice(0, 6)
+      .map((e) => `${e.tagName.toLowerCase()}.${(e.className && (e.className.baseVal ?? e.className)) || ''}`);
+    return { sw: document.documentElement.scrollWidth, W, off };
+  }, width);
+}
+
+function report(width, label, r) {
+  const ok = r.sw === r.W;
+  if (!ok) failed = true;
+  console.log(`  ${width} ${label}: scrollWidth ${r.sw} / ${r.W} ${ok ? 'OK' : 'FAIL ' + r.off.join(', ')}`);
+  return ok;
+}
+
 try {
   for (const width of [375, 390, 430]) {
-    const context = await browser.newContext({ viewport: { width, height: 844 }, deviceScaleFactor: 3, isMobile: true, hasTouch: true });
+    const context = await browser.newContext({ viewport: { width, height: 844 }, deviceScaleFactor: 3, isMobile: true, hasTouch: true, reducedMotion: 'no-preference' });
     const page = await context.newPage();
     for (const path of paths) {
       const res = await page.goto(url + path, { waitUntil: 'load' });
       if (!res || res.status() >= 400) continue;
-      await wait(1500);
-      const r = await page.evaluate((W) => {
-
-        const off = [...document.querySelectorAll('body *')]
-          .filter((e) => e.getBoundingClientRect().right > W + 0.5 && getComputedStyle(e).position !== 'fixed')
-          .slice(0, 5)
-          .map((e) => `${e.tagName.toLowerCase()}.${(e.className && (e.className.baseVal ?? e.className)) || ''}`);
-        return { sw: document.documentElement.scrollWidth, W, off };
-      }, width);
-      const ok = r.sw === r.W;
-      if (!ok) failed = true;
-      console.log(`  ${width} ${path}: scrollWidth ${r.sw} / ${r.W} ${ok ? 'OK' : 'FAIL ' + r.off.join(', ')}`);
+      await page.waitForFunction(() => document.documentElement.classList.contains('is-scroll-intro-ready') || document.readyState === 'complete', null, { timeout: 8000 }).catch(() => {});
+      await wait(width === 390 ? 200 : 400);
+      report(width, `${path} before`, await measure(page, width));
+      if (width !== 390 || !thorough.has(path)) continue;
+      if (path === '/') {
+        const about = page.locator('#about');
+        if (await about.count()) {
+          await about.scrollIntoViewIfNeeded();
+          await wait(100);
+          report(width, '/#about', await measure(page, width));
+        }
+      }
+      const max = await page.evaluate(() => Math.max(0, document.documentElement.scrollHeight - innerHeight));
+      const steps = Math.min(24, Math.max(4, Math.ceil(max / 500)));
+      for (let i = 1; i <= steps; i++) {
+        await page.evaluate((y) => scrollTo(0, y), Math.round((max * i) / steps));
+        await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
+        report(width, `${path} scroll ${i}/${steps}`, await measure(page, width));
+      }
+      report(width, `${path} after`, await measure(page, width));
     }
     await context.close();
   }
