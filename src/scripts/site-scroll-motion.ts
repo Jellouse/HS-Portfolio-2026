@@ -1,4 +1,4 @@
-import { SCROLL_MEDIA_FRAME } from './scroll-media-selectors';
+import { SCROLL_MEDIA, UI_MEDIA } from './scroll-media-selectors';
 import { introLetterSequence, playLetterIntro } from './wordmark-intro';
 
 const reduced = matchMedia('(prefers-reduced-motion: reduce)');
@@ -10,8 +10,42 @@ function doubleRaf() {
   return new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
 }
 
+function hostVideo(host: HTMLElement) {
+  return host instanceof HTMLVideoElement ? host : host.querySelector<HTMLVideoElement>('video');
+}
+
+function logoSized(el: Element) {
+  if (!(el instanceof HTMLImageElement)) return false;
+  const w = Number(el.getAttribute('width') || 0);
+  const h = Number(el.getAttribute('height') || 0);
+  return w > 0 && h > 0 && w <= 128 && h <= 128 && (el.getAttribute('alt') ?? '').trim() === '';
+}
+
+function markScrollMedia(el: Element) {
+  if (!(el instanceof HTMLImageElement || el instanceof HTMLVideoElement)) return;
+  if (el.classList.contains('scroll-media') || el.closest('.scroll-media')) return;
+  if (el.closest(UI_MEDIA) || logoSized(el)) return;
+  el.classList.add('scroll-media');
+}
+
+function adoptScrollMedia(root: ParentNode = document) {
+  const nodes: Element[] = [];
+  const consider = (el: Element) => {
+    if (!(el instanceof HTMLImageElement || el instanceof HTMLVideoElement)) return;
+    if (!el.closest('main')) return;
+    nodes.push(el);
+  };
+  if (root instanceof Element) {
+    consider(root);
+    root.querySelectorAll('img, video').forEach(consider);
+  } else {
+    root.querySelectorAll('main img, main video').forEach(consider);
+  }
+  nodes.forEach(markScrollMedia);
+}
+
 function ensureFrameMedia(frame: HTMLElement) {
-  const video = frame.querySelector<HTMLVideoElement>('video');
+  const video = hostVideo(frame);
   if (!video?.dataset.src || video.dataset.armed) return;
   const source = video.querySelector('source');
   const src = video.dataset.src;
@@ -27,40 +61,60 @@ function markMediaReady(frame: HTMLElement) {
   frame.classList.add('is-media-ready');
 }
 
+function scrollHosts() {
+  return [...document.querySelectorAll<HTMLElement>(SCROLL_MEDIA)];
+}
+
 function wireMediaReady() {
-  document.querySelectorAll<HTMLImageElement>(`${SCROLL_MEDIA_FRAME} img`).forEach((img) => {
-    const frame = img.closest<HTMLElement>('.frame');
-    if (!frame || frame !== img.closest(SCROLL_MEDIA_FRAME)) return;
-    const done = () => markMediaReady(frame);
-    if (img.complete && img.naturalWidth > 0) done();
-    else {
-      img.addEventListener('load', done, { once: true });
-      img.decode?.().then(done).catch(() => {});
-    }
+  adoptScrollMedia();
+  for (const host of scrollHosts()) {
+    const imgs =
+      host instanceof HTMLImageElement ? [host] : [...host.querySelectorAll<HTMLImageElement>('img')];
+    imgs.forEach((img) => {
+      const done = () => markMediaReady(host);
+      if (img.complete && img.naturalWidth > 0) done();
+      else {
+        img.addEventListener('load', done, { once: true });
+        img.decode?.().then(done).catch(() => {});
+      }
+    });
+    const video = hostVideo(host);
+    if (!video) continue;
+    if (video.poster) markMediaReady(host);
+    if (video.readyState >= 2) markMediaReady(host);
+    else video.addEventListener('loadeddata', () => markMediaReady(host), { once: true });
+  }
+}
+
+function primeFrame(frame: HTMLElement) {
+  const imgs =
+    frame instanceof HTMLImageElement
+      ? [frame]
+      : [...frame.querySelectorAll<HTMLImageElement>('img[loading="lazy"]')];
+  imgs.forEach((img) => {
+    img.loading = 'eager';
   });
-  document.querySelectorAll<HTMLVideoElement>(`${SCROLL_MEDIA_FRAME} video`).forEach((video) => {
-    const frame = video.closest<HTMLElement>('.frame');
-    if (!frame) return;
-    if (video.poster) markMediaReady(frame);
-    if (video.readyState >= 2) markMediaReady(frame);
-    else video.addEventListener('loadeddata', () => markMediaReady(frame), { once: true });
-  });
+  ensureFrameMedia(frame);
 }
 
 function initMediaScrollFade() {
-  const frames = [...document.querySelectorAll<HTMLElement>(SCROLL_MEDIA_FRAME)];
-  const locked = new WeakSet<HTMLElement>();
-
-  const lock = (frame: HTMLElement) => {
-    if (locked.has(frame)) return;
-    locked.add(frame);
-    frame.classList.add('is-viewport-locked');
-    frame.style.opacity = '1';
-    ensureFrameMedia(frame);
-  };
+  adoptScrollMedia();
+  const main = document.querySelector('main');
+  if (main) {
+    new MutationObserver((records) => {
+      for (const record of records) {
+        record.addedNodes.forEach((node) => {
+          if (node instanceof HTMLElement) adoptScrollMedia(node);
+        });
+      }
+    }).observe(main, { childList: true, subtree: true });
+  }
 
   if (reduced.matches) {
-    frames.forEach(lock);
+    scrollHosts().forEach((frame) => {
+      frame.style.opacity = '1';
+      primeFrame(frame);
+    });
     return;
   }
 
@@ -68,14 +122,12 @@ function initMediaScrollFade() {
     const vh = document.documentElement.clientHeight || innerHeight;
     const start = Math.round(vh * 1.05);
     const end = Math.round(vh * 0.7);
-    const span = start - end;
-    for (const frame of frames) {
-      if (locked.has(frame)) continue;
+    const span = Math.max(1, start - end);
+    for (const frame of scrollHosts()) {
       const top = frame.getBoundingClientRect().top;
       const opacity = Math.min(1, Math.max(0, (start - top) / span));
       frame.style.opacity = opacity.toFixed(3);
-      if (opacity > 0) ensureFrameMedia(frame);
-      if (opacity >= 1) lock(frame);
+      if (top < start + vh) primeFrame(frame);
     }
   };
 
@@ -112,7 +164,7 @@ function lazyVideos() {
       }
     }
   };
-  document.querySelectorAll<HTMLVideoElement>(`${SCROLL_MEDIA_FRAME} video, video[data-autoplay]`).forEach(prep);
+  document.querySelectorAll<HTMLVideoElement>(`${SCROLL_MEDIA} video, video.scroll-media, video[data-autoplay]`).forEach(prep);
 
   const syncPlayback = () => {
     const centre = document.documentElement.clientHeight / 2;
@@ -126,7 +178,7 @@ function lazyVideos() {
     videos.forEach((video, index) => {
       if (!document.hidden && index < limit) {
         if (!video.dataset.src) return;
-        const host = video.closest<HTMLElement>(SCROLL_MEDIA_FRAME);
+        const host = video.closest<HTMLElement>(SCROLL_MEDIA) ?? (video.classList.contains('scroll-media') ? video : null);
         if (host) ensureFrameMedia(host);
         video.play().catch(() => {});
       } else video.pause();
@@ -148,7 +200,7 @@ function lazyVideos() {
     { rootMargin: '500px 0px', threshold: 0.01 },
   );
 
-  document.querySelectorAll<HTMLVideoElement>(`${SCROLL_MEDIA_FRAME} video, video[data-autoplay]`).forEach((video) => {
+  document.querySelectorAll<HTMLVideoElement>(`${SCROLL_MEDIA} video, video.scroll-media, video[data-autoplay]`).forEach((video) => {
     prep(video);
     videoObserver.observe(video);
   });

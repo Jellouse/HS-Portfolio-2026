@@ -11,9 +11,10 @@ interface Props {
   flush?: boolean;
 
   outline?: boolean;
+  fade?: boolean;
 }
 
-const { src, alt, sizes, priority = false, plain = false, flush = false, outline = false } = Astro.props;
+const { src, alt, sizes, priority = false, plain = false, flush = false, outline = false, fade = true } = Astro.props;
 const remote = typeof src === 'string';
 const widths = remote
   ? []
@@ -30,7 +31,7 @@ const placeholder = remote
 
 {
   remote ? (
-    <div class:list={['frame', { 'is-plain': plain, 'is-flush': flush, 'is-outlined': outline }]}>
+    <div class:list={['frame', { 'scroll-media': fade, 'is-plain': plain, 'is-flush': flush, 'is-outlined': outline }]}>
       <img
         src={src}
         alt={alt}
@@ -41,7 +42,7 @@ const placeholder = remote
       />
     </div>
   ) : (
-    <div class:list={['frame', { 'is-plain': plain, 'is-flush': flush, 'is-outlined': outline }]} style={`background-image:url('${placeholder!.src}')`}>
+    <div class:list={['frame', { 'scroll-media': fade, 'is-plain': plain, 'is-flush': flush, 'is-outlined': outline }]} style={`background-image:url('${placeholder!.src}')`}>
       <Image
         src={src}
         alt={alt}
