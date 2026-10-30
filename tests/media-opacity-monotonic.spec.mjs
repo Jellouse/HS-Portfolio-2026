@@ -1,7 +1,7 @@
 import { chromium } from 'playwright';
 import { createServer } from 'node:http';
-import { readFileSync, existsSync, statSync, mkdirSync, writeFileSync } from 'node:fs';
-import { join, extname } from 'node:path';
+import { readFileSync, existsSync, statSync, mkdirSync, writeFileSync, readdirSync } from 'node:fs';
+import { join, extname, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
@@ -33,13 +33,28 @@ const log = (s) => {
 };
 let fail = 0;
 
+const skip = new Set(['canvas', 'admin', 'keystatic-upload', 'preview', 'api']);
+function pages(dir) {
+  const found = [];
+  for (const name of readdirSync(dir)) {
+    const path = join(dir, name);
+    if (statSync(path).isDirectory()) {
+      if (name.startsWith('_') || skip.has(name)) continue;
+      found.push(...pages(path));
+    } else if (name === 'index.html') {
+      const url = `/${relative(root, dir).split('\\').join('/')}`;
+      found.push(url === '/' ? '/' : `${url.replace(/\/$/, '')}/`);
+    } else if (name === '404.html') found.push('/404.html');
+  }
+  return found;
+}
+const routes = pages(root).sort();
+log(`routes ${routes.join(' ')}`);
+
 const browser = await chromium.launch();
-for (const [name, url, width] of [
-  ['home 390', '/', 390],
-  ['home 1440', '/', 1440],
-  ['atomic 390', '/work/atomic-ski/', 390],
-  ['atomic 1440', '/work/atomic-ski/', 1440],
-]) {
+for (const url of routes) {
+  for (const width of [390, 1440]) {
+  const name = `${url} ${width}`;
   const page = await browser.newPage({
     viewport: { width, height: width < 700 ? 844 : 900 },
     isMobile: width < 700,
@@ -48,17 +63,48 @@ for (const [name, url, width] of [
   });
   await page.goto(`http://127.0.0.1:4344${url}`, { waitUntil: 'load' });
   await page.waitForFunction(() => document.documentElement.classList.contains('is-letter-intro-done'), null, { timeout: 20000 });
+  const audit = await page.evaluate(() => {
+    const ui = '.mark, .shop-mark, .services-landing-mark, .brand, .site-header, .site-footer, .hero, .mark-wrap, nav, .project-mark, .shop-detail-mark, .shop-ring, [data-spin-mark]';
+    const loose = [];
+    document.querySelectorAll('main img, main video').forEach((el) => {
+      if (el.closest(ui)) return;
+      if (el.closest('.scroll-media') || el.classList.contains('scroll-media')) return;
+      const img = el instanceof HTMLImageElement ? el : null;
+      const w = Number(img?.getAttribute('width') || 0);
+      const h = Number(img?.getAttribute('height') || 0);
+      if (img && w > 0 && h > 0 && w <= 128 && h <= 128 && !(img.getAttribute('alt') || '').trim()) return;
+      loose.push(`${el.tagName}:${img?.getAttribute('alt') || el.getAttribute('aria-label') || ''}`);
+    });
+    const marked = [...document.querySelectorAll('.shop-mark, .mark, .services-landing-mark, [data-spin-mark], .project-mark svg')].filter(
+      (el) => el.classList.contains('scroll-media') || el.closest('.scroll-media'),
+    ).length;
+    return { loose, marked };
+  });
+  if (audit.loose.length || audit.marked) {
+    log(`FAIL ${name}: loose ${audit.loose.join('|') || 'none'} marks ${audit.marked}`);
+    fail = 1;
+  }
   const range = await page.evaluate(() => {
-    const frames = [...document.querySelectorAll('main .frame')];
-    const frame = frames.find((el) => el.getBoundingClientRect().top > innerHeight * 1.05 + 40) || frames.at(-1);
-    if (!frame) return null;
+    const frames = [...document.querySelectorAll('.scroll-media')];
+    const frame = frames.find((el) => el.getBoundingClientRect().top > innerHeight * 1.05 + 40);
+    if (!frame) return frames.length ? { inView: frames.length } : null;
     frame.setAttribute('data-opacity-probe', '1');
     const top = frame.getBoundingClientRect().top + scrollY;
     return { start: Math.max(0, Math.round(top - innerHeight * 1.05 - 12)), end: Math.round(top + frame.offsetHeight + 24) };
   });
   if (!range) {
-    log(`FAIL ${name}: no frame`);
-    fail = 1;
+    log(`ok   ${name}: no media`);
+    await page.close();
+    continue;
+  }
+  if (range.inView) {
+    const stuck = await page.evaluate(() =>
+      [...document.querySelectorAll('.scroll-media')].some((el) => parseFloat(getComputedStyle(el).opacity) < 0.95),
+    );
+    if (stuck) {
+      log(`FAIL ${name}: in-view media below full opacity`);
+      fail = 1;
+    } else log(`ok   ${name}: ${range.inView} in-view`);
     await page.close();
     continue;
   }
@@ -100,6 +146,7 @@ for (const [name, url, width] of [
   log(`  ${name} samples: ${samples.map((n) => n.toFixed(3)).join(' ')}`);
   log(`  ${name} back: ${back.map((n) => n.toFixed(3)).join(' ')}`);
   await page.close();
+  }
 }
 
 const outDir = process.env.ARTIFACTS || join(ROOT, 'artifacts');

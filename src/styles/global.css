@@ -3019,17 +3019,17 @@ html.is-contact-open body {
     visibility: hidden;
   }
 
-  html.js main .frame {
+  html.js .scroll-media {
     opacity: 0;
   }
 
-  html.has-scroll-motion.js .frame img,
-  html.has-scroll-motion.js .frame img.is-ready {
+  html.has-scroll-motion.js .scroll-media img,
+  html.has-scroll-motion.js .scroll-media img.is-ready {
     opacity: 1;
     transition: none;
   }
 
-  html.is-scroll-intro-pending main .frame {
+  html.is-scroll-intro-pending main .scroll-media {
     visibility: hidden;
   }
 

@@ -10,9 +10,10 @@ interface Props {
   flush?: boolean;
   outline?: boolean;
   priority?: boolean;
+  fade?: boolean;
 }
 
-const { src, poster, label, plain = false, flush = false, outline = false, priority = false } = Astro.props;
+const { src, poster, label, plain = false, flush = false, outline = false, priority = false, fade = true } = Astro.props;
 let posterSrc: string | undefined;
 if (typeof poster === 'string') {
   posterSrc = poster;
@@ -26,7 +27,7 @@ const ext = src.toLowerCase().split(/[?#]/)[0].split('.').pop();
 const type = ext === 'webm' ? 'video/webm' : ext === 'mov' ? 'video/quicktime' : 'video/mp4';
 ---
 
-<div class:list={['frame', 'is-video', { 'is-plain': plain, 'is-flush': flush, 'is-outlined': outline }]}>
+<div class:list={['frame', 'is-video', { 'scroll-media': fade, 'is-plain': plain, 'is-flush': flush, 'is-outlined': outline }]}>
   <video
     muted
     autoplay
