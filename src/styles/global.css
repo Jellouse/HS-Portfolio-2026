@@ -3019,6 +3019,16 @@ html.is-contact-open body {
     visibility: hidden;
   }
 
+  html.js main .frame {
+    opacity: 0;
+  }
+
+  html.has-scroll-motion.js .frame img,
+  html.has-scroll-motion.js .frame img.is-ready {
+    opacity: 1;
+    transition: none;
+  }
+
   html.is-scroll-intro-pending main .frame {
     visibility: hidden;
   }

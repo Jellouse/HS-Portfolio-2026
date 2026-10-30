@@ -62,26 +62,43 @@ for (const [name, url, width] of [
     await page.close();
     continue;
   }
+  const read = () =>
+    page.evaluate(() => {
+      const frame = document.querySelector('[data-opacity-probe]');
+      return frame ? parseFloat(getComputedStyle(frame).opacity) : -1;
+    });
   const samples = [];
+  const back = [];
   const steps = 48;
   let drop = false;
+  let rise = false;
   for (let i = 0; i <= steps; i++) {
     const y = Math.round(range.start + ((range.end - range.start) * i) / steps);
     await page.evaluate((yy) => scrollTo(0, yy), y);
     await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
-    const o = await page.evaluate(() => {
-      const frame = document.querySelector('[data-opacity-probe]');
-      return frame ? parseFloat(getComputedStyle(frame).opacity) : -1;
-    });
+    const o = await read();
     samples.push(o);
     const prev = samples[samples.length - 2];
     if (prev !== undefined && o < prev - 0.02) drop = true;
   }
+  for (let i = steps; i >= 0; i--) {
+    const y = Math.round(range.start + ((range.end - range.start) * i) / steps);
+    await page.evaluate((yy) => scrollTo(0, yy), y);
+    await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
+    const o = await read();
+    back.push(o);
+    const prev = back[back.length - 2];
+    if (prev !== undefined && o > prev + 0.02) rise = true;
+  }
   const final = samples[samples.length - 1];
-  const ok = !drop && final >= 0.99 && samples[0] <= 0.05;
+  const returned = back[back.length - 1];
+  const ok = !drop && !rise && final >= 0.99 && samples[0] <= 0.05 && returned <= 0.05;
   if (!ok) fail = 1;
-  log(`${ok ? 'ok  ' : 'FAIL'} ${name}: start ${samples[0].toFixed(3)} end ${final.toFixed(3)} drop ${drop}`);
+  log(
+    `${ok ? 'ok  ' : 'FAIL'} ${name}: start ${samples[0].toFixed(3)} end ${final.toFixed(3)} back ${returned.toFixed(3)} drop ${drop} rise ${rise}`,
+  );
   log(`  ${name} samples: ${samples.map((n) => n.toFixed(3)).join(' ')}`);
+  log(`  ${name} back: ${back.map((n) => n.toFixed(3)).join(' ')}`);
   await page.close();
 }
 

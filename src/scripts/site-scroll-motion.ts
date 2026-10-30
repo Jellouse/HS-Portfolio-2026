@@ -47,20 +47,21 @@ function wireMediaReady() {
   });
 }
 
+function primeFrame(frame: HTMLElement) {
+  frame.querySelectorAll<HTMLImageElement>('img[loading="lazy"]').forEach((img) => {
+    img.loading = 'eager';
+  });
+  ensureFrameMedia(frame);
+}
+
 function initMediaScrollFade() {
   const frames = [...document.querySelectorAll<HTMLElement>(SCROLL_MEDIA_FRAME)];
-  const locked = new WeakSet<HTMLElement>();
-
-  const lock = (frame: HTMLElement) => {
-    if (locked.has(frame)) return;
-    locked.add(frame);
-    frame.classList.add('is-viewport-locked');
-    frame.style.opacity = '1';
-    ensureFrameMedia(frame);
-  };
 
   if (reduced.matches) {
-    frames.forEach(lock);
+    frames.forEach((frame) => {
+      frame.style.opacity = '1';
+      primeFrame(frame);
+    });
     return;
   }
 
@@ -68,14 +69,12 @@ function initMediaScrollFade() {
     const vh = document.documentElement.clientHeight || innerHeight;
     const start = Math.round(vh * 1.05);
     const end = Math.round(vh * 0.7);
-    const span = start - end;
+    const span = Math.max(1, start - end);
     for (const frame of frames) {
-      if (locked.has(frame)) continue;
       const top = frame.getBoundingClientRect().top;
       const opacity = Math.min(1, Math.max(0, (start - top) / span));
       frame.style.opacity = opacity.toFixed(3);
-      if (opacity > 0) ensureFrameMedia(frame);
-      if (opacity >= 1) lock(frame);
+      if (top < start + vh) primeFrame(frame);
     }
   };
 
