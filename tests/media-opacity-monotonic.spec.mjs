@@ -50,11 +50,11 @@ for (const [name, url, width] of [
   await page.waitForFunction(() => document.documentElement.classList.contains('is-letter-intro-done'), null, { timeout: 20000 });
   const range = await page.evaluate(() => {
     const frames = [...document.querySelectorAll('main .frame')];
-    const frame = frames.find((el) => el.getBoundingClientRect().top > innerHeight + 40) || frames.at(-1);
+    const frame = frames.find((el) => el.getBoundingClientRect().top > innerHeight * 1.05 + 40) || frames.at(-1);
     if (!frame) return null;
     frame.setAttribute('data-opacity-probe', '1');
     const top = frame.getBoundingClientRect().top + scrollY;
-    return { start: Math.max(0, Math.round(top - innerHeight - 12)), end: Math.round(top + frame.offsetHeight + 24) };
+    return { start: Math.max(0, Math.round(top - innerHeight * 1.05 - 12)), end: Math.round(top + frame.offsetHeight + 24) };
   });
   if (!range) {
     log(`FAIL ${name}: no frame`);

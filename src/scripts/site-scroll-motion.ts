@@ -66,8 +66,8 @@ function initMediaScrollFade() {
 
   const paint = () => {
     const vh = document.documentElement.clientHeight || innerHeight;
-    const start = vh;
-    const end = vh * 0.6;
+    const start = Math.round(vh * 1.05);
+    const end = Math.round(vh * 0.7);
     const span = start - end;
     for (const frame of frames) {
       if (locked.has(frame)) continue;
