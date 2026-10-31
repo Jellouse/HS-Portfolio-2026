@@ -3615,3 +3615,7 @@ body.is-service-page .footer-faces {
     max-width: 100%;
   }
 }
+
+.frame.is-alpha {
+  background-image: none;
+}
