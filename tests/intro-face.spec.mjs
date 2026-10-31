@@ -37,7 +37,8 @@ for (const [name, vp, mobile] of [['desktop', { width: 1440, height: 900 }, fals
       const m = new DOMMatrix(getComputedStyle(el).transform);
       return { a: m.a, d: m.d };
     };
-    return { w: f.width, bottom: f.bottom, top: f.top, name: n.top, host: scaleOf(host), svg: scaleOf(svg), canvas: canvas ? scaleOf(canvas) : null };
+    const visual = Number(document.querySelector('[data-hero-root]')?.dataset.introW || 0);
+    return { w: visual || f.width, bottom: f.bottom, top: f.top, name: n.top, host: scaleOf(host), svg: scaleOf(svg), canvas: canvas ? scaleOf(canvas) : null };
   });
   let prev = null;
   let gap0 = null;

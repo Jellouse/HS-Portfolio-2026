@@ -42,7 +42,8 @@ const measure = () => page.evaluate(() => {
     const m = new DOMMatrix(getComputedStyle(el).transform);
     return { a: m.a, d: m.d };
   };
-  return { w: box.width, host: scaleOf(host), svg: scaleOf(svg), canvas: canvas ? scaleOf(canvas) : null };
+  const visual = Number(document.querySelector('[data-hero-root]')?.dataset.introW || 0);
+  return { w: visual || box.width, host: scaleOf(host), svg: scaleOf(svg), canvas: canvas ? scaleOf(canvas) : null };
 });
 
 let prev = null;

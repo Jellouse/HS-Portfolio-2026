@@ -2114,6 +2114,11 @@ body .site-header.is-menu-fade:not(.is-menu-open) .who .time {
   transform: translateX(-50%);
 }
 
+.mark-blob-gl {
+  will-change: transform;
+  contain: strict;
+}
+
 body:has(.hero[data-intro]) .site-header {
   top: var(--intro-name-top, round(77.2svh, 1px));
   flex-direction: column;

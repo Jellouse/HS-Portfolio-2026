@@ -2,6 +2,7 @@
 import { clearStableViewportHeight, stableViewportHeight } from '../lib/viewport-layout';
 import { introFaceLayout } from '../lib/intro-layout';
 import { setIntroCopy } from './intro-copy';
+import { pushHeroFrame } from './hero-blob-gl';
 
 export function initIntroFace(hero: HTMLElement) {
   const host = hero.querySelector<HTMLElement>('[data-hero-variant="blob"]');
@@ -90,6 +91,10 @@ export function initIntroFace(hero: HTMLElement) {
     hero.style.setProperty('--intro-smin', String(sMin));
     cur = NaN;
     lastPaint = '';
+    hero.style.setProperty('--intro-w', `${W0}px`);
+    hero.style.setProperty('--intro-h', `${H0}px`);
+    hero.style.setProperty('--intro-face-top', `${Math.round(faceBottom - hostTop) - H0}px`);
+    applyGeometry(mobile ? (H0 * 559) / (W0 * 249) : 1);
     host.dispatchEvent(new CustomEvent('intro-layout', { bubbles: true }));
     follow();
     if (sda) {
@@ -115,6 +120,7 @@ export function initIntroFace(hero: HTMLElement) {
   };
 
   // Width and height are the whole size. Stretch hits the shapes only, before displacement.
+  // Reduced motion sizes the SVG once. Live scroll only pushes shader uniforms.
   const paintSize = (scaleX: number, scaleY: number) => {
     const w = Math.max(1, Math.round(W0 * scaleX));
     const h = Math.max(1, Math.round(H0 * scaleY));
@@ -122,18 +128,27 @@ export function initIntroFace(hero: HTMLElement) {
     const stretch = (h * 559) / (w * 249);
     const key = `${w}:${h}:${top}:${stretch.toFixed(4)}`;
     host.style.transform = 'none';
+    hero.dataset.introW = String(w);
     if (key === lastPaint) return;
     lastPaint = key;
     hero.style.setProperty('--intro-w', `${w}px`);
     hero.style.setProperty('--intro-h', `${h}px`);
     hero.style.setProperty('--intro-face-top', `${top}px`);
     applyGeometry(stretch);
-    host.dispatchEvent(new CustomEvent('intro-frame', { bubbles: true }));
+  };
+
+  const paintLive = (scaleX: number, scaleY: number) => {
+    const w = Math.max(1, Math.round(W0 * scaleX));
+    const h = Math.max(1, Math.round(H0 * scaleY));
+    const stretch = (h * 559) / (w * 249);
+    host.style.transform = 'none';
+    hero.dataset.introW = String(w);
+    pushHeroFrame({ scaleX, scaleY, stretch });
   };
 
   const paintSda = () => {
     const t = Math.min(1, Math.max(0, scrollY / R));
-    paintSize(1 + (sX - 1) * t, 1 + (sY - 1) * t);
+    paintLive(1 + (sX - 1) * t, 1 + (sY - 1) * t);
   };
 
   const forceLayout = () => {
@@ -158,7 +173,9 @@ export function initIntroFace(hero: HTMLElement) {
     const along = (1 - cur) / (1 - sMin) || 0;
     const scaleX = mobile ? 1 + (sX - 1) * along : cur;
     const scaleY = mobile ? 1 + (sY - 1) * along : cur;
-    paintSize(scaleX, scaleY);
+    if (reduced) paintSize(scaleX, scaleY);
+    else paintLive(scaleX, scaleY);
+    if (!sda) host.style.translate = `0 ${-Math.round(scrollY)}px`;
     const progress = sMin === 1 ? 0 : (1 - cur) / (1 - sMin);
     setIntroCopy(progress, !reduced && !sda);
     const isSettled = cur === goal;
@@ -176,7 +193,6 @@ export function initIntroFace(hero: HTMLElement) {
   }
 
   const onScroll = () => {
-    follow();
     if (sda) {
       if (!frame) {
         frame = requestAnimationFrame(() => {
