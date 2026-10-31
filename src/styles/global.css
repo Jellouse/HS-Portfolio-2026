@@ -2999,6 +2999,10 @@ html.is-contact-open body {
   }
 }
 @keyframes menu-scroll-out {
+  from {
+    opacity: 1;
+  }
+
   to {
     opacity: 0;
     pointer-events: none;

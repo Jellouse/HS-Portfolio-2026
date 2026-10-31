@@ -104,8 +104,18 @@ export async function mountHeroBlobGL(svg: SVGSVGElement, opts: Opts) {
   const blurUser = attr(svg.querySelector('feGaussianBlur'), 'stdDeviation', 2.2);
   const table = (svg.querySelector('feFuncA')?.getAttribute('tableValues') || '0 0 1 1 1 1 1 1').trim().split(/\s+/);
   const cut = Math.max(0, table.indexOf('1')) / table.length;
-  const colour = (svg.querySelector('feFlood')?.getAttribute('flood-color') || '#B70606').replace('#', '');
-  const rgb = [0, 2, 4].map((i) => parseInt(colour.slice(i, i + 2), 16) / 255);
+  const flood = svg.querySelector('feFlood')?.getAttribute('flood-color') || '';
+  const colourSource = !flood || flood === 'currentColor' ? getComputedStyle(svg).color : flood;
+  const rgb = (() => {
+    const hex = colourSource.trim();
+    if (hex.startsWith('#')) {
+      const h = (hex.length === 4 ? hex.slice(1).split('').map((c) => c + c).join('') : hex.slice(1));
+      return [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16) / 255);
+    }
+    const nums = hex.match(/[\d.]+/g);
+    if (nums && nums.length >= 3) return nums.slice(0, 3).map((n) => Number(n) / 255);
+    return [0xb7 / 255, 0x06 / 255, 0x06 / 255];
+  })();
 
   const PAD = 40;
   const NRES = 2;
@@ -164,21 +174,25 @@ export async function mountHeroBlobGL(svg: SVGSVGElement, opts: Opts) {
     const k = host.offsetWidth ? hr.width / host.offsetWidth : 1;
     const cssPerUnit = layoutCssW / vb.width;
     let dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const layoutCssH = (layoutCssW * vb.height) / vb.width;
+    const nativeH = (layoutCssW * vb.height) / vb.width;
+    const boxH = svg.clientHeight;
+    const stretching = svg.getAttribute('preserveAspectRatio') === 'none' && boxH > nativeH + 0.5;
+    const stretch = stretching ? boxH / nativeH : 1;
+    const layoutCssH = nativeH * stretch;
     const area = layoutCssW * layoutCssH * dpr * dpr || 1;
     if (area > 2.4e6) dpr *= Math.sqrt(2.4e6 / area);
     pxPerUnit = cssPerUnit * dpr;
+    const pxY = pxPerUnit * stretch;
     const x0 = Math.max(region[0], vb.x + (hr.left - r.left) / cssPerUnit);
     const x1 = Math.min(region[0] + region[2], vb.x + (hr.right - r.left) / cssPerUnit);
     const y0 = Math.max(region[1], vb.y + (hr.top - r.top) / cssPerUnit);
     const y1 = Math.min(region[1] + region[3], vb.y + (hr.bottom - r.top) / cssPerUnit);
-    const stretching = svg.getAttribute('preserveAspectRatio') === 'none';
-    out = [x0, y0, Math.max(1 / pxPerUnit, x1 - x0), Math.max(1 / pxPerUnit, y1 - y0)];
+    out = [x0, y0, Math.max(1 / pxPerUnit, x1 - x0), Math.max(1 / pxY, y1 - y0)];
     W = Math.floor(out[2] * pxPerUnit);
-    H = Math.floor(out[3] * pxPerUnit);
+    H = Math.floor(out[3] * pxY);
     canvas.width = W;
     canvas.height = H;
-    const topPx = (r.top - hr.top + (out[1] - vb.y) * cssPerUnit) / k;
+    const topPx = (r.top - hr.top + (out[1] - vb.y) * cssPerUnit * stretch) / k;
     Object.assign(canvas.style, {
       position: 'absolute',
       left: `${(r.left - hr.left + (out[0] - vb.x) * cssPerUnit) / k}px`,
@@ -187,23 +201,14 @@ export async function mountHeroBlobGL(svg: SVGSVGElement, opts: Opts) {
       height: `${H / dpr / k}px`,
       pointerEvents: 'none',
     });
-    const nativeH = (layoutCssW * vb.height) / vb.width;
-    const boxH = svg.clientHeight;
-    if (stretching && boxH > nativeH + 0.5) {
-      const stretch = boxH / nativeH;
-      const originY = (r.top - hr.top) / k - topPx;
-      canvas.style.transformOrigin = `0 ${originY}px`;
-      canvas.style.transform = `scaleY(${stretch})`;
-    } else {
-      canvas.style.transform = '';
-      canvas.style.transformOrigin = '';
-    }
+    canvas.style.transform = '';
+    canvas.style.transformOrigin = '';
 
     const sc = document.createElement('canvas');
     sc.width = Math.round(region[2] * pxPerUnit);
-    sc.height = Math.round(region[3] * pxPerUnit);
+    sc.height = Math.round(region[3] * pxY);
     const ctx = sc.getContext('2d')!;
-    ctx.setTransform(pxPerUnit, 0, 0, pxPerUnit, -region[0] * pxPerUnit, -region[1] * pxPerUnit);
+    ctx.setTransform(pxPerUnit, 0, 0, pxY, -region[0] * pxPerUnit, -region[1] * pxY);
     ctx.fillStyle = '#000';
     shapes.forEach((el) => {
       if (el instanceof SVGPathElement) ctx.fill(new Path2D(el.getAttribute('d') || ''));

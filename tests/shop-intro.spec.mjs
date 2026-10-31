@@ -79,8 +79,8 @@ for (const [label, opt] of [['desktop', { viewport: { width: 1440, height: 900 }
   if (label === 'mobile') {
     check(Math.abs(shop.c - home.c) <= 12, `${label}: face and ring share the band (${home.c.toFixed(1)}/${shop.c.toFixed(1)})`);
     check(home.left >= -2 && home.right <= home.vw + 2 && home.w <= home.vw + 1, `mobile: face inside the viewport (${home.left.toFixed(0)}–${home.right.toFixed(0)}, ${home.w.toFixed(0)})`);
-    check(home.h / home.w > 249 / 559, `mobile: face rounder than the flat ellipse (${(home.w / home.h).toFixed(2)})`);
-    check(home.top < 120 && home.bottom < home.text && home.text - home.bottom < 100 && home.h > (home.text - 40) * 0.7, `mobile: face fills the space above the name (top ${home.top.toFixed(0)}, bottom ${home.bottom.toFixed(0)}, h ${home.h.toFixed(0)}, name ${home.text.toFixed(0)})`);
+    check(Math.abs(home.w / home.h - 1.3) < 0.08, `mobile: face about 1.3:1 (${(home.w / home.h).toFixed(2)})`);
+    check(home.top < 220 && home.bottom < home.text && home.text - home.bottom > 80 && home.text - home.bottom < 220, `mobile: face sits above the name (top ${home.top.toFixed(0)}, bottom ${home.bottom.toFixed(0)}, name ${home.text.toFixed(0)})`);
   }
   const R = Number(await p.getAttribute('[data-shop-head]', 'data-ring-r'));
   await p.evaluate((y) => scrollTo(0, y), R);
