@@ -4,7 +4,6 @@ const clear = 'rgba(0, 0, 0, 0)';
 const EASE = 'cubic-bezier(.22,1,.36,1)';
 const LETTER_MS = 380;
 const STAGGER_MS = 30;
-const INTRO_BUDGET_MS = 1500;
 
 const FOLD_SELECTOR = [
   'h1',
@@ -178,14 +177,24 @@ function signalLetterIntroPrepared() {
   document.dispatchEvent(new Event('letter-intro-prepared'));
 }
 
-function extraDelays(count: number, start: number) {
-  const delays: number[] = [];
-  if (!count) return delays;
-  const last = count - 1;
-  const room = INTRO_BUDGET_MS - LETTER_MS - start;
-  const step = last === 0 || room <= 0 ? 0 : Math.min(STAGGER_MS, Math.floor(room / last));
-  for (let i = 0; i < count; i++) delays.push(start + i * step);
-  return delays;
+function foldLines(segments: { letters: HTMLElement[]; color: string }[]) {
+  const painted = segments.flatMap(({ letters, color }) => letters.map((letter) => ({ letter, color })));
+  painted.sort((a, b) => {
+    const ra = a.letter.getBoundingClientRect();
+    const rb = b.letter.getBoundingClientRect();
+    if (Math.abs(ra.top - rb.top) > 2) return ra.top - rb.top;
+    return ra.left - rb.left;
+  });
+  const lines: { letter: HTMLElement; color: string }[][] = [];
+  let lineTop = -Infinity;
+  for (const item of painted) {
+    const top = item.letter.getBoundingClientRect().top;
+    if (!lines.length || Math.abs(top - lineTop) > 2) {
+      lines.push([item]);
+      lineTop = top;
+    } else lines[lines.length - 1].push(item);
+  }
+  return lines;
 }
 
 export async function playLetterIntro() {
@@ -272,21 +281,16 @@ export async function playLetterIntro() {
     }),
   );
 
-  const delays = extraDelays(
-    foldSegments.reduce((sum, segment) => sum + segment.letters.length, 0),
-    index * STAGGER_MS,
-  );
-  let cursor = 0;
-  const foldAnimations = foldSegments.flatMap(({ letters, color }) =>
-    letters.map((letter) => {
-      const anim = letter.animate([{ color: clear }, { color: letter.dataset.motionColor || color }], {
+  const headlineLetters = index;
+  const foldAnimations = foldLines(foldSegments).flatMap((line, lineIndex) =>
+    line.map(({ letter, color }, letterIndex) =>
+      letter.animate([{ color: clear }, { color: letter.dataset.motionColor || color }], {
         duration: LETTER_MS,
-        delay: delays[cursor++] ?? 0,
+        delay: (headlineLetters + lineIndex + letterIndex) * STAGGER_MS,
         easing: EASE,
         fill: 'both',
-      });
-      return anim;
-    }),
+      }),
+    ),
   );
   animations.push(...foldAnimations);
 
