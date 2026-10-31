@@ -122,7 +122,7 @@ Styles go in `src/styles/global.css` or `src/styles/type.css`, using the tokens 
 ## Checks
 
 - `npm run check:design` compares the source with this rulebook and fails on anything new.
-- `npm run check:visual` screenshots every public page at 1440 and 390 against `tests/visual/baseline`. It needs `npm run build` first. Videos stay on their poster still, and the shop ring waits until its canvas has painted, so a playing frame cannot fail the diff.
+- `npm run check:visual` screenshots every public page at 1440 and 390 against `tests/visual/baseline`. It needs `npm run build` first. The capture waits for fonts and for every image to decode. Videos stay on their poster still. The shop ring waits until its canvas has painted two identical frames. The spinning mark is locked at its rest angle before the shot, and the shot is kept only once two frames match. A picture may differ by at most 0.01% of its pixels. That budget is the antialiasing on the shop buy button, which settles on one of two edges a level apart. A larger diff fails.
 - Both run in `.github/workflows/design.yml`.
 - `npm test` runs the design check with the other specs.
 

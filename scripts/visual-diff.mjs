@@ -11,6 +11,7 @@ if (!before || !after) {
 }
 if (diffDir) mkdirSync(diffDir, { recursive: true });
 
+const maxRatio = 0.0001;
 const names = readdirSync(before).filter((name) => name.endsWith('.png')).sort();
 let failed = 0;
 for (const name of names) {
@@ -40,11 +41,13 @@ for (const name of names) {
     }
   }
   const pixels = width * height;
-  console.log(`${name} ${diff} / ${pixels} (${((100 * diff) / pixels).toFixed(4)}%)`);
+  const ratio = pixels ? diff / pixels : diff ? 1 : 0;
+  const within = diff > 0 && ratio <= maxRatio;
+  console.log(`${name} ${diff} / ${pixels} (${(100 * ratio).toFixed(4)}%)${within ? ' within 0.01%' : ''}`);
   if (diff && mask && diffDir) {
     await sharp(mask, { raw: { width, height, channels } }).png().toFile(join(diffDir, name));
   }
-  if (diff) failed++;
+  if (ratio > maxRatio) failed++;
 }
 if (!names.length) {
   console.error('no pngs');
