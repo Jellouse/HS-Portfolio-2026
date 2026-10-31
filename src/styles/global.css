@@ -2507,20 +2507,10 @@ html.is-contact-open {
   left: calc(100% + 16px);
 }
 
-@keyframes intro-face-scale {
-  from {
-    transform: scale(1) translateZ(0);
-  }
-
-  to {
-    transform: scale(var(--intro-sx, var(--intro-smin)), var(--intro-sy, var(--intro-smin))) translateZ(0);
-  }
-}
-
 .hero[data-intro].is-sda [data-hero-variant="blob"] {
-  animation: intro-face-scale linear both;
+  animation: intro-follow linear both;
   animation-timeline: scroll(root block);
-  animation-range: 0px var(--intro-r);
+  animation-range: 0px 100000px;
 }
 
 .project-menu > a,
@@ -2981,9 +2971,9 @@ html.is-contact-open body {
 }
 
 .hero[data-intro].is-sda [data-hero-variant="blob"] {
-  animation: intro-face-scale linear both, intro-follow linear both;
-  animation-timeline: scroll(root block), scroll(root block);
-  animation-range: 0px var(--intro-r), 0px 100000px;
+  animation: intro-follow linear both;
+  animation-timeline: scroll(root block);
+  animation-range: 0px 100000px;
 }
 
 .shop-head.is-sda .shop-ring-layer {

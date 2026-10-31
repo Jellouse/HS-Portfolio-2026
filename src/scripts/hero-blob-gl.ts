@@ -140,6 +140,7 @@ export async function mountHeroBlobGL(svg: SVGSVGElement, opts: Opts) {
   let nreg = [0, 0, 1, 1];
   let noiseTex: WebGLTexture | null = null;
   let noiseKey = '';
+  let baking: number[] | null = null;
 
   const readStretch = () => {
     const t = shapes.find((el) => el.hasAttribute('transform'))?.getAttribute('transform') || '';
@@ -147,10 +148,19 @@ export async function mountHeroBlobGL(svg: SVGSVGElement, opts: Opts) {
     return m ? Number(m[1]) || 1 : 1;
   };
 
+  const contains = (outer: number[], inner: number[]) =>
+    inner[0] >= outer[0] - 0.5 &&
+    inner[1] >= outer[1] - 0.5 &&
+    inner[0] + inner[2] <= outer[0] + outer[2] + 0.5 &&
+    inner[1] + inner[3] <= outer[1] + outer[3] + 0.5;
+
   const loadNoise = async (next: number[]) => {
+    if (noiseTex && contains(nreg, next)) return;
+    if (baking && contains(baking, next)) return;
     const key = next.map((n) => n.toFixed(3)).join(',');
     if (key === noiseKey && noiseTex) return;
     noiseKey = key;
+    baking = next;
     const nw = Math.max(1, Math.round(next[2] * NRES));
     const nh = Math.max(1, Math.round(next[3] * NRES));
     const noiseSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="${nw}" height="${nh}" viewBox="${next.join(' ')}"><filter id="n" x="${next[0]}" y="${next[1]}" width="${next[2]}" height="${next[3]}" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feTurbulence type="fractalNoise" baseFrequency="${freq}" numOctaves="${octaves}" seed="${seed}"/><feComponentTransfer><feFuncA type="linear" slope="0" intercept="1"/></feComponentTransfer></filter><rect x="${next[0]}" y="${next[1]}" width="${next[2]}" height="${next[3]}" filter="url(#n)"/></svg>`;
@@ -159,9 +169,14 @@ export async function mountHeroBlobGL(svg: SVGSVGElement, opts: Opts) {
     try {
       await img.decode();
     } catch {
+      if (baking === next) baking = null;
       return;
     }
     if (key !== noiseKey) return;
+    if (noiseTex && contains(nreg, next)) {
+      baking = null;
+      return;
+    }
     const nc = document.createElement('canvas');
     nc.width = nw;
     nc.height = nh;
@@ -170,6 +185,7 @@ export async function mountHeroBlobGL(svg: SVGSVGElement, opts: Opts) {
     if (noiseTex) gl.deleteTexture(noiseTex);
     noiseTex = texFrom(gl, nc);
     nreg = next;
+    baking = null;
   };
 
   const host = svg.parentElement!;
@@ -288,6 +304,7 @@ export async function mountHeroBlobGL(svg: SVGSVGElement, opts: Opts) {
     },
     { passive: true },
   );
+  addEventListener('intro-frame', () => layout(), { passive: true });
 
   const quad = (p: WebGLProgram) => {
     gl.useProgram(p);

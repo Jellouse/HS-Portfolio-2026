@@ -22,11 +22,15 @@ export function initIntroFace(hero: HTMLElement) {
   let sY = 1;
   let mobile = false;
   let R = 1;
+  let W0 = 1;
+  let H0 = 1;
+  let faceBottom = 0;
+  let hostTop = 0;
   let lastW = -1;
   let frame = 0;
-  let lastS = NaN;
   let cur = NaN;
   let lastT = 0;
+  let lastPaint = '';
   let settledAttr = false;
   const KEY = 'intro-smooth-ms';
   const DEFAULT_TAU = 30;
@@ -55,7 +59,10 @@ export function initIntroFace(hero: HTMLElement) {
     lastW = vw;
     const vh = stableViewportHeight(probe, vw);
     const laid = introFaceLayout(vh, vw);
-    const { W0, H0, nameTop, faceBottom, faceCenter } = laid;
+    W0 = laid.W0;
+    H0 = laid.H0;
+    faceBottom = laid.faceBottom;
+    const { nameTop, faceCenter } = laid;
     mobile = laid.mobile;
     const Wf = px('--mark-small-w') || 64;
     const topF = px('--mark-small-top') || 32;
@@ -65,31 +72,14 @@ export function initIntroFace(hero: HTMLElement) {
       hero.style.removeProperty('--intro-face-center');
     }
     const Hf = (Wf * 249) / 559;
-    const blob = hero.querySelector<SVGElement>('[data-hero-blob]');
-    const shapes = blob?.querySelectorAll('g[filter] > path, g[filter] > ellipse');
-    if (mobile && laid.stretch !== 1) {
-      hero.style.setProperty('--intro-h', `${Math.round(H0)}px`);
-      shapes?.forEach((el) => el.setAttribute('transform', `scale(1 ${laid.stretch})`));
-      blob?.setAttribute('viewBox', `0 0 559 ${laid.stretch * 249}`);
-      blob?.setAttribute('preserveAspectRatio', 'xMidYMin meet');
-    } else {
-      hero.style.removeProperty('--intro-h');
-      shapes?.forEach((el) => el.removeAttribute('transform'));
-      blob?.setAttribute('viewBox', '0 0 559 249');
-      blob?.removeAttribute('preserveAspectRatio');
-    }
     host.style.transform = 'none';
     hero.classList.remove('is-sda');
     host.style.translate = 'none';
-    const hostTop = measureHostTop();
+    hostTop = measureHostTop();
     R = Math.max(1, Math.round(faceBottom - Hf - topF));
     sMin = Wf / W0;
     sX = sMin;
     sY = mobile ? Hf / H0 : sMin;
-    hero.style.setProperty('--intro-w', `${W0}px`);
-    hero.style.setProperty('--intro-sx', String(sX));
-    hero.style.setProperty('--intro-sy', String(sY));
-    hero.style.setProperty('--intro-face-top', `${Math.round(faceBottom - H0) - hostTop}px`);
     hero.style.setProperty('--intro-origin', `${faceBottom - hostTop}px`);
     hero.style.setProperty('--intro-name-top', `${nameTop}px`);
     document.documentElement.style.setProperty('--intro-name-top', `${nameTop}px`);
@@ -98,15 +88,52 @@ export function initIntroFace(hero: HTMLElement) {
     hero.dataset.introReady = '';
     hero.style.setProperty('--intro-r', `${R}px`);
     hero.style.setProperty('--intro-smin', String(sMin));
-    lastS = NaN;
     cur = NaN;
+    lastPaint = '';
     host.dispatchEvent(new CustomEvent('intro-layout', { bubbles: true }));
     follow();
     if (sda) {
-      host.style.transform = '';
+      host.style.transform = 'none';
       hero.classList.add('is-sda');
       setIntroCopy(0, false);
+      paintSda();
     } else write(performance.now());
+  };
+
+  const applyGeometry = (stretch: number) => {
+    const blob = hero.querySelector<SVGElement>('[data-hero-blob]');
+    const shapes = blob?.querySelectorAll('g[filter] > path, g[filter] > ellipse');
+    if (Math.abs(stretch - 1) > 0.002) {
+      shapes?.forEach((el) => el.setAttribute('transform', `scale(1 ${stretch})`));
+      blob?.setAttribute('viewBox', `0 0 559 ${stretch * 249}`);
+      blob?.setAttribute('preserveAspectRatio', 'xMidYMin meet');
+    } else {
+      shapes?.forEach((el) => el.removeAttribute('transform'));
+      blob?.setAttribute('viewBox', '0 0 559 249');
+      blob?.removeAttribute('preserveAspectRatio');
+    }
+  };
+
+  // Width and height are the whole size. Stretch hits the shapes only, before displacement.
+  const paintSize = (scaleX: number, scaleY: number) => {
+    const w = Math.max(1, Math.round(W0 * scaleX));
+    const h = Math.max(1, Math.round(H0 * scaleY));
+    const top = Math.round(faceBottom - hostTop) - h;
+    const stretch = (h * 559) / (w * 249);
+    const key = `${w}:${h}:${top}:${stretch.toFixed(4)}`;
+    host.style.transform = 'none';
+    if (key === lastPaint) return;
+    lastPaint = key;
+    hero.style.setProperty('--intro-w', `${w}px`);
+    hero.style.setProperty('--intro-h', `${h}px`);
+    hero.style.setProperty('--intro-face-top', `${top}px`);
+    applyGeometry(stretch);
+    host.dispatchEvent(new CustomEvent('intro-frame', { bubbles: true }));
+  };
+
+  const paintSda = () => {
+    const t = Math.min(1, Math.max(0, scrollY / R));
+    paintSize(1 + (sX - 1) * t, 1 + (sY - 1) * t);
   };
 
   const forceLayout = () => {
@@ -128,12 +155,10 @@ export function initIntroFace(hero: HTMLElement) {
     if (!tau || Number.isNaN(cur)) cur = goal;
     else cur += (goal - cur) * (1 - Math.exp(-dt / tau));
     if (Math.abs(goal - cur) < 0.0005 * sMin) cur = goal;
-    const scaleX = mobile ? 1 + (sX - 1) * ((1 - cur) / (1 - sMin) || 0) : cur;
-    const scaleY = mobile ? 1 + (sY - 1) * ((1 - cur) / (1 - sMin) || 0) : cur;
-    if (cur !== lastS) {
-      lastS = cur;
-      host.style.transform = mobile ? `scale(${scaleX}, ${scaleY})` : `scale(${cur})`;
-    }
+    const along = (1 - cur) / (1 - sMin) || 0;
+    const scaleX = mobile ? 1 + (sX - 1) * along : cur;
+    const scaleY = mobile ? 1 + (sY - 1) * along : cur;
+    paintSize(scaleX, scaleY);
     const progress = sMin === 1 ? 0 : (1 - cur) / (1 - sMin);
     setIntroCopy(progress, !reduced && !sda);
     const isSettled = cur === goal;
@@ -152,7 +177,14 @@ export function initIntroFace(hero: HTMLElement) {
 
   const onScroll = () => {
     follow();
-    if (!sda && !frame) frame = requestAnimationFrame(write);
+    if (sda) {
+      if (!frame) {
+        frame = requestAnimationFrame(() => {
+          frame = 0;
+          paintSda();
+        });
+      }
+    } else if (!frame) frame = requestAnimationFrame(write);
   };
 
   function mountTune() {
