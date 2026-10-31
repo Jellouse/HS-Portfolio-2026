@@ -1,5 +1,6 @@
 
 
+import { getCollection } from 'astro:content';
 import { getProjects, projectLabel } from './content';
 import { getProducts } from './shop';
 
@@ -10,6 +11,7 @@ const sources = import.meta.glob<string>('../pages/**/*.astro', { query: '?raw',
 const DYNAMIC: Record<string, () => Promise<string[]>> = {
   '/work/[slug]': async () => (await getProjects()).map((p) => `/work/${p.id}/`),
   '/shop/[slug]': async () => (await getProducts()).map((p) => `/shop/${p.id}/`),
+  '/services/[slug]': async () => (await getCollection('services')).map((s) => `/services/${s.id}/`),
 };
 
 const routeOf = (file: string) =>
@@ -20,10 +22,11 @@ const routeOf = (file: string) =>
     .replace(/^$/, '/');
 
 export async function canvasPages() {
-  const [projects, products] = await Promise.all([getProjects(), getProducts()]);
-  const labels = new Map<string, string>([['/', 'Home'], ['/shop/', 'Shop'], ['/404', '404']]);
+  const [projects, products, services] = await Promise.all([getProjects(), getProducts(), getCollection('services')]);
+  const labels = new Map<string, string>([['/', 'Home'], ['/shop/', 'Shop'], ['/services/', 'Services'], ['/404', '404']]);
   for (const p of projects) labels.set(`/work/${p.id}/`, projectLabel(p.data));
   for (const p of products) labels.set(`/shop/${p.id}/`, p.data.overview.title || p.data.name);
+  for (const s of services) labels.set(`/services/${s.id}/`, s.data.title);
 
   const paths: string[] = [];
   for (const [file, src] of Object.entries(sources)) {

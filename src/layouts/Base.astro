@@ -20,9 +20,24 @@ interface Props {
   safeArea?: boolean;
 
   header?: boolean;
+  footerText?: string;
+  serviceFooter?: boolean;
+  hideFooter?: boolean;
 }
 
-const { title, description, image, type, jsonLd, noindex = false, safeArea = false, header = false } = Astro.props;
+const {
+  title,
+  description,
+  image,
+  type,
+  jsonLd,
+  noindex = false,
+  safeArea = false,
+  header = false,
+  footerText,
+  serviceFooter = false,
+  hideFooter = false,
+} = Astro.props;
 const site = await getSite();
 ---
 
@@ -32,7 +47,7 @@ const site = await getSite();
     
     <style is:inline>@view-transition{navigation:auto}@media (prefers-reduced-motion:reduce){@view-transition{navigation:none}}</style>
     <link rel="expect" href="#content" blocking="render" />
-    <style is:inline>.reveal-gate:not(.canvas-mode) :is(main :is(p,h1,h2,h3,h4,li,blockquote,figcaption,.caption,.project-summary),.site-footer :is(p,li)):not(.is-split,.is-split *,.sr-only,[data-no-reveal],[data-no-reveal] *){opacity:0}.is-split{transition:opacity 350ms cubic-bezier(.16,1,.3,1)}</style>
+    <style is:inline>.reveal-gate:not(.canvas-mode) :is(main :is(p,h1,h2,h3,h4,li,blockquote,figcaption,summary,.caption,.project-summary),.site-footer :is(p,li)):not(.is-split,.is-split *,.sr-only,[data-no-reveal],[data-no-reveal] *){opacity:0}.is-split{transition:opacity 350ms cubic-bezier(.16,1,.3,1)}</style>
     <script is:inline>
 
       addEventListener('pagereveal', function (e) {
@@ -130,7 +145,7 @@ const site = await getSite();
       })();
 </script>
   </head>
-  <body>
+  <body class:list={[{ 'is-service-page': serviceFooter, 'is-services-landing': hideFooter }]}>
     <svg class="squircle-def" width="0" height="0" aria-hidden="true">
       <defs>
         <clipPath id="squircle" clipPathUnits="objectBoundingBox">
@@ -144,7 +159,7 @@ const site = await getSite();
     <main id="content">
       <slot />
     </main>
-    <Footer site={site} />
+    {!hideFooter && <Footer site={site} footerText={footerText} serviceFooter={serviceFooter} />}
     <ContactSheet email={site.email} />
     <div class="grid-overlay" aria-hidden="true">
       <div class="page-grid">

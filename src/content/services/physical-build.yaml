@@ -1,0 +1,99 @@
+title: Physical Build
+label: Physical Build
+seoTitle: Retail store design and build in Europe
+metaDescription: >-
+  Custom shop fittings, displays and pop-ups, designed and built by Johann Schnettker in aluminium extrusion, 3D print and wood. On site across Europe.
+order: 1
+locationTag: On site / Remote
+h1: Retail store design and build
+subline: Custom shop fittings, product displays and lighting in aluminium extrusion, 3D print and wood.
+intro: >-
+  I'm a designer who builds. I design and make furniture, product displays and lighting that set a store apart. For pop-ups, new openings and existing stores. I work on site across Europe.
+processHeading: How a project runs
+processSteps:
+  - title: Inspiration
+    body: We collect ideas, borrow from what works and come up with new ones.
+  - title: Design
+    body: I design in 2D and 3D to get the shape and materials right.
+  - title: Build
+    body: I buy the materials, then cut, print and join every piece.
+  - title: Assembly
+    body: I install everything on site, sometimes with an assistant.
+sections:
+  - heading: Aluminium extrusion furniture and displays
+    body: >-
+      My main material. I build furniture and installations from aluminium extrusion profiles. It's strong, industrial and modular, so a design is easy to adjust or extend later.
+    images:
+      - src: >-
+          https://humansize-media.schnettker-johann.workers.dev/projects/analogue-couters/cover-mvaoawdg.mp4
+        alt: Analogue store on Zeedijk in Amsterdam, aluminium extrusion vitrines
+        caption: Analogue store, Zeedijk, Amsterdam, [year]
+        href: /work/analogue-counters/
+        poster: /src/content/projects/analogue-counters/cover.jpg
+  - heading: 3D printed product displays
+    body: >-
+      For displays that would be impossible to make any other way. I print on a Bambu Lab P1S, at production quality. It works on its own or combined with other materials in larger builds.
+    images:
+      - src: /src/content/services/images/print-shelves.jpg
+        alt: Blue 3D printed shelves hung on cables, each holding a camera
+        caption: ''
+        href: ''
+      - src: /src/content/services/images/print-shelf.jpg
+        alt: Blue 3D printed shelf holding a Konica Pop camera behind glass
+        caption: ''
+        href: ''
+      - src: /src/content/services/images/print-stool.jpg
+        alt: Blue geometric stool with a book on top
+        caption: ''
+        href: ''
+      - src: /src/content/services/images/print-cabinet.jpg
+        alt: Plywood cabinet with two open shelves
+        caption: ''
+        href: ''
+  - heading: Wooden cabinets and displays
+    body: >-
+      Cabinets and displays in wood. It means bringing more of the workshop, but the look and feel is hard to beat.
+    images:
+      - src: /src/content/services/images/wood-stool.jpg
+        alt: Blue wooden stool with a book on top
+        caption: ''
+        href: ''
+      - src: /src/content/services/images/wood-shelf.jpg
+        alt: Plywood shelf on legs
+        caption: ''
+        href: ''
+faq:
+  - question: Do you work outside Germany?
+    answer: Yes, on site across Europe.
+  - question: Can you build a pop-up store?
+    answer: Yes. Pop-ups, new openings and updates to existing stores.
+  - question: Do you only design, or also build?
+    answer: Both. I take it from first idea to installation.
+  - question: What materials do you use?
+    answer: Aluminium extrusion, 3D print and wood.
+  - question: How long does a project take?
+    answer: >-
+      A pop-up usually takes [x to y] weeks from first call to installation. A full store fit-out takes [x to y] weeks. Installation on site takes [x] days.
+  - question: How far ahead should I get in touch?
+    answer: >-
+      Ideally [x] weeks before your opening date. Shorter timelines can work for smaller builds, so just ask.
+  - question: Where do you work?
+    answer: >-
+      I'm based in [city, country] and install on site across Europe. Travel costs [are included / are added at cost / are quoted per project].
+  - question: What does a project cost?
+    answer: >-
+      Every build is quoted at a flat rate, excluding VAT. As a rough guide, a single display or piece of furniture starts at around €[x]. A pop-up runs €[x] to €[y], and a full store fit-out €[x] and up. I send a fixed quote once the design direction is clear.
+  - question: What affects the price?
+    answer: Mostly size, materials and how much is custom made.
+  - question: How do I start a project?
+    answer: Send me a message through Inquire.
+bottomCta: Have a store, or planning one? Get in touch.
+footerLine: >-
+  Humansize is the studio of Johann Schnettker. I design things you can look at, click through and walk into, like retail spaces, websites built in Framer, and 3D renders and artwork.
+summary: Retail spaces, pop-ups and objects you can walk into and pick up, designed and built end to end.
+items:
+  - Retail store design and build
+  - Pop-up and display design
+  - Artworks from existing 3D scans
+projects:
+  - analogue-counters

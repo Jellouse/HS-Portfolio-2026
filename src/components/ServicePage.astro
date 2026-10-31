@@ -1,0 +1,131 @@
+---
+import BlurImage from './BlurImage.astro';
+import HeroBlob from './HeroBlob.astro';
+import VideoFrame from './VideoFrame.astro';
+import Prose from './sections/Prose.astro';
+import { paragraphs } from '../lib/content';
+import { resolveImageSource } from '../lib/images';
+import { hasBracket, renderPlaceholders } from '../lib/services';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  entry: CollectionEntry<'services'>;
+}
+
+const { entry: s } = Astro.props;
+const d = s.data;
+const inquireService = s.data.title;
+const imageSizes = '(min-width: 760px) 666px, calc(100vw - 40px)';
+const videoSrc = /\.(mp4|webm|mov)(?:$|\?)/i;
+---
+
+<article class="service-page page-grid">
+  <div class="service-page-mark" aria-hidden="true">
+    <HeroBlob filterId="service-face" home={false} />
+  </div>
+
+  <header class="service-page-head">
+    {d.label && <p class="sr-only">{d.label}</p>}
+    <h1>{d.h1 || s.data.title}</h1>
+    {d.subline && <p class="service-page-subline">{d.subline}</p>}
+    <p class="service-page-inquire">
+      <button type="button" class="shop-buy-button" data-contact-open data-contact-service={inquireService}>
+        Inquire
+      </button>
+    </p>
+  </header>
+
+  <div class="service-page-text">
+    {d.intro && paragraphs(d.intro).map((paragraph) => (hasBracket(paragraph) ? <p set:html={renderPlaceholders(paragraph)} /> : <Prose paragraphs={[paragraph]} />))}
+  </div>
+
+  {
+    d.processSteps.length > 0 && (
+      <section class="service-page-process" aria-labelledby="service-process-heading">
+        <h2 id="service-process-heading">{d.processHeading || 'How a project runs'}</h2>
+        <div class="service-page-process-frame">
+          <div class="service-page-process-flow" aria-hidden="true" data-no-reveal>
+            {d.processSteps.map((step, i) => [
+              i > 0 ? <span class="service-page-process-arrow" aria-hidden="true">→</span> : null,
+              <span class="shop-buy-button service-page-process-pill">{step.title}</span>,
+            ])}
+          </div>
+        </div>
+        <ol class="service-page-process-list">
+          {d.processSteps.map((step) => (
+            <li>
+              {step.title}. {step.body}
+            </li>
+          ))}
+        </ol>
+      </section>
+    )
+  }
+
+  {
+    d.sections.map((section, sectionIndex) => (
+      <section class="service-page-section">
+        <h2>{section.heading}</h2>
+        <div class="service-page-text">
+          {paragraphs(section.body).map((paragraph) =>
+            hasBracket(paragraph) ? <p set:html={renderPlaceholders(paragraph)} /> : <Prose paragraphs={[paragraph]} />,
+          )}
+        </div>
+        <div class="service-page-images">
+          {section.images.map((img, imageIndex) => {
+            const video = videoSrc.test(img.src);
+            const priority = sectionIndex === 0 && imageIndex === 0;
+            const poster = img.poster ? resolveImageSource(img.poster) : undefined;
+            return (
+              <figure class:list={['service-page-figure', { 'is-video': video }]}>
+                {video ? (
+                  <VideoFrame src={img.src} poster={poster} label={img.alt} priority={priority} />
+                ) : (
+                  <BlurImage src={resolveImageSource(img.src)} alt={img.alt} sizes={imageSizes} priority={priority} />
+                )}
+                {img.caption && (
+                  <figcaption class="service-page-caption">
+                    {img.href ? (
+                      <a href={img.href} set:html={renderPlaceholders(img.caption)} />
+                    ) : (
+                      <span set:html={renderPlaceholders(img.caption)} />
+                    )}
+                  </figcaption>
+                )}
+              </figure>
+            );
+          })}
+        </div>
+      </section>
+    ))
+  }
+
+  {
+    d.faq.length > 0 && (
+      <section class="service-page-faq" aria-labelledby="service-faq-heading">
+        <h2 id="service-faq-heading">FAQ</h2>
+        <div class="service-page-faq-list">
+          {d.faq.map((item) => (
+            <details class="service-page-faq-item">
+              <summary>{item.question}</summary>
+              <p set:html={renderPlaceholders(item.answer)} />
+            </details>
+          ))}
+        </div>
+      </section>
+    )
+  }
+
+  {
+    d.bottomCta && (
+      <section class="service-page-bottom">
+        <p>{d.bottomCta}</p>
+        <p>
+          <button type="button" class="shop-buy-button" data-contact-open data-contact-service={inquireService}>
+            Inquire
+          </button>
+        </p>
+      </section>
+    )
+  }
+</article>
