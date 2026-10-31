@@ -1828,7 +1828,7 @@ body .site-header.is-menu-fade:not(.is-menu-open) .who .time {
 
 @media (max-width: 759px) {
   .shop-page {
-    padding: var(--intro-name-top, round(71.5svh, 1px)) var(--margin) 96px;
+    padding: var(--intro-name-top, round(calc(75svh - var(--lh) / 2), 1px)) var(--margin) 96px;
   }
   .shop-product {
     display: block;
@@ -2624,7 +2624,7 @@ html.is-contact-open {
 
 @media (max-width: 759px) {
   .shop-page {
-    padding-top: var(--intro-name-top, round(71.5svh, 1px));
+    padding-top: var(--intro-name-top, round(calc(75svh - var(--lh) / 2), 1px));
   }
 
   .shop-head {
@@ -2839,7 +2839,7 @@ html.is-contact-open body {
 
 @media (max-width: 759px) {
   body:has(.hero[data-intro]) .site-header {
-    top: var(--intro-name-top, round(71.5svh, 1px));
+    top: var(--intro-name-top, round(calc(75svh - var(--lh) / 2), 1px));
   }
 }
 
