@@ -87,7 +87,7 @@ export async function mountHeroBlobGL(svg: SVGSVGElement, opts: Opts) {
   const canvas = document.createElement('canvas');
   canvas.className = 'mark-blob-gl';
   canvas.setAttribute('aria-hidden', 'true');
-  const gl = canvas.getContext('webgl', { premultipliedAlpha: true, antialias: false, alpha: true });
+  const gl = canvas.getContext('webgl', { premultipliedAlpha: true, antialias: false, alpha: true, preserveDrawingBuffer: true });
   if (!gl) return null;
 
   const shapes = Array.from(group.querySelectorAll('path, ellipse'));
@@ -186,6 +186,7 @@ export async function mountHeroBlobGL(svg: SVGSVGElement, opts: Opts) {
     noiseTex = texFrom(gl, nc);
     nreg = next;
     baking = null;
+    paint();
   };
 
   const host = svg.parentElement!;
@@ -209,6 +210,7 @@ export async function mountHeroBlobGL(svg: SVGSVGElement, opts: Opts) {
   let srcTex: WebGLTexture | null = null;
   let a: ReturnType<typeof target> | null = null;
   let b: ReturnType<typeof target> | null = null;
+  let paint = () => {};
 
   const layout = () => {
     const blob = svg.parentElement as HTMLElement | null;
@@ -242,8 +244,10 @@ export async function mountHeroBlobGL(svg: SVGSVGElement, opts: Opts) {
     out = [x0, y0, Math.max(1 / pxPerUnit, x1 - x0), Math.max(1 / pxPerUnit, y1 - y0)];
     W = Math.floor(out[2] * pxPerUnit);
     H = Math.floor(out[3] * pxPerUnit);
-    canvas.width = W;
-    canvas.height = H;
+    if (canvas.width !== W || canvas.height !== H) {
+      canvas.width = W;
+      canvas.height = H;
+    }
     const topPx = (r.top - hr.top + (out[1] - vb.y) * cssPerUnit) / k;
     Object.assign(canvas.style, {
       position: 'absolute',
@@ -285,6 +289,7 @@ export async function mountHeroBlobGL(svg: SVGSVGElement, opts: Opts) {
     b = target(gl, LW, LH);
     const next = [region[0] - PAD, region[1] - PAD, region[2] + 2 * PAD, region[3] + 2 * PAD];
     void loadNoise(next);
+    paint();
   };
   const region0 = regionFor(readStretch());
   await loadNoise([region0[0] - PAD, region0[1] - PAD, region0[2] + 2 * PAD, region0[3] + 2 * PAD]);
@@ -358,5 +363,6 @@ export async function mountHeroBlobGL(svg: SVGSVGElement, opts: Opts) {
     gl.uniform1f(u(pCut, 'cut'), cut);
     quad(pCut);
   };
+  paint = draw;
   return { canvas, draw, layout };
 }
