@@ -10,6 +10,7 @@
   "duration\tsrc/styles/global.css:2945\t550ms",
   "easing\tsrc/scripts/spin-mark.ts:7\t0.22,0.61,0.36,1",
   "easing\tsrc/scripts/wordmark-intro.ts:4\t0.22,1,0.36,1",
+  "hex\tsrc/components/HeroBlob.astro:8\t#b70606",
   "hex\tsrc/components/Mark.astro:16\t#b70606",
   "hex\tsrc/components/Mark.astro:17\t#b70606",
   "hex\tsrc/components/Mark.astro:20\t#b70606",

@@ -1,6 +1,7 @@
 ---
 import { Image, getImage } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
+import { imageHasAlpha } from '../lib/image-alpha';
 
 interface Props {
   src: ImageMetadata | string;
@@ -19,19 +20,22 @@ const remote = typeof src === 'string';
 const widths = remote
   ? []
   : [...new Set([480, 768, 1100, 1600, 2000, src.width])].filter((width) => width <= src.width);
-const placeholder = remote
-  ? null
-  : await getImage({
-      src,
-      width: 24,
-      format: 'webp',
-      quality: 40,
-    });
+const alpha = !remote && (await imageHasAlpha(src));
+const placeholder =
+  remote || alpha
+    ? null
+    : await getImage({
+        src,
+        width: 24,
+        format: 'webp',
+        quality: 40,
+      });
+const frameClass = ['frame', { 'scroll-media': fade, 'is-plain': plain, 'is-flush': flush, 'is-outlined': outline, 'is-alpha': alpha }];
 ---
 
-{
-  remote ? (
-    <div class:list={['frame', { 'scroll-media': fade, 'is-plain': plain, 'is-flush': flush, 'is-outlined': outline }]}>
+<div class:list={frameClass} style={placeholder ? `background-image:url('${placeholder.src}')` : undefined}>
+  {
+    remote ? (
       <img
         src={src}
         alt={alt}
@@ -40,18 +44,17 @@ const placeholder = remote
         decoding="async"
         fetchpriority={priority ? 'high' : 'auto'}
       />
-    </div>
-  ) : (
-    <div class:list={['frame', { 'scroll-media': fade, 'is-plain': plain, 'is-flush': flush, 'is-outlined': outline }]} style={`background-image:url('${placeholder!.src}')`}>
+    ) : (
       <Image
         src={src}
         alt={alt}
         widths={widths}
         sizes={sizes}
+        format={alpha ? 'png' : undefined}
         loading={priority ? 'eager' : 'lazy'}
         decoding="async"
         fetchpriority={priority ? 'high' : 'auto'}
       />
-    </div>
-  )
-}
+    )
+  }
+</div>
