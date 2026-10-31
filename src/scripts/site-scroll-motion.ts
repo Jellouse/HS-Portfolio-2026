@@ -1,5 +1,5 @@
 import { SCROLL_MEDIA, UI_MEDIA } from './scroll-media-selectors';
-import { introLetterSequence, playLetterIntro } from './wordmark-intro';
+import { introLetterSequence, playLetterIntro, resetLetterIntro } from './wordmark-intro';
 
 const reduced = matchMedia('(prefers-reduced-motion: reduce)');
 const mobile = matchMedia('(max-width: 720px)');
@@ -238,6 +238,7 @@ const smoothstep = (a: number, b: number, v: number) => {
 };
 
 export function initSiteScrollMotion() {
+  resetLetterIntro();
   document.documentElement.classList.add('has-scroll-motion');
 
   if (reduced.matches) {
