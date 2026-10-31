@@ -1,11 +1,11 @@
 ---
 export const prerender = true;
 
-import BlurImage from '../../components/BlurImage.astro';
 import Base from '../../layouts/Base.astro';
-import mark from '../../assets/industrial-bloom-mark.svg?raw';
-import { resolveImageSource } from '../../lib/images';
-import { getProducts, priceText, seedEur } from '../../lib/shop';
+import ShopHead from '../../components/sections/ShopHead.astro';
+import ShopIntro from '../../components/sections/ShopIntro.astro';
+import ShopProduct from '../../components/sections/ShopProduct.astro';
+import { getProducts } from '../../lib/shop';
 import { absoluteUrl } from '../../lib/content';
 
 const products = (await getProducts()).filter((p) => p.data.overview.show !== false);
@@ -26,66 +26,9 @@ const sizes = '(min-width: 1440px) 439px, (min-width: 760px) 30vw, calc(50vw - 3
 
 <Base jsonLd={jsonLd} title="Industrial Bloom shop · Humansize" description="Industrial Bloom: solid aluminium vases made from extrusion profiles, handmade in Germany in small numbered editions.">
   <div class="shop-page page-grid">
-    <header class="shop-head" data-shop-head>
-      <div class="shop-ring-layer" data-shop-ring-layer>
-        <div class="shop-ring" data-shop-ring>
-          <div class="shop-mark" data-spin-mark aria-hidden="true" set:html={mark} />
-        </div>
-      </div>
-      <h1 class="shop-head-title">Industrial Bloom</h1>
-      <nav class="site-menu shop-menu" aria-label="Main">
-        <a href="/">Home</a>
-        <a href="#shop-about" data-shop-about>About</a>
-        <button type="button" data-contact-open>Contact</button>
-      </nav>
-    </header>
-
-    <section class="shop-intro" id="shop-about" tabindex="-1" aria-label="About Industrial Bloom">
-      <p>
-        Industrial Bloom is a range of solid aluminium vases. The name is a play on "industrial boom". Each vase is made
-        from aluminium extrusion, a heavy-duty building material, and brings it into the home to hold something as
-        delicate as flowers.
-      </p>
-      <p>They come in several sizes and are made and shipped from Europe. They're heavy and solid. If one falls, it won't break.</p>
-      <p>To see how they're made, visit the <a href="/work/industrial-bloom/">Industrial Bloom</a> project page.</p>
-    </section>
-
-    {
-      products.map((p, i) => {
-        const o = p.data.overview;
-        const left = o.left?.src ? o.left : p.data.detail.images[0];
-        const right = o.right?.src ? o.right : p.data.detail.images[1];
-        return (
-          <section class="shop-product" aria-label={p.data.name}>
-            <a class="shop-pair fade-in" href={`/shop/${p.id}/`} aria-label={`${p.data.name} details page`}>
-              {left?.src && <BlurImage src={resolveImageSource(left.src)} alt={left.alt} outline={left.outline === true} sizes={sizes} priority={i === 0} />}
-              {right?.src && <BlurImage src={resolveImageSource(right.src)} alt={right.alt} outline={right.outline === true} sizes={sizes} priority={i === 0} />}
-            </a>
-            <p class="shop-caption">
-              <a class="shop-title" href={`/shop/${p.id}/`}>{o.title || p.data.name}</a>
-              <br />
-              <span data-price={p.id} data-price-style="suffix">{priceText(seedEur(p.id), 'suffix')}</span>
-              <span class="shop-links">
-                {o.description ? (
-                  <button class="shop-details" type="button" aria-expanded="false" aria-controls={`details-${p.id}`}>
-                    Details
-                  </button>
-                ) : (
-                  <a href={`/shop/${p.id}/`}>Details</a>
-                )}, <a href={`/shop/${p.id}/`}>Buy</a>
-              </span>
-            </p>
-            {o.description && (
-              <div class="shop-desc-wrap" id={`details-${p.id}`} data-no-reveal hidden>
-                <div class="shop-desc-inner">
-                  <p class="shop-desc">{o.description}</p>
-                </div>
-              </div>
-            )}
-          </section>
-        );
-      })
-    }
+    <ShopHead />
+    <ShopIntro />
+    {products.map((product, index) => <ShopProduct product={product} index={index} sizes={sizes} />)}
   </div>
 </Base>
 

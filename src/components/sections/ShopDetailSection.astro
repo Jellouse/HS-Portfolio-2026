@@ -1,0 +1,19 @@
+---
+import ShopCopy from './ShopCopy.astro';
+import ShopFigure from './ShopFigure.astro';
+
+interface Props {
+  heading?: string;
+  text?: string;
+  sizes: string;
+  image?: { src?: string | null; alt?: string; outline?: boolean };
+}
+
+const { heading, text, sizes, image } = Astro.props;
+---
+
+<section class="shop-detail-section">
+  {heading && <h2 class="shop-detail-heading">{heading}</h2>}
+  {text && <ShopCopy text={text} />}
+  {image?.src && <ShopFigure src={image.src} alt={image.alt ?? ''} outline={image.outline === true} sizes={sizes} />}
+</section>

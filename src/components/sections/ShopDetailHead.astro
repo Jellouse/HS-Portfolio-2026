@@ -1,0 +1,16 @@
+---
+import { priceText } from '../../lib/shop';
+import Price from './Price.astro';
+
+interface Props {
+  title: string;
+  slug: string;
+  eur: number | null;
+}
+
+const { title, slug, eur } = Astro.props;
+---
+
+<header class="shop-detail-head">
+  <h1>{title}<br /><Price slug={slug} mode="suffix" text={priceText(eur, 'suffix')} /></h1>
+</header>

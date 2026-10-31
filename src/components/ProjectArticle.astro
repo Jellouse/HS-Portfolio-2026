@@ -1,8 +1,8 @@
 ---
-import SmallMenu from './SmallMenu.astro';
 import Blocks from './Blocks.astro';
 import MarkFace from './MarkFace.astro';
 import ProjectHero from './ProjectHero.astro';
+import CornerMark from './sections/CornerMark.astro';
 import { yearRange, type ProjectEntry } from '../lib/content';
 
 interface Props {
@@ -28,12 +28,9 @@ const info = (() => {
   class:list={['project', 'page-grid', { 'is-plain': project.data.rounded === false }]}
   data-slug={project.id}
 >
-  <div class="project-mark" data-project-menu>
-    <a href="/" aria-label="Humansize" data-project-face>
-      <MarkFace />
-    </a>
-    <SmallMenu />
-  </div>
+  <CornerMark class="project-mark" href="/" label="Humansize">
+    <MarkFace />
+  </CornerMark>
   <ProjectHero title={project.data.title} years={years} summary={project.data.summary} />
   <Blocks
     blocks={project.data.blocks}

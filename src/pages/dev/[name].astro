@@ -1,0 +1,180 @@
+---
+import '../../styles/global.css';
+import About from '../../components/About.astro';
+import Blocks from '../../components/Blocks.astro';
+import BlurImage from '../../components/BlurImage.astro';
+import ContactSheet from '../../components/ContactSheet.astro';
+import Footer from '../../components/Footer.astro';
+import Header from '../../components/Header.astro';
+import ImageBlock from '../../components/ImageBlock.astro';
+import ImagePair from '../../components/ImagePair.astro';
+import Info from '../../components/Info.astro';
+import LeadCard from '../../components/LeadCard.astro';
+import Mark from '../../components/Mark.astro';
+import MarkFace from '../../components/MarkFace.astro';
+import Peeps from '../../components/Peeps.astro';
+import PeepsStatic from '../../components/PeepsStatic.astro';
+import ProcessBlock from '../../components/ProcessBlock.astro';
+import ProjectCard from '../../components/ProjectCard.astro';
+import ProjectHero from '../../components/ProjectHero.astro';
+import SmallMenu from '../../components/SmallMenu.astro';
+import TextBlock from '../../components/TextBlock.astro';
+import VideoBlock from '../../components/VideoBlock.astro';
+import VideoFrame from '../../components/VideoFrame.astro';
+import CornerMark from '../../components/sections/CornerMark.astro';
+import MainMenu from '../../components/sections/MainMenu.astro';
+import NotFound from '../../components/sections/NotFound.astro';
+import Price from '../../components/sections/Price.astro';
+import Prose from '../../components/sections/Prose.astro';
+import ShopBuyBar from '../../components/sections/ShopBuyBar.astro';
+import ShopCopy from '../../components/sections/ShopCopy.astro';
+import ShopDetailHead from '../../components/sections/ShopDetailHead.astro';
+import ShopDetailSection from '../../components/sections/ShopDetailSection.astro';
+import ShopFigure from '../../components/sections/ShopFigure.astro';
+import ShopInfo from '../../components/sections/ShopInfo.astro';
+import ShopIntro from '../../components/sections/ShopIntro.astro';
+import ShopProduct from '../../components/sections/ShopProduct.astro';
+import ShopWild from '../../components/sections/ShopWild.astro';
+import { existing, sections } from '../../components/sections/registry.mjs';
+import { getProjects, getSite } from '../../lib/content';
+import { resolveImageSource } from '../../lib/images';
+import { getProducts, seedEur } from '../../lib/shop';
+
+export const prerender = true;
+
+export function getStaticPaths() {
+  if (import.meta.env.PROD) return [];
+  return [{ params: { name: 'components' } }];
+}
+
+const site = await getSite();
+const projects = await getProjects();
+const project = projects.find((entry) => entry.id === 'industrial-bloom') ?? projects[0];
+const products = (await getProducts()).filter((entry) => entry.data.overview.show !== false);
+const product = products[0];
+const catalogue = [...sections, ...existing];
+const cover = project?.data.cover;
+const imageSizes = '(min-width: 1440px) 666px, (min-width: 760px) 552px, calc(100vw - 40px)';
+const shopSizes = '(min-width: 1440px) 439px, (min-width: 760px) 30vw, calc(50vw - 30px)';
+const detailSizes = '(min-width: 760px) calc(5 * var(--col) + 4 * var(--gutter)), calc(100vw - 40px)';
+const halfSizes = '(min-width: 760px) 272px, calc((100vw - 48px) / 2)';
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Components · Humansize</title>
+    <style>
+      .dev-catalog { padding: 20px 20px 96px; }
+      .dev-catalog h1,
+      .dev-catalog h2 { margin: 40px 0 8px; font-size: var(--text); line-height: var(--lh); font-weight: 400; }
+      .dev-meta { margin: 0 0 8px; font-size: var(--text-meta); line-height: var(--lh-meta); color: var(--muted); }
+      .dev-preview { margin: 16px 0 40px; border: 1px solid var(--line); padding: 20px; }
+      .dev-preview.is-page { height: 100svh; padding: 0; }
+      .dev-preview iframe { display: block; width: 100%; height: 100%; border: 0; }
+    </style>
+  </head>
+  <body>
+    <main class="dev-catalog">
+      <h1>Components</h1>
+      <p class="dev-meta">Dev only. Production builds omit this page.</p>
+      {
+        catalogue.map((item) => (
+          <section>
+            <h2>{item.name}</h2>
+            <p class="dev-meta">{item.file}</p>
+            <p class="dev-meta">{item.props?.length ? item.props.join(', ') : 'no props'}</p>
+            <p class="dev-meta">{item.pages?.length ? item.pages.join(', ') : 'not mounted'}</p>
+            <div class:list={['dev-preview', { 'is-page': item.name === 'HomeHero' || item.name === 'ShopHead' || item.name === 'HeroBlob' || item.name === 'ProjectFeed' || item.name === 'ProjectArticle' }]}>
+              {item.name === 'HomeHero' && <iframe title="Home" src="/"></iframe>}
+              {item.name === 'HeroBlob' && <iframe title="Home hero" src="/"></iframe>}
+              {item.name === 'ShopHead' && <iframe title="Shop" src="/shop/"></iframe>}
+              {item.name === 'Prose' && <Prose paragraphs={site.about.slice(0, 2)} />}
+              {item.name === 'Price' && product && <Price slug={product.id} mode="suffix" text="price loads on the shop" />}
+              {item.name === 'MainMenu' && (
+                <>
+                  <MainMenu variant="header" home />
+                  <MainMenu variant="shop" />
+                  <MainMenu variant="project" />
+                </>
+              )}
+              {item.name === 'CornerMark' && (
+                <CornerMark class="project-mark" href="/" label="Humansize">
+                  <MarkFace />
+                </CornerMark>
+              )}
+              {item.name === 'ShopIntro' && <ShopIntro />}
+              {item.name === 'ShopProduct' && product && <ShopProduct product={product} index={0} sizes={shopSizes} />}
+              {item.name === 'ShopDetailHead' && product && (
+                <ShopDetailHead title={product.data.detail.title || product.data.name} slug={product.id} eur={seedEur(product.id)} />
+              )}
+              {item.name === 'ShopCopy' && product && <ShopCopy text={product.data.description} />}
+              {item.name === 'ShopFigure' && product?.data.detail.images[0] && (
+                <ShopFigure src={product.data.detail.images[0].src} alt={product.data.detail.images[0].alt} sizes={detailSizes} priority />
+              )}
+              {item.name === 'ShopDetailSection' && product?.data.detail.sections[0] && (
+                <ShopDetailSection
+                  heading={product.data.detail.sections[0].heading}
+                  text={product.data.detail.sections[0].text}
+                  image={product.data.detail.sections[0].image}
+                  sizes={detailSizes}
+                />
+              )}
+              {item.name === 'ShopWild' && product && product.data.detail.wild.length > 0 && (
+                <ShopWild title={product.data.detail.wildTitle} images={product.data.detail.wild} sizes={halfSizes} />
+              )}
+              {item.name === 'ShopInfo' && project && <ShopInfo items={project.data.info} />}
+              {item.name === 'ShopBuyBar' && product && <ShopBuyBar slug={product.id} />}
+              {item.name === 'NotFound' && <NotFound />}
+              {item.name === 'About' && <About paragraphs={site.about} />}
+              {item.name === 'Blocks' && project && <Blocks blocks={project.data.blocks.slice(0, 2)} slug={project.id} info={project.data.info} />}
+              {item.name === 'BlurImage' && cover && (
+                <BlurImage src={resolveImageSource(cover)} alt={project.data.coverAlt ?? ''} sizes={imageSizes} priority />
+              )}
+              {item.name === 'Footer' && <Footer site={site} />}
+              {item.name === 'Header' && <Header site={site} />}
+              {item.name === 'ImageBlock' && cover && <ImageBlock src={cover} alt={project.data.coverAlt ?? ''} priority />}
+              {item.name === 'ImagePair' && product?.data.detail.images[0]?.src && product.data.detail.images[1]?.src && (
+                <ImagePair
+                  left={product.data.detail.images[0].src}
+                  leftAlt={product.data.detail.images[0].alt}
+                  right={product.data.detail.images[1].src}
+                  rightAlt={product.data.detail.images[1].alt}
+                />
+              )}
+              {item.name === 'Info' && project && <Info items={project.data.info} />}
+              {item.name === 'LeadCard' && <LeadCard />}
+              {item.name === 'Mark' && <Mark />}
+              {item.name === 'MarkFace' && <MarkFace />}
+              {item.name === 'Peeps' && <Peeps maxH={2} />}
+              {item.name === 'PeepsStatic' && <PeepsStatic />}
+              {item.name === 'ProcessBlock' && cover && (
+                <ProcessBlock images={[{ src: cover, alt: project.data.coverAlt ?? '' }]} />
+              )}
+              {item.name === 'ProjectCard' && project && <ProjectCard project={project} priority />}
+              {item.name === 'ProjectFeed' && <iframe title="Home feed" src="/"></iframe>}
+              {item.name === 'ProjectHero' && project && (
+                <ProjectHero title={project.data.title} years={String(project.data.year ?? '')} summary={project.data.summary} />
+              )}
+              {item.name === 'Seo' && <p class="dev-meta">Rendered in the document head on every page.</p>}
+              {item.name === 'SmallMenu' && <SmallMenu />}
+              {item.name === 'TextBlock' && <TextBlock heading="Text" text={site.about[0] ?? ''} />}
+              {item.name === 'VideoBlock' && project?.data.coverVideo && (
+                <VideoBlock src={project.data.coverVideo} poster={cover} label={project.data.coverAlt ?? ''} />
+              )}
+              {item.name === 'VideoFrame' && project?.data.coverVideo && (
+                <VideoFrame src={project.data.coverVideo} poster={cover ? resolveImageSource(cover) : undefined} label={project.data.coverAlt} priority />
+              )}
+              {item.name === 'ProjectArticle' && <iframe title="Industrial Bloom" src="/work/industrial-bloom/"></iframe>}
+              {item.name === 'ContactSheet' && <p class="dev-meta">Mounted once at the end of this page. Contact in a menu opens it.</p>}
+              {item.name === 'ContactDrawer' && <p class="dev-meta">Rendered by ContactSheet.</p>}
+            </div>
+          </section>
+        ))
+      }
+    </main>
+    <ContactSheet email={site.email} />
+  </body>
+</html>

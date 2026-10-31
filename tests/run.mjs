@@ -8,6 +8,7 @@ const SPECS = [
   ['intro', 'tests/intro-face.spec.mjs'],
   ['intro-layout', 'tests/intro-layout.spec.mjs'],
   ['type-scale', 'tests/type-scale.spec.mjs'],
+  ['design', 'tests/design-check.spec.mjs'],
   ['intro-nav', 'tests/intro-nav.spec.mjs'],
   ['viewport-height', 'tests/viewport-height.spec.mjs'],
   ['contact', 'tests/contact.spec.mjs'],

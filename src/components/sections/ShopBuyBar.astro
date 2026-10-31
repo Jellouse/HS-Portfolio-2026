@@ -1,0 +1,15 @@
+---
+interface Props {
+  slug: string;
+}
+
+const { slug } = Astro.props;
+---
+
+<div class="shop-buy-bar">
+  <form class="shop-buy-form" method="post" action="/api/shop/buy">
+    <input type="hidden" name="slug" value={slug} />
+    <button class="shop-buy-button" type="submit" data-buy={slug}>Buy</button>
+  </form>
+  <p class="shop-buy-note" data-buy-note hidden></p>
+</div>

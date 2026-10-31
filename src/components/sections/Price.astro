@@ -1,0 +1,11 @@
+---
+interface Props {
+  slug: string;
+  mode: 'suffix' | 'prefix';
+  text: string;
+}
+
+const { slug, mode, text } = Astro.props;
+---
+
+<span data-price={slug} data-price-style={mode}>{text}</span>
