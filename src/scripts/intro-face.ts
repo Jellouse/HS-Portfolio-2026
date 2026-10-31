@@ -66,11 +66,16 @@ export function initIntroFace(hero: HTMLElement) {
     }
     const Hf = (Wf * 249) / 559;
     const blob = hero.querySelector<SVGElement>('[data-hero-blob]');
+    const shapes = blob?.querySelectorAll('g[filter] > path, g[filter] > ellipse');
     if (mobile && laid.stretch !== 1) {
       hero.style.setProperty('--intro-h', `${Math.round(H0)}px`);
-      blob?.setAttribute('preserveAspectRatio', 'none');
+      shapes?.forEach((el) => el.setAttribute('transform', `scale(1 ${laid.stretch})`));
+      blob?.setAttribute('viewBox', `0 0 559 ${laid.stretch * 249}`);
+      blob?.setAttribute('preserveAspectRatio', 'xMidYMin meet');
     } else {
       hero.style.removeProperty('--intro-h');
+      shapes?.forEach((el) => el.removeAttribute('transform'));
+      blob?.setAttribute('viewBox', '0 0 559 249');
       blob?.removeAttribute('preserveAspectRatio');
     }
     host.style.transform = 'none';

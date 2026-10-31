@@ -21,10 +21,12 @@ if (left >= 0 || left + d.W0 <= 390) failures.push(`mobile face not cut off on b
 if (d.faceTop >= 0) failures.push(`mobile face should be cut off at the top (${d.faceTop})`);
 if (d.nameTop !== nameTop) failures.push(`nameTop ${d.nameTop} expected ${nameTop}`);
 if (d.faceBottom !== d.faceTop + d.H0) failures.push('faceBottom');
+const unshiftedTop = Math.round(844 * (0.285 - 149.482 * ((0.5225 - 0.285) / (235.027 - 149.482))));
 near(eyeLx, 0.19 * 390, 'left eye x');
 near(eyeRx, 0.815 * 390, 'right eye x');
-near(eyeY, 0.285 * 844, 'eye y');
 near(mouthY, 0.5225 * 844, 'mouth y');
+if (d.faceTop !== unshiftedTop + Math.round(844 * 0.04)) failures.push(`brow crop ${d.faceTop}, unshifted ${unshiftedTop}`);
+if (eyeY < 0.26 * 844 || eyeY > 0.36 * 844) failures.push(`eye y ${eyeY.toFixed(1)}`);
 if (d.faceBottom < 0.54 * 844 || d.faceBottom > 0.62 * 844) failures.push(`face bottom ${d.faceBottom}`);
 const fitted = Math.round(390 / (1 + 2 * (111 / 2 / 559)));
 const ringH = Math.round(fitted / 1.3);

@@ -90,12 +90,30 @@ export async function mountHeroBlobGL(svg: SVGSVGElement, opts: Opts) {
   const gl = canvas.getContext('webgl', { premultipliedAlpha: true, antialias: false, alpha: true });
   if (!gl) return null;
 
-  const bb = group.getBBox();
+  const shapes = Array.from(group.querySelectorAll('path, ellipse'));
+  const bb = shapes.reduce(
+    (box, el) => {
+      const b = el.getBBox();
+      return {
+        x: Math.min(box.x, b.x),
+        y: Math.min(box.y, b.y),
+        x1: Math.max(box.x1, b.x + b.width),
+        y1: Math.max(box.y1, b.y + b.height),
+      };
+    },
+    { x: Infinity, y: Infinity, x1: -Infinity, y1: -Infinity },
+  );
+  const geom = { x: bb.x, y: bb.y, width: bb.x1 - bb.x, height: bb.y1 - bb.y };
   const fx = attr(filter, 'x', -10) / (filter.getAttribute('x')?.includes('%') ? 100 : 1);
   const fy = attr(filter, 'y', -10) / (filter.getAttribute('y')?.includes('%') ? 100 : 1);
   const fw = attr(filter, 'width', 120) / (filter.getAttribute('width')?.includes('%') ? 100 : 1);
   const fh = attr(filter, 'height', 120) / (filter.getAttribute('height')?.includes('%') ? 100 : 1);
-  const region = [bb.x + fx * bb.width, bb.y + fy * bb.height, fw * bb.width, fh * bb.height];
+  const regionFor = (stretch: number) => [
+    geom.x + fx * geom.width,
+    stretch * (geom.y + fy * geom.height),
+    fw * geom.width,
+    stretch * fh * geom.height,
+  ];
 
   const freq = turb.getAttribute('baseFrequency') || '0.015';
   const octaves = turb.getAttribute('numOctaves') || '2';
@@ -119,23 +137,41 @@ export async function mountHeroBlobGL(svg: SVGSVGElement, opts: Opts) {
 
   const PAD = 40;
   const NRES = 2;
-  const nreg = [region[0] - PAD, region[1] - PAD, region[2] + 2 * PAD, region[3] + 2 * PAD];
-  const nw = Math.round(nreg[2] * NRES);
-  const nh = Math.round(nreg[3] * NRES);
-  const noiseSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="${nw}" height="${nh}" viewBox="${nreg.join(' ')}"><filter id="n" x="${nreg[0]}" y="${nreg[1]}" width="${nreg[2]}" height="${nreg[3]}" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feTurbulence type="fractalNoise" baseFrequency="${freq}" numOctaves="${octaves}" seed="${seed}"/><feComponentTransfer><feFuncA type="linear" slope="0" intercept="1"/></feComponentTransfer></filter><rect x="${nreg[0]}" y="${nreg[1]}" width="${nreg[2]}" height="${nreg[3]}" filter="url(#n)"/></svg>`;
-  const img = new Image();
-  img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(noiseSvg);
-  try {
-    await img.decode();
-  } catch {
-    return null;
-  }
-  const nc = document.createElement('canvas');
-  nc.width = nw;
-  nc.height = nh;
-  nc.getContext('2d')!.drawImage(img, 0, 0, nw, nh);
+  let nreg = [0, 0, 1, 1];
+  let noiseTex: WebGLTexture | null = null;
+  let noiseKey = '';
 
-  const shapes = Array.from(group.querySelectorAll('path, ellipse'));
+  const readStretch = () => {
+    const t = shapes.find((el) => el.hasAttribute('transform'))?.getAttribute('transform') || '';
+    const m = t.match(/scale\(\s*1[\s,]+([\d.]+)\)/);
+    return m ? Number(m[1]) || 1 : 1;
+  };
+
+  const loadNoise = async (next: number[]) => {
+    const key = next.map((n) => n.toFixed(3)).join(',');
+    if (key === noiseKey && noiseTex) return;
+    noiseKey = key;
+    const nw = Math.max(1, Math.round(next[2] * NRES));
+    const nh = Math.max(1, Math.round(next[3] * NRES));
+    const noiseSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="${nw}" height="${nh}" viewBox="${next.join(' ')}"><filter id="n" x="${next[0]}" y="${next[1]}" width="${next[2]}" height="${next[3]}" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feTurbulence type="fractalNoise" baseFrequency="${freq}" numOctaves="${octaves}" seed="${seed}"/><feComponentTransfer><feFuncA type="linear" slope="0" intercept="1"/></feComponentTransfer></filter><rect x="${next[0]}" y="${next[1]}" width="${next[2]}" height="${next[3]}" filter="url(#n)"/></svg>`;
+    const img = new Image();
+    img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(noiseSvg);
+    try {
+      await img.decode();
+    } catch {
+      return;
+    }
+    if (key !== noiseKey) return;
+    const nc = document.createElement('canvas');
+    nc.width = nw;
+    nc.height = nh;
+    nc.getContext('2d')!.drawImage(img, 0, 0, nw, nh);
+    gl.activeTexture(gl.TEXTURE1);
+    if (noiseTex) gl.deleteTexture(noiseTex);
+    noiseTex = texFrom(gl, nc);
+    nreg = next;
+  };
+
   const host = svg.parentElement!;
   host.appendChild(canvas);
 
@@ -145,14 +181,13 @@ export async function mountHeroBlobGL(svg: SVGSVGElement, opts: Opts) {
   const buf = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, buf);
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
-  gl.activeTexture(gl.TEXTURE1);
-  const noiseTex = texFrom(gl, nc);
 
   let W = 0;
   let H = 0;
-  let lastLayoutW = 0;
+  let lastKey = '';
   let pxPerUnit = 1;
-  let out = region.slice();
+  let out = [0, 0, 1, 1];
+  let sreg = regionFor(1);
   let LW = 1;
   let LH = 1;
   let srcTex: WebGLTexture | null = null;
@@ -164,35 +199,36 @@ export async function mountHeroBlobGL(svg: SVGSVGElement, opts: Opts) {
     const heroRoot = host.closest('[data-hero-root]') as HTMLElement | null;
     const introW = heroRoot ? parseFloat(getComputedStyle(heroRoot).getPropertyValue('--intro-w')) : 0;
     const layoutCssW = introW || blob?.clientWidth || svg.clientWidth;
-    if (!layoutCssW || layoutCssW === lastLayoutW) return;
-    lastLayoutW = layoutCssW;
+    const stretch = readStretch();
+    const key = `${layoutCssW}:${stretch}`;
+    if (!layoutCssW || key === lastKey) return;
+    lastKey = key;
 
     const r = svg.getBoundingClientRect();
     const hr = host.getBoundingClientRect();
-    if (!r.width) return;
+    if (!r.width) {
+      lastKey = '';
+      return;
+    }
+    const region = (sreg = regionFor(stretch));
     const vb = svg.viewBox.baseVal;
     const k = host.offsetWidth ? hr.width / host.offsetWidth : 1;
     const cssPerUnit = layoutCssW / vb.width;
     let dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const nativeH = (layoutCssW * vb.height) / vb.width;
-    const boxH = svg.clientHeight;
-    const stretching = svg.getAttribute('preserveAspectRatio') === 'none' && boxH > nativeH + 0.5;
-    const stretch = stretching ? boxH / nativeH : 1;
-    const layoutCssH = nativeH * stretch;
-    const area = layoutCssW * layoutCssH * dpr * dpr || 1;
+    const faceH = (layoutCssW * 249 * stretch) / vb.width;
+    const area = layoutCssW * faceH * dpr * dpr || 1;
     if (area > 2.4e6) dpr *= Math.sqrt(2.4e6 / area);
     pxPerUnit = cssPerUnit * dpr;
-    const pxY = pxPerUnit * stretch;
     const x0 = Math.max(region[0], vb.x + (hr.left - r.left) / cssPerUnit);
     const x1 = Math.min(region[0] + region[2], vb.x + (hr.right - r.left) / cssPerUnit);
     const y0 = Math.max(region[1], vb.y + (hr.top - r.top) / cssPerUnit);
     const y1 = Math.min(region[1] + region[3], vb.y + (hr.bottom - r.top) / cssPerUnit);
-    out = [x0, y0, Math.max(1 / pxPerUnit, x1 - x0), Math.max(1 / pxY, y1 - y0)];
+    out = [x0, y0, Math.max(1 / pxPerUnit, x1 - x0), Math.max(1 / pxPerUnit, y1 - y0)];
     W = Math.floor(out[2] * pxPerUnit);
-    H = Math.floor(out[3] * pxY);
+    H = Math.floor(out[3] * pxPerUnit);
     canvas.width = W;
     canvas.height = H;
-    const topPx = (r.top - hr.top + (out[1] - vb.y) * cssPerUnit * stretch) / k;
+    const topPx = (r.top - hr.top + (out[1] - vb.y) * cssPerUnit) / k;
     Object.assign(canvas.style, {
       position: 'absolute',
       left: `${(r.left - hr.left + (out[0] - vb.x) * cssPerUnit) / k}px`,
@@ -205,10 +241,11 @@ export async function mountHeroBlobGL(svg: SVGSVGElement, opts: Opts) {
     canvas.style.transformOrigin = '';
 
     const sc = document.createElement('canvas');
-    sc.width = Math.round(region[2] * pxPerUnit);
-    sc.height = Math.round(region[3] * pxY);
+    sc.width = Math.max(1, Math.round(region[2] * pxPerUnit));
+    sc.height = Math.max(1, Math.round(region[3] * pxPerUnit));
     const ctx = sc.getContext('2d')!;
-    ctx.setTransform(pxPerUnit, 0, 0, pxY, -region[0] * pxPerUnit, -region[1] * pxY);
+    ctx.setTransform(pxPerUnit, 0, 0, pxPerUnit, -region[0] * pxPerUnit, -region[1] * pxPerUnit);
+    ctx.scale(1, stretch);
     ctx.fillStyle = '#000';
     shapes.forEach((el) => {
       if (el instanceof SVGPathElement) ctx.fill(new Path2D(el.getAttribute('d') || ''));
@@ -230,7 +267,11 @@ export async function mountHeroBlobGL(svg: SVGSVGElement, opts: Opts) {
     LH = Math.max(1, Math.round(H / 2));
     a = target(gl, LW, LH);
     b = target(gl, LW, LH);
+    const next = [region[0] - PAD, region[1] - PAD, region[2] + 2 * PAD, region[3] + 2 * PAD];
+    void loadNoise(next);
   };
+  const region0 = regionFor(readStretch());
+  await loadNoise([region0[0] - PAD, region0[1] - PAD, region0[2] + 2 * PAD, region0[3] + 2 * PAD]);
   layout();
   const blobEl = svg.parentElement;
   const ro =
@@ -242,7 +283,7 @@ export async function mountHeroBlobGL(svg: SVGSVGElement, opts: Opts) {
   addEventListener(
     'intro-layout',
     () => {
-      lastLayoutW = 0;
+      lastKey = '';
       layout();
     },
     { passive: true },
@@ -259,7 +300,7 @@ export async function mountHeroBlobGL(svg: SVGSVGElement, opts: Opts) {
   const u = (p: WebGLProgram, n: string) => gl.getUniformLocation(p, n);
 
   const draw = () => {
-    if (!a || !b || !srcTex || !W) return;
+    if (!a || !b || !srcTex || !noiseTex || !W) return;
     const o = opts.offset();
 
     gl.viewport(0, 0, LW, LH);
@@ -272,7 +313,7 @@ export async function mountHeroBlobGL(svg: SVGSVGElement, opts: Opts) {
     gl.uniform1i(u(pDisp, 'src'), 0);
     gl.uniform1i(u(pDisp, 'noise'), 1);
     gl.uniform4f(u(pDisp, 'region'), out[0], out[1], out[2], out[3]);
-    gl.uniform4f(u(pDisp, 'sreg'), region[0], region[1], region[2], region[3]);
+    gl.uniform4f(u(pDisp, 'sreg'), sreg[0], sreg[1], sreg[2], sreg[3]);
     gl.uniform4f(u(pDisp, 'nreg'), nreg[0], nreg[1], nreg[2], nreg[3]);
     gl.uniform2f(u(pDisp, 'off'), o.x, o.y);
     gl.uniform1f(u(pDisp, 'scale'), scale);

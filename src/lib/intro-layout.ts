@@ -61,9 +61,12 @@ export function introFaceLayout(vh: number, vw: number) {
   }
 
   const W0 = Math.max(1, Math.round(vw * VB_W * MOBILE_X));
-  const H0 = Math.max(1, Math.round(vh * VB_H * MOBILE_Y));
-  const faceTop = Math.round(vh * (EYE_Y_F - EYE_Y * MOBILE_Y));
-  const faceBottom = faceTop + H0;
+  const fittedH = Math.max(1, Math.round(vh * VB_H * MOBILE_Y));
+  const fittedTop = Math.round(vh * (EYE_Y_F - EYE_Y * MOBILE_Y));
+  // Bring the brow arc down a little. The mouth stays put, so the box gets shorter.
+  const faceTop = fittedTop + Math.round(vh * 0.04);
+  const faceBottom = fittedTop + fittedH;
+  const H0 = Math.max(1, faceBottom - faceTop);
   const nativeH = W0 / BLOB_ASPECT;
   return {
     W0,
