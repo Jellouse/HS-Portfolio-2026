@@ -1,5 +1,5 @@
 ---
-import { renderInline } from '../lib/content';
+import Prose from './sections/Prose.astro';
 
 interface Props {
   paragraphs: string[];
@@ -10,5 +10,5 @@ const { paragraphs } = Astro.props;
 
 <section class="about" id="about">
   <h2 class="sr-only">About</h2>
-  {paragraphs.map((paragraph) => <p set:html={renderInline(paragraph)} />)}
+  <Prose paragraphs={paragraphs} />
 </section>

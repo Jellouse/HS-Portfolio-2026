@@ -1,0 +1,18 @@
+---
+import SmallMenu from '../SmallMenu.astro';
+
+interface Props {
+  class: string;
+  href: string;
+  label: string;
+}
+
+const { class: className, href, label } = Astro.props;
+---
+
+<div class={className} data-project-menu>
+  <a href={href} aria-label={label} data-project-face>
+    <slot />
+  </a>
+  <SmallMenu />
+</div>

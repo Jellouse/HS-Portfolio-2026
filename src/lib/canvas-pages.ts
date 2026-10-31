@@ -28,7 +28,7 @@ export async function canvasPages() {
   const paths: string[] = [];
   for (const [file, src] of Object.entries(sources)) {
     const route = routeOf(file);
-    if (EXCLUDE.has(route.replace(/\/$/, '')) || route.startsWith('/preview/')) continue;
+    if (EXCLUDE.has(route.replace(/\/$/, '')) || route.startsWith('/preview/') || route === '/dev' || route.startsWith('/dev/')) continue;
     if (/export const prerender = false/.test(src)) continue;
     if (!route.includes('[')) {
       paths.push(route === '/' || route === '/404' ? route : `${route}/`.replace(/\/\/$/, '/'));

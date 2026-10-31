@@ -1,0 +1,46 @@
+---
+import BlurImage from '../BlurImage.astro';
+import { resolveImageSource } from '../../lib/images';
+import { priceText, seedEur, type ProductEntry } from '../../lib/shop';
+import Price from './Price.astro';
+
+interface Props {
+  product: ProductEntry;
+  index: number;
+  sizes: string;
+}
+
+const { product, index, sizes } = Astro.props;
+const overview = product.data.overview;
+const left = overview.left?.src ? overview.left : product.data.detail.images[0];
+const right = overview.right?.src ? overview.right : product.data.detail.images[1];
+const priority = index === 0;
+---
+
+<section class="shop-product" aria-label={product.data.name}>
+  <a class="shop-pair fade-in" href={`/shop/${product.id}/`} aria-label={`${product.data.name} details page`}>
+    {left?.src && <BlurImage src={resolveImageSource(left.src)} alt={left.alt} outline={left.outline === true} sizes={sizes} priority={priority} />}
+    {right?.src && <BlurImage src={resolveImageSource(right.src)} alt={right.alt} outline={right.outline === true} sizes={sizes} priority={priority} />}
+  </a>
+  <p class="shop-caption">
+    <a class="shop-title" href={`/shop/${product.id}/`}>{overview.title || product.data.name}</a>
+    <br />
+    <Price slug={product.id} mode="suffix" text={priceText(seedEur(product.id), 'suffix')} />
+    <span class="shop-links">
+      {overview.description ? (
+        <button class="shop-details" type="button" aria-expanded="false" aria-controls={`details-${product.id}`}>
+          Details
+        </button>
+      ) : (
+        <a href={`/shop/${product.id}/`}>Details</a>
+      )}, <a href={`/shop/${product.id}/`}>Buy</a>
+    </span>
+  </p>
+  {overview.description && (
+    <div class="shop-desc-wrap" id={`details-${product.id}`} data-no-reveal hidden>
+      <div class="shop-desc-inner">
+        <p class="shop-desc">{overview.description}</p>
+      </div>
+    </div>
+  )}
+</section>

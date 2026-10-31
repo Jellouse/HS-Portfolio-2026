@@ -1,0 +1,19 @@
+---
+import BlurImage from '../BlurImage.astro';
+import { resolveImageSource } from '../../lib/images';
+
+interface Props {
+  title?: string;
+  sizes: string;
+  images: { src: string; alt: string; outline?: boolean }[];
+}
+
+const { title, sizes, images } = Astro.props;
+---
+
+<section class="shop-detail-section shop-wild">
+  {title && <h2 class="shop-detail-heading">{title}</h2>}
+  <div class="shop-wild-grid fade-in">
+    {images.map((img) => <BlurImage src={resolveImageSource(img.src)} alt={img.alt} outline={img.outline === true} sizes={sizes} />)}
+  </div>
+</section>

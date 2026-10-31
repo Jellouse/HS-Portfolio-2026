@@ -1,4 +1,6 @@
 ---
+import Price from './sections/Price.astro';
+
 interface Item {
   label: string;
   value: string;
@@ -28,7 +30,7 @@ const parts = (value: string) =>
       <ul class="info-list">
         {items.map((item) => (
           <li>
-            {item.label}: {item.priceSlug ? <span data-price={item.priceSlug} data-price-style="prefix">{item.value}</span> : item.href ? <a href={item.href}>{item.value}</a> : parts(item.value).map((p) => (p.href ? <a href={p.href}>{p.text}</a> : p.text))}
+            {item.label}: {item.priceSlug ? <Price slug={item.priceSlug} mode="prefix" text={item.value} /> : item.href ? <a href={item.href}>{item.value}</a> : parts(item.value).map((p) => (p.href ? <a href={p.href}>{p.text}</a> : p.text))}
           </li>
         ))}
       </ul>

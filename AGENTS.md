@@ -2,6 +2,8 @@
 
 Portfolio and shop for Johann Schnettker. Static Astro 5 site. Content lives in the repo. Keystatic edits it locally, and on the deployed site through GitHub. The shop (Industrial Bloom) reads price and stock from Neon (`DATABASE_URL`) and checks out with Stripe.
 
+Read [docs/agents/RULEBOOK.md](docs/agents/RULEBOOK.md) before any edit. It is mandatory. The rules are whatever this site already does most often. Anything new reuses that, or waits for Johann. Agents do not improvise new styles. The component map is [docs/agents/COMPONENTS.md](docs/agents/COMPONENTS.md).
+
 ## Structure
 
 - `src/pages/index.astro` is the homepage. It opts into `Header`. The first project peeks above the fold.
@@ -11,7 +13,7 @@ Portfolio and shop for Johann Schnettker. Static Astro 5 site. Content lives in 
 - `src/content.config.ts` is the typed schema. `keystatic.config.ts` edits the same files. Keep the two in step.
 - `src/styles/type.css` is the only place font size, line height, and tracking are defined. `src/lib/type-scale.ts` mirrors those values for inline styles. `tests/type-scale.spec.mjs` fails if they drift.
 - `src/styles/global.css` is the layout. It imports `type.css`.
-- `src/components/` is the UI. `src/scripts/` is the page behaviour, one module per behaviour. `src/lib/` is shared server and content code. `src/lib/shop/` is Neon, Stripe, and stock.
+- `src/components/` is the UI. Repeated page sections live in `src/components/sections/`. `src/scripts/` is the page behaviour, one module per behaviour. `src/lib/` is shared server and content code. `src/lib/shop/` is Neon, Stripe, and stock.
 - Images live next to their project and go through `astro:assets` (`src/lib/images.ts`, `BlurImage.astro`).
 - `@astrojs/vercel` is the adapter. `output` stays `static`. Pages and the `llms.txt` and `robots.txt` endpoints export `prerender = true`. `@keystatic/astro` injects `/keystatic` with `prerender: false`. The API is `src/pages/api/keystatic/[...params].ts` (`prerender = false`). CMS project preview checks the Keystatic GitHub cookie (or `Authorization: Bearer`) for push access, reads the entry live from GitHub, and sends `noindex` plus `Cache-Control: private, no-store`. On Vercel, Astro's `request.url` host is localhost, and Keystatic builds the GitHub `redirect_uri` from that URL. The route rebuilds it from `x-forwarded-host` and `x-forwarded-proto`, falling back to `host`. Leave Vercel's output directory empty so the adapter can publish both.
 

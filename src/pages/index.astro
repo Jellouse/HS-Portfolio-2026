@@ -1,11 +1,10 @@
 ---
 export const prerender = true;
 
-import HeroBlob from '../components/HeroBlob.astro';
-import Mark from '../components/Mark.astro';
 import ProjectFeed from '../components/ProjectFeed.astro';
+import HomeHero from '../components/sections/HomeHero.astro';
 import Base from '../layouts/Base.astro';
-import { absoluteUrl, getProjects, getSite, plainText } from '../lib/content';
+import { absoluteUrl, getProjects, getSite } from '../lib/content';
 import { resolveImage } from '../lib/images';
 import { homeJsonLd } from '../lib/seo';
 import { positioning } from '../lib/positioning';
@@ -26,37 +25,6 @@ const description = positioning.description;
   header
 >
   <h1 class="sr-only">{site.name}, {site.studio}</h1>
-  <section class="hero" aria-label="Humansize" data-hero-root data-intro>
-    <div class="mark-wrap">
-      
-      <div class="hero-variant" data-hero-variant="blob">
-        <HeroBlob />
-      </div>
-      <div class="hero-variant" data-hero-variant="gradient" hidden>
-        <Mark />
-      </div>
-    </div>
-  </section>
+  <HomeHero />
   <ProjectFeed projects={projects} about={site.about} />
 </Base>
-
-<script>
-  import { initHeroBlob } from '../scripts/hero-blob';
-  import { initHeroBlobDials } from '../scripts/hero-blob-dials';
-  import { initIntroFace } from '../scripts/intro-face';
-
-  const root = document.querySelector<HTMLElement>('[data-hero-root]');
-  if (root) {
-    const mode = new URLSearchParams(location.search).get('hero') === 'gradient' ? 'gradient' : 'blob';
-    root.dataset.hero = mode;
-    root.querySelectorAll<HTMLElement>('[data-hero-variant]').forEach((el) => {
-      const on = el.dataset.heroVariant === mode;
-      el.hidden = !on;
-    });
-    if (mode === 'blob') {
-      initIntroFace(root);
-      initHeroBlob(root);
-      initHeroBlobDials(root);
-    }
-  }
-</script>

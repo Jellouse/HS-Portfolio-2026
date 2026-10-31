@@ -10,6 +10,7 @@ export const GET: APIRoute = ({ site }) => {
     'Disallow: /preview',
     'Disallow: /preview/',
     'Disallow: /canvas',
+    'Disallow: /dev',
     '',
     `Sitemap: ${new URL('sitemap-index.xml', origin).href}`,
     '',

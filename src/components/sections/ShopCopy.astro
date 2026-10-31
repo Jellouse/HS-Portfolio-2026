@@ -1,0 +1,14 @@
+---
+import { paragraphs } from '../../lib/content';
+import Prose from './Prose.astro';
+
+interface Props {
+  text: string;
+}
+
+const { text } = Astro.props;
+---
+
+<div class="shop-detail-text">
+  <Prose paragraphs={paragraphs(text)} />
+</div>

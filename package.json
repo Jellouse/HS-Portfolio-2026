@@ -34,7 +34,9 @@
     "test:a11y": "node tests/a11y.spec.mjs",
     "test:menu-fade": "node tests/menu-scroll-fade.spec.mjs",
     "test:serial": "npm run test:menu-fade && npm run test:shop && npm run test:touch-guard && npm run test:canvas && npm run test:scroll && npm run test:taps && npm run test:hscroll && npm run test:reveal && npm run test:spin && npm run test:vt && npm run test:canvas-pages && npm run test:project-images && npm run test:shop-grid && npm run test:keystatic && npm run test:intro && npm run test:intro-nav && npm run test:viewport-height && npm run test:contact && npm run test:shop-intro && npm run test:a11y",
-    "test:quick": "node tests/run.mjs"
+    "test:quick": "node tests/run.mjs",
+    "check:design": "node scripts/check-design.mjs",
+    "check:visual": "node scripts/visual-pages.mjs check"
   },
   "engines": {
     "node": ">=22"

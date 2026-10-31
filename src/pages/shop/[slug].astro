@@ -2,13 +2,17 @@
 export const prerender = true;
 
 import mark from '../../assets/industrial-bloom-mark.svg?raw';
-import BlurImage from '../../components/BlurImage.astro';
-import SmallMenu from '../../components/SmallMenu.astro';
-import Info from '../../components/Info.astro';
+import CornerMark from '../../components/sections/CornerMark.astro';
+import ShopBuyBar from '../../components/sections/ShopBuyBar.astro';
+import ShopCopy from '../../components/sections/ShopCopy.astro';
+import ShopDetailHead from '../../components/sections/ShopDetailHead.astro';
+import ShopDetailSection from '../../components/sections/ShopDetailSection.astro';
+import ShopFigure from '../../components/sections/ShopFigure.astro';
+import ShopInfo from '../../components/sections/ShopInfo.astro';
+import ShopWild from '../../components/sections/ShopWild.astro';
 import Base from '../../layouts/Base.astro';
-import { paragraphs, renderInline } from '../../lib/content';
-import { resolveImageSource } from '../../lib/images';
 import { getImage } from 'astro:assets';
+import { resolveImageSource } from '../../lib/images';
 import { getProducts, priceText, seedEur, SHIPPING, type ProductEntry } from '../../lib/shop';
 import { productJsonLd } from '../../lib/shop/jsonld';
 
@@ -26,7 +30,7 @@ const d = product.data;
 const detail = d.detail;
 const title = detail.title || d.overview.title || d.name;
 const eur = seedEur(product.id);
-const intro = paragraphs(detail.description || d.description);
+const intro = detail.description || d.description;
 const images = detail.images;
 const info = [
   ...detail.info,
@@ -65,54 +69,20 @@ const half = '(min-width: 760px) 272px, calc((100vw - 48px) / 2)';
   safeArea
 >
   <article class="shop-detail page-grid" data-slug={product.id}>
-    <div class="shop-detail-mark project-mark is-ring" data-project-menu>
-      <a href="/shop/" aria-label="Industrial Bloom shop" data-project-face>
-        <span class="shop-mark" data-spin-mark set:html={mark} />
-      </a>
-      <SmallMenu />
-    </div>
-    <header class="shop-detail-head">
-      <h1>{title}<br /><span data-price={product.id} data-price-style="suffix">{priceText(eur, 'suffix')}</span></h1>
-    </header>
-    <div class="shop-detail-text">
-      {intro.map((p) => <p set:html={renderInline(p)} />)}
-    </div>
+    <CornerMark class="shop-detail-mark project-mark is-ring" href="/shop/" label="Industrial Bloom shop">
+      <span class="shop-mark" data-spin-mark set:html={mark} />
+    </CornerMark>
+    <ShopDetailHead title={title} slug={product.id} eur={eur} />
+    <ShopCopy text={intro} />
     {images.map((img, i) => (
-      <figure class="shop-detail-image fade-in">
-        <BlurImage src={resolveImageSource(img.src)} alt={img.alt} outline={img.outline === true} sizes={big} priority={i < 1} />
-      </figure>
+      <ShopFigure src={img.src} alt={img.alt} outline={img.outline === true} sizes={big} priority={i < 1} />
     ))}
-    {detail.sections.map((s) => (
-      <section class="shop-detail-section">
-        {s.heading && <h2 class="shop-detail-heading">{s.heading}</h2>}
-        {s.text && <div class="shop-detail-text">{paragraphs(s.text).map((p) => <p set:html={renderInline(p)} />)}</div>}
-        {s.image?.src && (
-          <figure class="shop-detail-image fade-in">
-            <BlurImage src={resolveImageSource(s.image.src)} alt={s.image.alt} outline={s.image.outline === true} sizes={big} />
-          </figure>
-        )}
-      </section>
+    {detail.sections.map((section) => (
+      <ShopDetailSection heading={section.heading} text={section.text} image={section.image} sizes={big} />
     ))}
-    {detail.wild.length > 0 && (
-      <section class="shop-detail-section shop-wild">
-        {detail.wildTitle && <h2 class="shop-detail-heading">{detail.wildTitle}</h2>}
-        <div class="shop-wild-grid fade-in">
-          {detail.wild.map((img) => <BlurImage src={resolveImageSource(img.src)} alt={img.alt} outline={img.outline === true} sizes={half} />)}
-        </div>
-      </section>
-    )}
-    <section class="shop-detail-section shop-detail-info">
-      <Info items={info} />
-    </section>
-    
-    <div class="shop-buy-bar">
-      
-      <form class="shop-buy-form" method="post" action="/api/shop/buy">
-        <input type="hidden" name="slug" value={product.id} />
-        <button class="shop-buy-button" type="submit" data-buy={product.id}>Buy</button>
-      </form>
-      <p class="shop-buy-note" data-buy-note hidden></p>
-    </div>
+    {detail.wild.length > 0 && <ShopWild title={detail.wildTitle} images={detail.wild} sizes={half} />}
+    <ShopInfo items={info} />
+    <ShopBuyBar slug={product.id} />
   </article>
 </Base>
 
