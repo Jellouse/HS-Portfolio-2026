@@ -172,19 +172,32 @@ export async function mountHeroBlobGL(svg: SVGSVGElement, opts: Opts) {
     const x1 = Math.min(region[0] + region[2], vb.x + (hr.right - r.left) / cssPerUnit);
     const y0 = Math.max(region[1], vb.y + (hr.top - r.top) / cssPerUnit);
     const y1 = Math.min(region[1] + region[3], vb.y + (hr.bottom - r.top) / cssPerUnit);
+    const stretching = svg.getAttribute('preserveAspectRatio') === 'none';
     out = [x0, y0, Math.max(1 / pxPerUnit, x1 - x0), Math.max(1 / pxPerUnit, y1 - y0)];
     W = Math.floor(out[2] * pxPerUnit);
     H = Math.floor(out[3] * pxPerUnit);
     canvas.width = W;
     canvas.height = H;
+    const topPx = (r.top - hr.top + (out[1] - vb.y) * cssPerUnit) / k;
     Object.assign(canvas.style, {
       position: 'absolute',
       left: `${(r.left - hr.left + (out[0] - vb.x) * cssPerUnit) / k}px`,
-      top: `${(r.top - hr.top + (out[1] - vb.y) * cssPerUnit) / k}px`,
+      top: `${topPx}px`,
       width: `${W / dpr / k}px`,
       height: `${H / dpr / k}px`,
       pointerEvents: 'none',
     });
+    const nativeH = (layoutCssW * vb.height) / vb.width;
+    const boxH = svg.clientHeight;
+    if (stretching && boxH > nativeH + 0.5) {
+      const stretch = boxH / nativeH;
+      const originY = (r.top - hr.top) / k - topPx;
+      canvas.style.transformOrigin = `0 ${originY}px`;
+      canvas.style.transform = `scaleY(${stretch})`;
+    } else {
+      canvas.style.transform = '';
+      canvas.style.transformOrigin = '';
+    }
 
     const sc = document.createElement('canvas');
     sc.width = Math.round(region[2] * pxPerUnit);

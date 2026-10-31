@@ -87,10 +87,9 @@ const halfSizes = '(min-width: 760px) 272px, calc((100vw - 48px) / 2)';
             <p class="dev-meta">{item.file}</p>
             <p class="dev-meta">{item.props?.length ? item.props.join(', ') : 'no props'}</p>
             <p class="dev-meta">{item.pages?.length ? item.pages.join(', ') : 'not mounted'}</p>
-            <div class:list={['dev-preview', { 'is-page': item.name === 'HomeHero' || item.name === 'ShopHead' || item.name === 'HeroBlob' || item.name === 'ProjectFeed' || item.name === 'ProjectArticle' }]}>
-              {item.name === 'HomeHero' && <iframe title="Home" src="/"></iframe>}
+            <div class:list={['dev-preview', { 'is-page': item.name === 'IntroHero' || item.name === 'HeroBlob' || item.name === 'ProjectFeed' || item.name === 'ProjectArticle' }]}>
+              {item.name === 'IntroHero' && <iframe title="Home" src="/"></iframe>}
               {item.name === 'HeroBlob' && <iframe title="Home hero" src="/"></iframe>}
-              {item.name === 'ShopHead' && <iframe title="Shop" src="/shop/"></iframe>}
               {item.name === 'Prose' && <Prose paragraphs={site.about.slice(0, 2)} />}
               {item.name === 'Price' && product && <Price slug={product.id} mode="suffix" text="price loads on the shop" />}
               {item.name === 'MainMenu' && (

@@ -1,8 +1,9 @@
 ---
 export const prerender = true;
 
+import mark from '../../assets/industrial-bloom-mark.svg?raw';
 import Base from '../../layouts/Base.astro';
-import ShopHead from '../../components/sections/ShopHead.astro';
+import IntroHero from '../../components/sections/IntroHero.astro';
 import ShopIntro from '../../components/sections/ShopIntro.astro';
 import ShopProduct from '../../components/sections/ShopProduct.astro';
 import { getProducts } from '../../lib/shop';
@@ -26,7 +27,13 @@ const sizes = '(min-width: 1440px) 439px, (min-width: 760px) 30vw, calc(50vw - 3
 
 <Base jsonLd={jsonLd} title="Industrial Bloom shop · Humansize" description="Industrial Bloom: solid aluminium vases made from extrusion profiles, handmade in Germany in small numbered editions.">
   <div class="shop-page page-grid">
-    <ShopHead />
+    <IntroHero variant="shop">
+      <div slot="illustration" class="shop-ring-layer" data-shop-ring-layer>
+        <div class="shop-ring" data-shop-ring>
+          <div class="shop-mark" data-spin-mark aria-hidden="true" set:html={mark} />
+        </div>
+      </div>
+    </IntroHero>
     <ShopIntro />
     {products.map((product, index) => <ShopProduct product={product} index={index} sizes={sizes} />)}
   </div>

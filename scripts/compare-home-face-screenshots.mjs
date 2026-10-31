@@ -83,7 +83,8 @@ for (const c of cases) {
     await context.close();
     report.push({ case: c.tag, host: name, rest, mid, R });
     if (rest.m && !rest.m.inView && c.mobile) failures.push(`${c.tag} ${name} rest: face not fully in view ${JSON.stringify(rest.m)}`);
-    if (rest.m && Math.abs(rest.m.ratio - 559 / 249) > 0.02) failures.push(`${c.tag} ${name} bad aspect ${rest.m.ratio}`);
+    if (rest.m && !c.mobile && Math.abs(rest.m.ratio - 559 / 249) > 0.02) failures.push(`${c.tag} ${name} bad aspect ${rest.m.ratio}`);
+    if (rest.m && c.mobile && !(rest.m.h / rest.m.w > 249 / 559)) failures.push(`${c.tag} ${name} mobile face not rounder ${rest.m.ratio}`);
   }
 
   const prev = report.find((x) => x.case === c.tag && x.host === 'preview')?.rest.m;

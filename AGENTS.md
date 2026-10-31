@@ -6,7 +6,7 @@ Read [docs/agents/RULEBOOK.md](docs/agents/RULEBOOK.md) before any edit. It is m
 
 ## Structure
 
-- `src/pages/index.astro` is the homepage. It opts into `Header`. The first project peeks above the fold.
+- `src/pages/index.astro` is the homepage. Home and `/shop` share `IntroHero` (illustration slot, name, menu). The first project peeks above the fold.
 - `src/pages/work/[slug].astro` builds every published project from its block list. New projects do not need a new page.
 - `src/pages/shop/index.astro` and `src/pages/shop/[slug].astro` are the vase shop.
 - `src/pages/canvas.astro` is the review board. `src/pages/admin.astro` is shop admin. `src/pages/preview/[slug].astro` is the CMS preview.

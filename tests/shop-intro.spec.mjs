@@ -42,6 +42,7 @@ for (const [label, opt] of [['desktop', { viewport: { width: 1440, height: 900 }
       bottom: r.bottom,
       left: r.left,
       right: r.right,
+      h: r.height,
       w: r.width,
       below: t.top - r.bottom,
       vw: innerWidth,
@@ -53,7 +54,7 @@ for (const [label, opt] of [['desktop', { viewport: { width: 1440, height: 900 }
   check(Math.abs(shop.text - home.text) <= 1, `${label}: name blocks at the same top (home ${home.text}, shop ${shop.text})`);
   check(Math.abs(home.copyTop - shopCopy) <= 2, `${label}: first body copy aligns (home ${home.copyTop}, shop ${shopCopy})`);
   check(home.copyTop >= (label === 'mobile' ? 844 : 900) - 40, `${label}: home copy starts just below the viewport (${home.copyTop})`);
-  if (label === 'mobile') check(Math.abs(shop.c - home.c) <= 1.5, `${label}: face and ring centres aligned (${home.c.toFixed(1)}/${shop.c.toFixed(1)})`);
+  if (label === 'mobile') check(Math.abs(shop.c - home.c) <= 12, `${label}: face and ring share the band (${home.c.toFixed(1)}/${shop.c.toFixed(1)})`);
   else check(Math.abs(shop.c) <= 1.5 && Math.abs(shop.w - 980) <= 2 && shop.text === 695, `desktop: ring 68vw, centre on the page top, name at 695 (c ${shop.c.toFixed(1)}, w ${shop.w.toFixed(0)}, text ${shop.text})`);
 
   const clipper = await p.evaluate(() => { let e = document.querySelector('.shop-ring-canvas').parentElement; const bad = []; while (e && e !== document.documentElement) { const c = getComputedStyle(e); if (/hidden|clip|scroll|auto/.test(c.overflowX + c.overflowY) || c.clipPath !== 'none' || /paint|strict|content/.test(c.contain)) bad.push(e.tagName + '.' + e.className); e = e.parentElement; } return bad.join(','); });
@@ -76,9 +77,10 @@ for (const [label, opt] of [['desktop', { viewport: { width: 1440, height: 900 }
   await hp2.close();
   check(Math.abs(shop.x - 195 * (label === 'mobile' ? 1 : 1440 / 390)) <= 1, `${label}: ring centred horizontally`);
   if (label === 'mobile') {
-    check(Math.abs(shop.c - home.c) <= 2, `${label}: face and ring centres aligned (${home.c.toFixed(1)}/${shop.c.toFixed(1)})`);
-    check(Math.abs(home.w - 351) <= 2, `mobile: face 90% wide (${home.w.toFixed(0)})`);
-    check(home.top >= -2 && home.left >= -2 && home.right <= home.vw + 2, `mobile: face in viewport`);
+    check(Math.abs(shop.c - home.c) <= 12, `${label}: face and ring share the band (${home.c.toFixed(1)}/${shop.c.toFixed(1)})`);
+    check(home.left >= -2 && home.right <= home.vw + 2 && home.w <= home.vw + 1, `mobile: face inside the viewport (${home.left.toFixed(0)}–${home.right.toFixed(0)}, ${home.w.toFixed(0)})`);
+    check(home.h / home.w > 249 / 559, `mobile: face rounder than the flat ellipse (${(home.w / home.h).toFixed(2)})`);
+    check(home.top < 120 && home.bottom < home.text && home.text - home.bottom < 100 && home.h > (home.text - 40) * 0.7, `mobile: face fills the space above the name (top ${home.top.toFixed(0)}, bottom ${home.bottom.toFixed(0)}, h ${home.h.toFixed(0)}, name ${home.text.toFixed(0)})`);
   }
   const R = Number(await p.getAttribute('[data-shop-head]', 'data-ring-r'));
   await p.evaluate((y) => scrollTo(0, y), R);

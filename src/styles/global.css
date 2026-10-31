@@ -2110,6 +2110,7 @@ body .site-header.is-menu-fade:not(.is-menu-open) .who .time {
 .hero[data-intro] .mark-blob {
   top: var(--intro-face-top, 0);
   width: var(--intro-w, 500px);
+  height: var(--intro-h, auto);
   transform: translateX(-50%);
 }
 
@@ -2512,7 +2513,7 @@ html.is-contact-open {
   }
 
   to {
-    transform: scale(var(--intro-smin)) translateZ(0);
+    transform: scale(var(--intro-sx, var(--intro-smin)), var(--intro-sy, var(--intro-smin))) translateZ(0);
   }
 }
 
@@ -3006,16 +3007,13 @@ html.is-contact-open body {
 
 @media (prefers-reduced-motion: no-preference) {
   @supports (animation-timeline: scroll()) {
-    body:has(.hero) .site-menu[data-main-menu],
-    .shop-menu {
+    body:has(.is-sda) [data-intro-copy] {
       animation: menu-scroll-out linear both;
-      animation-timing-function: var(--ease-out);
-      animation-timeline: scroll(root);
-      animation-range: 40svh 80svh;
+      animation-timeline: scroll(root block);
+      animation-range: 0px var(--intro-r);
     }
 
-    body:has(.hero) .site-menu[data-main-menu]:focus-within,
-    .shop-menu:focus-within {
+    body:has(.is-sda) [data-intro-copy]:focus-within {
       animation: none;
     }
   }

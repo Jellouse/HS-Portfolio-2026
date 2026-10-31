@@ -1,6 +1,7 @@
 
 import { clearStableViewportHeight, stableViewportHeight } from '../lib/viewport-layout';
 import { introFaceLayout } from '../lib/intro-layout';
+import { setIntroCopy } from './intro-copy';
 
 export function initIntroFace(hero: HTMLElement) {
   const host = hero.querySelector<HTMLElement>('[data-hero-variant="blob"]');
@@ -17,6 +18,9 @@ export function initIntroFace(hero: HTMLElement) {
   const opt = { passive: true as const, signal: ac.signal };
 
   let sMin = 1;
+  let sX = 1;
+  let sY = 1;
+  let mobile = false;
   let R = 1;
   let lastW = -1;
   let frame = 0;
@@ -50,7 +54,9 @@ export function initIntroFace(hero: HTMLElement) {
     if (vw === lastW && hero.dataset.introReady !== undefined) return;
     lastW = vw;
     const vh = stableViewportHeight(probe, vw);
-    const { W0, H0, nameTop, faceBottom, faceCenter, mobile } = introFaceLayout(vh, vw);
+    const laid = introFaceLayout(vh, vw);
+    const { W0, H0, nameTop, faceBottom, faceCenter } = laid;
+    mobile = laid.mobile;
     const Wf = px('--mark-small-w') || 64;
     const topF = px('--mark-small-top') || 32;
     if (mobile && faceCenter !== undefined) {
@@ -59,17 +65,30 @@ export function initIntroFace(hero: HTMLElement) {
       hero.style.removeProperty('--intro-face-center');
     }
     const Hf = (Wf * 249) / 559;
+    const blob = hero.querySelector<SVGElement>('[data-hero-blob]');
+    if (mobile && laid.stretch !== 1) {
+      hero.style.setProperty('--intro-h', `${Math.round(H0)}px`);
+      blob?.setAttribute('preserveAspectRatio', 'none');
+    } else {
+      hero.style.removeProperty('--intro-h');
+      blob?.removeAttribute('preserveAspectRatio');
+    }
     host.style.transform = 'none';
     hero.classList.remove('is-sda');
     host.style.translate = 'none';
     const hostTop = measureHostTop();
     R = Math.max(1, Math.round(faceBottom - Hf - topF));
     sMin = Wf / W0;
+    sX = sMin;
+    sY = mobile ? Hf / H0 : sMin;
     hero.style.setProperty('--intro-w', `${W0}px`);
+    hero.style.setProperty('--intro-sx', String(sX));
+    hero.style.setProperty('--intro-sy', String(sY));
     hero.style.setProperty('--intro-face-top', `${Math.round(faceBottom - H0) - hostTop}px`);
     hero.style.setProperty('--intro-origin', `${faceBottom - hostTop}px`);
     hero.style.setProperty('--intro-name-top', `${nameTop}px`);
     document.documentElement.style.setProperty('--intro-name-top', `${nameTop}px`);
+    document.documentElement.style.setProperty('--intro-r', `${R}px`);
     hero.dataset.introR = String(R);
     hero.dataset.introReady = '';
     hero.style.setProperty('--intro-r', `${R}px`);
@@ -81,6 +100,7 @@ export function initIntroFace(hero: HTMLElement) {
     if (sda) {
       host.style.transform = '';
       hero.classList.add('is-sda');
+      setIntroCopy(0, false);
     } else write(performance.now());
   };
 
@@ -103,10 +123,14 @@ export function initIntroFace(hero: HTMLElement) {
     if (!tau || Number.isNaN(cur)) cur = goal;
     else cur += (goal - cur) * (1 - Math.exp(-dt / tau));
     if (Math.abs(goal - cur) < 0.0005 * sMin) cur = goal;
+    const scaleX = mobile ? 1 + (sX - 1) * ((1 - cur) / (1 - sMin) || 0) : cur;
+    const scaleY = mobile ? 1 + (sY - 1) * ((1 - cur) / (1 - sMin) || 0) : cur;
     if (cur !== lastS) {
       lastS = cur;
-      host.style.transform = `scale(${cur})`;
+      host.style.transform = mobile ? `scale(${scaleX}, ${scaleY})` : `scale(${cur})`;
     }
+    const progress = sMin === 1 ? 0 : (1 - cur) / (1 - sMin);
+    setIntroCopy(progress, !reduced && !sda);
     const isSettled = cur === goal;
     if (isSettled !== settledAttr) {
       settledAttr = isSettled;

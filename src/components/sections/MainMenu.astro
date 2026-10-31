@@ -9,7 +9,7 @@ const { variant, home = false } = Astro.props;
 
 {
   variant === 'header' && (
-    <nav class="site-menu" aria-label="Main" data-main-menu>
+    <nav class="site-menu" aria-label="Main" data-main-menu data-intro-copy>
       {home ? <a href="#about" data-about-link>About</a> : <a href="/">Home</a>}
       <a href="/shop">Shop</a>
       <button type="button" data-contact-open>Contact</button>
@@ -18,7 +18,7 @@ const { variant, home = false } = Astro.props;
 }
 {
   variant === 'shop' && (
-    <nav class="site-menu shop-menu" aria-label="Main">
+    <nav class="site-menu shop-menu" aria-label="Main" data-intro-copy>
       <a href="/">Home</a>
       <a href="#shop-about" data-shop-about>About</a>
       <button type="button" data-contact-open>Contact</button>

@@ -34,7 +34,7 @@ export const sections = [
     files: [
       'src/components/Header.astro',
       'src/components/SmallMenu.astro',
-      'src/components/sections/ShopHead.astro',
+      'src/components/sections/IntroHero.astro',
     ],
     roots: ['site-menu', 'shop-menu', 'project-menu'],
   },
@@ -47,12 +47,12 @@ export const sections = [
     roots: ['project-mark', 'shop-detail-mark'],
   },
   {
-    name: 'ShopHead',
-    file: 'src/components/sections/ShopHead.astro',
-    props: [],
-    pages: ['/shop/'],
-    files: ['src/pages/shop/index.astro'],
-    roots: ['shop-head'],
+    name: 'IntroHero',
+    file: 'src/components/sections/IntroHero.astro',
+    props: ['variant: "home" | "shop"', 'site?: SiteData', 'slot: illustration'],
+    pages: ['/', '/shop/'],
+    files: ['src/pages/index.astro', 'src/pages/shop/index.astro'],
+    roots: ['shop-head', 'mark-wrap'],
   },
   {
     name: 'ShopIntro',
@@ -125,14 +125,6 @@ export const sections = [
     pages: ['/shop/:slug'],
     files: ['src/pages/shop/[slug].astro'],
     roots: ['shop-buy-bar'],
-  },
-  {
-    name: 'HomeHero',
-    file: 'src/components/sections/HomeHero.astro',
-    props: [],
-    pages: ['/'],
-    files: ['src/pages/index.astro'],
-    roots: ['mark-wrap'],
   },
   {
     name: 'NotFound',
