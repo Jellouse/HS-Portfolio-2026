@@ -35,7 +35,15 @@ await page.waitForSelector('[data-intro-ready]');
 const R = Number(await page.getAttribute('[data-hero-root]', 'data-intro-r'));
 const measure = () => page.evaluate(() => {
   const host = document.querySelector('[data-hero-variant="blob"]');
-  return new DOMMatrix(getComputedStyle(host).transform).a;
+  const svg = document.querySelector('[data-hero-blob]');
+  const canvas = document.querySelector('.mark-blob-gl');
+  const box = svg.getBoundingClientRect();
+  const scaleOf = (el) => {
+    const m = new DOMMatrix(getComputedStyle(el).transform);
+    return { a: m.a, d: m.d };
+  };
+  const visual = Number(document.querySelector('[data-hero-root]')?.dataset.introW || 0);
+  return { w: visual || box.width, host: scaleOf(host), svg: scaleOf(svg), canvas: canvas ? scaleOf(canvas) : null };
 });
 
 let prev = null;
@@ -44,8 +52,13 @@ for (let y = 0; y <= R; y += Math.max(10, Math.round(R / 20))) {
   await page.waitForTimeout(50);
   await page.waitForSelector('[data-intro-settled]', { state: 'attached' });
   const s = await measure();
-  if (prev !== null && s > prev + 1e-9) failures.push(`after nav y=${y}: scale rose ${prev} -> ${s}`);
-  prev = s;
+  if (prev !== null && s.w > prev + 0.5) failures.push(`after nav y=${y}: width rose ${prev} -> ${s.w}`);
+  for (const part of ['host', 'svg', 'canvas']) {
+    const m = s[part];
+    if (!m) failures.push(`after nav y=${y}: missing ${part}`);
+    else if (Math.abs(m.a - 1) > 0.01 || Math.abs(m.d - 1) > 0.01) failures.push(`after nav y=${y}: ${part} scale ${m.a}, ${m.d}`);
+  }
+  prev = s.w;
 }
 
 await browser.close();

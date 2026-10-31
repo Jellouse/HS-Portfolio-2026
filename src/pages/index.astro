@@ -1,8 +1,10 @@
 ---
 export const prerender = true;
 
+import HeroBlob from '../components/HeroBlob.astro';
+import Mark from '../components/Mark.astro';
 import ProjectFeed from '../components/ProjectFeed.astro';
-import HomeHero from '../components/sections/HomeHero.astro';
+import IntroHero from '../components/sections/IntroHero.astro';
 import Base from '../layouts/Base.astro';
 import { absoluteUrl, getProjects, getSite } from '../lib/content';
 import { resolveImage } from '../lib/images';
@@ -22,9 +24,11 @@ const description = positioning.description;
   description={description}
   image={image}
   jsonLd={homeJsonLd(site, pageUrl)}
-  header
 >
   <h1 class="sr-only">{site.name}, {site.studio}</h1>
-  <HomeHero />
+  <IntroHero variant="home" site={site}>
+    <HeroBlob slot="blob" />
+    <Mark slot="gradient" />
+  </IntroHero>
   <ProjectFeed projects={projects} about={site.about} />
 </Base>

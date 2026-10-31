@@ -1,0 +1,60 @@
+---
+import type { SiteData } from '../../lib/content';
+import Header from '../Header.astro';
+import MainMenu from './MainMenu.astro';
+
+interface Props {
+  variant: 'home' | 'shop';
+  site?: SiteData;
+}
+
+const { variant, site } = Astro.props;
+---
+
+{variant === 'home' && site && <Header site={site} />}
+{
+  variant === 'home' && (
+    <section class="hero" aria-label="Humansize" data-hero-root data-intro>
+      <div class="mark-wrap">
+        <div class="hero-variant" data-hero-variant="blob">
+          <slot name="blob" />
+        </div>
+        <div class="hero-variant" data-hero-variant="gradient" hidden>
+          <slot name="gradient" />
+        </div>
+      </div>
+    </section>
+  )
+}
+{
+  variant === 'shop' && (
+    <header class="shop-head" data-shop-head>
+      <slot name="illustration" />
+      <h1 class="shop-head-title">
+        Industrial Bloom
+      </h1>
+      <MainMenu variant="shop" />
+    </header>
+  )
+}
+
+<script>
+  import { initHeroBlob } from '../../scripts/hero-blob';
+  import { initHeroBlobDials } from '../../scripts/hero-blob-dials';
+  import { initIntroFace } from '../../scripts/intro-face';
+
+  const root = document.querySelector<HTMLElement>('[data-hero-root]');
+  if (root) {
+    const mode = new URLSearchParams(location.search).get('hero') === 'gradient' ? 'gradient' : 'blob';
+    root.dataset.hero = mode;
+    root.querySelectorAll<HTMLElement>('[data-hero-variant]').forEach((el) => {
+      const on = el.dataset.heroVariant === mode;
+      el.hidden = !on;
+    });
+    if (mode === 'blob') {
+      initIntroFace(root);
+      initHeroBlob(root);
+      initHeroBlobDials(root);
+    }
+  }
+</script>

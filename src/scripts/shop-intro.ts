@@ -1,5 +1,6 @@
 import { clearStableViewportHeight, stableViewportHeight } from '../lib/viewport-layout';
-import { introFaceLayout } from '../lib/intro-layout';
+import { introFaceLayout, introRingLayout } from '../lib/intro-layout';
+import { setIntroCopy } from './intro-copy';
 
 export function initShopIntro(head: HTMLElement) {
   const host = head.querySelector<HTMLElement>('[data-shop-ring]');
@@ -69,10 +70,11 @@ export function initShopIntro(head: HTMLElement) {
     lastW = vw;
     const vh = stableViewportHeight(probe, vw);
     const mobile = vw < 760;
-    const { nameTop, faceCenter } = introFaceLayout(vh, vw);
+    const { nameTop } = introFaceLayout(vh, vw);
     document.documentElement.style.setProperty('--intro-name-top', `${nameTop}px`);
-    const W0 = Math.round((vw * (mobile ? 0.9 : 0.68)) / 2) * 2;
-    const C = mobile ? (faceCenter ?? Math.round(nameTop / 2)) : 0;
+    const ring = introRingLayout(vh, vw);
+    const W0 = ring ? ring.W0 : Math.round((vw * 0.68) / 2) * 2;
+    const C = ring ? ring.C : 0;
     const Wf = 54;
     const topF = mobile ? 32 : 44;
     const titleF = topF + Wf + (mobile ? 96 : 130);
@@ -88,6 +90,7 @@ export function initShopIntro(head: HTMLElement) {
     head.style.setProperty('--ring-w', `${W0}px`);
     head.style.setProperty('--ring-origin', `${C - L}px`);
     head.style.setProperty('--ring-r', `${R}px`);
+    document.documentElement.style.setProperty('--intro-r', `${R}px`);
     head.style.setProperty('--ring-dy', `${Math.round(dy)}px`);
     head.style.setProperty('--ring-smin', String(sMin));
     head.dataset.ringR = String(R);
@@ -98,6 +101,7 @@ export function initShopIntro(head: HTMLElement) {
     if (sda) {
       layer.style.transform = '';
       head.classList.add('is-sda');
+      setIntroCopy(0, false);
     } else write(performance.now());
   };
 
@@ -123,6 +127,7 @@ export function initShopIntro(head: HTMLElement) {
     else cur += (t - cur) * (1 - Math.exp(-dt / TAU));
     if (Math.abs(t - cur) < 0.0005) cur = t;
     layer.style.transform = `translateY(${(dy * cur).toFixed(2)}px) scale(${1 + (sMin - 1) * cur})`;
+    setIntroCopy(cur, !reduced && !sda);
     head.toggleAttribute('data-ring-settled', cur === t);
     if (cur !== t) frame = requestAnimationFrame(write);
     else lastT = 0;

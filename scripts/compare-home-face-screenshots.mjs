@@ -82,13 +82,13 @@ for (const c of cases) {
     const mid = await shots(page2, host, `${c.tag}-${name}-scroll`, midY);
     await context.close();
     report.push({ case: c.tag, host: name, rest, mid, R });
-    if (rest.m && !rest.m.inView && c.mobile) failures.push(`${c.tag} ${name} rest: face not fully in view ${JSON.stringify(rest.m)}`);
-    if (rest.m && Math.abs(rest.m.ratio - 559 / 249) > 0.02) failures.push(`${c.tag} ${name} bad aspect ${rest.m.ratio}`);
+    if (rest.m && c.mobile && !(rest.m.left < 0 && rest.m.right > c.viewport.width && rest.m.top < 0)) failures.push(`${c.tag} ${name} rest: face should crop off the top and sides ${JSON.stringify(rest.m)}`);
+    if (rest.m && !c.mobile && Math.abs(rest.m.ratio - 559 / 249) > 0.02) failures.push(`${c.tag} ${name} bad aspect ${rest.m.ratio}`);
   }
 
   const prev = report.find((x) => x.case === c.tag && x.host === 'preview')?.rest.m;
   const main = report.find((x) => x.case === c.tag && x.host === 'main')?.rest.m;
-  if (prev && main) {
+  if (prev && main && !c.mobile) {
     const dw = Math.abs(prev.w - main.w);
     const dh = Math.abs(prev.h - main.h);
     if (dw > 3 || dh > 3) failures.push(`${c.tag} size vs main: preview ${prev.w}x${prev.h} main ${main.w}x${main.h}`);

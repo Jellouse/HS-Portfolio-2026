@@ -19,18 +19,26 @@ await new Promise((r) => server.listen(4337, '127.0.0.1', r));
 const browser = await chromium.launch();
 const failures = [];
 const check = (ok, label) => { console.log(`${ok ? 'ok  ' : 'FAIL'} ${label}`); if (!ok) failures.push(label); };
-const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+for (const opt of [{ viewport: { width: 1440, height: 900 } }, { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true }]) {
+const page = await browser.newPage(opt);
+const tag = opt.viewport.width;
 const op = (sel) => page.evaluate((s) => +getComputedStyle(document.querySelector(s)).opacity, sel);
 const at = async (y) => { await page.evaluate((v) => window.scrollTo(0, v), y); await page.waitForTimeout(300); };
-for (const [url, sel] of [['/', '.site-menu[data-main-menu]'], ['/shop/', '.shop-menu']]) {
+for (const [url, sel, title] of [['/', '.site-menu[data-main-menu]', '.brand'], ['/shop/', '.shop-menu', '.shop-head-title']]) {
   await page.goto(`http://127.0.0.1:4337${url}`, { waitUntil: 'load' });
   await page.waitForTimeout(800);
-  await at(0); check((await op(sel)) > 0.99, `${url} menu visible at top`);
-  await at(2000); check((await op(sel)) < 0.01, `${url} menu faded past intro`);
+  await at(0);
+  check((await op(sel)) > 0.99, `${tag} ${url} menu visible at top`);
+  check((await op(title)) > 0.99, `${tag} ${url} title visible at top`);
+  await at(2000);
+  check((await op(sel)) < 0.01, `${tag} ${url} menu faded past intro`);
+  check((await op(title)) > 0.99, `${tag} ${url} title stays visible`);
   await page.focus(`${sel} > *`); await page.waitForTimeout(100);
-  check((await op(sel)) > 0.99, `${url} menu back on keyboard focus`);
+  check((await op(sel)) > 0.99, `${tag} ${url} menu back on keyboard focus`);
   await page.evaluate(() => document.activeElement.blur());
-  await at(0); check((await op(sel)) > 0.99, `${url} menu back on scroll up`);
+  await at(0); check((await op(sel)) > 0.99, `${tag} ${url} menu back on scroll up`);
+}
+await page.close();
 }
 await browser.close(); server.close();
 if (failures.length) process.exit(1);
