@@ -1,6 +1,6 @@
 import { chromium } from 'playwright';
 import { createServer } from 'node:http';
-import { readFileSync, existsSync, statSync, mkdirSync, readdirSync, rmSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, statSync, mkdirSync, readdirSync, rmSync } from 'node:fs';
 import { join, extname, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
@@ -139,10 +139,37 @@ export async function capture(outDir, port = 4377) {
         if (route === '/') await page.waitForSelector('[data-intro-settled]', { timeout: 20000 }).catch(() => {});
         if (route === '/shop/') {
           await page.waitForSelector('[data-ring-settled]', { timeout: 20000 }).catch(() => {});
-          await page.waitForSelector('.shop-mark.has-canvas.at-top', { timeout: 8000 }).catch(() => {});
+          await page.waitForFunction(() => {
+            const mark = document.querySelector('.shop-mark');
+            const canvas = document.querySelector('canvas.shop-ring-canvas');
+            if (!mark || !canvas) return false;
+            if (!mark.classList.contains('has-canvas') || !mark.classList.contains('at-top') || canvas.width === 0) return false;
+            const stamp = canvas.toDataURL();
+            const same = canvas.dataset.visualStamp === stamp;
+            canvas.dataset.visualStamp = stamp;
+            return same;
+          }, null, { timeout: 20000, polling: 50 }).catch(() => {});
         }
-        await page.waitForTimeout(400);
-        await page.evaluate(() => {
+        await page.evaluate(async () => {
+          await document.fonts.ready;
+          if (document.fonts.load) {
+            await document.fonts.load('23px "ABC Areal"');
+            await document.fonts.ready;
+          }
+          const visible = (img) => {
+            if (img.closest('[hidden]')) return false;
+            const style = getComputedStyle(img);
+            return style.display !== 'none' && style.visibility !== 'hidden';
+          };
+          await Promise.all([...document.querySelectorAll('img')].filter(visible).map(async (img) => {
+            if (!img.complete || img.naturalWidth === 0) {
+              await new Promise((resolve) => {
+                img.addEventListener('load', () => resolve(), { once: true });
+                img.addEventListener('error', () => resolve(), { once: true });
+              });
+            }
+            try { await img.decode(); } catch {}
+          }));
           HTMLVideoElement.prototype.play = function play() {
             this.pause();
             return Promise.resolve();
@@ -155,14 +182,24 @@ export async function capture(outDir, port = 4377) {
             video.preload = 'none';
             video.load();
           });
-        });
-        await page.evaluate(() => {
+          scrollTo(0, 0);
+          const nativeFrame = window.requestAnimationFrame.bind(window);
+          window.__visualFrame = nativeFrame;
+          const markRest = () => [...document.querySelectorAll('[data-spin-mark]')].every((el) => {
+            const angle = Number((el.style.transform.match(/rotate\(([-\d.]+)deg\)/) || [])[1]);
+            const anims = el.getAnimations?.() ?? [];
+            return angle === 90 && anims.every((anim) => anim.playState === 'finished' || anim.playState === 'idle');
+          });
+          const deadline = performance.now() + 1600;
+          while (performance.now() < deadline && !markRest()) {
+            await new Promise((resolve) => nativeFrame(resolve));
+          }
           document.querySelectorAll('[data-spin-mark]').forEach((el) => {
-            if (el.getAnimations) el.getAnimations().forEach((anim) => anim.cancel());
+            el.getAnimations?.().forEach((anim) => anim.cancel());
             el.style.transform = 'rotate(90deg)';
           });
+          await new Promise((resolve) => nativeFrame(() => nativeFrame(resolve)));
         });
-        await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
         const pending = await page.evaluate(() =>
           [...document.querySelectorAll('img')].filter((img) => {
             if (img.closest('[hidden]')) return false;
@@ -172,7 +209,18 @@ export async function capture(outDir, port = 4377) {
           }).map((img) => img.currentSrc || img.src),
         );
         if (pending.length) console.log('undecoded', route, vp.tag, pending.length);
-        await page.screenshot({ path: file, fullPage: true, animations: 'disabled' });
+        let previous = null;
+        let shot = null;
+        for (let attempt = 0; attempt < 6; attempt++) {
+          await page.evaluate(() => new Promise((resolve) => {
+            const frame = window.__visualFrame || requestAnimationFrame;
+            frame(() => frame(resolve));
+          }));
+          shot = await page.screenshot({ fullPage: true, animations: 'disabled' });
+          if (previous && shot.equals(previous)) break;
+          previous = shot;
+        }
+        writeFileSync(file, shot);
         console.log('shot', file);
       }
       await context.close();

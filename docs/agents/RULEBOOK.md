@@ -37,6 +37,13 @@ The spacing system is the custom properties in `src/styles/global.css`. Use the 
 | `--space-text` | 240px | 160px |
 | `--space-text-titled` | 150px | 100px |
 | `--space-section` | 240px | 160px |
+| `--space-2xs` | 8px | 8px |
+| `--space-xs` | 15px | 15px |
+| `--space-sm` | 24px | 24px |
+| `--space-md` | 40px | 40px |
+| `--space-lg` | 64px | 64px |
+| `--space-xl` | 96px | 96px |
+| `--space-2xl` | `--space-section` | `--space-section` |
 | `--scroll-nudge` | 100px | 0 on phones |
 | `--image-gap` | `--gutter` | `--margin` |
 
@@ -60,6 +67,7 @@ Tokens on `:root` in `src/styles/global.css`:
 | `--bg` | `#fff` | Page background. The common white. |
 | `--bg-mobile` | `#fff` | Same white. |
 | `--red` | `#b70606` | The Humansize red. Hover on filled buttons. The mark. |
+| `--service-face` | `#b0b0b0` | The services detail face. Same drawing as the homepage mark. |
 | `--line` | `#d6d6d6` | Hairline rules. |
 | `--image-stroke` | `#e5e5e5` | Image outline. |
 | `--button-fill` | `#f2f2f2` | Buy button fill. |
@@ -114,7 +122,7 @@ Styles go in `src/styles/global.css` or `src/styles/type.css`, using the tokens 
 ## Checks
 
 - `npm run check:design` compares the source with this rulebook and fails on anything new.
-- `npm run check:visual` screenshots every public page at 1440 and 390 against `tests/visual/baseline`. It needs `npm run build` first. Videos stay on their poster still, and the shop ring waits until its canvas has painted, so a playing frame cannot fail the diff.
+- `npm run check:visual` screenshots every public page at 1440 and 390 against `tests/visual/baseline`. It needs `npm run build` first. The capture waits for fonts and for every image to decode. Videos stay on their poster still. The shop ring waits until its canvas has painted two identical frames. The spinning mark is locked at its rest angle before the shot, and the shot is kept only once two frames match. A picture may differ by at most 0.01% of its pixels. That budget is the antialiasing on the shop buy button, which settles on one of two edges a level apart. A larger diff fails.
 - Both run in `.github/workflows/design.yml`.
 - `npm test` runs the design check with the other specs.
 

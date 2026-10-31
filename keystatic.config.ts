@@ -349,6 +349,64 @@ export default config({
         ),
       },
     }),
+    services: collection({
+      label: 'Services',
+      slugField: 'title',
+      path: 'src/content/services/*',
+      format: { data: 'yaml' },
+      schema: {
+        title: fields.slug({ name: { label: 'Title' } }),
+        label: fields.text({ label: 'Label' }),
+        seoTitle: fields.text({ label: 'SEO title' }),
+        metaDescription: fields.text({ label: 'Meta description', multiline: true }),
+        order: fields.integer({ label: 'Order', description: 'Position on /services.', defaultValue: 0 }),
+        locationTag: fields.text({ label: 'Location tag', description: 'Shown on /services landing.' }),
+        h1: fields.text({ label: 'H1' }),
+        subline: fields.text({ label: 'Subline', multiline: true }),
+        intro: fields.text({ label: 'Intro', multiline: true }),
+        processHeading: fields.text({ label: 'Process heading', defaultValue: 'How a project runs' }),
+        processSteps: fields.array(
+          fields.object({
+            title: fields.text({ label: 'Step title' }),
+            body: fields.text({ label: 'Step body', multiline: true }),
+          }),
+          { label: 'Process steps', itemLabel: (p) => p.fields.title.value || 'Step' },
+        ),
+        sections: fields.array(
+          fields.object({
+            heading: fields.text({ label: 'Heading' }),
+            body: fields.text({ label: 'Body', multiline: true }),
+            images: fields.array(
+              fields.object({
+                src: fields.text({ label: 'Image path' }),
+                alt: fields.text({ label: 'Alt text' }),
+                caption: fields.text({ label: 'Caption' }),
+                href: fields.text({ label: 'Link (optional)' }),
+                tbd: fields.checkbox({ label: 'Flag TBD' }),
+                poster: fields.text({ label: 'Video poster', description: 'Image path. Used when the source is a video.' }),
+              }),
+              { label: 'Images', itemLabel: (p) => p.fields.caption.value || 'Image' },
+            ),
+          }),
+          { label: 'Sections', itemLabel: (p) => p.fields.heading.value || 'Section' },
+        ),
+        faq: fields.array(
+          fields.object({
+            question: fields.text({ label: 'Question' }),
+            answer: fields.text({ label: 'Answer', multiline: true }),
+          }),
+          { label: 'FAQ', itemLabel: (p) => p.fields.question.value || 'Question' },
+        ),
+        bottomCta: fields.text({ label: 'Bottom CTA', multiline: true }),
+        footerLine: fields.text({ label: 'Footer line', multiline: true }),
+        summary: fields.text({ label: 'Summary', multiline: true }),
+        items: fields.array(fields.text({ label: 'Item' }), { label: 'Items', itemLabel: (p) => p.value }),
+        projects: fields.array(fields.relationship({ label: 'Project', collection: 'projects' }), {
+          label: 'Case studies',
+          itemLabel: (p) => p.value ?? 'Select a project',
+        }),
+      },
+    }),
   },
   singletons: {
     projectOrder: singleton({

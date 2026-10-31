@@ -2,7 +2,7 @@ import type { ImageMetadata } from 'astro';
 import { contentPathFromSrc } from './github-content';
 
 const images = import.meta.glob<ImageMetadata>(
-  '/src/content/{projects,products}/**/*.{jpg,jpeg,png,webp,avif}',
+  '/src/content/{projects,products,services}/**/*.{jpg,jpeg,png,webp,avif}',
   { eager: true, import: 'default' },
 );
 

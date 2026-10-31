@@ -1,7 +1,7 @@
 
 
 const SELECTOR = [
-  'main :is(p, h1, h2, h3, h4, li, blockquote, figcaption, .caption, .project-summary)',
+  'main :is(p, h1, h2, h3, h4, li, blockquote, figcaption, summary, .caption, .project-summary)',
   '.site-footer :is(p, li)',
 ].join(', ');
 const EXCLUDE = '.sr-only, [data-no-reveal], [data-no-reveal] *';

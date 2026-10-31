@@ -11,4 +11,11 @@ export const positioning = {
     '3D renders',
     'Artworks from existing 3D scans',
   ],
+  serviceUrls: {
+    'Retail store design and build': '/services/physical-build/',
+    'Pop-up and display design': '/services/physical-build/',
+    'Artworks from existing 3D scans': '/services/physical-build/',
+    'Framer web design and development': '/services/digital-build/',
+    '3D renders': '/services/digital-build/',
+  } as Record<string, string>,
 } as const;

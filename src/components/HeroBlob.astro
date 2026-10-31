@@ -1,20 +1,24 @@
 ---
+interface Props {
+  filterId?: string;
+  home?: boolean;
+}
 
+const { filterId = 'hero-blob-texture', home = true } = Astro.props;
 ---
 
 <svg
-  class="mark mark-blob"
+  class={home ? 'mark mark-blob' : 'service-face'}
   viewBox="0 0 559 249"
   fill="none"
   aria-hidden="true"
   xmlns="http://www.w3.org/2000/svg"
-  data-hero-blob
+  data-hero-blob={home || undefined}
   overflow="visible"
 >
   <defs>
-    
     <filter
-      id="hero-blob-texture"
+      id={filterId}
       x="-45%"
       y="-55%"
       width="190%"
@@ -38,25 +42,23 @@
         yChannelSelector="G"
         result="displaced"
       ></feDisplacementMap>
-      
       <feGaussianBlur in="displaced" stdDeviation="2.2" result="blurred"></feGaussianBlur>
       <feComponentTransfer in="blurred" result="goo">
         <feFuncA type="discrete" tableValues="0 0 1 1 1 1 1 1"></feFuncA>
       </feComponentTransfer>
-      <feFlood flood-color="#B70606" result="red"></feFlood>
+      <feFlood flood-color="currentColor" result="red"></feFlood>
       <feComposite in="red" in2="goo" operator="in" result="flat"></feComposite>
       <feMerge>
         <feMergeNode in="flat"></feMergeNode>
       </feMerge>
     </filter>
   </defs>
-  <g filter="url(#hero-blob-texture)">
-    
+  <g filter={`url(#${filterId})`}>
     <path
       d="M279.042 0C433.153 -6.7364e-06 558.085 58.867 558.085 131.482C558.085 182.171 497.209 226.158 408.028 248.102V245.562C476.807 225.284 522.552 189.272 522.552 148.225C522.552 84.8558 413.529 33.4854 279.042 33.4854C144.555 33.4854 35.5312 84.8557 35.5312 148.225C35.5314 189.275 81.2831 225.289 150.07 245.566V248.104C60.8819 226.162 0.000283291 182.174 0 131.482C-3.17412e-06 58.8671 124.931 0.000104863 279.042 0Z"
-      fill="#B70606"></path>
-    <ellipse cx="153.872" cy="149.482" rx="84.8098" ry="60.171" fill="#B70606"></ellipse>
-    <ellipse cx="404.224" cy="149.482" rx="84.8098" ry="60.171" fill="#B70606"></ellipse>
-    <ellipse cx="280.484" cy="235.027" rx="78.7657" ry="10.0642" fill="#B70606"></ellipse>
+      fill="currentColor"></path>
+    <ellipse cx="153.872" cy="149.482" rx="84.8098" ry="60.171" fill="currentColor"></ellipse>
+    <ellipse cx="404.224" cy="149.482" rx="84.8098" ry="60.171" fill="currentColor"></ellipse>
+    <ellipse cx="280.484" cy="235.027" rx="78.7657" ry="10.0642" fill="currentColor"></ellipse>
   </g>
 </svg>

@@ -4,7 +4,7 @@ import { Drawer } from 'vaul';
 import { typePx } from '../lib/type-scale';
 
 const TITLES: Record<number, string> = { 1: 'Pick a service', 2: 'Describe your project', 3: 'Add your email' };
-const SERVICES = ['Retail', 'Website', 'Other'];
+const SERVICES = ['Physical Build', 'Digital Build', 'Other'];
 const THANKS = 'Thank you, i’ll be in touch shortly!';
 
 export default function ContactDrawer({ email: address }: { email: string }) {
@@ -34,12 +34,22 @@ export default function ContactDrawer({ email: address }: { email: string }) {
       if (!t) return;
       e.preventDefault();
       opener.current = t;
+      const preset = t.getAttribute('data-contact-service');
+      setProject('');
+      setEmail('');
+      setMsg(THANKS);
+      lines.current = 0;
+      if (text.current) text.current.style.height = '';
+      const next = preset && SERVICES.includes(preset) ? 2 : 1;
+      if (preset && SERVICES.includes(preset)) setService(preset);
+      else setService('');
+      setStep(next);
       setOpen(true);
-      announce(`Contact. Step ${Math.min(step, 3)} of 3: ${TITLES[Math.min(step, 3)]}`);
+      announce(`Contact. Step ${next} of 3: ${TITLES[next]}`);
     };
     document.addEventListener('click', onClick);
     return () => document.removeEventListener('click', onClick);
-  }, [step]);
+  }, []);
 
   useEffect(() => {
     document.documentElement.classList.toggle('is-contact-open', open);

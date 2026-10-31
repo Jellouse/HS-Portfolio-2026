@@ -1,0 +1,52 @@
+title: Digital Build
+label: Digital Build
+seoTitle: Framer web design and 3D renders
+metaDescription: >-
+  Websites and 3D work you can click through and look at, designed and built in Framer and 3D for brands like Atomic and Analogue.
+order: 2
+locationTag: Remote
+h1: Framer web design and 3D renders
+subline: Websites and 3D work you can click through and look at, designed and built in Framer and 3D.
+intro: >-
+  I design and build websites in Framer and 3D renders that show a product or space before it exists. Most projects combine both, from a launch site to the visuals that sell the idea.
+processHeading: How a project runs
+processSteps:
+  - title: Brief
+    body: We align on goals, audience and what needs to ship first.
+  - title: Design
+    body: I design in Framer or 3D, iterating in the tool you will ship or present from.
+  - title: Build
+    body: I build the site, renders or both, and tie them to your brand system.
+  - title: Launch
+    body: I hand over a live site, export kit or render set ready for your team.
+sections:
+  - heading: Framer web design and development
+    body: >-
+      Brand sites, campaign pages and shops in Framer. I design and build in one flow, with motion and responsive layout baked in from the start.
+    images:
+      - src: /src/content/projects/atomic-ski/cover.jpg
+        alt: Atomic Ski website hero with a skier mid jump
+        caption: Atomic Ski, [year]
+        href: /work/atomic-ski/
+      - src: /src/content/projects/analogue-af1/cover.jpg
+        alt: Analogue AF1 product page
+        caption: Analogue AF1, [year]
+        href: /work/analogue-af1/
+  - heading: 3D renders
+    body: >-
+      Product and space renders for campaigns, pitches and web. I model, light and composite so the result reads clearly at any size.
+    images:
+      - src: /src/content/projects/analogue-af1/blocks/3/value/src.jpg
+        alt: 3D render of an Analogue camera
+        caption: Analogue AF1, [year]
+        href: /work/analogue-af1/
+bottomCta: Planning a site or need renders? Get in touch.
+footerLine: >-
+  Humansize is the studio of Johann Schnettker. I design things you can look at, click through and walk into.
+summary: Websites and 3D work you can click through and look at, designed and built in Framer and 3D.
+items:
+  - Framer web design and development
+  - 3D renders
+projects:
+  - atomic-ski
+  - analogue-af1

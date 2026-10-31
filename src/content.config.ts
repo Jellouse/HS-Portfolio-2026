@@ -183,4 +183,53 @@ const products = defineCollection({
   }),
 });
 
-export const collections = { projects, site, projectOrder, products };
+const serviceImage = z.object({
+  src: z.string(),
+  alt: z.string(),
+  caption: z.string().default(''),
+  href: z.string().default(''),
+  tbd: z.boolean().default(false),
+  poster: z.string().default(''),
+});
+
+const serviceSection = z.object({
+  heading: z.string(),
+  body: z.string(),
+  images: z.array(serviceImage).default([]),
+});
+
+const serviceProcessStep = z.object({
+  title: z.string(),
+  body: z.string(),
+});
+
+const serviceFaq = z.object({
+  question: z.string(),
+  answer: z.string(),
+});
+
+const services = defineCollection({
+  loader: glob({ pattern: '*.yaml', base: './src/content/services' }),
+  schema: z.object({
+    title: z.string(),
+    label: z.string().default(''),
+    seoTitle: z.string().default(''),
+    metaDescription: z.string().default(''),
+    order: z.number().default(0),
+    locationTag: z.string().default(''),
+    h1: z.string().default(''),
+    subline: z.string().default(''),
+    intro: z.string().default(''),
+    processHeading: z.string().default(''),
+    processSteps: z.array(serviceProcessStep).default([]),
+    sections: z.array(serviceSection).default([]),
+    faq: z.array(serviceFaq).default([]),
+    bottomCta: z.string().default(''),
+    footerLine: z.string().default(''),
+    summary: z.string().default(''),
+    items: z.array(z.string()).default([]),
+    projects: z.array(z.string()).default([]),
+  }),
+});
+
+export const collections = { projects, site, projectOrder, products, services };

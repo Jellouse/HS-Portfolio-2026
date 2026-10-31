@@ -1,0 +1,52 @@
+---
+export const prerender = true;
+
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import { absoluteUrl } from '../../lib/content';
+import landingMark from '../../assets/service-landing-mark.png';
+
+const services = (await getCollection('services')).sort((a, b) => a.data.order - b.data.order);
+const pageUrl = absoluteUrl(Astro.site, '/services/');
+const description = 'Physical Build and Digital Build. Retail store design, Framer websites and 3D renders from Humansize.';
+---
+
+<Base
+  hideFooter
+  title="Services · Humansize"
+  description={description}
+  jsonLd={{
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: 'Services',
+    url: pageUrl,
+    description,
+  }}
+>
+  <div class="services-landing page-grid">
+    <h1 class="sr-only">Services</h1>
+    <div class="services-split">
+      <div class="services-landing-mark" aria-hidden="true">
+        <img src={landingMark.src} width={95} height={88} alt="" decoding="sync" />
+      </div>
+      {
+        services.map((s) => (
+          <section class="services-panel" aria-labelledby={`service-panel-${s.id}`}>
+            <div class="services-panel-inner">
+              <div class="services-panel-copy">
+                <h2 id={`service-panel-${s.id}`}>{s.data.title}</h2>
+                {s.data.locationTag && <p class="services-tag">{s.data.locationTag}</p>}
+              </div>
+              <div class="services-panel-actions">
+                <a class="shop-button" href={`/services/${s.id}/`}>Learn more</a>
+                <button type="button" class="shop-buy-button" data-contact-open data-contact-service={s.data.title}>
+                  Inquire
+                </button>
+              </div>
+            </div>
+          </section>
+        ))
+      }
+    </div>
+  </div>
+</Base>

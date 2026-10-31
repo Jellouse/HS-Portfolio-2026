@@ -1,5 +1,6 @@
 import { projectLabel } from '../lib/content';
 import type { APIRoute } from 'astro';
+import { getCollection } from 'astro:content';
 import { positioning } from '../lib/positioning';
 import { absoluteUrl, getProjects, getSite, plainText } from '../lib/content';
 import { getProducts, priceText, seedEur } from '../lib/shop';
@@ -18,7 +19,12 @@ export const GET: APIRoute = async ({ site }) => {
     '',
     '## Services',
     '',
-    ...positioning.services.map((s) => `- ${s}`),
+    ...(await getCollection('services'))
+      .sort((a, b) => a.data.order - b.data.order)
+      .flatMap((s) => {
+        const blurb = s.data.metaDescription?.trim() || s.data.summary;
+        return [`### [${s.data.title}](${absoluteUrl(site, `/services/${s.id}/`)})`, '', blurb, '', ...s.data.items.map((item) => `- ${item}`), ''];
+      }),
     '',
     `Email: ${settings.email}`,
     '',

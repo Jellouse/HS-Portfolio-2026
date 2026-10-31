@@ -74,3 +74,5 @@ These look related and stay separate. Folding them into one component would pick
 | Photo grid | `process-grid` and `shop-wild-grid` | Process uses `--gutter`. The wild grid uses `12px 8px`. |
 | Text section | `about`, `shop-intro`, `text-block`, `project-summary` | `Prose` is the shared paragraphs. The shells use `--space-text`, `--space-text-titled`, and the shop intro offset. |
 | Media frame | `image-block` and `shop-detail-image` | Project images use the content span. Shop figures use their own bottom margin. |
+| Services landing | `services-landing` | One screen, two centred halves, a mark, and a divider. No other page uses that split. |
+| Services detail | `service-page` | Grey face, process chart, FAQ, and the service footer. `Prose`, `BlurImage`, and `VideoFrame` are the shared pieces inside it. |

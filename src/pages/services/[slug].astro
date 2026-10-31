@@ -1,0 +1,42 @@
+---
+export const prerender = true;
+
+import { getCollection, type CollectionEntry } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import ServicePage from '../../components/ServicePage.astro';
+import { absoluteUrl } from '../../lib/content';
+import { faqJsonLd } from '../../lib/services';
+
+export async function getStaticPaths() {
+  return (await getCollection('services')).map((s) => ({ params: { slug: s.id }, props: { s } }));
+}
+const { s } = Astro.props as { s: CollectionEntry<'services'> };
+const pageUrl = absoluteUrl(Astro.site, `/services/${s.id}/`);
+const title = `${s.data.seoTitle || s.data.title} · Humansize`;
+const description = s.data.metaDescription?.trim() || s.data.summary;
+const faqLd = faqJsonLd(s.data.faq, pageUrl);
+const jsonLd = faqLd
+  ? [
+      {
+        '@context': 'https://schema.org',
+        '@type': 'Service',
+        name: s.data.h1 || s.data.title,
+        description,
+        url: pageUrl,
+        provider: { '@type': 'Person', name: 'Johann Schnettker' },
+      },
+      faqLd,
+    ]
+  : {
+      '@context': 'https://schema.org',
+      '@type': 'Service',
+      name: s.data.h1 || s.data.title,
+      description,
+      url: pageUrl,
+      provider: { '@type': 'Person', name: 'Johann Schnettker' },
+    };
+---
+
+<Base title={title} description={description} jsonLd={jsonLd} footerText={s.data.footerLine || undefined} serviceFooter>
+  <ServicePage entry={s} />
+</Base>
