@@ -3019,12 +3019,17 @@ html.is-contact-open body {
 }
 
 @media (prefers-reduced-motion: no-preference) {
+  .motion-word {
+    white-space: nowrap;
+  }
+
   .brand-toggle:not(.is-motion-ready),
   .project-hero h1:not(.is-motion-ready),
   .shop-head-title:not(.is-motion-ready),
   .site-header .site-menu[data-main-menu] :is(a, button):not(.is-motion-ready),
   .shop-head .shop-menu :is(a, button):not(.is-motion-ready),
-  main .services-menu :is(a, button):not(.is-motion-ready) {
+  main .services-menu :is(a, button):not(.is-motion-ready),
+  [data-letter-intro]:not(.is-motion-ready) {
     visibility: hidden;
   }
 
@@ -3206,6 +3211,11 @@ body.is-services-landing main#content {
 
   .services-panel-actions > :nth-child(2) {
     animation-delay: calc(30ms * 3);
+  }
+
+  .services-panel-copy :is(h2, .services-tag)[data-letter-intro],
+  .services-panel-actions > [data-letter-intro] {
+    animation: none;
   }
 }
 
@@ -3618,4 +3628,19 @@ body.is-service-page .footer-faces {
 
 .frame.is-alpha {
   background-image: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .is-split.is-letter-host {
+    opacity: 1;
+    transition: none;
+  }
+
+  .is-split .is-letter-line {
+    display: inline-block;
+    animation: none;
+    opacity: 1;
+    filter: none;
+    transform: none;
+  }
 }

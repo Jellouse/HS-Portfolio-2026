@@ -110,35 +110,39 @@ function armFallback(hosts: Host[]) {
 
 export function initTextReveal() {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  const all = [...document.querySelectorAll<Host>(SELECTOR)].filter((el) => !el.matches(EXCLUDE));
-  const hosts = all.filter((el) => !all.some((other) => other !== el && other.contains(el)));
-  if (!hosts.length) return;
-  const scrollLinked = CSS.supports('animation-timeline: view()');
 
-  const run = () => hosts.forEach(split);
-  (document.fonts?.ready ?? Promise.resolve()).then(() => {
+  const boot = () => {
+    const all = [...document.querySelectorAll<Host>(SELECTOR)].filter((el) => !el.matches(EXCLUDE));
+    const hosts = all.filter((el) => !all.some((other) => other !== el && other.contains(el)));
+    if (!hosts.length) return;
+    const scrollLinked = CSS.supports('animation-timeline: view()');
+
+    const run = () => hosts.forEach(split);
     run();
     if (!scrollLinked) armFallback(hosts);
-  });
 
-  const settle = () => {
-    hosts.forEach((el) => el.classList.contains('is-split') && measureLines(el));
-    if (scrollLinked) return;
-    hosts.forEach((el) => {
-      if (el.classList.contains('reveal-in')) return;
-      const r = el.getBoundingClientRect();
-      if (r.top < window.innerHeight * 0.95 && r.bottom > 0) playIn(el, true);
+    const settle = () => {
+      hosts.forEach((el) => el.classList.contains('is-split') && measureLines(el));
+      if (scrollLinked) return;
+      hosts.forEach((el) => {
+        if (el.classList.contains('reveal-in')) return;
+        const r = el.getBoundingClientRect();
+        if (r.top < window.innerHeight * 0.95 && r.bottom > 0) playIn(el, true);
+      });
+    };
+    window.addEventListener('load', () => document.fonts?.ready.then(settle) ?? settle());
+    window.addEventListener('pageshow', (e) => e.persisted && settle());
+
+    let width = window.innerWidth;
+    let timer = 0;
+    window.addEventListener('resize', () => {
+      if (window.innerWidth === width) return;
+      width = window.innerWidth;
+      clearTimeout(timer);
+      timer = window.setTimeout(() => (run(), settle()), 150);
     });
   };
-  window.addEventListener('load', () => document.fonts?.ready.then(settle) ?? settle());
-  window.addEventListener('pageshow', (e) => e.persisted && settle());
 
-  let width = window.innerWidth;
-  let timer = 0;
-  window.addEventListener('resize', () => {
-    if (window.innerWidth === width) return;
-    width = window.innerWidth;
-    clearTimeout(timer);
-    timer = window.setTimeout(() => (run(), settle()), 150);
-  });
+  if (document.documentElement.hasAttribute('data-letter-intro-prepared')) boot();
+  else document.addEventListener('letter-intro-prepared', boot, { once: true });
 }

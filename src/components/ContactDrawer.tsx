@@ -147,6 +147,7 @@ export default function ContactDrawer({ email: address }: { email: string }) {
         <Drawer.Content
           className="contact-panel"
           data-contact=""
+          data-no-letter=""
           data-step={stepAttr}
           aria-describedby={undefined}
           onOpenAutoFocus={(e) => {
