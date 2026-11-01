@@ -1,3 +1,5 @@
+import { adoptReveal } from './text-reveal';
+
 const reduced = matchMedia('(prefers-reduced-motion: reduce)');
 const clear = 'rgba(0, 0, 0, 0)';
 
@@ -177,6 +179,69 @@ function signalLetterIntroPrepared() {
   document.dispatchEvent(new Event('letter-intro-prepared'));
 }
 
+function revealRoot(el: HTMLElement) {
+  if (!el.matches(REVEAL_HOST)) return null;
+  let host: HTMLElement = el;
+  let parent = host.parentElement?.closest<HTMLElement>(REVEAL_HOST) ?? null;
+  while (parent) {
+    host = parent;
+    parent = host.parentElement?.closest<HTMLElement>(REVEAL_HOST) ?? null;
+  }
+  return host;
+}
+
+function unwrapMotion(el: HTMLElement) {
+  el.querySelectorAll<HTMLElement>('.motion-letter').forEach((letter) => {
+    const text = letter.textContent ?? '';
+    letter.replaceWith(document.createTextNode(text === '\u00a0' ? ' ' : text));
+  });
+  el.querySelectorAll<HTMLElement>('.motion-word').forEach((word) => {
+    word.replaceWith(...word.childNodes);
+  });
+}
+
+function holdBlur(el: HTMLElement) {
+  el.querySelectorAll<HTMLElement>('.reveal-word').forEach((word) => {
+    if (word.parentElement?.closest('.reveal-word')) return;
+    if (!word.querySelector('.motion-letter')) return;
+    word.classList.remove('reveal-word');
+    word.classList.add('is-letter-line');
+  });
+}
+
+const releasedFolds = new WeakSet<HTMLElement>();
+const addedAria = new Map<HTMLElement, HTMLElement[]>();
+
+function withAria(el: HTMLElement, run: () => void) {
+  const before = new Set<HTMLElement>(el.querySelectorAll<HTMLElement>('[aria-label]'));
+  if (el.hasAttribute('aria-label')) before.add(el);
+  run();
+  const added: HTMLElement[] = [];
+  if (el.hasAttribute('aria-label') && !before.has(el)) added.push(el);
+  el.querySelectorAll<HTMLElement>('[aria-label]').forEach((node) => {
+    if (!before.has(node)) added.push(node);
+  });
+  if (added.length) addedAria.set(el, added);
+}
+
+function releaseFold(el: HTMLElement) {
+  if (!el.matches(REVEAL_HOST) || releasedFolds.has(el)) return;
+  releasedFolds.add(el);
+  el.querySelectorAll<HTMLElement>('.motion-letter').forEach((letter) => {
+    letter.style.color = '';
+  });
+  unwrapMotion(el);
+  el.querySelectorAll<HTMLElement>('.is-letter-line').forEach((line) => {
+    line.classList.remove('is-letter-line', 'is-motion-ready');
+    line.classList.add('reveal-word');
+  });
+  el.classList.remove('is-letter-host');
+  for (const node of addedAria.get(el) ?? []) node.removeAttribute('aria-label');
+  addedAria.delete(el);
+  el.removeAttribute('data-no-reveal');
+  if (!el.closest('.is-split')) adoptReveal(el);
+}
+
 function foldLines(segments: { letters: HTMLElement[]; color: string }[]) {
   const painted = segments.flatMap(({ letters, color }) => letters.map((letter) => ({ letter, color })));
   painted.sort((a, b) => {
@@ -210,9 +275,11 @@ export async function playLetterIntro() {
   try {
     fold = collectFoldText(targets);
     fold.forEach(({ el, lines }) => {
+      const root = revealRoot(el);
+      if (root) el.setAttribute('data-letter-blur', '');
       if (lines) return;
       el.setAttribute('data-letter-intro', '');
-      el.setAttribute('data-no-reveal', '');
+      if (!root || root === el) el.setAttribute('data-no-reveal', '');
     });
   } finally {
     signalLetterIntroPrepared();
@@ -230,40 +297,52 @@ export async function playLetterIntro() {
   }
 
   const foldSegments: { letters: HTMLElement[]; color: string }[] = [];
+  const revealFolds: HTMLElement[] = [];
+  const letterOwner = new Map<HTMLElement, HTMLElement>();
   const vh = document.documentElement.clientHeight || window.innerHeight;
+  const pushFold = (el: HTMLElement, segment: { letters: HTMLElement[]; color: string }) => {
+    if (el.matches(REVEAL_HOST)) segment.letters.forEach((letter) => letterOwner.set(letter, el));
+    foldSegments.push(segment);
+  };
   for (const { el, lines } of fold) {
+    if (el.matches(REVEAL_HOST)) revealFolds.push(el);
     if (!lines) {
-      el.classList.add('is-motion-ready');
-      const existing = [...el.querySelectorAll<HTMLElement>('.motion-letter')];
-      if (existing.length) foldSegments.push({ letters: existing, color: getComputedStyle(el).color });
-      else foldSegments.push(splitLetterText(el, { wrap: true }));
+      withAria(el, () => {
+        el.classList.add('is-motion-ready');
+        const existing = [...el.querySelectorAll<HTMLElement>('.motion-letter')];
+        if (existing.length) pushFold(el, { letters: existing, color: getComputedStyle(el).color });
+        else pushFold(el, splitLetterText(el, { wrap: true }));
+      });
+      holdBlur(el);
       continue;
     }
-    el.classList.add('is-letter-host');
-    const label = el.textContent?.trim() || '';
-    if (label && !el.hasAttribute('aria-label')) el.setAttribute('aria-label', label);
-    el.querySelectorAll<HTMLElement>('a, button').forEach((control) => {
-      if (control.hasAttribute('aria-label')) return;
-      const name = control.textContent?.trim();
-      if (name) control.setAttribute('aria-label', name);
+    withAria(el, () => {
+      el.classList.add('is-letter-host');
+      const label = el.textContent?.trim() || '';
+      if (label && !el.hasAttribute('aria-label')) el.setAttribute('aria-label', label);
+      el.querySelectorAll<HTMLElement>('a, button').forEach((control) => {
+        if (control.hasAttribute('aria-label')) return;
+        const name = control.textContent?.trim();
+        if (name) control.setAttribute('aria-label', name);
+      });
+      const words = [...el.querySelectorAll<HTMLElement>('.reveal-word')].filter((word) => {
+        if (word.parentElement?.closest('.reveal-word')) return false;
+        const rect = word.getBoundingClientRect();
+        return rect.width > 0 && rect.top < vh;
+      });
+      if (!words.length) {
+        el.classList.add('is-motion-ready');
+        pushFold(el, splitLetterText(el, { wrap: true, ariaLabel: false }));
+        return;
+      }
+      for (const word of words) {
+        word.classList.add('is-motion-ready');
+        const existing = [...word.querySelectorAll<HTMLElement>('.motion-letter')];
+        if (existing.length) pushFold(el, { letters: existing, color: getComputedStyle(word).color });
+        else pushFold(el, splitLetterText(word, { ariaLabel: !word.matches('a, button') }));
+      }
     });
-    const words = [...el.querySelectorAll<HTMLElement>('.reveal-word')].filter((word) => {
-      if (word.parentElement?.closest('.reveal-word')) return false;
-      const rect = word.getBoundingClientRect();
-      return rect.width > 0 && rect.top < vh;
-    });
-    if (!words.length) {
-      el.classList.add('is-motion-ready');
-      foldSegments.push(splitLetterText(el, { wrap: true, ariaLabel: false }));
-      continue;
-    }
-    for (const word of words) {
-      word.classList.remove('reveal-word');
-      word.classList.add('is-letter-line', 'is-motion-ready');
-      const existing = [...word.querySelectorAll<HTMLElement>('.motion-letter')];
-      if (existing.length) foldSegments.push({ letters: existing, color: getComputedStyle(word).color });
-      else foldSegments.push(splitLetterText(word, { ariaLabel: !word.matches('a, button') }));
-    }
+    holdBlur(el);
   }
 
   await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
@@ -282,17 +361,31 @@ export async function playLetterIntro() {
   );
 
   const headlineLetters = index;
+  const animsByFold = new Map<HTMLElement, Animation[]>();
   const foldAnimations = foldLines(foldSegments).flatMap((line, lineIndex) =>
-    line.map(({ letter, color }, letterIndex) =>
-      letter.animate([{ color: clear }, { color: letter.dataset.motionColor || color }], {
+    line.map(({ letter, color }, letterIndex) => {
+      const anim = letter.animate([{ color: clear }, { color: letter.dataset.motionColor || color }], {
         duration: LETTER_MS,
         delay: (headlineLetters + lineIndex + letterIndex) * STAGGER_MS,
         easing: EASE,
         fill: 'both',
-      }),
-    ),
+      });
+      const owner = letterOwner.get(letter);
+      if (owner) {
+        const list = animsByFold.get(owner) ?? [];
+        list.push(anim);
+        animsByFold.set(owner, list);
+      }
+      return anim;
+    }),
   );
   animations.push(...foldAnimations);
+
+  for (const el of revealFolds) {
+    const anims = animsByFold.get(el) ?? [];
+    if (!anims.length) releaseFold(el);
+    else void Promise.all(anims.map((anim) => anim.finished.catch(() => {}))).then(() => releaseFold(el));
+  }
 
   try {
     await Promise.all(animations.map((a) => a.finished));
@@ -301,8 +394,9 @@ export async function playLetterIntro() {
       letter.style.color = letter.dataset.motionColor || getComputedStyle(letter).color;
     });
     foldSegments.flatMap((segment) => segment.letters).forEach((letter) => {
-      letter.style.color = '';
+      if (letter.isConnected) letter.style.color = '';
     });
+    revealFolds.forEach(releaseFold);
     animations.forEach((a) => a.cancel());
     document.documentElement.classList.add('is-letter-intro-done');
   }
