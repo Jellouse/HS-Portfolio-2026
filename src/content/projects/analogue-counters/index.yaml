@@ -29,7 +29,7 @@ blocks:
     value:
       src: >-
         https://humansize-media.schnettker-johann.workers.dev/projects/analogue-couters/cover-mvaoawdg.mp4
-      frame: default
+      frame: wide
       flush: false
       outline: false
   - discriminant: text
