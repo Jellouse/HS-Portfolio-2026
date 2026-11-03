@@ -4,7 +4,11 @@ const SELECTOR = [
   'main :is(p, h1, h2, h3, h4, li, blockquote, figcaption, summary, .caption, .project-summary)',
   '.site-footer :is(p, li)',
 ].join(', ');
-const EXCLUDE = '.sr-only, [data-no-reveal], [data-no-reveal] *';
+const SKIP = '.sr-only';
+
+function locked(el: HTMLElement) {
+  return !!el.closest('[data-no-reveal]');
+}
 
 type Host = HTMLElement & { __revealHtml?: string };
 
@@ -108,24 +112,36 @@ function armFallback(hosts: Host[]) {
   });
 }
 
+export function adoptReveal(host: Host) {
+  if (locked(host)) return;
+  split(host);
+  if (CSS.supports('animation-timeline: view()')) return;
+  if (host.classList.contains('reveal-in')) return;
+  const rect = host.getBoundingClientRect();
+  if (rect.top < window.innerHeight * 0.95 && rect.bottom > 0) playIn(host, true);
+}
+
 export function initTextReveal() {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
   const boot = () => {
-    const all = [...document.querySelectorAll<Host>(SELECTOR)].filter((el) => !el.matches(EXCLUDE));
+    const all = [...document.querySelectorAll<Host>(SELECTOR)].filter((el) => !el.matches(SKIP));
     const hosts = all.filter((el) => !all.some((other) => other !== el && other.contains(el)));
     if (!hosts.length) return;
     const scrollLinked = CSS.supports('animation-timeline: view()');
 
-    const run = () => hosts.forEach(split);
+    const run = () => hosts.forEach((el) => {
+      if (locked(el)) return;
+      split(el);
+    });
     run();
-    if (!scrollLinked) armFallback(hosts);
+    if (!scrollLinked) armFallback(hosts.filter((el) => !locked(el)));
 
     const settle = () => {
-      hosts.forEach((el) => el.classList.contains('is-split') && measureLines(el));
+      hosts.forEach((el) => !locked(el) && el.classList.contains('is-split') && measureLines(el));
       if (scrollLinked) return;
       hosts.forEach((el) => {
-        if (el.classList.contains('reveal-in')) return;
+        if (locked(el) || el.classList.contains('reveal-in')) return;
         const r = el.getBoundingClientRect();
         if (r.top < window.innerHeight * 0.95 && r.bottom > 0) playIn(el, true);
       });

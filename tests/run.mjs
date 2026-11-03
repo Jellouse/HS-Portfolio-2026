@@ -16,6 +16,7 @@ const SPECS = [
   ['taps', 'tests/mobile-taps.spec.mjs'],
   ['scroll', 'tests/mobile-scroll.spec.mjs'],
   ['reveal', 'tests/text-reveal.spec.mjs'],
+  ['intro-blur', 'tests/intro-blur.spec.mjs'],
   ['reveal-first-paint', 'tests/reveal-first-paint.spec.mjs'],
   ['footer-faces', 'tests/footer-faces.spec.mjs'],
   ['link-underline', 'tests/link-underline.spec.mjs'],
