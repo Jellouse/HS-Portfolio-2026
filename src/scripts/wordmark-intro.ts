@@ -200,7 +200,12 @@ function unwrapMotion(el: HTMLElement) {
   });
 }
 
+function usesScrollBlurLayer(el: HTMLElement) {
+  return !!el.closest('[data-letter-blur]');
+}
+
 function holdBlur(el: HTMLElement) {
+  if (usesScrollBlurLayer(el)) return;
   el.querySelectorAll<HTMLElement>('.reveal-word').forEach((word) => {
     if (word.parentElement?.closest('.reveal-word')) return;
     if (!word.querySelector('.motion-letter')) return;
@@ -276,7 +281,7 @@ export async function playLetterIntro() {
     fold = collectFoldText(targets);
     fold.forEach(({ el, lines }) => {
       const root = revealRoot(el);
-      if (root) el.setAttribute('data-letter-blur', '');
+      if (root) root.setAttribute('data-letter-blur', '');
       if (lines) return;
       el.setAttribute('data-letter-intro', '');
       if (!root || root === el) el.setAttribute('data-no-reveal', '');
@@ -332,6 +337,7 @@ export async function playLetterIntro() {
       });
       if (!words.length) {
         el.classList.add('is-motion-ready');
+        if (usesScrollBlurLayer(el)) return;
         pushFold(el, splitLetterText(el, { wrap: true, ariaLabel: false }));
         return;
       }
