@@ -114,6 +114,29 @@ export function splitLetterText(
   return { letters, color };
 }
 
+/** Header nav uses letter intro only. Clear stray blur/opacity from legacy CSS animations. */
+export function finalizeHeaderChrome() {
+  document
+    .querySelectorAll<HTMLElement>(
+      '.site-header .site-menu[data-main-menu] :is(a, button), .site-header .brand-toggle, .site-header [data-intro-copy]',
+    )
+    .forEach((el) => {
+      el.style.animation = 'none';
+      el.style.filter = 'none';
+      el.style.opacity = '';
+      el.style.transform = '';
+    });
+  document.querySelectorAll<HTMLElement>('.site-header .motion-letter').forEach((letter) => {
+    letter.style.filter = 'none';
+    letter.style.opacity = '';
+    letter.style.transform = '';
+    const ink = letter.dataset.motionColor || getComputedStyle(letter.parentElement || letter).color;
+    if (letter.style.color === clear || getComputedStyle(letter).color === clear) letter.style.color = ink;
+  });
+  document.querySelectorAll<HTMLElement>('.site-header .reveal-word').forEach(clearWordReveal);
+  setIntroCopy(0, !reduced.matches);
+}
+
 export function introLetterSequence(): LetterIntroTarget[] {
   const seq: LetterIntroTarget[] = [];
   document.querySelectorAll<HTMLElement>('.brand-toggle').forEach((shell) => {
@@ -255,6 +278,7 @@ export async function playLetterIntro() {
   const targets = introLetterSequence();
   if (reduced.matches) {
     targets.forEach(({ shell }) => shell.classList.add('is-motion-ready'));
+    finalizeHeaderChrome();
     document.documentElement.classList.add('is-letter-intro-done');
     signalLetterIntroPrepared();
     return;
@@ -387,8 +411,7 @@ export async function playLetterIntro() {
     });
     revealFolds.forEach(releaseFold);
     animations.forEach((a) => a.cancel());
-    setIntroCopy(0, !reduced.matches);
-    document.querySelectorAll<HTMLElement>('.site-header .reveal-word').forEach(clearWordReveal);
+    finalizeHeaderChrome();
     paintScrollWords();
     requestAnimationFrame(() => paintScrollWords());
     document.documentElement.classList.add('is-letter-intro-done');

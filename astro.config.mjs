@@ -83,13 +83,9 @@ export default defineConfig({
     '/projects': '/',
     '/all': '/',
     '/services/product': '/services/physical-build/',
-    '/services/product/': '/services/physical-build/',
     '/services/retail': '/services/physical-build/',
-    '/services/retail/': '/services/physical-build/',
     '/services/web': '/services/digital-build/',
-    '/services/web/': '/services/digital-build/',
     '/services/website': '/services/digital-build/',
-    '/services/website/': '/services/digital-build/',
   },
   env: {
     schema: {

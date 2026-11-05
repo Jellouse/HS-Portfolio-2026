@@ -1,7 +1,7 @@
 import { SCROLL_MEDIA, UI_MEDIA } from './scroll-media-selectors';
 import { markSiteIntroSeen, siteIntroSeen } from '../lib/site-intro';
 import { paintScrollWords } from './text-blur-scroll';
-import { introLetterSequence, playLetterIntro, resetLetterIntro } from './wordmark-intro';
+import { finalizeHeaderChrome, introLetterSequence, playLetterIntro, resetLetterIntro } from './wordmark-intro';
 
 const reduced = matchMedia('(prefers-reduced-motion: reduce)');
 const mobile = matchMedia('(max-width: 720px)');
@@ -268,6 +268,7 @@ function prepareSkippedIntro() {
     document.dispatchEvent(new Event('letter-intro-prepared'));
   }
   introLetterSequence().forEach(({ shell }) => shell.classList.add('is-motion-ready'));
+  finalizeHeaderChrome();
 }
 
 export function initSiteScrollMotion() {

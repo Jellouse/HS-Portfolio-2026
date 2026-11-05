@@ -2713,18 +2713,14 @@ html.is-contact-open body {
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .site-header .brand,
-  .site-menu > *,
   .contact-step:not([hidden]) :is(.contact-q, .contact-options > button, textarea, input, .contact-done) {
     animation: text-in 400ms var(--ease-out-expo) both;
   }
 
-  .site-menu > :nth-child(2),
   .contact-options > :nth-child(2) {
     animation-delay: 30ms;
   }
 
-  .site-menu > :nth-child(3),
   .contact-options > :nth-child(3) {
     animation-delay: 60ms;
   }
@@ -2951,12 +2947,12 @@ html.is-contact-open body {
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .site-header.did-swap .site-menu:not([hidden]) > * {
-    animation: text-blur-in 550ms var(--ease-out-expo) both;
-  }
-
-  html.has-scroll-motion .site-header.did-swap .site-menu:not([hidden]) > * {
+  html.has-scroll-motion .site-header .site-menu[data-main-menu] :is(a, button),
+  html.has-scroll-motion .site-header .brand-toggle {
     animation: none;
+    filter: none;
+    opacity: 1;
+    transform: none;
   }
 }
 

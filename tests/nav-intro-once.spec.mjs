@@ -46,9 +46,9 @@ const headerSharp = () =>
     if (nav) {
       const style = getComputedStyle(nav);
       samples.push({ who: 'nav', opacity: Number(style.opacity), blur: parseBlur(style.filter) });
-      const letter = nav.querySelector('.motion-letter');
-      if (letter) {
-        const ls = getComputedStyle(letter);
+      const probe = nav.querySelector('.motion-letter') || nav.querySelector('a');
+      if (probe) {
+        const ls = getComputedStyle(probe);
         samples.push({ who: 'nav-letter', opacity: Number(ls.opacity), blur: parseBlur(ls.filter), color: ls.color });
       }
     }
@@ -92,6 +92,15 @@ check(after.clearish === 0, `nav letters stay visible (${after.clearish} still c
 const headerAfterScroll = await headerSharp();
 const navAfter = headerAfterScroll.find((s) => s.who === 'nav-letter');
 check(navAfter && navAfter.blur < 0.5 && navAfter.opacity > 0.99, `nav stays sharp at scroll 0 (${navAfter?.blur}px blur)`);
+
+await page.reload({ waitUntil: 'load' });
+await page.waitForFunction(() => document.documentElement.classList.contains('is-letter-intro-done'), null, {
+  timeout: 25000,
+});
+await page.waitForTimeout(400);
+const afterReload = await headerSharp();
+const navReload = afterReload.find((s) => s.who === 'nav-letter');
+check(navReload && navReload.blur < 0.5 && navReload.opacity > 0.99, `nav sharp after reload (${navReload?.blur}px blur)`);
 
 await browser.close();
 server.close();
