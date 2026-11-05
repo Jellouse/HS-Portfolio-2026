@@ -66,10 +66,24 @@ let applyFrame: (frame: HeroFrame) => void = (frame) => {
   latest = frame;
 };
 
+const snapFrame = (frame: HeroFrame): HeroFrame => ({
+  scaleX: Math.round(frame.scaleX * 400) / 400,
+  scaleY: Math.round(frame.scaleY * 400) / 400,
+  stretch: Math.round(frame.stretch * 400) / 400,
+});
+
 /** Live scroll scale. Uniforms only: the mask and noise stay uploaded. */
 export function pushHeroFrame(frame: HeroFrame) {
-  latest = frame;
-  applyFrame(frame);
+  const next = snapFrame(frame);
+  if (
+    next.scaleX === latest.scaleX &&
+    next.scaleY === latest.scaleY &&
+    next.stretch === latest.stretch
+  ) {
+    return;
+  }
+  latest = next;
+  applyFrame(latest);
 }
 
 function compile(gl: WebGLRenderingContext, fs: string) {
@@ -399,6 +413,7 @@ export async function mountHeroBlobGL(svg: SVGSVGElement, opts: Opts) {
   const draw = () => {
     if (!a || !b || !srcTex || !noiseTex || !W) return;
     const o = opts.offset();
+    const sourceCut = getHeroBlobSourceCut();
     const atRest = Math.abs(scaleX - 1) < 0.0005 && Math.abs(scaleY - 1) < 0.0005;
     const stretch = Math.max(0.0001, atRest ? restStretch : stretchU || restStretch);
     let region = out;
@@ -467,7 +482,6 @@ export async function mountHeroBlobGL(svg: SVGSVGElement, opts: Opts) {
     const coverY = lh / fboH;
 
     let thickTex = srcTex;
-    const sourceCut = getHeroBlobSourceCut();
     if (sourceCut >= 0 && srcTex) {
       const units = Math.max(1, mask[2]);
       const tw = Math.max(64, Math.min(280, Math.round((units * 16) / 60)));
