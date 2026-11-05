@@ -1,5 +1,7 @@
 
 
+import { setHeroBlobSourceCut } from './hero-blob-cut';
+
 export type HeroBlobDrift = {
   max: number;
   ease: number;
@@ -13,6 +15,57 @@ export const heroBlobDrift: HeroBlobDrift = {
   idleAmp: 14,
   idleSpeed: 0.00028,
 };
+
+function easeInOut(t: number) {
+  const x1 = 0.77;
+  const y1 = 0;
+  const x2 = 0.175;
+  const y2 = 1;
+  const cx = 3 * x1;
+  const bx = 3 * (x2 - x1) - cx;
+  const ax = 1 - cx - bx;
+  const cy = 3 * y1;
+  const by = 3 * (y2 - y1) - cy;
+  const ay = 1 - cy - by;
+  const sampleX = (u: number) => ((ax * u + bx) * u + cx) * u;
+  const sampleY = (u: number) => ((ay * u + by) * u + cy) * u;
+  const slopeX = (u: number) => (3 * ax * u + 2 * bx) * u + cx;
+  let u = t;
+  for (let i = 0; i < 6; i++) {
+    const x = sampleX(u) - t;
+    const d = slopeX(u);
+    if (Math.abs(x) < 1e-4 || Math.abs(d) < 1e-4) break;
+    u = Math.min(1, Math.max(0, u - x / d));
+  }
+  return sampleY(u);
+}
+
+/** Thickness of the source, then the existing turbulence. Starts empty. */
+function growBlob(canvas: HTMLCanvasElement, draw: () => void) {
+  const hidden = 1.05;
+  const duration = 4800;
+  setHeroBlobSourceCut(hidden);
+  let origin = 0;
+  const tick = (now: number) => {
+    if (canvas.width <= 0) {
+      requestAnimationFrame(tick);
+      return;
+    }
+    if (!origin) {
+      origin = now;
+      setHeroBlobSourceCut(hidden);
+      draw();
+      canvas.dataset.ready = '';
+      requestAnimationFrame(tick);
+      return;
+    }
+    const t = Math.min(1, (now - origin) / duration);
+    setHeroBlobSourceCut(t >= 1 ? -1 : hidden * (1 - easeInOut(t)));
+    draw();
+    if (t < 1) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
 
 export function initHeroBlob(root: ParentNode = document) {
   const svg = root.querySelector<SVGSVGElement>('[data-hero-blob], [data-mark-face]');
@@ -42,19 +95,30 @@ export function initHeroBlob(root: ParentNode = document) {
     offset.setAttribute('dx', curX.toFixed(2));
     offset.setAttribute('dy', curY.toFixed(2));
   };
+  const intro = svg.hasAttribute('data-hero-blob') && !new URLSearchParams(location.search).has('dials');
+  if (intro && !reduce.matches) setHeroBlobSourceCut(1.05);
   if (svg.hasAttribute('data-hero-blob') && !reduce.matches) {
     import('./hero-blob-gl')
       .then(({ mountHeroBlobGL }) => mountHeroBlobGL(svg, { offset: () => ({ x: curX, y: curY }) }))
       .then((g) => {
-        if (!g) return;
+        if (!g) {
+          svg.closest('[data-hero-root]')?.setAttribute('data-blob-fallback', '');
+          return;
+        }
         gl = g;
-        g.draw();
         svg.style.visibility = 'hidden';
+        svg.style.opacity = '0';
         svg.style.viewTransitionName = 'none';
         g.canvas.style.viewTransitionName = 'hs-mark';
-        g.canvas.dataset.ready = '';
+        if (intro) growBlob(g.canvas, g.draw);
+        else {
+          g.draw();
+          g.canvas.dataset.ready = '';
+        }
       })
-      .catch(() => {});
+      .catch(() => {
+        svg.closest('[data-hero-root]')?.setAttribute('data-blob-fallback', '');
+      });
   }
 
   const tick = (now: number) => {
@@ -125,6 +189,7 @@ const loopOffset = (now: number) => {
 
 async function initTouchLoop(svg: SVGSVGElement) {
   const { mountHeroBlobGL } = await import('./hero-blob-gl');
+  if (svg.hasAttribute('data-hero-blob')) setHeroBlobSourceCut(1.05);
   let gl: Awaited<ReturnType<typeof mountHeroBlobGL>> = null;
   let now = performance.now();
   try {
@@ -132,14 +197,22 @@ async function initTouchLoop(svg: SVGSVGElement) {
   } catch {
     gl = null;
   }
-  if (!gl) return;
+  if (!gl) {
+    svg.closest('[data-hero-root]')?.setAttribute('data-blob-fallback', '');
+    return;
+  }
   const { canvas, draw } = gl;
-  draw();
   svg.style.visibility = 'hidden';
-
+  svg.style.opacity = '0';
   svg.style.viewTransitionName = 'none';
   canvas.style.viewTransitionName = 'hs-mark';
-  canvas.dataset.ready = '';
+  if (svg.hasAttribute('data-hero-blob')) {
+    setHeroBlobSourceCut(1.05);
+    growBlob(canvas, draw);
+  } else {
+    draw();
+    canvas.dataset.ready = '';
+  }
 
   let visible = true;
   let frame = 0;
