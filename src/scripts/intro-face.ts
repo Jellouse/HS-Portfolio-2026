@@ -32,6 +32,8 @@ export function initIntroFace(hero: HTMLElement) {
   let cur = NaN;
   let lastT = 0;
   let lastPaint = '';
+  let lastLiveKey = '';
+  let lastSdaScroll = -1;
   let settledAttr = false;
   const KEY = 'intro-smooth-ms';
   const DEFAULT_TAU = 30;
@@ -91,6 +93,8 @@ export function initIntroFace(hero: HTMLElement) {
     hero.style.setProperty('--intro-smin', String(sMin));
     cur = NaN;
     lastPaint = '';
+    lastLiveKey = '';
+    lastSdaScroll = -1;
     hero.style.setProperty('--intro-w', `${W0}px`);
     hero.style.setProperty('--intro-h', `${H0}px`);
     hero.style.setProperty('--intro-face-top', `${Math.round(faceBottom - hostTop) - H0}px`);
@@ -143,11 +147,20 @@ export function initIntroFace(hero: HTMLElement) {
     const stretch = (h * 559) / (w * 249);
     host.style.transform = 'none';
     hero.dataset.introW = String(w);
-    pushHeroFrame({ scaleX, scaleY, stretch });
+    const sx = Math.round(scaleX * 400) / 400;
+    const sy = Math.round(scaleY * 400) / 400;
+    const st = Math.round(stretch * 400) / 400;
+    const key = `${sx}:${sy}:${st}`;
+    if (key === lastLiveKey) return;
+    lastLiveKey = key;
+    pushHeroFrame({ scaleX: sx, scaleY: sy, stretch: st });
   };
 
   const paintSda = () => {
-    const t = Math.min(1, Math.max(0, scrollY / R));
+    const y = Math.round(scrollY);
+    if (y === lastSdaScroll) return;
+    lastSdaScroll = y;
+    const t = Math.min(1, Math.max(0, y / R));
     paintLive(1 + (sX - 1) * t, 1 + (sY - 1) * t);
   };
 
