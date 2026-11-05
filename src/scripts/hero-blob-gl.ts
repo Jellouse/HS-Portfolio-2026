@@ -1,16 +1,25 @@
 
 
+import { getHeroBlobSourceCut } from './hero-blob-cut';
+
 const VERT = `attribute vec2 a;varying vec2 v;void main(){v=a*.5+.5;gl_Position=vec4(a,0.,1.);}`;
 
 const DISPLACE = `precision highp float;varying vec2 v;
-uniform sampler2D src,noise;uniform vec4 region,sreg,nreg;uniform vec2 off;uniform float scale,stretch;
+uniform sampler2D src,noise,thick;uniform vec4 region,sreg,nreg;uniform vec2 off;uniform float scale,stretch,srcCut;
 void main(){
   vec2 p=region.xy+v*region.zw;
   vec2 n=texture2D(noise,(p-off-nreg.xy)/nreg.zw).rg;
   vec2 q=p+scale*(n-.5);
   vec2 g=vec2(q.x,q.y/stretch);
   vec2 uv=(g-sreg.xy)/sreg.zw;
-  float a=(uv.x<0.||uv.y<0.||uv.x>1.||uv.y>1.)?0.:texture2D(src,uv).a;
+  float a=0.;
+  if(uv.x>=0.&&uv.y>=0.&&uv.x<=1.&&uv.y<=1.){
+    float raw=texture2D(src,uv).a;
+    float h=texture2D(thick,uv).r;h*=h*h;
+    float k=smoothstep(srcCut,srcCut+0.02,h);
+    float gate=smoothstep(0.02,0.28,srcCut);
+    a=srcCut<0.?raw:mix(raw,raw*k,gate);
+  }
   gl_FragColor=vec4(a,0.,0.,1.);
 }`;
 
@@ -26,6 +35,24 @@ void main(){
   }
   gl_FragColor=vec4(s/w,0.,0.,1.);
 }`;
+
+const BLUR_SOFT = `precision highp float;varying vec2 v;
+uniform sampler2D tex;uniform vec2 dir,cover;uniform float radius;
+void main(){
+  vec2 c=v*cover;
+  float s=texture2D(tex,c).r,w=1.;
+  for(int j=1;j<=20;j++){
+    float o=float(j)/20.*radius;
+    float k=exp(-float(j)*float(j)/50.);
+    vec2 d=dir*o;
+    s+=k*(texture2D(tex,c+d).r+texture2D(tex,c-d).r);
+    w+=2.*k;
+  }
+  gl_FragColor=vec4(s/w,0.,0.,1.);
+}`;
+
+const BLIT_A = `precision highp float;varying vec2 v;uniform sampler2D tex;
+void main(){gl_FragColor=vec4(texture2D(tex,v).a,0.,0.,1.);}`;
 
 const CUT = `precision highp float;varying vec2 v;uniform sampler2D tex;uniform vec3 colour;uniform float cut;uniform vec2 cover;
 void main(){float a=texture2D(tex,vec2(v.x*cover.x,(1.-v.y)*cover.y)).r;float o=step(cut,a);gl_FragColor=vec4(colour*o,o);}`;
@@ -208,6 +235,8 @@ export async function mountHeroBlobGL(svg: SVGSVGElement, opts: Opts) {
 
   const pDisp = compile(gl, DISPLACE);
   const pBlur = compile(gl, BLUR);
+  const pSoft = compile(gl, BLUR_SOFT);
+  const pBlit = compile(gl, BLIT_A);
   const pCut = compile(gl, CUT);
   const buf = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, buf);
@@ -221,6 +250,12 @@ export async function mountHeroBlobGL(svg: SVGSVGElement, opts: Opts) {
   let pxPerUnit = 1;
   let out = [0, 0, 1, 1];
   let mask = regionFor(1);
+  let srcW = 1;
+  let srcH = 1;
+  let thickA: ReturnType<typeof target> | null = null;
+  let thickB: ReturnType<typeof target> | null = null;
+  let thickW = 0;
+  let thickH = 0;
   let restStretch = 1;
   let anchorX = 0;
   let anchorYTop = 0;
@@ -311,6 +346,8 @@ export async function mountHeroBlobGL(svg: SVGSVGElement, opts: Opts) {
     gl.activeTexture(gl.TEXTURE0);
     if (srcTex) gl.deleteTexture(srcTex);
     srcTex = texFrom(gl, sc);
+    srcW = sc.width;
+    srcH = sc.height;
     [a, b].forEach((t) => {
       if (!t) return;
       gl.deleteTexture(t.t);
@@ -429,6 +466,46 @@ export async function mountHeroBlobGL(svg: SVGSVGElement, opts: Opts) {
     const coverX = lw / fboW;
     const coverY = lh / fboH;
 
+    let thickTex = srcTex;
+    const sourceCut = getHeroBlobSourceCut();
+    if (sourceCut >= 0 && srcTex) {
+      const units = Math.max(1, mask[2]);
+      const tw = Math.max(64, Math.min(280, Math.round((units * 16) / 60)));
+      const th = Math.max(32, Math.min(180, Math.round((tw * srcH) / Math.max(1, srcW))));
+      if (!thickA || !thickB || thickW !== tw || thickH !== th) {
+        for (const t of [thickA, thickB]) {
+          if (!t) continue;
+          gl.deleteTexture(t.t);
+          gl.deleteFramebuffer(t.fb);
+        }
+        thickA = target(gl, tw, th);
+        thickB = target(gl, tw, th);
+        thickW = tw;
+        thickH = th;
+      }
+      gl.viewport(0, 0, tw, th);
+      gl.useProgram(pBlit);
+      gl.uniform1i(u(pBlit, 'tex'), 0);
+      gl.activeTexture(gl.TEXTURE0);
+      gl.bindFramebuffer(gl.FRAMEBUFFER, thickA.fb);
+      gl.bindTexture(gl.TEXTURE_2D, srcTex);
+      quad(pBlit);
+      const pass = (src: WebGLTexture, dst: WebGLFramebuffer, dir: [number, number]) => {
+        gl.useProgram(pSoft);
+        gl.uniform1i(u(pSoft, 'tex'), 0);
+        gl.uniform2f(u(pSoft, 'cover'), 1, 1);
+        gl.uniform1f(u(pSoft, 'radius'), 11);
+        gl.uniform2f(u(pSoft, 'dir'), dir[0], dir[1]);
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, dst);
+        gl.bindTexture(gl.TEXTURE_2D, src);
+        quad(pSoft);
+      };
+      pass(thickA.t, thickB.fb, [1 / tw, 0]);
+      pass(thickB.t, thickA.fb, [0, 1 / th]);
+      thickTex = thickA.t;
+    }
+
     gl.viewport(0, 0, lw, lh);
     gl.bindFramebuffer(gl.FRAMEBUFFER, a.fb);
     gl.useProgram(pDisp);
@@ -436,8 +513,12 @@ export async function mountHeroBlobGL(svg: SVGSVGElement, opts: Opts) {
     gl.bindTexture(gl.TEXTURE_2D, srcTex);
     gl.activeTexture(gl.TEXTURE1);
     gl.bindTexture(gl.TEXTURE_2D, noiseTex);
+    gl.activeTexture(gl.TEXTURE2);
+    gl.bindTexture(gl.TEXTURE_2D, thickTex);
     gl.uniform1i(u(pDisp, 'src'), 0);
     gl.uniform1i(u(pDisp, 'noise'), 1);
+    gl.uniform1i(u(pDisp, 'thick'), 2);
+    gl.uniform1f(u(pDisp, 'srcCut'), sourceCut);
     gl.uniform4f(u(pDisp, 'region'), region[0], region[1], region[2], region[3]);
     gl.uniform4f(u(pDisp, 'sreg'), mask[0], mask[1], mask[2], mask[3]);
     gl.uniform4f(u(pDisp, 'nreg'), nreg[0], nreg[1], nreg[2], nreg[3]);

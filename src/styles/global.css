@@ -2119,6 +2119,17 @@ body .site-header.is-menu-fade:not(.is-menu-open) .who .time {
   contain: strict;
 }
 
+.js .mark-blob-gl:not([data-ready]) {
+  visibility: hidden;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .js .hero[data-intro]:not([data-blob-fallback]) .mark-blob {
+    visibility: hidden;
+    opacity: 0;
+  }
+}
+
 body:has(.hero[data-intro]) .site-header {
   top: var(--intro-name-top, round(77.2svh, 1px));
   flex-direction: column;
