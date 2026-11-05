@@ -254,9 +254,14 @@ export function initSiteScrollMotion() {
   wireMediaReady();
   lazyVideos();
 
+  const heroBlobGate =
+    !reduced.matches && document.querySelector('.hero[data-intro]')
+      ? import('./hero-blob').then(({ whenHeroBlobIntroReady }) => whenHeroBlobIntroReady())
+      : Promise.resolve();
+
   const run = async () => {
     try {
-      await document.fonts.ready.catch(() => {});
+      await Promise.all([document.fonts.ready.catch(() => {}), heroBlobGate]);
       await doubleRaf();
       await playLetterIntro();
       document.documentElement.classList.remove('is-scroll-intro-pending');

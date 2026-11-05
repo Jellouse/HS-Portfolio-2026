@@ -2,6 +2,27 @@
 
 import { setHeroBlobSourceCut } from './hero-blob-cut';
 
+let blobIntroStarted = false;
+const blobIntroWaiters: (() => void)[] = [];
+
+/** Homepage blob grow passed the text gate, or the mark fell back to SVG. */
+export function signalHeroBlobIntroStarted() {
+  if (blobIntroStarted) return;
+  blobIntroStarted = true;
+  blobIntroWaiters.splice(0).forEach((done) => done());
+}
+
+export function whenHeroBlobIntroReady(): Promise<void> {
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)');
+  const hero = document.querySelector<HTMLElement>('[data-hero-root][data-intro]');
+  if (!hero || reduce.matches) return Promise.resolve();
+  if (hero.dataset.hero === 'gradient') return Promise.resolve();
+  if (new URLSearchParams(location.search).has('dials')) return Promise.resolve();
+  if (hero.hasAttribute('data-blob-fallback')) return Promise.resolve();
+  if (blobIntroStarted) return Promise.resolve();
+  return new Promise((resolve) => blobIntroWaiters.push(resolve));
+}
+
 export type HeroBlobDrift = {
   max: number;
   ease: number;
@@ -44,8 +65,11 @@ function easeInOut(t: number) {
 function growBlob(canvas: HTMLCanvasElement, draw: () => void) {
   const hidden = 1.05;
   const duration = 4800;
+  /** Letter intro starts once the mark grow reaches this fraction. */
+  const textAt = 0.4;
   setHeroBlobSourceCut(hidden);
   let origin = 0;
+  let textReleased = false;
   const tick = (now: number) => {
     if (canvas.width <= 0) {
       requestAnimationFrame(tick);
@@ -62,7 +86,12 @@ function growBlob(canvas: HTMLCanvasElement, draw: () => void) {
     const t = Math.min(1, (now - origin) / duration);
     setHeroBlobSourceCut(t >= 1 ? -1 : hidden * (1 - easeInOut(t)));
     draw();
+    if (!textReleased && t >= textAt) {
+      textReleased = true;
+      signalHeroBlobIntroStarted();
+    }
     if (t < 1) requestAnimationFrame(tick);
+    else if (!textReleased) signalHeroBlobIntroStarted();
   };
   requestAnimationFrame(tick);
 }
@@ -96,6 +125,7 @@ export function initHeroBlob(root: ParentNode = document) {
     offset.setAttribute('dy', curY.toFixed(2));
   };
   const intro = svg.hasAttribute('data-hero-blob') && !new URLSearchParams(location.search).has('dials');
+  if (svg.hasAttribute('data-hero-blob') && !reduce.matches) void import('./hero-blob-gl');
   if (intro && !reduce.matches) setHeroBlobSourceCut(1.05);
   if (svg.hasAttribute('data-hero-blob') && !reduce.matches) {
     import('./hero-blob-gl')
@@ -103,6 +133,7 @@ export function initHeroBlob(root: ParentNode = document) {
       .then((g) => {
         if (!g) {
           svg.closest('[data-hero-root]')?.setAttribute('data-blob-fallback', '');
+          signalHeroBlobIntroStarted();
           return;
         }
         gl = g;
@@ -114,10 +145,12 @@ export function initHeroBlob(root: ParentNode = document) {
         else {
           g.draw();
           g.canvas.dataset.ready = '';
+          signalHeroBlobIntroStarted();
         }
       })
       .catch(() => {
         svg.closest('[data-hero-root]')?.setAttribute('data-blob-fallback', '');
+        signalHeroBlobIntroStarted();
       });
   }
 
@@ -199,6 +232,7 @@ async function initTouchLoop(svg: SVGSVGElement) {
   }
   if (!gl) {
     svg.closest('[data-hero-root]')?.setAttribute('data-blob-fallback', '');
+    signalHeroBlobIntroStarted();
     return;
   }
   const { canvas, draw } = gl;
