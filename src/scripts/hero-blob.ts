@@ -37,6 +37,15 @@ export const heroBlobDrift: HeroBlobDrift = {
   idleSpeed: 0.00028,
 };
 
+/** Coarser fractal noise below 760 so the goo reads at phone scale. */
+function tuneBlobTurbulence(svg: SVGSVGElement) {
+  if (!matchMedia('(max-width: 759px)').matches) return;
+  const turb = svg.querySelector('feTurbulence');
+  const disp = svg.querySelector('feDisplacementMap');
+  if (turb) turb.setAttribute('baseFrequency', '0.0102');
+  if (disp) disp.setAttribute('scale', '122');
+}
+
 function easeInOut(t: number) {
   const x1 = 0.77;
   const y1 = 0;
@@ -99,6 +108,7 @@ function growBlob(canvas: HTMLCanvasElement, draw: () => void) {
 export function initHeroBlob(root: ParentNode = document) {
   const svg = root.querySelector<SVGSVGElement>('[data-hero-blob], [data-mark-face]');
   if (!svg) return;
+  tuneBlobTurbulence(svg);
   const offset = svg.querySelector<SVGFEOffsetElement>('feOffset[data-blob-offset]');
   if (!offset) return;
 
