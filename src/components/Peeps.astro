@@ -13,6 +13,10 @@ const { maxH } = Astro.props;
 </div>
 
 <script>
-  import { mountFaces } from '../scripts/faces';
-  document.querySelectorAll<HTMLElement>('[data-peeps]').forEach((el) => mountFaces(el));
+  const boot = () =>
+    import('../scripts/faces').then(({ mountFaces }) => {
+      document.querySelectorAll<HTMLElement>('[data-peeps]').forEach((el) => mountFaces(el));
+    });
+  if (document.readyState === 'complete') boot();
+  else addEventListener('load', boot, { once: true });
 </script>

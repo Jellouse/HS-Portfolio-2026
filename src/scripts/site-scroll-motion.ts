@@ -5,6 +5,16 @@ const reduced = matchMedia('(prefers-reduced-motion: reduce)');
 const mobile = matchMedia('(max-width: 720px)');
 
 const viewportVideos = new Set<HTMLVideoElement>();
+let siteLoadComplete = document.readyState === 'complete';
+let syncFeedVideoPlayback: () => void = () => {};
+
+function markSiteLoadComplete() {
+  if (siteLoadComplete) return;
+  siteLoadComplete = true;
+  syncFeedVideoPlayback();
+}
+
+addEventListener('load', markSiteLoadComplete, { once: true });
 
 function doubleRaf() {
   return new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
@@ -45,6 +55,7 @@ function adoptScrollMedia(root: ParentNode = document) {
 }
 
 function ensureFrameMedia(frame: HTMLElement) {
+  if (!siteLoadComplete) return;
   const video = hostVideo(frame);
   if (!video?.dataset.src || video.dataset.armed) return;
   const source = video.querySelector('source');
@@ -152,6 +163,7 @@ function lazyVideos() {
     video.loop = true;
     video.playsInline = true;
     video.removeAttribute('autoplay');
+    video.preload = 'none';
     if (!video.dataset.src) {
       const source = video.querySelector('source');
       const src = source?.getAttribute('src') || video.getAttribute('src');
@@ -159,14 +171,21 @@ function lazyVideos() {
         video.dataset.src = src;
         source?.removeAttribute('src');
         video.removeAttribute('src');
-        video.preload = 'none';
         video.load();
       }
     }
   };
   document.querySelectorAll<HTMLVideoElement>(`${SCROLL_MEDIA} video, video.scroll-media, video[data-autoplay]`).forEach(prep);
 
-  const syncPlayback = () => {
+  syncFeedVideoPlayback = () => {
+    if (!siteLoadComplete) return;
+    if (reduced.matches) {
+      document.querySelectorAll<HTMLVideoElement>('video[data-autoplay]').forEach((video) => {
+        video.pause();
+        video.currentTime = 0;
+      });
+      return;
+    }
     const centre = document.documentElement.clientHeight / 2;
     const videos = [...viewportVideos].filter((v) => v.isConnected);
     videos.sort(
@@ -195,7 +214,7 @@ function lazyVideos() {
           video.pause();
         }
       });
-      syncPlayback();
+      syncFeedVideoPlayback();
     },
     { rootMargin: '500px 0px', threshold: 0.01 },
   );
@@ -206,9 +225,11 @@ function lazyVideos() {
   });
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) viewportVideos.forEach((v) => v.pause());
-    else syncPlayback();
+    else syncFeedVideoPlayback();
   });
-  mobile.addEventListener?.('change', syncPlayback);
+  mobile.addEventListener?.('change', syncFeedVideoPlayback);
+  reduced.addEventListener?.('change', syncFeedVideoPlayback);
+  if (siteLoadComplete) syncFeedVideoPlayback();
 }
 
 function initHeaderScrollFade() {

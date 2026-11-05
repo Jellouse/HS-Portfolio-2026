@@ -4,4 +4,4 @@ import ContactDrawer from './ContactDrawer';
 const { email } = Astro.props as { email: string };
 ---
 
-<ContactDrawer client:load email={email} />
+<ContactDrawer client:idle email={email} />

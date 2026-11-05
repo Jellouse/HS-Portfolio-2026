@@ -13,7 +13,7 @@ interface Props {
   fade?: boolean;
 }
 
-const { src, poster, label, plain = false, flush = false, outline = false, priority = false, fade = true } = Astro.props;
+const { src, poster, label, plain = false, flush = false, outline = false, fade = true } = Astro.props;
 let posterSrc: string | undefined;
 if (typeof poster === 'string') {
   posterSrc = poster;
@@ -30,30 +30,14 @@ const type = ext === 'webm' ? 'video/webm' : ext === 'mov' ? 'video/quicktime' :
 <div class:list={['frame', 'is-video', { 'scroll-media': fade, 'is-plain': plain, 'is-flush': flush, 'is-outlined': outline }]}>
   <video
     muted
-    autoplay
     loop
     playsinline
-    preload={priority ? 'auto' : 'metadata'}
+    preload="none"
     poster={posterSrc}
     aria-label={label || undefined}
+    data-src={src}
     data-autoplay
   >
-    <source src={src} type={type} />
+    <source type={type} />
   </video>
 </div>
-
-<script>
-  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
-  function apply() {
-    document.querySelectorAll<HTMLVideoElement>('video[data-autoplay]').forEach((video) => {
-      if (reduce.matches) {
-        video.pause();
-        video.currentTime = 0;
-      } else {
-        video.play().catch(() => {});
-      }
-    });
-  }
-  apply();
-  reduce.addEventListener('change', apply);
-</script>
