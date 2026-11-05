@@ -67,6 +67,9 @@ export default defineConfig({
   site,
   output: 'static',
   adapter: vercel(),
+  devToolbar: {
+    enabled: false,
+  },
 
   security: {
     allowedDomains: [

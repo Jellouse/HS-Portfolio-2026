@@ -198,7 +198,7 @@ export async function mountHeroBlobGL(svg: SVGSVGElement, opts: Opts) {
   const loadNoise = async (next: number[]) => {
     if (noiseTex && contains(nreg, next)) return;
     if (baking && contains(baking, next)) return;
-    const key = next.map((n) => n.toFixed(3)).join(',');
+    const key = `${next.map((n) => n.toFixed(3)).join(',')}:${freq}`;
     if (key === noiseKey && noiseTex) return;
     noiseKey = key;
     baking = next;
