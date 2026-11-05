@@ -1,8 +1,10 @@
 
 import { clearStableViewportHeight, stableViewportHeight } from '../lib/viewport-layout';
 import { introFaceLayout } from '../lib/intro-layout';
+import { introCopyProgress, introScrollT, smoothIntro } from '../lib/intro-scroll';
 import { setIntroCopy } from './intro-copy';
 import { pushHeroFrame } from './hero-blob-gl';
+import { handoffHeroMarkToSvg } from './hs-mark-transition';
 
 export function initIntroFace(hero: HTMLElement) {
   const host = hero.querySelector<HTMLElement>('[data-hero-variant="blob"]');
@@ -33,17 +35,9 @@ export function initIntroFace(hero: HTMLElement) {
   let lastT = 0;
   let lastPaint = '';
   let lastLiveKey = '';
-  let lastSdaScroll = -1;
   let settledAttr = false;
-  const KEY = 'intro-smooth-ms';
-  const DEFAULT_TAU = 30;
-  const stored = Number(localStorage.getItem(KEY));
-  const showIntroTune =
-    !reduced &&
-    (import.meta.env.DEV || new URLSearchParams(location.search).has('debug'));
-  let tau =
-    showIntroTune && localStorage.getItem(KEY) !== null && stored >= 0 ? stored : DEFAULT_TAU;
-  if (reduced) tau = 0;
+  const TAU = 30;
+  const tau = reduced ? 0 : TAU;
 
   const px = (name: string) => Math.round(parseFloat(getComputedStyle(document.documentElement).getPropertyValue(name)));
 
@@ -76,7 +70,6 @@ export function initIntroFace(hero: HTMLElement) {
     }
     const Hf = (Wf * 249) / 559;
     host.style.transform = 'none';
-    hero.classList.remove('is-sda');
     host.style.translate = 'none';
     hostTop = measureHostTop();
     R = Math.max(1, Math.round(faceBottom - Hf - topF));
@@ -94,19 +87,13 @@ export function initIntroFace(hero: HTMLElement) {
     cur = NaN;
     lastPaint = '';
     lastLiveKey = '';
-    lastSdaScroll = -1;
     hero.style.setProperty('--intro-w', `${W0}px`);
     hero.style.setProperty('--intro-h', `${H0}px`);
     hero.style.setProperty('--intro-face-top', `${Math.round(faceBottom - hostTop) - H0}px`);
     applyGeometry(mobile ? (H0 * 559) / (W0 * 249) : 1);
     host.dispatchEvent(new CustomEvent('intro-layout', { bubbles: true }));
     follow();
-    if (sda) {
-      host.style.transform = 'none';
-      hero.classList.add('is-sda');
-      setIntroCopy(0, false);
-      paintSda();
-    } else write(performance.now());
+    write(performance.now());
   };
 
   const applyGeometry = (stretch: number) => {
@@ -123,8 +110,6 @@ export function initIntroFace(hero: HTMLElement) {
     }
   };
 
-  // Width and height are the whole size. Stretch hits the shapes only, before displacement.
-  // Reduced motion sizes the SVG once. Live scroll only pushes shader uniforms.
   const paintSize = (scaleX: number, scaleY: number) => {
     const w = Math.max(1, Math.round(W0 * scaleX));
     const h = Math.max(1, Math.round(H0 * scaleY));
@@ -156,14 +141,6 @@ export function initIntroFace(hero: HTMLElement) {
     pushHeroFrame({ scaleX: sx, scaleY: sy, stretch: st });
   };
 
-  const paintSda = () => {
-    const y = Math.round(scrollY);
-    if (y === lastSdaScroll) return;
-    lastSdaScroll = y;
-    const t = Math.min(1, Math.max(0, y / R));
-    paintLive(1 + (sX - 1) * t, 1 + (sY - 1) * t);
-  };
-
   const forceLayout = () => {
     lastW = -1;
     hero.removeAttribute('data-intro-ready');
@@ -171,7 +148,7 @@ export function initIntroFace(hero: HTMLElement) {
   };
 
   const target = () => {
-    const t = reduced ? 1 : Math.min(1, Math.max(0, scrollY / R));
+    const t = introScrollT(scrollY, R, reduced);
     return 1 + (sMin - 1) * t;
   };
 
@@ -180,17 +157,14 @@ export function initIntroFace(hero: HTMLElement) {
     const goal = target();
     const dt = lastT ? Math.min(100, now - lastT) : 16;
     lastT = now;
-    if (!tau || Number.isNaN(cur)) cur = goal;
-    else cur += (goal - cur) * (1 - Math.exp(-dt / tau));
-    if (Math.abs(goal - cur) < 0.0005 * sMin) cur = goal;
+    cur = smoothIntro(cur, goal, dt, tau, 0.0005 * sMin);
     const along = (1 - cur) / (1 - sMin) || 0;
     const scaleX = mobile ? 1 + (sX - 1) * along : cur;
     const scaleY = mobile ? 1 + (sY - 1) * along : cur;
     if (reduced) paintSize(scaleX, scaleY);
     else paintLive(scaleX, scaleY);
-    if (!sda) host.style.translate = `0 ${-Math.round(scrollY)}px`;
-    const progress = sMin === 1 ? 0 : (1 - cur) / (1 - sMin);
-    setIntroCopy(progress, !reduced && !sda);
+    host.style.translate = `0 ${-Math.round(scrollY)}px`;
+    setIntroCopy(introCopyProgress(cur, sMin), !reduced);
     const isSettled = cur === goal;
     if (isSettled !== settledAttr) {
       settledAttr = isSettled;
@@ -201,66 +175,33 @@ export function initIntroFace(hero: HTMLElement) {
   };
 
   function follow() {
-    const y = scrollY;
-    host!.style.translate = sda ? '' : `0 ${-y}px`;
+    host!.style.translate = `0 ${-Math.round(scrollY)}px`;
   }
 
   const onScroll = () => {
-    if (sda) {
-      if (!frame) {
-        frame = requestAnimationFrame(() => {
-          frame = 0;
-          paintSda();
-        });
-      }
-    } else if (!frame) frame = requestAnimationFrame(write);
+    follow();
+    if (!frame) frame = requestAnimationFrame(write);
   };
-
-  function mountTune() {
-    const box = document.createElement('div');
-    box.className = 'intro-tune';
-    box.innerHTML = `<label>Smoothing <output></output></label><input type="range" min="0" max="400" step="10" aria-label="Intro smoothing in ms"><button type="button">Copy value</button>`;
-    const input = box.querySelector('input')!;
-    const out = box.querySelector('output')!;
-    const btn = box.querySelector('button')!;
-    const show = () => (out.textContent = tau ? `${tau} ms` : 'off');
-    input.value = String(tau);
-    show();
-    input.addEventListener('input', () => {
-      tau = Number(input.value);
-      localStorage.setItem(KEY, String(tau));
-      show();
-    });
-    btn.addEventListener('click', async () => {
-      try {
-        await navigator.clipboard.writeText(`intro smoothing tau: ${tau}ms`);
-        btn.textContent = 'Copied';
-      } catch {
-        btn.textContent = `${tau} ms`;
-      }
-      setTimeout(() => (btn.textContent = 'Copy value'), 1200);
-    });
-    document.body.appendChild(box);
-  }
-
-  const sda =
-    !reduced &&
-    matchMedia('(pointer: coarse)').matches &&
-    CSS.supports('animation-timeline: scroll()') &&
-    new URLSearchParams(location.search).get('intro') !== 'raf';
 
   addEventListener('scroll', onScroll, opt);
   hero.dataset.intro = '';
-  if (sda) {
-    hero.classList.add('is-sda');
-    hero.toggleAttribute('data-intro-settled', true);
-  }
   layout();
-  if (showIntroTune && !sda) mountTune();
+  addEventListener('pageswap', (e) => {
+    const vt = (e as PageSwapEvent).viewTransition;
+    if (!vt) return;
+    follow();
+    write(performance.now());
+    handoffHeroMarkToSvg(hero);
+  }, opt);
   addEventListener('resize', () => {
     if (document.documentElement.clientWidth !== lastW) forceLayout();
   }, opt);
-  addEventListener('pagereveal', forceLayout, opt);
+  addEventListener('pagereveal', (e) => {
+    const vt = (e as PageRevealEvent).viewTransition;
+    const run = () => forceLayout();
+    if (vt) vt.finished.then(run, run);
+    else run();
+  }, opt);
   addEventListener('pageshow', (e) => e.persisted && forceLayout(), opt);
   addEventListener('pagehide', () => ac.abort(), { once: true });
 }

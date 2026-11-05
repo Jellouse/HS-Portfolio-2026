@@ -8,51 +8,61 @@ locationTag: On site / Remote
 h1: Retail store design and build
 subline: Custom shop fittings, product displays and lighting in aluminium extrusion, 3D print and wood.
 intro: >-
-  I'm a designer who builds. I design and make furniture, product displays and lighting that set a store apart. For pop-ups, new openings and existing stores. I work on site across Europe.
-processHeading: How a project runs
+  I'm a designer turned builder. I design and build custom furniture pieces, product displays and lighting to set your store apart from low-effort production.
+
+
+  Consumers are extremely conscious about where they spend their money. Make them want to come to your store and enjoy the experience so much they want to bring their friends.
+
+
+  Popup stores, new openings, existing store optimization.
+
+
+  Don't hesitate to contact me to discuss ideas!
+processHeading: Full service
 processSteps:
   - title: Inspiration
-    body: We collect ideas, borrow from what works and come up with new ones.
+    body: We have a round of inspiration where we hatch ideas, steal from existing concepts and create new ones.
   - title: Design
-    body: I design in 2D and 3D to get the shape and materials right.
+    body: I design in a mix of 2D and 3D to get a feel for the shape and materials.
   - title: Build
-    body: I buy the materials, then cut, print and join every piece.
+    body: I buy the materials, cut, print and join the pieces.
   - title: Assembly
-    body: I install everything on site, sometimes with an assistant.
+    body: For assembly I will be on site to implement everything. (Potentially bringing an assistant)
 sections:
-  - heading: Aluminium extrusion furniture and displays
+  - heading: Aluminium Extrusion
     body: >-
-      My main material. I build furniture and installations from aluminium extrusion profiles. It's strong, industrial and modular, so a design is easy to adjust or extend later.
+      This is where my main expertise lies. Building furniture and installations using aluminium extrusion.
+
+
+      It's strong, it's industrial, it's beautiful.
+
+
+      A modular building material allowing for custom designs, easy adjustability and modularity.
     images:
       - src: >-
           https://humansize-media.schnettker-johann.workers.dev/projects/analogue-couters/cover-mvaoawdg.mp4
         alt: Analogue store on Zeedijk in Amsterdam, aluminium extrusion vitrines
-        caption: Analogue store, Zeedijk, Amsterdam, [year]
+        caption: Analogue Store Zeedijk
         href: /work/analogue-counters/
         poster: /src/content/projects/analogue-counters/cover.jpg
-  - heading: 3D printed product displays
+  - heading: 3D Printing
     body: >-
-      For displays that would be impossible to make any other way. I print on a Bambu Lab P1S, at production quality. It works on its own or combined with other materials in larger builds.
+      A conversation starter for many, as they browse through impossibly custom displays for your products.
+
+
+      Great on its own, even better in combination with other materials to build larger structures. I bring a Bambu Lab P1S printer which steps up the quality. Production ready.
     images:
-      - src: /src/content/services/images/print-shelves.jpg
-        alt: Blue 3D printed shelves hung on cables, each holding a camera
-        caption: ''
-        href: ''
       - src: /src/content/services/images/print-shelf.jpg
         alt: Blue 3D printed shelf holding a Konica Pop camera behind glass
         caption: ''
         href: ''
-      - src: /src/content/services/images/print-stool.jpg
-        alt: Blue geometric stool with a book on top
+      - src: /src/content/services/images/print-shelves.jpg
+        alt: Blue 3D printed shelves hung on cables, each holding a camera
         caption: ''
         href: ''
-      - src: /src/content/services/images/print-cabinet.jpg
-        alt: Plywood cabinet with two open shelves
-        caption: ''
-        href: ''
-  - heading: Wooden cabinets and displays
+  - heading: Woodworking
     body: >-
-      Cabinets and displays in wood. It means bringing more of the workshop, but the look and feel is hard to beat.
+      Cabinets and displays made out of wood. For this I have to carry more of my workshop, but its look and feel is hard to beat.
     images:
       - src: /src/content/services/images/wood-stool.jpg
         alt: Blue wooden stool with a book on top
@@ -87,7 +97,7 @@ faq:
     answer: Mostly size, materials and how much is custom made.
   - question: How do I start a project?
     answer: Send me a message through Inquire.
-bottomCta: Have a store, or planning one? Get in touch.
+bottomCta: If you have a store or are thinking of building one, contact me!
 footerLine: >-
   Humansize is the studio of Johann Schnettker. I design things you can look at, click through and walk into, like retail spaces, websites built in Framer, and 3D renders and artwork.
 summary: Retail spaces, pop-ups and objects you can walk into and pick up, designed and built end to end.

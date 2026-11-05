@@ -42,10 +42,7 @@ const sizes = '(min-width: 1440px) 439px, (min-width: 760px) 30vw, calc(50vw - 3
 <script>
   import { initSpinMark } from '../../scripts/spin-mark';
   import { initShopDetails } from '../../scripts/shop-details';
-  import { initShopIntro } from '../../scripts/shop-intro';
   import { scrollToId } from '../../scripts/scroll-to-id';
-  const head = document.querySelector<HTMLElement>('[data-shop-head]');
-  if (head) initShopIntro(head);
   document.querySelector('[data-shop-about]')?.addEventListener('click', (e) => {
     if (!document.getElementById('shop-about')) return;
     e.preventDefault();

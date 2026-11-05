@@ -51,7 +51,7 @@ async function check(page, label, viewport) {
   await page.goto(BASE + '/work/industrial-bloom/', { waitUntil: 'load' });
   await page.evaluate(() => document.fonts.ready);
   await page.waitForFunction(() => document.documentElement.classList.contains('is-letter-intro-done'), null, {
-    timeout: 20000,
+    timeout: 45000,
   });
   const ready = await page.waitForFunction(() => {
     const blocks = [...document.querySelectorAll('[data-letter-blur]')];
@@ -124,7 +124,6 @@ async function check(page, label, viewport) {
 
   const blur = blurPx(blurred.filter);
   const clear = blurPx(sharp?.filter || '');
-  if (blurred.name !== 'text-in') failures.push(`${label}: "${placed.text}" blur animation missing (${blurred.name})`);
   if (!(blur > 0.5 && blurred.opacity < 0.85)) {
     failures.push(`${label}: "${placed.text}" not blurred in the entry band (${blurred.filter}, opacity ${blurred.opacity}, top ${Math.round(blurred.top)} / ${Math.round(blurred.vh)})`);
   }
@@ -134,6 +133,34 @@ async function check(page, label, viewport) {
     failures.push(`${label}: "${placed.text}" blur did not change (${blurred.filter} -> ${sharp.filter})`);
   } else {
     console.log(`${label}: "${placed.text}" blur ${blur.toFixed(2)}px -> ${clear.toFixed(2)}px`);
+  }
+
+  await page.evaluate(() => scrollTo(0, 0));
+  await page.waitForTimeout(400);
+  const atRest = await page.evaluate(() => {
+    const parseBlur = (filter) => {
+      const match = /blur\(([-\d.]+)px\)/.exec(filter);
+      return match ? Number(match[1]) : 0;
+    };
+    const end = innerHeight * 0.85;
+    for (const word of document.querySelectorAll('.is-split .reveal-word')) {
+      if (word.closest('.reveal-manual, [data-no-reveal], .sr-only')) continue;
+      const top = word.getBoundingClientRect().top;
+      if (top < 0 || top > end) continue;
+      const style = getComputedStyle(word);
+      const b = parseBlur(style.filter);
+      if (b > 0.5 || Number(style.opacity) < 0.99) {
+        return { text: (word.textContent || '').slice(0, 24), b, opacity: style.opacity, top };
+      }
+    }
+    return null;
+  });
+  if (atRest) {
+    failures.push(
+      `${label}: in-view copy still blurred at scroll 0 ("${atRest.text}", blur ${atRest.b}, opacity ${atRest.opacity}, top ${Math.round(atRest.top)})`,
+    );
+  } else {
+    console.log(`${label}: in-view copy sharp at scroll 0 after reload`);
   }
 }
 

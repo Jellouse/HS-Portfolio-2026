@@ -7,12 +7,9 @@ const VB_H = 249;
 
 /**
  * The displacement shader offsets by scale*(noise-0.5), so the goo can leave the
- * viewBox by half the feDisplacementMap scale. The shop ring keeps that margin inside the viewport.
+ * viewBox by half the feDisplacementMap scale.
  */
 export const BLOB_BLEED = 111 / 2 / 559;
-
-/** Shop ring on a phone: 13 wide to 10 tall, the circle's own proportion. */
-const RING_ASPECT = 13 / 10;
 
 /**
  * Eye and mouth centres from the ellipses in HeroBlob.astro.
@@ -80,13 +77,16 @@ export function introFaceLayout(vh: number, vw: number) {
   };
 }
 
-/** Phone ring: its own circle, inset from the edges, sitting in the gap above the name. Desktop stays in shop-intro. */
+/**
+ * Shop ring diameter with its centre on the viewport top edge. The lower half
+ * sits in the page, so diameter = viewport height makes that visible arc ~50vh.
+ */
+export function shopRingWidth(vh: number, vw: number) {
+  return Math.min(vw, Math.round(vh));
+}
+
 export function introRingLayout(vh: number, vw: number) {
   const face = introFaceLayout(vh, vw);
-  if (!face.mobile) return null;
-  const W0 = Math.round(vw / (1 + 2 * BLOB_BLEED));
-  const H0 = Math.max(1, Math.round(W0 / RING_ASPECT));
-  const bottom = face.nameTop - NAME_GAP;
-  const top = bottom - H0;
-  return { W0, C: Math.round((top + bottom) / 2), nameTop: face.nameTop };
+  const W0 = shopRingWidth(vh, vw);
+  return { W0, C: 0, nameTop: face.nameTop };
 }

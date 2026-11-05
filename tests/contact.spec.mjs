@@ -26,8 +26,19 @@ let posted = null;
 await page.route('**/api/contact', (route) => { posted = JSON.parse(route.request().postData()); route.fulfill({ json: { ok: true } }); });
 await page.goto('http://127.0.0.1:4355/', { waitUntil: 'load' });
 await page.waitForTimeout(500);
+await page.evaluate(() => window.scrollTo(0, 320));
+await page.waitForTimeout(100);
+const layoutBefore = await page.evaluate(() => {
+  const grid = document.querySelector('.page-grid');
+  return grid ? Math.round(grid.getBoundingClientRect().left) : 0;
+});
 await page.click('.site-menu [data-contact-open]');
 await page.waitForTimeout(700);
+const layoutAfter = await page.evaluate(() => {
+  const grid = document.querySelector('.page-grid');
+  return grid ? Math.round(grid.getBoundingClientRect().left) : 0;
+});
+check(Math.abs(layoutBefore - layoutAfter) <= 1, `opening contact does not shift page (was ${layoutBefore}, now ${layoutAfter})`);
 const panelY = await page.evaluate(() => Math.round(document.querySelector('.contact-panel').getBoundingClientRect().top));
 check(panelY === 465, `sheet slides up to y=465 (${panelY})`);
 await page.click('[data-service="Physical Build"]');

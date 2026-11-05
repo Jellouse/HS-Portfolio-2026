@@ -1,10 +1,18 @@
 
 
+import {
+  applyWordReveal,
+  clearWordReveal,
+  initScrollWordBlur,
+  paintScrollWords,
+  wordRevealProgress,
+} from './text-blur-scroll';
+
 const SELECTOR = [
   'main :is(p, h1, h2, h3, h4, li, blockquote, figcaption, summary, .caption, .project-summary)',
   '.site-footer :is(p, li)',
 ].join(', ');
-const SKIP = '.sr-only';
+const SKIP = '.sr-only, .site-header, .site-header *';
 
 function locked(el: HTMLElement) {
   return !!el.closest('[data-no-reveal]');
@@ -30,7 +38,6 @@ function wrapWords(node: Node) {
     }
     (node as ChildNode).replaceWith(frag);
   } else if (node.nodeType === Node.ELEMENT_NODE) {
-
     if ((node as Element).matches('a, [data-price]') && /\S/.test(node.textContent ?? '')) {
       (node as Element).classList.add('reveal-word');
       return;
@@ -79,6 +86,7 @@ export function playIn(host: Host, instant = false) {
   host.classList.remove('reveal-out');
   host.classList.add('reveal-in');
   if (instant) host.classList.add('reveal-now');
+  host.querySelectorAll<HTMLElement>('.reveal-word').forEach(clearWordReveal);
   requestAnimationFrame(() => host.classList.remove('reveal-pending'));
 }
 
@@ -90,7 +98,7 @@ export function playOut(host: Host) {
 export const revealDuration = (host: HTMLElement) =>
   400 + (Number(host.style.getPropertyValue('--lines')) - 1 || 0) * 30;
 
-function armFallback(hosts: Host[]) {
+function armManualReveal(hosts: Host[]) {
   if (!('IntersectionObserver' in window)) return;
   const io = new IntersectionObserver(
     (entries) => {
@@ -98,16 +106,16 @@ function armFallback(hosts: Host[]) {
         if (!entry.isIntersecting) continue;
         const el = entry.target as Host;
         io.unobserve(el);
-
         playIn(el, entry.boundingClientRect.top < window.innerHeight * 0.5);
       }
     },
     { rootMargin: '0px 0px -5% 0px' },
   );
   hosts.forEach((el) => {
+    if (!el.classList.contains('reveal-manual')) return;
     if (el.classList.contains('reveal-in')) return;
     if (el.getBoundingClientRect().top < window.innerHeight) return;
-    prepareReveal(el);
+    prepareReveal(el, true);
     io.observe(el);
   });
 }
@@ -115,33 +123,35 @@ function armFallback(hosts: Host[]) {
 export function adoptReveal(host: Host) {
   if (locked(host)) return;
   split(host);
-  if (CSS.supports('animation-timeline: view()')) return;
-  if (host.classList.contains('reveal-in')) return;
-  const rect = host.getBoundingClientRect();
-  if (rect.top < window.innerHeight * 0.95 && rect.bottom > 0) playIn(host, true);
+  paintScrollWords(host);
 }
 
 export function initTextReveal() {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
   const boot = () => {
-    const all = [...document.querySelectorAll<Host>(SELECTOR)].filter((el) => !el.matches(SKIP));
+    const all = [...document.querySelectorAll<Host>(SELECTOR)].filter(
+      (el) => !el.matches(SKIP) && !el.closest('.site-header'),
+    );
     const hosts = all.filter((el) => !all.some((other) => other !== el && other.contains(el)));
     if (!hosts.length) return;
-    const scrollLinked = CSS.supports('animation-timeline: view()');
 
-    const run = () => hosts.forEach((el) => {
-      if (locked(el)) return;
-      split(el);
-    });
+    const run = () => {
+      hosts.forEach((el) => {
+        if (locked(el)) return;
+        split(el);
+      });
+      initScrollWordBlur();
+    };
     run();
-    if (!scrollLinked) armFallback(hosts.filter((el) => !locked(el)));
+    armManualReveal(hosts.filter((el) => !locked(el)));
 
     const settle = () => {
       hosts.forEach((el) => !locked(el) && el.classList.contains('is-split') && measureLines(el));
-      if (scrollLinked) return;
+      paintScrollWords();
+      requestAnimationFrame(() => paintScrollWords());
       hosts.forEach((el) => {
-        if (locked(el) || el.classList.contains('reveal-in')) return;
+        if (locked(el) || !el.classList.contains('reveal-manual') || el.classList.contains('reveal-in')) return;
         const r = el.getBoundingClientRect();
         if (r.top < window.innerHeight * 0.95 && r.bottom > 0) playIn(el, true);
       });
@@ -162,3 +172,5 @@ export function initTextReveal() {
   if (document.documentElement.hasAttribute('data-letter-intro-prepared')) boot();
   else document.addEventListener('letter-intro-prepared', boot, { once: true });
 }
+
+export { applyWordReveal, clearWordReveal, paintScrollWords, wordRevealProgress };

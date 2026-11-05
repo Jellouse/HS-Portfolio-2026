@@ -34,6 +34,31 @@ await page.waitForFunction(() => document.documentElement.classList.contains('is
 });
 await page.waitForTimeout(600);
 
+const headerSharp = () =>
+  page.evaluate(() => {
+    const parseBlur = (filter) => {
+      const match = /blur\(([-\d.]+)px\)/.exec(filter || '');
+      return match ? Number(match[1]) : 0;
+    };
+    const nav = document.querySelector('.site-menu[data-main-menu]');
+    const brandLetter = document.querySelector('.brand-name .motion-letter');
+    const samples = [];
+    if (nav) {
+      const style = getComputedStyle(nav);
+      samples.push({ who: 'nav', opacity: Number(style.opacity), blur: parseBlur(style.filter) });
+      const letter = nav.querySelector('.motion-letter');
+      if (letter) {
+        const ls = getComputedStyle(letter);
+        samples.push({ who: 'nav-letter', opacity: Number(ls.opacity), blur: parseBlur(ls.filter), color: ls.color });
+      }
+    }
+    if (brandLetter) {
+      const ls = getComputedStyle(brandLetter);
+      samples.push({ who: 'brand', opacity: Number(ls.opacity), blur: parseBlur(ls.filter), color: ls.color });
+    }
+    return samples;
+  });
+
 const snapshot = () =>
   page.evaluate(() => {
     const letters = [...document.querySelectorAll('.site-menu[data-main-menu] .motion-letter')];
@@ -46,6 +71,12 @@ const snapshot = () =>
   });
 
 const before = await snapshot();
+const headerNow = await headerSharp();
+const navLetter = headerNow.find((s) => s.who === 'nav-letter');
+const brand = headerNow.find((s) => s.who === 'brand');
+check(navLetter && navLetter.blur < 0.5 && navLetter.opacity > 0.99, `nav sharp after intro (opacity ${navLetter?.opacity}, blur ${navLetter?.blur})`);
+check(brand && brand.blur < 0.5 && brand.opacity > 0.99, `brand sharp after intro (opacity ${brand?.opacity}, blur ${brand?.blur})`);
+check(navLetter && navLetter.color !== 'rgba(0, 0, 0, 0)' && navLetter.color !== 'transparent', 'nav letters painted');
 check(before.letters >= 12, `nav split into letters (${before.letters})`);
 check(before.running === 0 && before.clearish === 0, 'nav letters settled after intro');
 
@@ -57,6 +88,10 @@ await page.waitForTimeout(800);
 const after = await snapshot();
 check(after.running === 0, `no letter animations after scroll (${after.running} running)`);
 check(after.clearish === 0, `nav letters stay visible (${after.clearish} still clear)`);
+
+const headerAfterScroll = await headerSharp();
+const navAfter = headerAfterScroll.find((s) => s.who === 'nav-letter');
+check(navAfter && navAfter.blur < 0.5 && navAfter.opacity > 0.99, `nav stays sharp at scroll 0 (${navAfter?.blur}px blur)`);
 
 await browser.close();
 server.close();

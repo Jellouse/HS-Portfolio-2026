@@ -1,5 +1,6 @@
 
 
+import { siteIntroSeen } from '../lib/site-intro';
 import { setHeroBlobSourceCut } from './hero-blob-cut';
 
 let blobIntroStarted = false;
@@ -149,9 +150,13 @@ export function initHeroBlob(root: ParentNode = document) {
         gl = g;
         svg.style.visibility = 'hidden';
         svg.style.opacity = '0';
-        svg.style.viewTransitionName = 'none';
-        g.canvas.style.viewTransitionName = 'hs-mark';
-        if (intro) growBlob(g.canvas, g.draw);
+        svg.style.viewTransitionName = '';
+        if (intro && siteIntroSeen()) {
+          setHeroBlobSourceCut(-1);
+          g.draw();
+          g.canvas.dataset.ready = '';
+          signalHeroBlobIntroStarted();
+        } else if (intro) growBlob(g.canvas, g.draw);
         else {
           g.draw();
           g.canvas.dataset.ready = '';
@@ -248,11 +253,17 @@ async function initTouchLoop(svg: SVGSVGElement) {
   const { canvas, draw } = gl;
   svg.style.visibility = 'hidden';
   svg.style.opacity = '0';
-  svg.style.viewTransitionName = 'none';
-  canvas.style.viewTransitionName = 'hs-mark';
+  svg.style.viewTransitionName = '';
   if (svg.hasAttribute('data-hero-blob')) {
-    setHeroBlobSourceCut(1.05);
-    growBlob(canvas, draw);
+    if (siteIntroSeen()) {
+      setHeroBlobSourceCut(-1);
+      draw();
+      canvas.dataset.ready = '';
+      signalHeroBlobIntroStarted();
+    } else {
+      setHeroBlobSourceCut(1.05);
+      growBlob(canvas, draw);
+    }
   } else {
     draw();
     canvas.dataset.ready = '';

@@ -53,9 +53,7 @@ const videoSrc = /\.(mp4|webm|mov)(?:$|\?)/i;
         </div>
         <ol class="service-page-process-list">
           {d.processSteps.map((step) => (
-            <li>
-              {step.title}. {step.body}
-            </li>
+            <li>{step.body}</li>
           ))}
         </ol>
       </section>
@@ -71,7 +69,7 @@ const videoSrc = /\.(mp4|webm|mov)(?:$|\?)/i;
             hasBracket(paragraph) ? <p set:html={renderPlaceholders(paragraph)} /> : <Prose paragraphs={[paragraph]} />,
           )}
         </div>
-        <div class="service-page-images">
+        <div class:list={['service-page-images', { 'is-pair': section.images.length === 2 }]}>
           {section.images.map((img, imageIndex) => {
             const video = videoSrc.test(img.src);
             const priority = sectionIndex === 0 && imageIndex === 0;

@@ -5,6 +5,7 @@ import { cpus } from 'node:os';
 const SPECS = [
   ['a11y', 'tests/a11y.spec.mjs'],
   ['shop-intro', 'tests/shop-intro.spec.mjs'],
+  ['shop-ring-size', 'tests/shop-ring-size.spec.mjs'],
   ['intro', 'tests/intro-face.spec.mjs'],
   ['intro-layout', 'tests/intro-layout.spec.mjs'],
   ['type-scale', 'tests/type-scale.spec.mjs'],

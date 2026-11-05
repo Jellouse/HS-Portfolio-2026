@@ -51,15 +51,30 @@ export default function ContactDrawer({ email: address }: { email: string }) {
     return () => document.removeEventListener('click', onClick);
   }, []);
 
-  useEffect(() => {
-    document.documentElement.classList.toggle('is-contact-open', open);
+  useLayoutEffect(() => {
+    const root = document.documentElement;
+    const body = document.body;
+    root.classList.toggle('is-contact-open', open);
 
+    if (open) {
+      const gap = Math.max(0, window.innerWidth - root.clientWidth);
+      if (gap > 0) {
+        root.style.setProperty('--scroll-lock', `${gap}px`);
+        body.style.paddingRight = `${gap}px`;
+      }
+    } else {
+      root.style.removeProperty('--scroll-lock');
+      body.style.removeProperty('padding-right');
+    }
+  }, [open]);
+
+  useEffect(() => {
     if (!open) opener.current?.focus({ preventScroll: true });
     if (!open && step === 4) {
       const t = setTimeout(reset, 500);
       return () => clearTimeout(t);
     }
-  }, [open]);
+  }, [open, step]);
 
   const reset = () => {
     setStep(1);

@@ -84,6 +84,16 @@ await page.goto(`${BASE}/work/atomic-ski/`, { waitUntil: 'load' });
 if ((await vtName('.project-mark .mark')) !== 'hs-mark') failures.push('project mark is not a shared element');
 await go('project mark click -> home', () => page.click('.project-mark a'), '/', 'hs-mark');
 
+await page.goto(`${BASE}/`, { waitUntil: 'load' });
+await wait(2000);
+await page.evaluate(() => scrollTo(0, 280));
+await wait(400);
+const firstWork = await page.getAttribute('.card a', 'href');
+if (firstWork) {
+  await go('home (scrolled) -> project', () => page.click('.card a'), firstWork, 'hs-mark');
+  await go('project -> home again', () => page.click('.project-mark a'), '/', 'hs-mark');
+}
+
 await browser.close();
 server.close();
 if (errors.length) failures.push(...errors.map((e) => `console: ${e}`));

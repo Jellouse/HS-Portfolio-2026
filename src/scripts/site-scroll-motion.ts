@@ -1,4 +1,6 @@
 import { SCROLL_MEDIA, UI_MEDIA } from './scroll-media-selectors';
+import { markSiteIntroSeen, siteIntroSeen } from '../lib/site-intro';
+import { paintScrollWords } from './text-blur-scroll';
 import { introLetterSequence, playLetterIntro, resetLetterIntro } from './wordmark-intro';
 
 const reduced = matchMedia('(prefers-reduced-motion: reduce)');
@@ -258,13 +260,36 @@ const smoothstep = (a: number, b: number, v: number) => {
   return t * t * (3 - 2 * t);
 };
 
+function prepareSkippedIntro() {
+  document.documentElement.classList.add('is-scroll-intro-ready', 'is-letter-intro-done');
+  const root = document.documentElement;
+  if (!root.hasAttribute('data-letter-intro-prepared')) {
+    root.setAttribute('data-letter-intro-prepared', '');
+    document.dispatchEvent(new Event('letter-intro-prepared'));
+  }
+  introLetterSequence().forEach(({ shell }) => shell.classList.add('is-motion-ready'));
+}
+
 export function initSiteScrollMotion() {
-  resetLetterIntro();
   document.documentElement.classList.add('has-scroll-motion');
+
+  if (siteIntroSeen()) {
+    prepareSkippedIntro();
+    wireMediaReady();
+    lazyVideos();
+    initMediaScrollFade();
+    paintScrollWords();
+    requestAnimationFrame(() => paintScrollWords());
+    initHeaderScrollFade();
+    return;
+  }
+
+  resetLetterIntro();
 
   if (reduced.matches) {
     document.documentElement.classList.add('is-scroll-intro-ready', 'is-letter-intro-done');
     introLetterSequence().forEach(({ shell }) => shell.classList.add('is-motion-ready'));
+    markSiteIntroSeen();
     wireMediaReady();
     lazyVideos();
     initMediaScrollFade();
@@ -285,11 +310,14 @@ export function initSiteScrollMotion() {
       await Promise.all([document.fonts.ready.catch(() => {}), heroBlobGate]);
       await doubleRaf();
       await playLetterIntro();
+      markSiteIntroSeen();
       document.documentElement.classList.remove('is-scroll-intro-pending');
       wireMediaReady();
       initMediaScrollFade();
       document.documentElement.classList.add('is-scroll-intro-ready');
       initHeaderScrollFade();
+      paintScrollWords();
+      requestAnimationFrame(() => paintScrollWords());
     } finally {
       document.documentElement.classList.remove('is-scroll-intro-pending');
     }

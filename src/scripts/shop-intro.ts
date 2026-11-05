@@ -1,5 +1,6 @@
 import { clearStableViewportHeight, stableViewportHeight } from '../lib/viewport-layout';
-import { introFaceLayout, introRingLayout } from '../lib/intro-layout';
+import { introFaceLayout, shopRingWidth } from '../lib/intro-layout';
+import { introScrollT, smoothIntro } from '../lib/intro-scroll';
 import { setIntroCopy } from './intro-copy';
 
 export function initShopIntro(head: HTMLElement) {
@@ -7,11 +8,6 @@ export function initShopIntro(head: HTMLElement) {
   const title = head.querySelector<HTMLElement>('.shop-head-title');
   if (!host || !title) return;
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const sda =
-    !reduced &&
-    matchMedia('(pointer: coarse)').matches &&
-    CSS.supports('animation-timeline: scroll()') &&
-    new URLSearchParams(location.search).get('intro') !== 'raf';
   const TAU = 30;
   let R = 1;
   let sMin = 1;
@@ -68,17 +64,16 @@ export function initShopIntro(head: HTMLElement) {
     if (vw !== lastW) clearStableViewportHeight();
     if (vw === lastW && head.dataset.ringReady !== undefined) return;
     lastW = vw;
-    const vh = stableViewportHeight(probe, vw);
+    const layoutVh = stableViewportHeight(probe, vw);
     const mobile = vw < 760;
-    const { nameTop } = introFaceLayout(vh, vw);
+    const viewVh = Math.round(window.innerHeight || layoutVh);
+    const { nameTop } = introFaceLayout(layoutVh, vw);
     document.documentElement.style.setProperty('--intro-name-top', `${nameTop}px`);
-    const ring = introRingLayout(vh, vw);
-    const W0 = ring ? ring.W0 : Math.round((vw * 0.68) / 2) * 2;
-    const C = ring ? ring.C : 0;
+    const W0 = shopRingWidth(viewVh, vw);
+    const C = 0;
     const Wf = 54;
     const topF = mobile ? 32 : 44;
     const titleF = topF + Wf + (mobile ? 96 : 130);
-    head.classList.remove('is-sda');
     layer.style.transform = 'none';
     layer.style.translate = 'none';
     const L = Math.round(layer.getBoundingClientRect().top);
@@ -87,7 +82,10 @@ export function initShopIntro(head: HTMLElement) {
     R = Math.max(1, titleTop - titleF);
     sMin = Wf / W0;
     dy = R + topF + Wf / 2 - C;
+    host.style.width = `${W0}px`;
+    host.style.height = `${W0}px`;
     head.style.setProperty('--ring-w', `${W0}px`);
+    document.documentElement.style.setProperty('--shop-ring-w', `${W0}px`);
     head.style.setProperty('--ring-origin', `${C - L}px`);
     head.style.setProperty('--ring-r', `${R}px`);
     document.documentElement.style.setProperty('--intro-r', `${R}px`);
@@ -95,45 +93,38 @@ export function initShopIntro(head: HTMLElement) {
     head.style.setProperty('--ring-smin', String(sMin));
     head.dataset.ringR = String(R);
     head.dataset.ringReady = '';
+    head.dataset.ringW = String(W0);
     paintCanvas(W0);
     follow();
     cur = NaN;
-    if (sda) {
-      layer.style.transform = '';
-      head.classList.add('is-sda');
-      setIntroCopy(0, false);
-    } else write(performance.now());
+    document.dispatchEvent(new CustomEvent('intro-layout'));
+    write(performance.now());
   };
 
   const follow = () => {
-
-    const y = scrollY;
-    if (!sda) layer.style.translate = `0 ${-y}px`;
-    else layer.style.translate = '';
+    layer.style.translate = `0 ${-Math.round(scrollY)}px`;
   };
+
   const onScroll = () => {
     atTop();
     follow();
-    if (!sda && !frame) frame = requestAnimationFrame(write);
+    if (!frame) frame = requestAnimationFrame(write);
   };
   addEventListener('scroll', onScroll, { passive: true });
 
   const write = (now: number) => {
     frame = 0;
-    const t = reduced ? 1 : Math.min(1, Math.max(0, scrollY / R));
+    const t = introScrollT(scrollY, R, reduced);
     const dt = lastT ? Math.min(100, now - lastT) : 16;
     lastT = now;
-    if (reduced || Number.isNaN(cur)) cur = t;
-    else cur += (t - cur) * (1 - Math.exp(-dt / TAU));
-    if (Math.abs(t - cur) < 0.0005) cur = t;
+    cur = smoothIntro(cur, t, dt, reduced ? 0 : TAU);
     layer.style.transform = `translateY(${(dy * cur).toFixed(2)}px) scale(${1 + (sMin - 1) * cur})`;
-    setIntroCopy(cur, !reduced && !sda);
+    setIntroCopy(cur, !reduced);
     head.toggleAttribute('data-ring-settled', cur === t);
     if (cur !== t) frame = requestAnimationFrame(write);
     else lastT = 0;
   };
 
-  if (sda) head.toggleAttribute('data-ring-settled', true);
   layout();
   addEventListener('resize', () => {
     if (document.documentElement.clientWidth !== lastW) forceLayout();

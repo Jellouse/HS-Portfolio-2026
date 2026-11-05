@@ -28,7 +28,7 @@ for (const [label, opt] of [['desktop', { viewport: { width: 1440, height: 900 }
   await p.waitForTimeout(1200);
   const shop = await p.evaluate(() => { const t = document.querySelector('.shop-head-title').getBoundingClientRect(); const r = document.querySelector('.shop-ring').getBoundingClientRect(); return { text: t.top, c: (r.top + r.bottom) / 2, top: r.top, below: t.top - r.bottom, w: r.width, x: r.left + r.width / 2 }; });
   const hp = await (await browser.newContext(opt)).newPage();
-  await hp.goto(B + '/?intro=raf', { waitUntil: 'load' });
+  await hp.goto(B + '/', { waitUntil: 'load' });
   await hp.waitForSelector('[data-intro-ready]', { state: 'attached', timeout: 30000 });
   await hp.waitForSelector('[data-intro-settled]', { state: 'attached', timeout: 30000 });
   const home = await hp.evaluate(() => {
@@ -54,8 +54,8 @@ for (const [label, opt] of [['desktop', { viewport: { width: 1440, height: 900 }
   check(Math.abs(shop.text - home.text) <= 1, `${label}: name blocks at the same top (home ${home.text}, shop ${shop.text})`);
   check(Math.abs(home.copyTop - shopCopy) <= 2, `${label}: first body copy aligns (home ${home.copyTop}, shop ${shopCopy})`);
   check(home.copyTop >= (label === 'mobile' ? 844 : 900) - 40, `${label}: home copy starts just below the viewport (${home.copyTop})`);
-  if (label === 'mobile') check(shop.top > 0 && shop.w < 390 && home.top < 0 && home.left < 0 && home.right > home.vw, `${label}: ring stays inset, face is cropped (${home.left.toFixed(0)}–${home.right.toFixed(0)})`);
-  else check(Math.abs(shop.c) <= 1.5 && Math.abs(shop.w - 980) <= 2 && shop.text === 695, `desktop: ring 68vw, centre on the page top, name at 695 (c ${shop.c.toFixed(1)}, w ${shop.w.toFixed(0)}, text ${shop.text})`);
+  if (label === 'mobile') check(Math.abs(shop.c) <= 1.5 && shop.w <= 390 && home.top < 0 && home.left < 0 && home.right > home.vw, `${label}: ring centred on the page top, face is cropped (${home.left.toFixed(0)}–${home.right.toFixed(0)})`);
+  else check(Math.abs(shop.c) <= 1.5 && Math.abs(shop.w - 900) <= 2 && shop.text === 695, `desktop: ring visible half viewport, centre on the page top, name at 695 (c ${shop.c.toFixed(1)}, w ${shop.w.toFixed(0)}, text ${shop.text})`);
 
   const clipper = await p.evaluate(() => { let e = document.querySelector('.shop-ring-canvas').parentElement; const bad = []; while (e && e !== document.documentElement) { const c = getComputedStyle(e); if (/hidden|clip|scroll|auto/.test(c.overflowX + c.overflowY) || c.clipPath !== 'none' || /paint|strict|content/.test(c.contain)) bad.push(e.tagName + '.' + e.className); e = e.parentElement; } return bad.join(','); });
   check(clipper === '', `${label}: no ancestor clips the ring (${clipper || 'none'})`);

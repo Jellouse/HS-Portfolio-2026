@@ -52,7 +52,16 @@ const site = await getSite();
 
       addEventListener('pagereveal', function (e) {
         var vt = e.viewTransition;
-        if (vt && vt.types) vt.types.add(document.querySelector('.shop-detail-mark') ? 'ib-shrink' : 'ib-grow');
+        if (!vt || !vt.types) return;
+        if (document.querySelector('.shop-detail-mark')) {
+          vt.types.add('ib-shrink');
+        } else if (document.querySelector('[data-shop-head]')) {
+          vt.types.add('ib-grow');
+        } else if (document.querySelector('.project-mark') && !document.querySelector('[data-hero-root]')) {
+          vt.types.add('hs-shrink');
+        } else if (document.querySelector('[data-hero-root]')) {
+          vt.types.add('hs-grow');
+        }
       });
 </script>
     <meta name="viewport" content={`width=device-width, initial-scale=1${safeArea ? ', viewport-fit=cover' : ''}`} />
@@ -166,6 +175,10 @@ const site = await getSite();
         <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
       </div>
     </div>
+    <script>
+      import { initHsMarkTransition } from '../scripts/hs-mark-transition';
+      initHsMarkTransition();
+    </script>
     <script>
       import '../scripts/haptics';
 </script>
@@ -333,6 +346,7 @@ const site = await getSite();
       import { initTextReveal } from '../scripts/text-reveal';
       import { initScrollFade } from '../scripts/scroll-fade';
       import { initSiteScrollMotion } from '../scripts/site-scroll-motion';
+      import '../scripts/shop-page-boot';
       startInput();
       initSiteScrollMotion();
       initTextReveal();

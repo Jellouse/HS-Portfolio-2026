@@ -1,4 +1,6 @@
 import { adoptReveal } from './text-reveal';
+import { clearWordReveal, paintScrollWords } from './text-blur-scroll';
+import { setIntroCopy } from './intro-copy';
 
 const reduced = matchMedia('(prefers-reduced-motion: reduce)');
 const clear = 'rgba(0, 0, 0, 0)';
@@ -34,7 +36,6 @@ const FOLD_SKIP = [
   '.contact-panel',
   '[data-contact]',
   '[role="dialog"]',
-  '.intro-tune',
   '.hero-dials',
   'svg',
 ].join(', ');
@@ -200,20 +201,6 @@ function unwrapMotion(el: HTMLElement) {
   });
 }
 
-function usesScrollBlurLayer(el: HTMLElement) {
-  return !!el.closest('[data-letter-blur]');
-}
-
-function holdBlur(el: HTMLElement) {
-  if (usesScrollBlurLayer(el)) return;
-  el.querySelectorAll<HTMLElement>('.reveal-word').forEach((word) => {
-    if (word.parentElement?.closest('.reveal-word')) return;
-    if (!word.querySelector('.motion-letter')) return;
-    word.classList.remove('reveal-word');
-    word.classList.add('is-letter-line');
-  });
-}
-
 const releasedFolds = new WeakSet<HTMLElement>();
 const addedAria = new Map<HTMLElement, HTMLElement[]>();
 
@@ -236,15 +223,12 @@ function releaseFold(el: HTMLElement) {
     letter.style.color = '';
   });
   unwrapMotion(el);
-  el.querySelectorAll<HTMLElement>('.is-letter-line').forEach((line) => {
-    line.classList.remove('is-letter-line', 'is-motion-ready');
-    line.classList.add('reveal-word');
-  });
   el.classList.remove('is-letter-host');
   for (const node of addedAria.get(el) ?? []) node.removeAttribute('aria-label');
   addedAria.delete(el);
   el.removeAttribute('data-no-reveal');
   if (!el.closest('.is-split')) adoptReveal(el);
+  else paintScrollWords(el);
 }
 
 function foldLines(segments: { letters: HTMLElement[]; color: string }[]) {
@@ -286,8 +270,8 @@ export async function playLetterIntro() {
       el.setAttribute('data-letter-intro', '');
       if (!root || root === el) el.setAttribute('data-no-reveal', '');
     });
-  } finally {
-    signalLetterIntroPrepared();
+  } catch {
+    /* fold prep is best-effort */
   }
 
   const segments: { letters: HTMLElement[]; color: string }[] = [];
@@ -300,6 +284,8 @@ export async function playLetterIntro() {
     if (existing.length) segments.push({ letters: existing, color: getComputedStyle(textRoot).color });
     else segments.push(splitLetterText(textRoot, { ariaLabel: !textRoot.classList.contains('brand-name') }));
   }
+
+  signalLetterIntroPrepared();
 
   const foldSegments: { letters: HTMLElement[]; color: string }[] = [];
   const revealFolds: HTMLElement[] = [];
@@ -318,7 +304,6 @@ export async function playLetterIntro() {
         if (existing.length) pushFold(el, { letters: existing, color: getComputedStyle(el).color });
         else pushFold(el, splitLetterText(el, { wrap: true }));
       });
-      holdBlur(el);
       continue;
     }
     withAria(el, () => {
@@ -337,7 +322,6 @@ export async function playLetterIntro() {
       });
       if (!words.length) {
         el.classList.add('is-motion-ready');
-        if (usesScrollBlurLayer(el)) return;
         pushFold(el, splitLetterText(el, { wrap: true, ariaLabel: false }));
         return;
       }
@@ -348,7 +332,6 @@ export async function playLetterIntro() {
         else pushFold(el, splitLetterText(word, { ariaLabel: !word.matches('a, button') }));
       }
     });
-    holdBlur(el);
   }
 
   await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
@@ -404,6 +387,10 @@ export async function playLetterIntro() {
     });
     revealFolds.forEach(releaseFold);
     animations.forEach((a) => a.cancel());
+    setIntroCopy(0, !reduced.matches);
+    document.querySelectorAll<HTMLElement>('.site-header .reveal-word').forEach(clearWordReveal);
+    paintScrollWords();
+    requestAnimationFrame(() => paintScrollWords());
     document.documentElement.classList.add('is-letter-intro-done');
   }
 }
