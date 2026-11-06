@@ -18,8 +18,6 @@ interface Props {
   jsonLd?: unknown;
   noindex?: boolean;
 
-  safeArea?: boolean;
-
   header?: boolean;
   footerText?: string;
   serviceFooter?: boolean;
@@ -33,7 +31,6 @@ const {
   type,
   jsonLd,
   noindex = false,
-  safeArea = false,
   header = false,
   footerText,
   serviceFooter = false,
@@ -65,7 +62,7 @@ const site = await getSite();
         }
       });
 </script>
-    <meta name="viewport" content={`width=device-width, initial-scale=1${safeArea ? ', viewport-fit=cover' : ''}`} />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#ffffff" />
     <meta name="google-site-verification" content="M6eRTJDg2gB4PMiLKpzNVeRX6jugbsgeBjGd_0ci2V4" />
     <link rel="preload" href="/fonts/ABCAreal-Regular.woff2" as="font" type="font/woff2" crossorigin />
@@ -228,8 +225,18 @@ const site = await getSite();
           }
         }
         var level = Math.round(blend * 255);
-        sky.style.backgroundColor = 'rgb(' + level + ' ' + level + ' ' + level + ')';
-        document.documentElement.dataset.skyInk = level >= 148 ? 'black' : 'white';
+        var color = 'rgb(' + level + ' ' + level + ' ' + level + ')';
+        var root = document.documentElement;
+        var byte = level.toString(16);
+        if (byte.length < 2) byte = '0' + byte;
+        var theme = '#' + byte + byte + byte;
+        root.style.setProperty('--page-bg', color);
+        root.style.backgroundColor = color;
+        document.body.style.backgroundColor = color;
+        sky.style.backgroundColor = color;
+        var meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) meta.setAttribute('content', theme);
+        root.dataset.skyInk = level >= 148 ? 'black' : 'white';
         sky.dataset.ready = '';
       })();
     </script>

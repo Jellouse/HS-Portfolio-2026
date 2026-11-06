@@ -19,7 +19,7 @@ if (mode === 'auth') {
     const msg = forbidden
       ? `Signed in as ${access.login.replace(/[^\w-]/g, '')}, which has no push access to the site repo.`
       : 'The canvas is for site editors. Sign in with the GitHub account you use for Keystatic.';
-    const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex, nofollow"><title>Canvas · Humansize</title><style>${typeCss}body{margin:0;min-height:100vh;display:grid;place-items:center;background:#1a1a1a;color:#8a8a8a;font:var(--text-meta)/var(--lh-snug) ui-monospace,Menlo,monospace}main{max-width:360px;padding:20px}a{display:inline-block;margin-top:16px;padding:8px 12px;border-radius:4px;background:#fff;color:#000;text-decoration:none}</style></head><body><main><p>${msg}</p><a href="/api/keystatic/github/login">Sign in with GitHub</a></main></body></html>`;
+    const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#1a1a1a"><meta name="robots" content="noindex, nofollow"><title>Canvas · Humansize</title><style>${typeCss}html,body{margin:0;min-height:100vh;background:#1a1a1a}body{display:grid;place-items:center;color:#8a8a8a;font:var(--text-meta)/var(--lh-snug) ui-monospace,Menlo,monospace}main{max-width:360px;padding:20px}a{display:inline-block;margin-top:16px;padding:8px 12px;border-radius:4px;background:#fff;color:#000;text-decoration:none}</style></head><body><main><p>${msg}</p><a href="/api/keystatic/github/login">Sign in with GitHub</a></main></body></html>`;
     return new Response(html, {
       status: forbidden ? 403 : 401,
       headers: { ...NOINDEX, 'Content-Type': 'text/html; charset=utf-8' },
@@ -40,7 +40,8 @@ const widths = [
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#1a1a1a" />
     <meta name="robots" content="noindex, nofollow" />
     <title>Canvas · Humansize</title>
     <style is:global>
@@ -65,11 +66,11 @@ const widths = [
       #interact { font: inherit; border: 0; cursor: pointer; position: fixed; left: 16px; bottom: 16px; padding: 4px 8px; border-radius: 4px; background: #000; color: #8a8a8a; font-size: var(--text-meta); line-height: var(--lh-meta); user-select: none; }
       body.interact #interact { color: #fff; }
       #grid-toggle { font: inherit; border: 0; cursor: pointer; padding: 4px 8px; border-radius: 4px; background: #000; color: #8a8a8a; font-size: var(--text-meta); line-height: var(--lh-meta); user-select: none; }
-      .canvas-tools { position: fixed; left: 16px; bottom: 16px; display: flex; gap: 8px; }
+      .canvas-tools { position: fixed; left: 16px; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); display: flex; gap: 8px; }
       .canvas-tools #interact { position: static; }
       body.grid #grid-toggle { color: #fff; }
       astro-dev-toolbar { display: none !important; }
-      #zoom { position: fixed; right: 16px; bottom: 16px; padding: 4px 8px; border-radius: 4px; background: #000; color: #fff; font-size: var(--text-meta); line-height: var(--lh-meta); user-select: none; }
+      #zoom { position: fixed; right: 16px; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); padding: 4px 8px; border-radius: 4px; background: #000; color: #fff; font-size: var(--text-meta); line-height: var(--lh-meta); user-select: none; }
 </style>
   </head>
   <body>
