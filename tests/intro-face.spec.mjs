@@ -28,6 +28,7 @@ for (const [name, vp, mobile] of [['desktop', { width: 1440, height: 900 }, fals
   await page.waitForTimeout(800);
   const R = Number(await page.getAttribute('[data-hero-root]', 'data-intro-r'));
   const measure = () => page.evaluate(() => {
+    const hero = document.querySelector('[data-hero-root]');
     const host = document.querySelector('[data-hero-variant="blob"]');
     const svg = document.querySelector('[data-hero-blob]');
     const canvas = document.querySelector('.mark-blob-gl');
@@ -37,7 +38,7 @@ for (const [name, vp, mobile] of [['desktop', { width: 1440, height: 900 }, fals
       const m = new DOMMatrix(getComputedStyle(el).transform);
       return { a: m.a, d: m.d };
     };
-    const visual = Number(document.querySelector('[data-hero-root]')?.dataset.introW || 0);
+    const visual = Number(hero?.dataset.introW || 0);
     return { w: visual || f.width, bottom: f.bottom, top: f.top, name: n.top, host: scaleOf(host), svg: scaleOf(svg), canvas: canvas ? scaleOf(canvas) : null };
   });
   let prev = null;
@@ -49,14 +50,13 @@ for (const [name, vp, mobile] of [['desktop', { width: 1440, height: 900 }, fals
     const m = await measure();
     const gap = m.name - m.bottom;
     if (gap0 === null) gap0 = gap;
-    if (prev && m.w > prev.w + 0.5) failures.push(`${name} y=${y}: width rose ${prev.w} -> ${m.w}`);
-    for (const part of ['host', 'svg', 'canvas']) {
+    if (prev && Math.abs(m.w - prev.w) > 0.5) failures.push(`${name} y=${y}: width changed ${prev.w} -> ${m.w}`);
+    for (const part of ['svg', 'canvas']) {
       const s = m[part];
       if (!s) failures.push(`${name} y=${y}: missing ${part}`);
       else if (Math.abs(s.a - 1) > 0.01 || Math.abs(s.d - 1) > 0.01) failures.push(`${name} y=${y}: ${part} scale ${s.a}, ${s.d}`);
     }
-    if (y <= R && Math.abs(gap - gap0) > 1) failures.push(`${name} y=${y}: gap ${gap} vs ${gap0}`);
-    if (y > R && prev && prev.y >= R && Math.abs((prev.top - m.top) - 10) > 1) failures.push(`${name} y=${y}: face moved ${prev.top - m.top}px for 10px scroll`);
+    if (prev && Math.abs((prev.top - m.top) - 10) > 1) failures.push(`${name} y=${y}: face moved ${prev.top - m.top}px for 10px scroll`);
     prev = { ...m, y };
   }
   if (gap0 === null || !(gap0 > 0)) failures.push(`${name}: bad gap ${gap0}`);

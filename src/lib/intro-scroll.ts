@@ -4,6 +4,12 @@ export function introScrollT(scrollY: number, R: number, reduced = false) {
   return Math.min(1, Math.max(0, scrollY / R));
 }
 
+/** Scale factor at scroll offset (1 at top, `sMin` at `--intro-r`). */
+export function introScaleFromScroll(scrollY: number, R: number, sMin: number, reduced = false) {
+  const t = introScrollT(scrollY, R, reduced);
+  return 1 + (sMin - 1) * t;
+}
+
 /** Exponential smoothing toward a scroll goal (whole-pixel callers round themselves). */
 export function smoothIntro(cur: number, goal: number, dt: number, tau: number, epsilon = 0.0005) {
   if (!tau || Number.isNaN(cur)) return goal;
