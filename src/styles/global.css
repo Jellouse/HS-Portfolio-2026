@@ -331,7 +331,6 @@ html[data-sky-ink='white'] body:has([data-sky]) {
 }
 
 .contact-panel,
-.sky-clock,
 .shop-buy-button,
 .services-landing .shop-button,
 .service-page-process-pill {
@@ -535,46 +534,6 @@ html[data-sky-ink='white'] body:has([data-sky]) {
 html:has([data-sky]),
 html:has([data-sky]) body {
   background: transparent;
-}
-
-.sky-clock {
-  position: fixed;
-  z-index: 30;
-  left: 50%;
-  bottom: var(--pad);
-  display: flex;
-  align-items: center;
-  gap: var(--gutter);
-  margin: 0;
-  padding: var(--space-2xs) var(--gutter);
-  transform: translateX(-50%);
-  background: var(--bg);
-  color: var(--ink-fixed);
-  border-radius: var(--radius-sm);
-  font-size: var(--text-meta);
-  line-height: var(--lh-meta);
-}
-
-.sky-clock label {
-  display: flex;
-  align-items: center;
-  gap: var(--gutter);
-}
-
-.sky-clock input {
-  width: 160px;
-  margin: 0;
-}
-
-.sky-clock button {
-  padding: 0;
-  font: inherit;
-  font-size: var(--text-meta);
-  line-height: var(--lh-meta);
-  color: inherit;
-  background: none;
-  border: 0;
-  cursor: pointer;
 }
 
 .hero .mark-blob {

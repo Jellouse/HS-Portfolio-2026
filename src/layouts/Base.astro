@@ -157,15 +157,6 @@ const site = await getSite();
   </head>
   <body class:list={[{ 'is-service-page': serviceFooter, 'is-services-landing': hideFooter }]}>
     <div class="sky" data-sky data-sky-places={SKY_PLACES} aria-hidden="true"></div>
-    {import.meta.env.DEV && (
-      <form class="sky-clock" data-sky-clock>
-        <label>
-          <span data-sky-clock-readout>00:00</span>
-          <input type="range" min="0" max="1439" step="1" value="0" data-sky-clock-range aria-label="Time of day" />
-        </label>
-        <button type="button" data-sky-clock-now>Now</button>
-      </form>
-    )}
     <script is:inline>
       (function () {
         var sky = document.querySelector('[data-sky]');
