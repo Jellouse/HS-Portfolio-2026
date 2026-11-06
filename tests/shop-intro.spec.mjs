@@ -132,15 +132,24 @@ await p.waitForTimeout(200);
 check((await soc()).menu, 'scrolling away closes socials');
 await p.evaluate(() => scrollTo(0, 0));
 
-for (const [lab, o, top] of [['desktop', { viewport: { width: 1440, height: 900 } }, 70], ['mobile', { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true }, 57]]) {
+for (const [lab, o] of [['desktop', { viewport: { width: 1440, height: 900 } }], ['mobile', { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true }]]) {
   const q = await (await browser.newContext(o)).newPage();
-  const off = [];
   for (const u of [B + '/work/analogue-counters/', B + (await (async () => { const z = await (await browser.newContext()).newPage(); await z.goto(B + '/shop/'); const h = await z.getAttribute('.shop-title', 'href'); await z.close(); return h; })())]) {
     await q.goto(u, { waitUntil: 'load' });
-    await q.waitForTimeout(2500);
-    off.push(await q.evaluate(() => { const w = document.querySelector('[data-project-menu]'); const n = w.querySelector('.project-menu'); w.classList.add('is-open'); const r = n.getBoundingClientRect(), m = w.getBoundingClientRect(); return Math.round(r.top + parseFloat(getComputedStyle(n).paddingTop) - m.top); }));
+    await q.waitForTimeout(800);
+    const menu = await q.evaluate(() => {
+      const nav = document.querySelector('.project-menu');
+      const link = nav?.querySelector('a');
+      const color = link ? getComputedStyle(link).color : '';
+      return {
+        items: nav ? [...nav.children].map((el) => el.textContent.trim()).join(',') : '',
+        icon: !!document.querySelector('[data-project-face], .project-mark, .shop-detail-mark'),
+        color,
+        flow: nav ? getComputedStyle(nav).position : '',
+      };
+    });
+    check(menu.items === 'Home,Shop,Contact' && !menu.icon && menu.flow === 'static' && /0\.4\)/.test(menu.color), `${lab}: open menu at 40% (${menu.items}, ${menu.color}, ${menu.flow})`);
   }
-  check(off[0] === top && off[1] === top, `${lab}: small-icon menu offset ${off.join('/')} (want ${top})`);
   await q.close();
 }
 await p.click('.site-menu [data-contact-open]');

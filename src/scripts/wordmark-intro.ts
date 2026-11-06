@@ -66,7 +66,7 @@ export function splitLetterText(
   const color = getComputedStyle(root).color;
   if (ariaLabel) {
     const text = root.textContent?.trim() || '';
-    if (!wrap || text) root.setAttribute('aria-label', text);
+    if ((!wrap || text) && !root.getAttribute('aria-label')) root.setAttribute('aria-label', text);
     if (wrap) {
       root.querySelectorAll<HTMLElement>('a, button').forEach((el) => {
         if (el.hasAttribute('aria-label')) return;
@@ -303,6 +303,15 @@ export async function playLetterIntro() {
     shell.classList.add('is-motion-ready');
     if (textRoot.classList.contains('brand-name')) {
       shell.setAttribute('aria-label', textRoot.textContent?.trim() || 'Humansize');
+    }
+    const year = textRoot.querySelector<HTMLElement>(':scope > .project-year');
+    if (year) {
+      const title = [...textRoot.childNodes]
+        .filter((node) => node !== year)
+        .map((node) => node.textContent ?? '')
+        .join('')
+        .trim();
+      textRoot.setAttribute('aria-label', `${title} ${year.textContent?.trim() ?? ''}`.trim());
     }
     const existing = [...textRoot.querySelectorAll<HTMLElement>('.motion-letter')];
     if (existing.length) segments.push({ letters: existing, color: getComputedStyle(textRoot).color });

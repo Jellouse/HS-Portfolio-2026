@@ -14,7 +14,7 @@ const parts = summary && summary.trim() ? paragraphs(summary) : [];
 
 <header class="project-hero">
   <h1>
-    {title}{years ? <>, <span class="project-year">{years}</span></> : null}
+    {title}{years ? <span class="project-year">{years}</span> : null}
   </h1>
   {parts.length > 0 && (
     <div class="summary project-summary">

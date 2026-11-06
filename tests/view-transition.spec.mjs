@@ -47,10 +47,7 @@ await page.addInitScript(() => {
 });
 const failures = [];
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
-const vtName = (sel = '[data-spin-mark]') => page.evaluate((sel) => getComputedStyle(document.querySelector(sel)).viewTransitionName, sel);
-
-const go = async (label, click, expectPath, mark = 'ib-mark') => {
-
+const go = async (label, click, expectPath) => {
   await page.waitForLoadState('load');
   await wait(1500);
   await page.evaluate(() => scrollTo(0, 200));
@@ -59,30 +56,27 @@ const go = async (label, click, expectPath, mark = 'ib-mark') => {
   await page.waitForFunction(() => window.__vt && window.__vt.done, null, { timeout: 5000 });
   const vt = await page.evaluate(() => window.__vt);
   const y = await page.evaluate(() => scrollY);
-  const name = mark === 'ib-mark' ? await vtName() : 'hs-mark';
   await wait(1000);
-  const a = mark === 'ib-mark' ? await page.evaluate(() => Number(/rotate\(([-\d.e]+)deg\)/.exec(document.querySelector('[data-spin-mark]').style.transform)?.[1])) : 90;
-  console.log(`${label}: vt=${vt.ran} morph=${vt.morph} spinAnims=${vt.spin} scrollY=${y} name=${name} rest=${a}deg types=${vt.types}`);
-  if (name !== mark) failures.push(`${label}: mark has view-transition-name ${name}`);
-  if (!vt.ran || !vt.morph || vt.done !== true) failures.push(`${label}: shared-element morph did not run`);
+  const spin = await page.$('[data-spin-mark]');
+  const a = spin ? await page.evaluate(() => Number(/rotate\(([-\d.e]+)deg\)/.exec(document.querySelector('[data-spin-mark]').style.transform)?.[1])) : null;
+  console.log(`${label}: vt=${vt.ran} scrollY=${y} rest=${a}deg types=${vt.types}`);
+  if (!vt.ran || vt.done !== true) failures.push(`${label}: page transition did not finish`);
   if (vt.spin) failures.push(`${label}: load spin replayed after in-site navigation`);
   if (y !== 0) failures.push(`${label}: arrived at scrollY ${y}`);
-  if (!(Math.abs(a / 90 - Math.round(a / 90)) * 90 < 0.01)) failures.push(`${label}: mark rests at ${a}deg`);
+  if (a != null && !(Math.abs(a / 90 - Math.round(a / 90)) * 90 < 0.01)) failures.push(`${label}: mark rests at ${a}deg`);
 };
 
 await page.goto(`${BASE}/shop/`, { waitUntil: 'load' });
 await wait(1800);
-if ((await vtName()) !== 'ib-mark') failures.push('/shop: mark is not a shared element');
 
 const firstDetail = await page.getAttribute('a.shop-pair >> nth=0', 'href');
 await go('/shop -> detail (click)', () => page.click('a.shop-pair >> nth=0'), firstDetail);
-await go('detail ring click -> /shop', () => page.click('.shop-detail-mark a'), '/shop/');
+await go('detail menu -> /shop', () => page.click('.project-menu a[href="/shop"]'), '/shop');
 await go('/shop -> detail again', () => page.click('a.shop-pair >> nth=0'), firstDetail);
-await go('detail ring click -> /shop again', () => page.click('.shop-detail-mark a'), '/shop/');
+await go('detail menu -> /shop again', () => page.click('.project-menu a[href="/shop"]'), '/shop');
 
 await page.goto(`${BASE}/work/atomic-ski/`, { waitUntil: 'load' });
-if ((await vtName('.project-mark .mark')) !== 'hs-mark') failures.push('project mark is not a shared element');
-await go('project mark click -> home', () => page.click('.project-mark a'), '/', 'hs-mark');
+await go('project menu -> home', () => page.click('.project-menu a[href="/"]'), '/');
 
 await page.goto(`${BASE}/`, { waitUntil: 'load' });
 await wait(2000);
@@ -90,8 +84,8 @@ await page.evaluate(() => scrollTo(0, 280));
 await wait(400);
 const firstWork = await page.getAttribute('.card a', 'href');
 if (firstWork) {
-  await go('home (scrolled) -> project', () => page.click('.card a'), firstWork, 'hs-mark');
-  await go('project -> home again', () => page.click('.project-mark a'), '/', 'hs-mark');
+  await go('home (scrolled) -> project', () => page.click('.card a'), firstWork);
+  await go('project -> home again', () => page.click('.project-menu a[href="/"]'), '/');
 }
 
 await browser.close();

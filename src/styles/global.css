@@ -701,6 +701,7 @@ html:has([data-sky]) body {
 }
 
 .project-year {
+  display: block;
   color: var(--ink-40);
 }
 
@@ -762,7 +763,7 @@ html:has([data-sky]) body {
 
 .project-hero {
   width: min(100%, 800px);
-  margin: 0 auto 120px;
+  margin: 0 auto calc(var(--space-title) + var(--space-md));
   text-align: center;
 }
 
@@ -776,7 +777,7 @@ html:has([data-sky]) body {
 
 .project-summary {
   width: min(100%, var(--measure));
-  margin: var(--lh) auto 0;
+  margin: calc(var(--space-title) + var(--space-md)) auto 0;
   font-size: var(--text);
   line-height: var(--lh);
   letter-spacing: var(--track);
@@ -789,6 +790,13 @@ html:has([data-sky]) body {
 
 .project-summary p:last-child {
   margin-bottom: 0;
+}
+
+@media (min-width: 760px) {
+  .project-summary,
+  .shop-detail-text {
+    padding-inline: var(--space-md);
+  }
 }
 
 .text-block {
@@ -1305,6 +1313,7 @@ html:has([data-sky]) body {
     margin-right: 0;
   }
 
+  .project.page-grid > .project-menu,
   .project.page-grid > .project-mark,
   .project.page-grid > .project-hero {
     grid-column: 1 / -1;
@@ -1495,12 +1504,9 @@ html.show-grid .grid-overlay .page-grid {
 
 .hero .mark,
 .hero .mark-blob,
-.project-mark .mark {
-  view-transition-name: hs-mark;
-}
-
+.project-mark .mark,
 .shop-mark {
-  view-transition-name: ib-mark;
+  view-transition-name: none;
 }
 
 ::view-transition-group(ib-mark) {
@@ -2012,7 +2018,7 @@ body .site-header.is-menu-fade:not(.is-menu-open) .who .time {
 }
 
 .shop-detail {
-  padding-top: 44px;
+  padding-top: 32px;
   padding-bottom: 116px;
 }
 .shop-detail > * {
@@ -2032,16 +2038,21 @@ body .site-header.is-menu-fade:not(.is-menu-open) .who .time {
   display: block;
   width: 54px;
 }
+.shop-detail-head h1 {
+  margin: 0 0 calc(var(--space-title) + var(--space-md));
+}
 .shop-detail-head h1,
 .shop-detail-heading {
-  margin: 0 0 60px;
   font-size: var(--text);
   font-weight: 400;
   line-height: var(--lh);
   text-align: center;
 }
+.shop-detail-heading {
+  margin: 0 0 60px;
+}
 .shop-detail-text {
-  margin-bottom: 122px;
+  margin-bottom: calc(var(--space-title) + var(--space-md));
 }
 .shop-detail-text p {
   margin: 0 0 var(--lh);
@@ -2154,12 +2165,8 @@ body .site-header.is-menu-fade:not(.is-menu-open) .who .time {
   .shop-detail-mark {
     margin-bottom: 96px;
   }
-  .shop-detail-head h1,
   .shop-detail-heading {
     margin-bottom: var(--lh);
-  }
-  .shop-detail-text {
-    margin-bottom: 48px;
   }
   .shop-detail-image {
     margin-bottom: var(--space-block);
@@ -2333,34 +2340,19 @@ body:has(.hero[data-intro]) .site-header .contact {
 }
 
 .project-menu {
-  position: absolute;
-  top: var(--small-menu-top);
-  left: 50%;
-  z-index: 1;
+  position: static;
   display: flex;
+  justify-content: center;
   gap: 24px;
-  transform: translateX(-50%);
-  pointer-events: none;
+  margin: 0 0 calc(var(--space-title) + var(--space-md));
+  pointer-events: auto;
 }
 
 .project-menu > a,
 .project-menu > button {
-  opacity: 0;
-  transform: translate(calc(var(--i) * -48px), -56px) scale(0.6);
-  transition:
-    opacity var(--dur-ui) var(--ease-out),
-    transform var(--dur-media) var(--ease-out),
-    color var(--dur-hover) var(--ease-out);
-}
-
-.project-mark.is-open .project-menu {
-  pointer-events: auto;
-}
-
-.project-mark.is-open .project-menu > a,
-.project-mark.is-open .project-menu > button {
   opacity: 1;
   transform: none;
+  filter: none;
 }
 
 .project-menu:has(> :hover) > :not(:hover) {
@@ -2587,17 +2579,7 @@ html.is-contact-open body {
 .project-menu > a,
 .project-menu > button {
   color: var(--muted);
-  filter: blur(4px);
-  transition:
-    opacity var(--dur-ui) var(--ease-out),
-    filter var(--dur-menu) var(--ease-out),
-    transform var(--dur-media) var(--ease-out),
-    color var(--dur-hover) var(--ease-out);
-}
-
-.project-mark.is-open .project-menu > a,
-.project-mark.is-open .project-menu > button {
-  filter: none;
+  transition: color var(--dur-hover) var(--ease-out);
 }
 
 .project-menu:has(> :hover) > :not(:hover) {
@@ -2607,11 +2589,6 @@ html.is-contact-open body {
 .project-menu > :hover,
 .project-menu > :focus-visible {
   color: var(--ink);
-}
-
-.project-mark.is-ring .project-menu {
-  top: calc(var(--small-menu-top) - var(--small-menu-bridge));
-  padding-top: var(--small-menu-bridge);
 }
 
 .shop-page {

@@ -28,7 +28,7 @@ await page.goto('http://127.0.0.1:4334/', { waitUntil: 'load' });
 await page.waitForSelector('[data-intro-ready]');
 await page.goto('http://127.0.0.1:4334/work/atomic-ski/', { waitUntil: 'load' });
 await page.waitForTimeout(1200);
-await Promise.all([page.waitForURL('**/'), page.click('.project-mark a')]);
+await Promise.all([page.waitForURL('**/'), page.click('.project-menu a[href="/"]')]);
 await page.waitForTimeout(1200);
 await page.waitForSelector('[data-intro-ready]');
 
