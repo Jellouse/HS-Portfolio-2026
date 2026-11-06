@@ -24,22 +24,28 @@ sections:
     body: >-
       Brand sites, campaign pages and shops in Framer. I design and build in one flow, with motion and responsive layout baked in from the start.
     images:
-      - src: /src/content/projects/atomic-ski/cover.jpg
-        alt: Atomic Ski website hero with a skier mid jump
-        caption: Atomic Ski, [year]
-        href: /work/atomic-ski/
-      - src: /src/content/projects/analogue-af1/cover.jpg
-        alt: Analogue AF1 product page
-        caption: Analogue AF1, [year]
-        href: /work/analogue-af1/
+      - discriminant: project
+        value:
+          project: atomic-ski
+          alt: Atomic Ski website hero with a skier mid jump
+          caption: Atomic Ski, [year]
+          href: /work/atomic-ski/
+      - discriminant: project
+        value:
+          project: analogue-af1
+          alt: Analogue AF1 product page
+          caption: Analogue AF1, [year]
+          href: /work/analogue-af1/
   - heading: 3D renders
     body: >-
       Product and space renders for campaigns, pitches and web. I model, light and composite so the result reads clearly at any size.
     images:
-      - src: /src/content/projects/analogue-af1/blocks/3/value/src.jpg
-        alt: 3D render of an Analogue camera
-        caption: Analogue AF1, [year]
-        href: /work/analogue-af1/
+      - discriminant: image
+        value:
+          src: /src/content/services/images/analogue-af1-render.jpg
+          alt: 3D render of an Analogue camera
+          caption: Analogue AF1, [year]
+          href: /work/analogue-af1/
 bottomCta: Planning a site or need renders? Get in touch.
 footerLine: >-
   Humansize is the studio of Johann Schnettker. I design things you can look at, click through and walk into.

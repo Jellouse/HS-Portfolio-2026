@@ -56,14 +56,17 @@ const outline = fields.checkbox({
   description: '1px light grey line inside the image edge. Does not change the size.',
 });
 
+const serviceImageDirectory = 'src/content/services/images';
+const serviceImagePublicPath = '/src/content/services/images';
+
 function imageField(
   label: string,
-  opts?: { required?: boolean; description?: string },
+  opts?: { required?: boolean; description?: string; directory?: string; publicPath?: string },
 ) {
   const field = fields.image({
     label,
-    directory: imageDirectory,
-    publicPath: imagePublicPath,
+    directory: opts?.directory ?? imageDirectory,
+    publicPath: opts?.publicPath ?? imagePublicPath,
     ...(opts?.description ? { description: opts.description } : {}),
     ...(opts?.required ? { validation: { isRequired: true as const } } : {}),
   });
@@ -75,7 +78,7 @@ export default config({
   storage: storage(),
   ui: {
     brand: { name: 'Humansize' },
-    navigation: ['projects', 'projectOrder', '---', 'products', '---', 'site'],
+    navigation: ['projects', 'projectOrder', 'services', '---', 'products', '---', 'site'],
   },
   collections: {
     projects: collection({
@@ -376,16 +379,49 @@ export default config({
           fields.object({
             heading: fields.text({ label: 'Heading' }),
             body: fields.text({ label: 'Body', multiline: true }),
-            images: fields.array(
-              fields.object({
-                src: fields.text({ label: 'Image path' }),
-                alt: fields.text({ label: 'Alt text' }),
-                caption: fields.text({ label: 'Caption' }),
-                href: fields.text({ label: 'Link (optional)' }),
-                tbd: fields.checkbox({ label: 'Flag TBD' }),
-                poster: fields.text({ label: 'Video poster', description: 'Image path. Used when the source is a video.' }),
-              }),
-              { label: 'Images', itemLabel: (p) => p.fields.caption.value || 'Image' },
+            images: fields.blocks(
+              {
+                project: {
+                  label: 'Project cover',
+                  itemLabel: (props) => props.fields.project.value || props.fields.caption.value || 'Project cover',
+                  schema: fields.object({
+                    project: fields.relationship({
+                      label: 'Project',
+                      collection: 'projects',
+                      validation: { isRequired: true },
+                    }),
+                    alt: fields.text({
+                      label: 'Alt text',
+                      description: 'Empty uses the project cover alt.',
+                    }),
+                    caption: fields.text({ label: 'Caption' }),
+                    href: fields.text({ label: 'Link' }),
+                    video: videoField('Video', 'Optional. The project cover is the poster.'),
+                    tbd: fields.checkbox({ label: 'Flag TBD', defaultValue: false }),
+                  }),
+                },
+                image: {
+                  label: 'Image',
+                  itemLabel: (props) => props.fields.caption.value || props.fields.alt.value || 'Image',
+                  schema: fields.object({
+                    src: imageField('Image', {
+                      required: true,
+                      directory: serviceImageDirectory,
+                      publicPath: serviceImagePublicPath,
+                      description: 'Stored with this service.',
+                    }),
+                    alt: fields.text({ label: 'Alt text' }),
+                    caption: fields.text({ label: 'Caption' }),
+                    href: fields.text({ label: 'Link' }),
+                    tbd: fields.checkbox({ label: 'Flag TBD', defaultValue: false }),
+                  }),
+                },
+              },
+              {
+                label: 'Images',
+                description:
+                  'A project cover uses the cover from that project. An image is a file stored with this service.',
+              },
             ),
           }),
           { label: 'Sections', itemLabel: (p) => p.fields.heading.value || 'Section' },
