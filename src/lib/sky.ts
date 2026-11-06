@@ -130,10 +130,3 @@ export function skyColor(minutes: number, when = new Date()) {
   const level = skyLevel(minutes, when);
   return `rgb(${level} ${level} ${level})`;
 }
-
-export function skyClock(minutes: number) {
-  const whole = Math.round(minutes) % DAY_MINUTES;
-  const hours = Math.floor(whole / 60);
-  const mins = whole % 60;
-  return `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;
-}

@@ -1,4 +1,4 @@
-import { skyClock, skyColor, skyInk, skyLock, skyYiq, skyRgb, type SkyInk } from '../lib/sky';
+import { skyColor, skyInk, skyLock, skyYiq, skyRgb, type SkyInk } from '../lib/sky';
 
 let timer = 0;
 let hold: number | null = null;
@@ -21,10 +21,6 @@ export function paintSky() {
     root.dataset.skyInk = next;
     document.dispatchEvent(new Event('sky-ink'));
   }
-  const readout = document.querySelector<HTMLElement>('[data-sky-clock-readout]');
-  const range = document.querySelector<HTMLInputElement>('[data-sky-clock-range]');
-  if (readout) readout.textContent = skyClock(minutes);
-  if (range && document.activeElement !== range) range.value = String(Math.round(minutes));
 }
 
 export function initSky() {
@@ -38,16 +34,6 @@ export function initSky() {
     paintSky();
   };
   tick();
-  const range = document.querySelector<HTMLInputElement>('[data-sky-clock-range]');
-  const now = document.querySelector<HTMLButtonElement>('[data-sky-clock-now]');
-  range?.addEventListener('input', () => {
-    hold = Number(range.value);
-    paintSky();
-  });
-  now?.addEventListener('click', () => {
-    hold = null;
-    paintSky();
-  });
   if (!timer) timer = window.setInterval(tick, 1000);
   document.addEventListener('visibilitychange', () => {
     if (!document.hidden) tick();
