@@ -39,12 +39,13 @@ sections:
 
       A modular building material allowing for custom designs, easy adjustability and modularity.
     images:
-      - src: >-
-          https://humansize-media.schnettker-johann.workers.dev/projects/analogue-couters/cover-mvaoawdg.mp4
-        alt: Analogue store on Zeedijk in Amsterdam, aluminium extrusion vitrines
-        caption: Analogue Store Zeedijk
-        href: /work/analogue-counters/
-        poster: /src/content/projects/analogue-counters/cover.jpg
+      - discriminant: project
+        value:
+          project: analogue-counters
+          alt: Analogue store on Zeedijk in Amsterdam, aluminium extrusion vitrines
+          caption: Analogue Store Zeedijk
+          href: /work/analogue-counters/
+          video: https://humansize-media.schnettker-johann.workers.dev/projects/analogue-couters/cover-mvaoawdg.mp4
   - heading: 3D Printing
     body: >-
       A conversation starter for many, as they browse through impossibly custom displays for your products.
@@ -52,26 +53,34 @@ sections:
 
       Great on its own, even better in combination with other materials to build larger structures. I bring a Bambu Lab P1S printer which steps up the quality. Production ready.
     images:
-      - src: /src/content/services/images/print-shelf.jpg
-        alt: Blue 3D printed shelf holding a Konica Pop camera behind glass
-        caption: ''
-        href: ''
-      - src: /src/content/services/images/print-shelves.jpg
-        alt: Blue 3D printed shelves hung on cables, each holding a camera
-        caption: ''
-        href: ''
+      - discriminant: image
+        value:
+          src: /src/content/services/images/print-shelf.jpg
+          alt: Blue 3D printed shelf holding a Konica Pop camera behind glass
+          caption: ''
+          href: ''
+      - discriminant: image
+        value:
+          src: /src/content/services/images/print-shelves.jpg
+          alt: Blue 3D printed shelves hung on cables, each holding a camera
+          caption: ''
+          href: ''
   - heading: Woodworking
     body: >-
       Cabinets and displays made out of wood. For this I have to carry more of my workshop, but its look and feel is hard to beat.
     images:
-      - src: /src/content/services/images/wood-stool.jpg
-        alt: Blue wooden stool with a book on top
-        caption: ''
-        href: ''
-      - src: /src/content/services/images/wood-shelf.jpg
-        alt: Plywood shelf on legs
-        caption: ''
-        href: ''
+      - discriminant: image
+        value:
+          src: /src/content/services/images/wood-stool.jpg
+          alt: Blue wooden stool with a book on top
+          caption: ''
+          href: ''
+      - discriminant: image
+        value:
+          src: /src/content/services/images/wood-shelf.jpg
+          alt: Plywood shelf on legs
+          caption: ''
+          href: ''
 faq:
   - question: Do you work outside Germany?
     answer: Yes, on site across Europe.

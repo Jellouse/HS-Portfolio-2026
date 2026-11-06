@@ -183,14 +183,34 @@ const products = defineCollection({
   }),
 });
 
-const serviceImage = z.object({
-  src: z.string(),
-  alt: z.string(),
-  caption: z.string().default(''),
-  href: z.string().default(''),
-  tbd: z.boolean().default(false),
-  poster: z.string().default(''),
+const serviceText = z.preprocess((value) => (typeof value === 'string' ? value : ''), z.string());
+
+const serviceFlag = z.preprocess((value) => value === true, z.boolean());
+
+const serviceProjectImage = z.object({
+  discriminant: z.literal('project'),
+  value: z.object({
+    project: serviceText,
+    alt: serviceText,
+    caption: serviceText,
+    href: serviceText,
+    video: serviceText,
+    tbd: serviceFlag,
+  }),
 });
+
+const serviceFileImage = z.object({
+  discriminant: z.literal('image'),
+  value: z.object({
+    src: serviceText,
+    alt: serviceText,
+    caption: serviceText,
+    href: serviceText,
+    tbd: serviceFlag,
+  }),
+});
+
+const serviceImage = z.discriminatedUnion('discriminant', [serviceProjectImage, serviceFileImage]);
 
 const serviceSection = z.object({
   heading: z.string(),

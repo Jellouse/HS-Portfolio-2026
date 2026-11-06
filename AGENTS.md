@@ -25,6 +25,7 @@ File names are kebab-case. A module that both pages use lives in `src/lib/` or `
 - One folder per project: `src/content/projects/<slug>/index.yaml` plus images in that folder
 - Products: `src/content/products/<slug>/index.yaml`
 - Image paths in YAML are absolute from the repo, like `/src/content/projects/atomic-ski/cover.jpg`
+- Services: `src/content/services/<slug>.yaml`. A project cover stores the project slug and the page reads that project's `cover`. Other photos are files in `src/content/services/images/`.
 
 ## Add a project
 

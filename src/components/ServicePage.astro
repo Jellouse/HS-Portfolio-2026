@@ -3,10 +3,11 @@ import BlurImage from './BlurImage.astro';
 import HeroBlob from './HeroBlob.astro';
 import VideoFrame from './VideoFrame.astro';
 import Prose from './sections/Prose.astro';
+import { getCollection, type CollectionEntry } from 'astro:content';
 import { paragraphs } from '../lib/content';
 import { resolveImageSource } from '../lib/images';
+import { resolveServiceImage } from '../lib/service-images.mjs';
 import { hasBracket, renderPlaceholders } from '../lib/services';
-import type { CollectionEntry } from 'astro:content';
 
 interface Props {
   entry: CollectionEntry<'services'>;
@@ -16,7 +17,17 @@ const { entry: s } = Astro.props;
 const d = s.data;
 const inquireService = s.data.title;
 const imageSizes = '(min-width: 760px) 666px, calc(100vw - 40px)';
-const videoSrc = /\.(mp4|webm|mov)(?:$|\?)/i;
+const projects = new Map((await getCollection('projects')).map((project) => [project.id, project.data]));
+const sections = d.sections.map((section, sectionIndex) => ({
+  ...section,
+  images: section.images.map((image, imageIndex) =>
+    resolveServiceImage(
+      image,
+      image.discriminant === 'project' ? projects.get(image.value.project) : undefined,
+      `src/content/services/${s.id}.yaml sections[${sectionIndex}].images[${imageIndex}]`,
+    ),
+  ),
+}));
 ---
 
 <article class="service-page page-grid">
@@ -61,7 +72,7 @@ const videoSrc = /\.(mp4|webm|mov)(?:$|\?)/i;
   }
 
   {
-    d.sections.map((section, sectionIndex) => (
+    sections.map((section, sectionIndex) => (
       <section class="service-page-section">
         <h2>{section.heading}</h2>
         <div class="service-page-text">
@@ -71,12 +82,11 @@ const videoSrc = /\.(mp4|webm|mov)(?:$|\?)/i;
         </div>
         <div class:list={['service-page-images', { 'is-pair': section.images.length === 2 }]}>
           {section.images.map((img, imageIndex) => {
-            const video = videoSrc.test(img.src);
             const priority = sectionIndex === 0 && imageIndex === 0;
             const poster = img.poster ? resolveImageSource(img.poster) : undefined;
             return (
-              <figure class:list={['service-page-figure', { 'is-video': video }]}>
-                {video ? (
+              <figure class:list={['service-page-figure', { 'is-video': img.video }]}>
+                {img.video ? (
                   <VideoFrame src={img.src} poster={poster} label={img.alt} priority={priority} />
                 ) : (
                   <BlurImage src={resolveImageSource(img.src)} alt={img.alt} sizes={imageSizes} priority={priority} />
