@@ -1,5 +1,5 @@
 import { BLOB_ASPECT, introFaceLayout, introRingLayout, shopRingWidth } from '../src/lib/intro-layout.ts';
-import { introCopyProgress, introScrollT, smoothIntro } from '../src/lib/intro-scroll.ts';
+import { introCopyProgress, introScaleFromScroll, introScrollT, smoothIntro } from '../src/lib/intro-scroll.ts';
 
 const d = introFaceLayout(844, 390);
 const desk = introFaceLayout(900, 1440);
@@ -41,6 +41,7 @@ if (desk.mobile) failures.push('desktop flagged mobile');
 if (introRingLayout(900, 1440).W0 !== shopRingWidth(900, 1440)) failures.push('desktop ring width');
 if (introScrollT(450, 900) !== 0.5) failures.push('introScrollT half');
 if (introCopyProgress(1, 0.5) !== 0 || introCopyProgress(0.5, 0.5) !== 1) failures.push('introCopyProgress');
+if (Math.abs(introScaleFromScroll(450, 900, 0.5) - 0.75) > 0.001) failures.push('introScaleFromScroll half');
 if (smoothIntro(0, 1, 16, 30) <= 0) failures.push('smoothIntro');
 if (failures.length) {
   console.error(failures.join('\n'));

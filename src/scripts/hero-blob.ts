@@ -2,6 +2,7 @@
 
 import { siteIntroSeen } from '../lib/site-intro';
 import { setHeroBlobSourceCut } from './hero-blob-cut';
+import { heroIntroScrolling } from './hero-blob-gl';
 
 let blobIntroStarted = false;
 const blobIntroWaiters: (() => void)[] = [];
@@ -187,7 +188,7 @@ export function initHeroBlob(root: ParentNode = document) {
 
     curX += (tgtX - curX) * ease;
     curY += (tgtY - curY) * ease;
-    paint();
+    if (!heroIntroScrolling()) paint();
     frame = onScreen && !document.hidden ? requestAnimationFrame(tick) : 0;
   };
   let onScreen = true;
@@ -274,7 +275,7 @@ async function initTouchLoop(svg: SVGSVGElement) {
 
   const tick = (t: number) => {
     now = t;
-    draw();
+    if (!heroIntroScrolling()) draw();
     frame = visible && !document.hidden ? requestAnimationFrame(tick) : 0;
   };
   const wake = () => {
