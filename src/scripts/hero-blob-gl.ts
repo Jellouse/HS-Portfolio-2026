@@ -65,6 +65,16 @@ let latest: HeroFrame = { scaleX: 1, scaleY: 1, stretch: 1 };
 let applyFrame: (frame: HeroFrame) => void = (frame) => {
   latest = frame;
 };
+let introScrolling = false;
+
+/** True while the homepage intro is actively scrubbing scroll scale. */
+export function setHeroIntroScrolling(on: boolean) {
+  introScrolling = on;
+}
+
+export function heroIntroScrolling() {
+  return introScrolling;
+}
 
 const snapFrame = (frame: HeroFrame): HeroFrame => ({
   scaleX: Math.round(frame.scaleX * 400) / 400,
@@ -267,8 +277,6 @@ export async function mountHeroBlobGL(svg: SVGSVGElement, opts: Opts) {
 
   let W = 0;
   let H = 0;
-  let virtW = 0;
-  let virtH = 0;
   let lastKey = '';
   let pxPerUnit = 1;
   let out = [0, 0, 1, 1];
@@ -280,16 +288,8 @@ export async function mountHeroBlobGL(svg: SVGSVGElement, opts: Opts) {
   let thickW = 0;
   let thickH = 0;
   let restStretch = 1;
-  let anchorX = 0;
-  let anchorYTop = 0;
-  let scaleX = latest.scaleX;
-  let scaleY = latest.scaleY;
-  let stretchU = latest.stretch;
   let fboW = 1;
   let fboH = 1;
-  let pixRatio = 1;
-  let viewLeft = 0;
-  let viewTop0 = 0;
   let srcTex: WebGLTexture | null = null;
   let a: ReturnType<typeof target> | null = null;
   let b: ReturnType<typeof target> | null = null;
@@ -312,43 +312,43 @@ export async function mountHeroBlobGL(svg: SVGSVGElement, opts: Opts) {
       return;
     }
     restStretch = stretch;
-    const region = regionFor(stretch);
+    const padU = scale / 2 + blurUser * 6;
+    const region = [
+      geom.x - padU,
+      stretch * (geom.y - padU),
+      geom.width + 2 * padU,
+      stretch * (geom.height + 2 * padU),
+    ];
     const vb = svg.viewBox.baseVal;
     const k = host.offsetWidth ? hr.width / host.offsetWidth : 1;
     const cssPerUnit = layoutCssW / vb.width;
-    pixRatio = Math.min(window.devicePixelRatio || 1, 2);
-    const dpr = pixRatio;
+    const cssW = region[2] * cssPerUnit;
+    const cssH = region[3] * cssPerUnit;
+    const budget = Math.max(1, window.innerWidth * window.innerHeight * 4);
+    let dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const area = Math.max(1, cssW * cssH);
+    if (area * dpr * dpr > budget) dpr = Math.sqrt(budget / area);
     pxPerUnit = cssPerUnit * dpr;
-    const x0 = Math.max(region[0], vb.x + (hr.left - r.left) / cssPerUnit);
-    const x1 = Math.min(region[0] + region[2], vb.x + (hr.right - r.left) / cssPerUnit);
-    const y0 = Math.max(region[1], vb.y + (hr.top - r.top) / cssPerUnit);
-    const y1 = Math.min(region[1] + region[3], vb.y + (hr.bottom - r.top) / cssPerUnit);
-    out = [x0, y0, Math.max(1 / pxPerUnit, x1 - x0), Math.max(1 / pxPerUnit, y1 - y0)];
-    virtW = Math.max(1, Math.floor(out[2] * pxPerUnit));
-    virtH = Math.max(1, Math.floor(out[3] * pxPerUnit));
-    W = Math.max(1, Math.floor(window.innerWidth * dpr));
-    H = Math.max(1, Math.floor(window.innerHeight * dpr));
+    out = region;
+    W = Math.max(1, Math.floor(cssW * dpr));
+    H = Math.max(1, Math.floor(cssH * dpr));
     if (canvas.width !== W || canvas.height !== H) {
       canvas.width = W;
       canvas.height = H;
     }
-    const leftPx = (r.left - hr.left + (out[0] - vb.x) * cssPerUnit) / k;
-    const topPx = (r.top - hr.top + (out[1] - vb.y) * cssPerUnit) / k;
-    viewLeft = hr.left + leftPx * k;
-    viewTop0 = hr.top + topPx * k;
+    const leftPx = (r.left - hr.left + (region[0] - vb.x) * cssPerUnit) / k;
+    const topPx = (r.top - hr.top + (region[1] - vb.y) * cssPerUnit) / k;
     Object.assign(canvas.style, {
       position: 'absolute',
-      left: `${-hr.left / k}px`,
-      top: `${-hr.top / k}px`,
-      width: `${window.innerWidth / k}px`,
-      height: `${window.innerHeight / k}px`,
+      left: `${leftPx}px`,
+      top: `${topPx}px`,
+      width: `${cssW / k}px`,
+      height: `${cssH / k}px`,
       pointerEvents: 'none',
       translate: 'none',
     });
     canvas.style.transform = '';
     canvas.style.transformOrigin = '';
-    anchorX = (279.5 - out[0]) * pxPerUnit;
-    anchorYTop = (stretch * 249 - out[1]) * pxPerUnit;
 
     mask = regionFor(1);
     const pxY = pxPerUnit * stretch;
@@ -402,11 +402,7 @@ export async function mountHeroBlobGL(svg: SVGSVGElement, opts: Opts) {
     },
     { passive: true },
   );
-  applyFrame = (frame) => {
-    scaleX = frame.scaleX;
-    scaleY = frame.scaleY;
-    stretchU = frame.stretch;
-  };
+  applyFrame = () => {};
   applyFrame(latest);
 
   const quad = (p: WebGLProgram) => {
@@ -420,71 +416,15 @@ export async function mountHeroBlobGL(svg: SVGSVGElement, opts: Opts) {
   const u = (p: WebGLProgram, n: string) => gl.getUniformLocation(p, n);
 
   const draw = () => {
+    if (heroIntroScrolling()) return;
     if (!a || !b || !srcTex || !noiseTex || !W) return;
     const o = opts.offset();
     const sourceCut = getHeroBlobSourceCut();
-    const atRest = Math.abs(scaleX - 1) < 0.0005 && Math.abs(scaleY - 1) < 0.0005;
-    const stretch = Math.max(0.0001, atRest ? restStretch : stretchU || restStretch);
-    let region = out;
-    let px = pxPerUnit;
-    let vpX = 0;
-    let vpY = 0;
-    let vpW = virtW;
-    let vpH = virtH;
-    if (!atRest) {
-      region = regionFor(stretch);
-      px = pxPerUnit * scaleX;
-      vpW = Math.max(1, Math.round(region[2] * px));
-      vpH = Math.max(1, Math.round(region[3] * px));
-      const vx = (279.5 - region[0]) * px;
-      const vyTop = (stretch * 249 - region[1]) * px;
-      const top = anchorYTop - vyTop;
-      vpX = Math.round(anchorX - vx);
-      vpY = Math.round(virtH - top - vpH);
-    }
-    const scroll = window.scrollY;
-    const screenX = viewLeft * pixRatio + vpX;
-    const yTop = virtH - (vpY + vpH);
-    const screenY = (viewTop0 - scroll) * pixRatio + yTop;
-    let rx = Math.round(screenX);
-    let ry = Math.round(H - (screenY + vpH));
-    let rw = vpW;
-    let rh = vpH;
-    if (rx < 0) {
-      const cut = -rx / rw;
-      region = [region[0] + cut * region[2], region[1], region[2] * (1 - cut), region[3]];
-      rw += rx;
-      rx = 0;
-    }
-    if (ry < 0) {
-      const cut = -ry / rh;
-      region = [region[0], region[1], region[2], region[3] * (1 - cut)];
-      rh += ry;
-      ry = 0;
-    }
-    if (rx + rw > W) {
-      const cut = (rx + rw - W) / rw;
-      region = [region[0], region[1], region[2] * (1 - cut), region[3]];
-      rw = W - rx;
-    }
-    if (ry + rh > H) {
-      const cut = (ry + rh - H) / rh;
-      region = [region[0], region[1] + cut * region[3], region[2], region[3] * (1 - cut)];
-      rh = H - ry;
-    }
-    if (rw < 1 || rh < 1) {
-      gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-      gl.viewport(0, 0, W, H);
-      gl.clearColor(0, 0, 0, 0);
-      gl.clear(gl.COLOR_BUFFER_BIT);
-      return;
-    }
-    vpX = rx;
-    vpY = ry;
-    vpW = rw;
-    vpH = rh;
-    const pin = Math.round(scroll);
-    if (canvas.style.translate !== `0 ${pin}px`) canvas.style.translate = `0 ${pin}px`;
+    const stretch = Math.max(0.0001, restStretch);
+    const region = out;
+    const px = pxPerUnit;
+    const vpW = W;
+    const vpH = H;
     const lw = Math.max(1, Math.round(vpW / 2));
     const lh = Math.max(1, Math.round(vpH / 2));
     const coverX = lw / fboW;
@@ -569,7 +509,6 @@ export async function mountHeroBlobGL(svg: SVGSVGElement, opts: Opts) {
     gl.viewport(0, 0, W, H);
     gl.clearColor(0, 0, 0, 0);
     gl.clear(gl.COLOR_BUFFER_BIT);
-    gl.viewport(vpX, vpY, vpW, vpH);
     gl.useProgram(pCut);
     gl.bindTexture(gl.TEXTURE_2D, a.t);
     gl.uniform1i(u(pCut, 'tex'), 0);

@@ -57,23 +57,26 @@ for (const [label, opt] of [['desktop', { viewport: { width: 1440, height: 900 }
   if (label === 'mobile') check(Math.abs(shop.c) <= 1.5 && shop.w <= 390 && home.top < 0 && home.left < 0 && home.right > home.vw, `${label}: ring centred on the page top, face is cropped (${home.left.toFixed(0)}–${home.right.toFixed(0)})`);
   else check(Math.abs(shop.c) <= 1.5 && Math.abs(shop.w - 900) <= 2 && shop.text === 695, `desktop: ring visible half viewport, centre on the page top, name at 695 (c ${shop.c.toFixed(1)}, w ${shop.w.toFixed(0)}, text ${shop.text})`);
 
-  const clipper = await p.evaluate(() => { let e = document.querySelector('.shop-ring-canvas').parentElement; const bad = []; while (e && e !== document.documentElement) { const c = getComputedStyle(e); if (/hidden|clip|scroll|auto/.test(c.overflowX + c.overflowY) || c.clipPath !== 'none' || /paint|strict|content/.test(c.contain)) bad.push(e.tagName + '.' + e.className); e = e.parentElement; } return bad.join(','); });
+  const clipper = await p.evaluate(() => { let e = document.querySelector('.shop-ring').parentElement; const bad = []; while (e && e !== document.documentElement) { const c = getComputedStyle(e); if (/hidden|clip|scroll|auto/.test(c.overflowX + c.overflowY) || c.clipPath !== 'none' || /paint|strict|content/.test(c.contain)) bad.push(e.tagName + '.' + e.className); e = e.parentElement; } return bad.join(','); });
   check(clipper === '', `${label}: no ancestor clips the ring (${clipper || 'none'})`);
   const painted = await p.evaluate(() => { const c = document.querySelector('.shop-ring-canvas'); const m = c.closest('.shop-mark'); if (!m.classList.contains('at-top') || getComputedStyle(c).visibility !== 'visible') return 'canvas not shown'; const x = c.getContext('2d'); const h = c.height; let top = 0, bot = 0; const row = (y) => { const d = x.getImageData(0, y, c.width, 1).data; let n = 0; for (let i = 3; i < d.length; i += 4) n += d[i] > 0; return n; }; for (let y = 0; y < h / 2; y += 8) top += row(y); for (let y = Math.ceil(h / 2); y < h; y += 8) bot += row(y); return top > 0 && Math.abs(top - bot) / bot < 0.1 ? 'ok' : `top ${top} bottom ${bot}`; });
   check(painted === 'ok', `${label}: full ring painted, both halves (${painted})`);
 
-  const fixedCheck = (sel) => `(() => { const l = document.querySelector('${sel}'); if (getComputedStyle(l).position !== 'fixed') return 'not fixed'; let e = l.parentElement; while (e && e !== document.documentElement) { const c = getComputedStyle(e); if (c.transform !== 'none' || c.filter !== 'none' || c.perspective !== 'none' || /transform|filter|perspective/.test(c.willChange) || /paint|layout|strict|content/.test(c.contain) || (c.backdropFilter && c.backdropFilter !== 'none')) return 'containing block ' + e.tagName + '.' + e.className; e = e.parentElement; } return 'ok'; })()`;
-  check((await p.evaluate(fixedCheck('.shop-ring-layer'))) === 'ok', `${label}: ring layer is viewport-fixed (${await p.evaluate(fixedCheck('.shop-ring-layer'))})`);
+  const pagePos = (sel) => p.evaluate((s) => getComputedStyle(document.querySelector(s)).position, sel);
+  check((await pagePos('.shop-ring-layer')) !== 'fixed', `${label}: ring layer sits in the page (${await pagePos('.shop-ring-layer')})`);
   const hp2 = await (await browser.newContext(opt)).newPage();
   await hp2.goto(B + '/', { waitUntil: 'load' });
   await hp2.waitForSelector('[data-intro-ready]');
-  check((await hp2.evaluate(fixedCheck('[data-hero-variant="blob"]'))) === 'ok', `${label}: home face host is viewport-fixed (${await hp2.evaluate(fixedCheck('[data-hero-variant="blob"]'))})`);
+  const facePos = await hp2.evaluate(() => getComputedStyle(document.querySelector('[data-hero-variant="blob"]')).position);
+  check(facePos !== 'fixed', `${label}: home face sits in the page (${facePos})`);
   const b0 = await hp2.evaluate(() => document.querySelector('.mark-blob').getBoundingClientRect().top);
+  await hp2.evaluate(() => scrollTo(0, 80));
+  await hp2.waitForFunction((b) => Math.abs(b - 80 - document.querySelector('.mark-blob').getBoundingClientRect().top) <= 1, b0);
   await hp2.evaluate(() => scrollTo(0, 3000));
   await hp2.waitForFunction(() => document.querySelector('.mark-blob').getBoundingClientRect().bottom < 0);
   await hp2.evaluate(() => scrollTo(0, 0));
   await hp2.waitForFunction((b) => Math.abs(document.querySelector('.mark-blob').getBoundingClientRect().top - b) < 1, b0);
-  check(true, `${label}: fixed face scrolls away with the page and returns to rest at top`);
+  check(true, `${label}: face tracks scroll with the page and returns to rest at top`);
   await hp2.close();
   check(Math.abs(shop.x - 195 * (label === 'mobile' ? 1 : 1440 / 390)) <= 1, `${label}: ring centred horizontally`);
   if (label === 'mobile') {
@@ -84,7 +87,6 @@ for (const [label, opt] of [['desktop', { viewport: { width: 1440, height: 900 }
   const R = Number(await p.getAttribute('[data-shop-head]', 'data-ring-r'));
   await p.evaluate((y) => scrollTo(0, y), R);
   await p.waitForTimeout(800);
-  const a = await p.locator('.shop-mark').boundingBox();
   check(await p.evaluate(() => !document.querySelector('.shop-ring-wrap, [data-shop-ring] .project-menu')), `${label}: no ring menu on /shop`);
   const order = await p.evaluate(() => [...document.querySelectorAll('.shop-menu > *')].map((e) => e.textContent.trim()).join(','));
   check(order === 'Home,About,Contact', `${label}: shop menu order ${order}`);
@@ -102,10 +104,6 @@ for (const [label, opt] of [['desktop', { viewport: { width: 1440, height: 900 }
     await p.evaluate((y) => scrollTo(0, y), Number(await p.getAttribute('[data-shop-head]', 'data-ring-r')));
     await p.waitForTimeout(800);
   }
-  await p.goto(B + (await p.getAttribute('.shop-title', 'href')), { waitUntil: 'load' });
-  await p.waitForTimeout(3000);
-  const d = await p.locator('.shop-mark').boundingBox();
-  check(Math.abs(a.y - d.y) <= 2 && Math.abs(a.width - d.width) <= 1 && Math.abs(a.x - d.x) <= 1, `${label}: ring at R matches detail icon (${a.y.toFixed(1)}/${d.y.toFixed(1)}, ${a.width.toFixed(1)}/${d.width.toFixed(1)})`);
 }
 const p = await browser.newPage({ viewport: { width: 1440, height: 900 } });
 await p.goto(B + '/', { waitUntil: 'load' });

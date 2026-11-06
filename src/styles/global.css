@@ -2226,19 +2226,16 @@ body .site-header.is-menu-fade:not(.is-menu-open) .who .time {
 .hero[data-intro] {
   padding-top: 0;
   overflow-x: clip;
+  overflow-y: clip;
 }
 
 .hero[data-intro] .mark-wrap {
   min-height: 100svh;
+  overflow: visible;
 }
 
 .hero[data-intro] [data-hero-variant="blob"] {
-
-  position: fixed;
-  inset: -100lvh -50% auto;
-  height: calc(100lvh + 100svh);
-  transform-origin: 50% var(--intro-origin, 0);
-  will-change: transform;
+  overflow: visible;
 }
 
 .hero[data-intro] .mark-blob {
@@ -2249,7 +2246,6 @@ body .site-header.is-menu-fade:not(.is-menu-open) .who .time {
 }
 
 .mark-blob-gl {
-  will-change: transform;
   contain: strict;
 }
 
@@ -2681,26 +2677,25 @@ html.is-contact-open body {
 }
 
 .shop-ring-layer {
-
-  position: fixed;
-  top: -100lvh;
+  position: absolute;
+  top: 0;
   right: 0;
   left: 0;
   z-index: 2;
-  height: 100lvh;
-  transform-origin: 50% var(--ring-origin, 100lvh);
-  will-change: transform;
+  height: 0;
+  overflow: visible;
   pointer-events: none;
 }
 
 .shop-ring {
   position: absolute;
-  top: calc(100lvh - var(--ring-w) / 2);
+  top: calc(var(--ring-w) / -2);
   left: 50%;
   box-sizing: border-box;
   width: var(--ring-w, min(100vw, round(100svh, 1px)));
   height: var(--ring-w, min(100vw, round(100svh, 1px)));
   margin-left: calc(var(--ring-w) / -2);
+  overflow: clip;
   pointer-events: auto;
 }
 
