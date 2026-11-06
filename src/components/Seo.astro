@@ -27,11 +27,11 @@ const og = image
     })
   : null;
 
-const useBlob = Astro.url.pathname === '/' || !og;
-const ogUrl = useBlob ? new URL('/og/humansize-blob.gif', Astro.site).href : new URL(og!.src, Astro.site).href;
-const ogW = useBlob ? 1200 : og!.attributes.width ?? Math.min(1200, image!.width);
-const ogH = useBlob ? 630 : og!.attributes.height ?? Math.min(630, image!.height);
-const ogType = useBlob ? 'image/gif' : 'image/jpeg';
+const useShare = Astro.url.pathname === '/' || !og;
+const ogUrl = useShare ? new URL('/og/humansize.jpg', Astro.site).href : new URL(og!.src, Astro.site).href;
+const ogW = useShare ? 1024 : og!.attributes.width ?? Math.min(1200, image!.width);
+const ogH = useShare ? 640 : og!.attributes.height ?? Math.min(630, image!.height);
+const ogType = 'image/jpeg';
 const json = jsonLd
   ? JSON.stringify(jsonLd).replace(/</g, '\u003c')
   : '';
