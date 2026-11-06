@@ -1,6 +1,6 @@
 # Component map
 
-Pages compose these. Paths are from the repo root. Public routes are the pages a visitor can open. `src/components/sections/registry.mjs` is the same list the dev catalogue and `npm run check:design` read.
+Pages compose these. Paths are from the repo root. Public routes are the pages a visitor can open. `src/components/sections/registry.mjs` is the same list the dev catalogue reads.
 
 The catalogue is `/dev/components` in `astro dev`. It is not part of the production build, the sitemap, or `/canvas`.
 

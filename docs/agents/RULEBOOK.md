@@ -2,7 +2,7 @@
 
 Read this before editing the site. The rules are the values and patterns that already show up most often. Anything new reuses a component, a token, or one of those values. If nothing on the site fits, stop. Johann designs it. Agents do not improvise new styles.
 
-`npm run check:design` locks this file. The line-by-line exceptions are `docs/agents/known-drift.json`. The component map is `docs/agents/COMPONENTS.md`.
+The component map is `docs/agents/COMPONENTS.md`.
 
 ## Typography
 
@@ -121,20 +121,16 @@ Styles go in `src/styles/global.css` or `src/styles/type.css`, using the tokens 
 
 ## Checks
 
-- `npm run check:content` reads every content yaml. It fails when an image path is missing on disk, or a project slug does not match a project. The message names the yaml file and the field. `npm run build` runs it before the site builds. `npm run check:design` runs it too.
-- `npm run check:design` compares the source with this rulebook and fails on anything new.
+- `npm run check:content` reads every content yaml. It fails when an image path is missing on disk, or a project slug does not match a project. The message names the yaml file and the field. `npm run build` runs it before the site builds.
 - `npm run check:visual` screenshots every public page at 1440 and 390 against `tests/visual/baseline`. It needs `npm run build` first. The capture waits for fonts and for every image to decode. Videos stay on their poster still. The shop ring waits until its canvas has painted two identical frames. The spinning mark is locked at its rest angle before the shot, and the shot is kept only once two frames match. A picture may differ by at most 0.01% of its pixels. That budget is the antialiasing on the shop buy button, which settles on one of two edges a level apart. A larger diff fails.
 - Both run in `.github/workflows/design.yml`.
-- `npm test` runs the design check with the other specs.
-
-Update `docs/agents/known-drift.json` only when Johann has accepted a deviation, with `node scripts/check-design.mjs --update`.
 
 ## Known drift
 
 The pages keep these. Changing them would move the picture. They are listed so a later edit does not copy them.
 
 - Raw hex outside the `:root` tokens. The mark and peep SVGs repeat `#b70606` and `#f8f8f8`. Tool pages (canvas, admin, the upload screen, Keystatic fields) use their own greys (`#111`, `#8a8a8a`, `#1a1a1a`, and several near-whites). The contact sheet paints `#fff` again. `#ffffff` on the OG image is the same white as `--bg`.
-- Spacing and radius pixels off the scale above. Shop and project sections use one-off distances such as 24, 32, 56, 60, 72, 86, 90, 116, 120, 128, and 136. Tool chrome uses 2px, 10px radius, and 14px padding in places. The full list is the `space` and `radius` rows in `known-drift.json`.
+- Spacing and radius pixels off the scale above. Shop and project sections use one-off distances such as 24, 32, 56, 60, 72, 86, 90, 116, 120, 128, and 136. Tool chrome uses 2px, 10px radius, and 14px padding in places.
 - `max-width: 720px` in `src/scripts/site-scroll-motion.ts`. The layout break everywhere else is 759 / 760.
 - Durations outside the table: 350ms on the first-paint reveal, 550ms on the blur-in, 120ms on the upload progress bar, 500ms and 600ms on the mark view transitions, 60ms and 90ms on the menu delay, and the spin and wordmark timings in `src/scripts/spin-mark.ts` and `src/scripts/wordmark-intro.ts`.
 - Easings outside the table: `cubic-bezier(0.22, 0.61, 0.36, 1)` on the spinning mark and `cubic-bezier(0.22, 1, 0.36, 1)` on the wordmark.

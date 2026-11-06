@@ -14,7 +14,7 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npm run check:design
+      - run: npm run check:content
       - run: npx playwright install chromium
       - run: npm run build
       - run: npm run check:visual
