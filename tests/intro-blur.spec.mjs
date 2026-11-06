@@ -135,6 +135,34 @@ async function check(page, label, viewport) {
     console.log(`${label}: "${placed.text}" blur ${blur.toFixed(2)}px -> ${clear.toFixed(2)}px`);
   }
 
+  await page.evaluate((band) => {
+    const word = document.querySelector('[data-blur-probe]');
+    const top = word.getBoundingClientRect().top;
+    scrollTo(0, scrollY + top - band * 0.4);
+  }, band);
+  await page.waitForTimeout(50);
+  const leaving = await page.evaluate(() => {
+    const word = document.querySelector('[data-blur-probe]');
+    if (!word) return null;
+    const style = getComputedStyle(word);
+    return {
+      filter: style.filter,
+      opacity: Number(style.opacity),
+      transform: style.transform,
+      top: word.getBoundingClientRect().top,
+      vh: innerHeight,
+    };
+  });
+  const leaveBlur = blurPx(leaving?.filter || '');
+  const inExitBand = leaving && leaving.top > 2 && leaving.top < leaving.vh * 0.15;
+  if (!(inExitBand && leaveBlur > 1 && leaving.opacity < 0.75 && leaving.opacity > 0.15 && /matrix\(1, 0, 0, 1, 0, -/.test(leaving.transform))) {
+    failures.push(
+      `${label}: "${placed.text}" did not blur out at the top (${leaving?.filter}, opacity ${leaving?.opacity}, ${leaving?.transform}, top ${Math.round(leaving?.top || 0)})`,
+    );
+  } else {
+    console.log(`${label}: "${placed.text}" exit blur ${leaveBlur.toFixed(2)}px`);
+  }
+
   await page.evaluate(() => scrollTo(0, 0));
   await page.waitForTimeout(400);
   const atRest = await page.evaluate(() => {
@@ -142,11 +170,12 @@ async function check(page, label, viewport) {
       const match = /blur\(([-\d.]+)px\)/.exec(filter);
       return match ? Number(match[1]) : 0;
     };
+    const band = innerHeight * 0.15;
     const end = innerHeight * 0.85;
     for (const word of document.querySelectorAll('.is-split .reveal-word')) {
       if (word.closest('.reveal-manual, [data-no-reveal], .sr-only')) continue;
       const top = word.getBoundingClientRect().top;
-      if (top < 0 || top > end) continue;
+      if (top < band || top > end) continue;
       const style = getComputedStyle(word);
       const b = parseBlur(style.filter);
       if (b > 0.5 || Number(style.opacity) < 0.99) {

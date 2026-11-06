@@ -74,7 +74,19 @@ for (const url of urls) {
   for (const b of blocks.filter((x) => x.host)) {
     await page.evaluate((id) => document.querySelector(`[data-reveal-test="${id}"]`).scrollIntoView({ block: 'center' }), b.id);
     await page.waitForTimeout(120);
-    const end = await page.evaluate((id) => [...document.querySelectorAll(`[data-reveal-test="${id}"] .reveal-word`)].every((w) => { const s = getComputedStyle(w); return +s.opacity > 0.99 && !/blur\((?!0px)/.test(s.filter); }), b.id);
+    const end = await page.evaluate((id) => {
+      const words = [...document.querySelectorAll(`[data-reveal-test="${id}"] .reveal-word`)];
+      const band = innerHeight * 0.15;
+      const clear = words.filter((w) => {
+        const top = w.getBoundingClientRect().top;
+        return top >= band && top <= innerHeight - band;
+      });
+      if (!clear.length) return false;
+      return clear.every((w) => {
+        const s = getComputedStyle(w);
+        return +s.opacity > 0.99 && !/blur\((?!0px)/.test(s.filter);
+      });
+    }, b.id);
     if (!end) failures.push(`${url}: "${b.text}" did not reach the final state in view`);
   }
   console.log(`${url}: ${blocks.length} below-the-fold text blocks`);
