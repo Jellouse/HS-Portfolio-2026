@@ -66,7 +66,7 @@ Sizes folded into the scale (these surfaces are tools, not the public pages):
 
 Do not change these. They are the design.
 
-- Scroll-linked blur reveal: `src/scripts/text-blur-scroll.ts` paints `.reveal-word` on scroll (15vh band). Link underlines use the same `--reveal` progress.
+- Scroll-linked blur reveal: `src/scripts/text-blur-scroll.ts` paints `.reveal-word` on scroll (15vh band at the bottom, the same band in reverse at the top). Link underlines use the same `--reveal` progress.
 - Links: 1px underline, 3px offset (`text-underline-offset: 3px`).
 - `@Humansize` on desktop hover: the `@` fades in and the word slides so the pair stays centred on the same point. The shift is `translateX(-50%)` of the `@` itself (`Header.astro`, `.brand-shift`). No measured width.
 - Homepage face and shop ring: size comes from `src/lib/intro-layout.ts` and `src/lib/viewport-layout.ts`. They sit in the page and scroll with it. Intro nav fade still uses `src/scripts/intro-face.ts`, `src/scripts/shop-intro.ts`, and `src/lib/intro-scroll.ts`.

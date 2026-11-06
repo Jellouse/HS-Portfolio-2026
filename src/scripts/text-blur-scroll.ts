@@ -8,23 +8,31 @@ function clamp(v: number, lo = 0, hi = 1) {
   return Math.min(hi, Math.max(lo, v));
 }
 
-/** Same band as the old `animation-range: cover 0px cover 15vh` on `.reveal-word`. */
-export function wordRevealProgress(word: HTMLElement, vh: number) {
+/**
+ * Enter across the bottom 15vh, the old `animation-range: cover 0px cover 15vh`.
+ * Leave across the top 15vh: the same blur, fade, and 4px shift, aimed up.
+ */
+export function wordRevealState(word: HTMLElement, vh: number) {
   const top = word.getBoundingClientRect().top;
-  const start = vh;
-  const end = vh * (1 - RANGE);
-  if (top >= start) return 0;
-  if (top <= end) return 1;
-  return (start - top) / (start - end);
+  const band = vh * RANGE;
+  if (band <= 0) return { progress: top < vh ? 1 : 0, leaving: false };
+  const enter = clamp((vh - top) / band);
+  const exit = clamp(top / band);
+  return { progress: Math.min(enter, exit), leaving: exit < enter };
 }
 
-export function applyWordReveal(word: HTMLElement, t: number) {
+export function wordRevealProgress(word: HTMLElement, vh: number) {
+  return wordRevealState(word, vh).progress;
+}
+
+export function applyWordReveal(word: HTMLElement, t: number, leaving = false) {
   const p = clamp(t);
   const blur = BLUR_PX * (1 - p);
+  const lift = LIFT_PX * (1 - p);
   word.style.setProperty('--reveal', p.toFixed(3));
   word.style.opacity = p.toFixed(3);
   word.style.filter = blur > 0.05 ? `blur(${blur.toFixed(2)}px)` : 'none';
-  word.style.transform = p < 1 ? `translateY(${(LIFT_PX * (1 - p)).toFixed(2)}px)` : 'none';
+  word.style.transform = p < 1 ? `translateY(${(leaving ? -lift : lift).toFixed(2)}px)` : 'none';
 }
 
 export function clearWordReveal(word: HTMLElement) {
@@ -58,7 +66,10 @@ function schedulePaint() {
 export function paintScrollWords(root: ParentNode = document) {
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   const vh = document.documentElement.clientHeight || window.innerHeight;
-  for (const word of collectWords(root)) applyWordReveal(word, wordRevealProgress(word, vh));
+  for (const word of collectWords(root)) {
+    const { progress, leaving } = wordRevealState(word, vh);
+    applyWordReveal(word, progress, leaving);
+  }
 }
 
 /** Run once layout has had a frame to settle (intro, fonts, media unhide). */
