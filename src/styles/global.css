@@ -53,9 +53,14 @@
   --mark-small-w: 64px;
   --mark-small-top: 32px;
   --ink: #000;
-  --ink-40: rgba(0, 0, 0, 0.4);
+  --ink-40: var(--ink-40-fixed);
+  --ink-fixed: #000;
+  --ink-40-fixed: rgba(0, 0, 0, 0.4);
   --muted: var(--ink-40);
   --bg: #fff;
+  --bg-40: rgba(255, 255, 255, 0.4);
+  --sky-day: #fff;
+  --sky-night: #000;
   --bg-mobile: #fff;
   --red: #b70606;
   --service-face: #b0b0b0;
@@ -311,6 +316,29 @@ body:has(.hero) .site-header {
   width: min(var(--card), calc(100vw - 40px));
   margin: 0;
   transform: translate(-50%, -50%);
+  transition: color var(--dur-ui) var(--ease-out);
+}
+
+html:has([data-sky]) body {
+  transition: color var(--dur-ui) var(--ease-out);
+}
+
+html[data-sky-ink='white'] body:has([data-sky]) {
+  --ink: var(--bg);
+  --ink-40: var(--bg-40);
+  --muted: var(--bg-40);
+  color: var(--bg);
+}
+
+.contact-panel,
+.sky-clock,
+.shop-buy-button,
+.services-landing .shop-button,
+.service-page-process-pill {
+  --ink: var(--ink-fixed);
+  --ink-40: var(--ink-40-fixed);
+  --muted: var(--ink-40-fixed);
+  color: var(--ink-fixed);
 }
 
 .who {
@@ -496,6 +524,59 @@ body:has(.hero) .site-header {
   display: none !important;
 }
 
+.sky {
+  position: fixed;
+  z-index: -1;
+  inset: 0;
+  pointer-events: none;
+  background: var(--sky-day);
+}
+
+html:has([data-sky]),
+html:has([data-sky]) body {
+  background: transparent;
+}
+
+.sky-clock {
+  position: fixed;
+  z-index: 30;
+  left: 50%;
+  bottom: var(--pad);
+  display: flex;
+  align-items: center;
+  gap: var(--gutter);
+  margin: 0;
+  padding: var(--space-2xs) var(--gutter);
+  transform: translateX(-50%);
+  background: var(--bg);
+  color: var(--ink-fixed);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-meta);
+  line-height: var(--lh-meta);
+}
+
+.sky-clock label {
+  display: flex;
+  align-items: center;
+  gap: var(--gutter);
+}
+
+.sky-clock input {
+  width: 160px;
+  margin: 0;
+}
+
+.sky-clock button {
+  padding: 0;
+  font: inherit;
+  font-size: var(--text-meta);
+  line-height: var(--lh-meta);
+  color: inherit;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
 .hero .mark-blob {
   --mark-scale: 1;
   color: var(--red);
@@ -505,6 +586,11 @@ body:has(.hero) .site-header {
   height: auto;
   transform: translate(-50%, -50%);
   overflow: visible;
+}
+
+.js .hero .mark-blob,
+.js .hero .mark-blob-gl {
+  color: var(--ink);
 }
 
 .feed {
@@ -1511,7 +1597,7 @@ html:active-view-transition-type(hs-shrink)::view-transition-new(hs-mark) {
 }
 
 ::view-transition {
-  background: var(--page-bg, var(--bg));
+  background: transparent;
 }
 
 ::view-transition-image-pair(root) {
@@ -3205,7 +3291,7 @@ body.is-services-landing main#content {
 }
 
 .service-face {
-  color: var(--service-face);
+  color: var(--ink);
 }
 
 .service-page-mark .service-face {

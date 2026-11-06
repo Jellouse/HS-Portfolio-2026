@@ -178,9 +178,9 @@ export async function mountHeroBlobGL(svg: SVGSVGElement, opts: Opts) {
   const table = (svg.querySelector('feFuncA')?.getAttribute('tableValues') || '0 0 1 1 1 1 1 1').trim().split(/\s+/);
   const cut = Math.max(0, table.indexOf('1')) / table.length;
   const flood = svg.querySelector('feFlood')?.getAttribute('flood-color') || '';
-  const colourSource = !flood || flood === 'currentColor' ? getComputedStyle(svg).color : flood;
-  const rgb = (() => {
-    const hex = colourSource.trim();
+  const tracksCss = !flood || flood === 'currentColor';
+  const parseColour = (source: string) => {
+    const hex = source.trim();
     if (hex.startsWith('#')) {
       const h = (hex.length === 4 ? hex.slice(1).split('').map((c) => c + c).join('') : hex.slice(1));
       return [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16) / 255);
@@ -188,7 +188,16 @@ export async function mountHeroBlobGL(svg: SVGSVGElement, opts: Opts) {
     const nums = hex.match(/[\d.]+/g);
     if (nums && nums.length >= 3) return nums.slice(0, 3).map((n) => Number(n) / 255);
     return [0xb7 / 255, 0x06 / 255, 0x06 / 255];
-  })();
+  };
+  let rgb = parseColour(tracksCss ? getComputedStyle(svg).color : flood);
+  let colourCss = tracksCss ? getComputedStyle(svg).color : '';
+  const syncColour = () => {
+    if (!tracksCss) return;
+    const next = getComputedStyle(svg).color;
+    if (next === colourCss) return;
+    colourCss = next;
+    rgb = parseColour(next);
+  };
 
   const PAD = 40;
   const NRES = 2;
@@ -565,6 +574,7 @@ export async function mountHeroBlobGL(svg: SVGSVGElement, opts: Opts) {
     gl.bindTexture(gl.TEXTURE_2D, a.t);
     gl.uniform1i(u(pCut, 'tex'), 0);
     gl.uniform2f(u(pCut, 'cover'), coverX, coverY);
+    syncColour();
     gl.uniform3f(u(pCut, 'colour'), rgb[0], rgb[1], rgb[2]);
     gl.uniform1f(u(pCut, 'cut'), cut);
     quad(pCut);

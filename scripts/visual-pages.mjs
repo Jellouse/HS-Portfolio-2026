@@ -101,7 +101,8 @@ export async function capture(outDir, port = 4377) {
       const page = await context.newPage();
       for (const route of pages) {
         const file = join(outDir, fileName(route, vp.tag));
-        const url = route === '/404' ? '/404.html' : route;
+        const path = route === '/404' ? '/404.html' : route;
+        const url = path + (path.includes('?') ? '&' : '?') + 't=720';
         await page.goto(`http://127.0.0.1:${port}${url}`, { waitUntil: 'networkidle', timeout: 120000 });
         await page.evaluate(() => document.fonts.ready);
         await page.evaluate(async () => {

@@ -62,7 +62,8 @@ for (const vp of viewports) {
   for (const path of pages) {
     const slug = path.replace(/\//g, '') || 'home';
     const file = join(outDir, `${slug}-${vp.tag}.png`);
-    await page.goto(`http://127.0.0.1:${port}${path}`, { waitUntil: 'networkidle', timeout: 120000 });
+    const shotPath = path + (path.includes('?') ? '&' : '?') + 't=720';
+    await page.goto(`http://127.0.0.1:${port}${shotPath}`, { waitUntil: 'networkidle', timeout: 120000 });
     await page.evaluate(() => document.fonts.ready);
     await page.evaluate(async () => {
       const height = document.documentElement.scrollHeight;

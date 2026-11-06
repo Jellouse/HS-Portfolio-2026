@@ -29,6 +29,8 @@ export function initShopIntro(head: HTMLElement) {
   canvas.setAttribute('aria-hidden', 'true');
   mark.appendChild(canvas);
   let drawn = 0;
+  let ringW = 0;
+  let ringPaintBound = false;
   const paintCanvas = (w: number) => {
     const px = Math.round(w * Math.min(2, devicePixelRatio || 1));
     if (px === drawn) return;
@@ -94,8 +96,16 @@ export function initShopIntro(head: HTMLElement) {
     head.dataset.ringR = String(R);
     head.dataset.ringReady = '';
     head.dataset.ringW = String(W0);
+    ringW = W0;
     paintCanvas(W0);
     follow();
+    if (!ringPaintBound) {
+      ringPaintBound = true;
+      document.addEventListener('sky-ink', () => {
+        drawn = 0;
+        paintCanvas(ringW);
+      });
+    }
     cur = NaN;
     document.dispatchEvent(new CustomEvent('intro-layout'));
     write(performance.now());
