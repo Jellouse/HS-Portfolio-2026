@@ -1,8 +1,7 @@
 ---
 export const prerender = true;
 
-import mark from '../../assets/industrial-bloom-mark.svg?raw';
-import CornerMark from '../../components/sections/CornerMark.astro';
+import MainMenu from '../../components/sections/MainMenu.astro';
 import ShopBuyBar from '../../components/sections/ShopBuyBar.astro';
 import ShopCopy from '../../components/sections/ShopCopy.astro';
 import ShopDetailHead from '../../components/sections/ShopDetailHead.astro';
@@ -69,9 +68,7 @@ const half = '(min-width: 760px) 272px, calc((100vw - 48px) / 2)';
   safeArea
 >
   <article class="shop-detail page-grid" data-slug={product.id}>
-    <CornerMark class="shop-detail-mark project-mark is-ring" href="/shop/" label="Industrial Bloom shop">
-      <span class="shop-mark" data-spin-mark set:html={mark} />
-    </CornerMark>
+    <MainMenu variant="project" />
     <ShopDetailHead title={title} slug={product.id} eur={eur} />
     <ShopCopy text={intro} />
     {images.map((img, i) => (
@@ -87,16 +84,6 @@ const half = '(min-width: 760px) 272px, calc((100vw - 48px) / 2)';
 </Base>
 
 <script>
-  import { initSpinMark } from '../../scripts/spin-mark';
-  import { initProjectMenu } from '../../scripts/project-menu';
-  initProjectMenu();
-
-  const start = () => {
-    const el = document.querySelector<HTMLElement>('[data-spin-mark]');
-    if (el) initSpinMark(el);
-  };
-  start();
-
   import { applyStock } from '../../lib/shop/label.mjs';
   import { applyPrices, showBuyNote } from '../../scripts/shop-price';
   showBuyNote();
@@ -115,9 +102,6 @@ const half = '(min-width: 760px) 272px, calc((100vw - 48px) / 2)';
   };
   refreshBuy();
   addEventListener('pageshow', (e) => {
-    if (e.persisted) {
-      start();
-      refreshBuy();
-    }
+    if (e.persisted) refreshBuy();
   });
 </script>

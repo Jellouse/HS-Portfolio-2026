@@ -70,7 +70,7 @@ Do not change these. They are the design.
 - Links: 1px underline, 3px offset (`text-underline-offset: 3px`).
 - `@Humansize` on desktop hover: the `@` fades in and the word slides so the pair stays centred on the same point. The shift is `translateX(-50%)` of the `@` itself (`Header.astro`, `.brand-shift`). No measured width.
 - Homepage face and shop ring: size comes from `src/lib/intro-layout.ts` and `src/lib/viewport-layout.ts`. They sit in the page and scroll with it. Intro nav fade still uses `src/scripts/intro-face.ts`, `src/scripts/shop-intro.ts`, and `src/lib/intro-scroll.ts`.
-- View transitions: `hs-mark` between home and a project, `ib-mark` between `/shop` and a product. The root transition fades the new page in over the old one.
+- View transitions: the root transition fades the new page in over the old one. Project and product pages open with the menu, not the mark.
 
 ## Layout grid
 

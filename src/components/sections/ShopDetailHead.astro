@@ -9,8 +9,11 @@ interface Props {
 }
 
 const { title, slug, eur } = Astro.props;
+const price = priceText(eur, 'suffix');
 ---
 
 <header class="shop-detail-head">
-  <h1>{title}<br /><Price slug={slug} mode="suffix" text={priceText(eur, 'suffix')} /></h1>
+  <h1>
+    {title}{price ? <span class="project-year"><Price slug={slug} mode="suffix" text={price} /></span> : null}
+  </h1>
 </header>

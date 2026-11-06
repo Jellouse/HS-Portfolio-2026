@@ -6,10 +6,8 @@ export function handoffHeroMarkToSvg(root: ParentNode = document) {
   const svg = hero.querySelector<SVGSVGElement>('[data-hero-blob].mark-blob');
   const canvas = hero.querySelector<HTMLCanvasElement>('.mark-blob-gl');
   if (!svg || !canvas) return;
-  canvas.style.viewTransitionName = 'none';
   svg.style.visibility = 'visible';
   svg.style.opacity = '1';
-  svg.style.viewTransitionName = 'hs-mark';
 }
 
 export function restoreHeroMarkCanvas(root: ParentNode = document) {

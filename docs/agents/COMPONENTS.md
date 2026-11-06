@@ -13,7 +13,7 @@ These were repeated, or the same menu and price markup copied across pages. The 
 | Prose | `src/components/sections/Prose.astro` | `paragraphs: string[]` | `/`, `/shop/`, `/shop/:slug`, `/work/:slug` |
 | Price | `src/components/sections/Price.astro` | `slug`, `mode` (`suffix` or `prefix`), `text` | `/shop/`, `/shop/:slug` |
 | MainMenu | `src/components/sections/MainMenu.astro` | `variant` (`header`, `shop`, or `project`), `home?` | `/`, `/shop/`, `/shop/:slug`, `/work/:slug` |
-| CornerMark | `src/components/sections/CornerMark.astro` | `class`, `href`, `label`, slot for the mark | `/work/:slug`, `/shop/:slug` |
+| CornerMark | `src/components/sections/CornerMark.astro` | `class`, `href`, `label`, slot for the mark | dev catalogue |
 | IntroHero | `src/components/sections/IntroHero.astro` | `variant` (`home` or `shop`), `site?`, illustration slot | `/`, `/shop/` |
 | ShopIntro | `src/components/sections/ShopIntro.astro` | none | `/shop/` |
 | ShopProduct | `src/components/sections/ShopProduct.astro` | `product`, `index`, `sizes` | `/shop/` |
@@ -57,8 +57,8 @@ These were already shared. Pages and other components keep using them.
 | PeepsStatic | `src/components/PeepsStatic.astro` | none | every page, through Peeps |
 | HeroBlob | `src/components/HeroBlob.astro` | none | `/` |
 | Mark | `src/components/Mark.astro` | none | `/` when `?hero=gradient` |
-| MarkFace | `src/components/MarkFace.astro` | none | `/work/:slug` |
-| SmallMenu | `src/components/SmallMenu.astro` | none | `/work/:slug`, `/shop/:slug` |
+| MarkFace | `src/components/MarkFace.astro` | none | dev catalogue |
+| SmallMenu | `src/components/SmallMenu.astro` | none | dev catalogue |
 | LeadCard | `src/components/LeadCard.astro` | none | not mounted |
 
 `BlurImage` and `VideoFrame` add `scroll-media` when `fade` is true. True is the default. Leave it.

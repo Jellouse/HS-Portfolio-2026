@@ -47,12 +47,10 @@ await p.goto(B + '/work/' + work[0] + '/', { waitUntil: 'load' });
 check(!(await p.evaluate(() => document.querySelector('.skip'))), 'no skip link');
 
 await p.keyboard.press('Tab');
-check(await p.evaluate(() => document.activeElement.matches('[data-project-face]') && document.querySelector('[data-project-menu]').classList.contains('is-open')), 'Tab onto the icon opens the menu');
+check(await p.evaluate(() => document.activeElement.matches('.project-menu a') && document.activeElement.textContent.trim() === 'Home'), 'Tab lands on Home');
 await p.keyboard.press('Tab');
-check(await p.evaluate(() => document.activeElement.closest('.project-menu') !== null), 'next Tab lands on a menu item');
-await p.keyboard.press('Escape');
-check(await p.evaluate(() => document.activeElement.matches('[data-project-face]') && !document.querySelector('[data-project-menu]').classList.contains('is-open')), 'Esc closes the menu and returns focus');
-check(await p.evaluate(() => document.querySelector('.project-menu').inert), 'closed menu is inert');
+check(await p.evaluate(() => document.activeElement.matches('.project-menu a') && document.activeElement.textContent.trim() === 'Shop'), 'next Tab lands on Shop');
+check(await p.evaluate(() => !document.querySelector('.project-menu').inert), 'menu stays available');
 
 await p.goto(B + '/', { waitUntil: 'load' });
 await p.waitForTimeout(400);
