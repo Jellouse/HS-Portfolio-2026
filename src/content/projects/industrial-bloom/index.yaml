@@ -5,7 +5,7 @@ summary: >-
   Industrial Bloom is a series of aluminium vases, handmade by Johann Schnettker
   in Germany with laser cutting, 3D printing and embossing. Available in the
   [Humansize shop](/shop/).
-cover: /src/content/projects/industrial-bloom/cover.jpg
+cover: /src/content/projects/industrial-bloom/cover.png
 coverVideo: >-
   https://humansize-media.schnettker-johann.workers.dev/projects/industrial-bloom/render-7-base-11-mvevabg5.mp4
 coverAlt: Industrial Bloom
@@ -48,6 +48,7 @@ blocks:
       poster: /src/content/projects/industrial-bloom/blocks/2/value/poster.jpg
       frame: default
       flush: false
+      outline: false
   - discriminant: image
     value:
       src: /src/content/projects/industrial-bloom/blocks/3/value/src.jpg
@@ -118,22 +119,22 @@ blocks:
     value:
       images:
         - src: >-
-            /src/content/projects/industrial-bloom/blocks/11/value/images/0/src.jpg
+            /src/content/projects/industrial-bloom/blocks/12/value/images/0/src.jpg
           alt: Industrial Bloom vase
           flush: false
           outline: false
         - src: >-
-            /src/content/projects/industrial-bloom/blocks/11/value/images/1/src.jpg
+            /src/content/projects/industrial-bloom/blocks/12/value/images/1/src.jpg
           alt: Industrial Bloom vase
           flush: false
           outline: false
         - src: >-
-            /src/content/projects/industrial-bloom/blocks/11/value/images/2/src.jpg
+            /src/content/projects/industrial-bloom/blocks/12/value/images/2/src.jpg
           alt: Industrial Bloom round vase
           flush: false
           outline: false
         - src: >-
-            /src/content/projects/industrial-bloom/blocks/11/value/images/3/src.jpg
+            /src/content/projects/industrial-bloom/blocks/12/value/images/3/src.jpg
           alt: Industrial Bloom vase
           flush: false
           outline: false

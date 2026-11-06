@@ -4,7 +4,7 @@ published: true
 summary: >
   Tony's Chocolonely called us for a new website! Their branding has no rules,
   and so many rules. It really grew on me.
-cover: /src/content/projects/tonys-chocolonely/cover.jpg
+cover: /src/content/projects/tonys-chocolonely/cover.png
 coverAlt: Tony's Chocolonely
 coverFrame: default
 coverFlush: false
@@ -28,6 +28,7 @@ blocks:
       poster: /src/content/projects/tonys-chocolonely/blocks/0/value/poster.jpg
       frame: wide
       flush: false
+      outline: false
   - discriminant: image
     value:
       src: /src/content/projects/tonys-chocolonely/blocks/1/value/src.jpg
