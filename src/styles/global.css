@@ -175,6 +175,13 @@ html {
 body {
   margin: 0;
   min-height: 100svh;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+body:not(:has(.hero, .shop-head)) {
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
 }
 
 img {
@@ -528,12 +535,12 @@ html[data-sky-ink='white'] body:has([data-sky]) {
   z-index: -1;
   inset: 0;
   pointer-events: none;
-  background: var(--sky-day);
+  background: var(--page-bg);
 }
 
 html:has([data-sky]),
 html:has([data-sky]) body {
-  background: transparent;
+  background: var(--page-bg);
 }
 
 .hero .mark-blob {
@@ -2487,7 +2494,7 @@ html.is-contact-open body {
 
 .contact-nav {
   position: absolute;
-  bottom: 30px;
+  bottom: calc(30px + env(safe-area-inset-bottom, 0px));
   left: 50%;
   display: flex;
   align-items: center;

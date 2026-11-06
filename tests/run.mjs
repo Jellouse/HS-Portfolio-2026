@@ -12,6 +12,7 @@ const SPECS = [
   ['design', 'tests/design-check.spec.mjs'],
   ['intro-nav', 'tests/intro-nav.spec.mjs'],
   ['viewport-height', 'tests/viewport-height.spec.mjs'],
+  ['edge-bg', 'tests/edge-bg.spec.mjs'],
   ['contact', 'tests/contact.spec.mjs'],
   ['keystatic', 'tests/keystatic-smoke.spec.mjs'],
   ['taps', 'tests/mobile-taps.spec.mjs'],
