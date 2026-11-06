@@ -1,6 +1,6 @@
 [
   "breakpoint\tsrc/scripts/site-scroll-motion.ts:7\t720px",
-  "duration\tsrc/layouts/Base.astro:50\t350ms",
+  "duration\tsrc/layouts/Base.astro:51\t350ms",
   "duration\tsrc/lib/VideoUrlInput.tsx:45\t120ms",
   "duration\tsrc/styles/global.css:1548\t600ms",
   "duration\tsrc/styles/global.css:1572\t600ms",
@@ -39,7 +39,7 @@
   "hex\tsrc/components/PeepsStatic.astro:7\t#f8f8f8",
   "hex\tsrc/components/PeepsStatic.astro:8\t#f8f8f8",
   "hex\tsrc/components/Seo.astro:26\t#ffffff",
-  "hex\tsrc/layouts/Base.astro:68\t#ffffff",
+  "hex\tsrc/layouts/Base.astro:69\t#ffffff",
   "hex\tsrc/lib/VideoUrlInput.tsx:39\t#111",
   "hex\tsrc/lib/VideoUrlInput.tsx:39\t#fff",
   "hex\tsrc/lib/VideoUrlInput.tsx:44\t#eee",
