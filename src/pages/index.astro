@@ -1,34 +1,24 @@
 ---
 export const prerender = true;
 
-import HeroBlob from '../components/HeroBlob.astro';
-import Mark from '../components/Mark.astro';
-import ProjectFeed from '../components/ProjectFeed.astro';
-import IntroHero from '../components/sections/IntroHero.astro';
+import ArrowNav from '../components/ArrowNav.astro';
 import Base from '../layouts/Base.astro';
-import { absoluteUrl, getProjects, getSite } from '../lib/content';
-import { resolveImage } from '../lib/images';
+import { getArrowNav } from '../lib/arrow-nav';
+import { absoluteUrl, getSite } from '../lib/content';
 import { homeJsonLd } from '../lib/seo';
 import { positioning } from '../lib/positioning';
 
 const site = await getSite();
-const projects = await getProjects();
-const cover = projects[0]?.data.cover;
-const image = cover ? resolveImage(cover) : undefined;
+const nav = await getArrowNav();
 const pageUrl = absoluteUrl(Astro.site, '/');
-const description = positioning.description;
 ---
 
 <Base
   title={positioning.homeTitle}
-  description={description}
-  image={image}
+  description={positioning.description}
   jsonLd={homeJsonLd(site, pageUrl)}
+  header={false}
+  hideFooter
 >
-  <h1 class="sr-only">{site.name}, {site.studio}</h1>
-  <IntroHero variant="home" site={site}>
-    <HeroBlob slot="blob" />
-    <Mark slot="gradient" />
-  </IntroHero>
-  <ProjectFeed projects={projects} about={site.about} />
+  <ArrowNav tree={nav} />
 </Base>

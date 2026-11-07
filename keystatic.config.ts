@@ -530,5 +530,78 @@ export default config({
         }),
       },
     }),
+    arrowNav: singleton({
+      label: 'Arrow nav',
+      path: 'src/content/site/arrow-nav',
+      format: { data: 'yaml' },
+      schema: {
+        landing: fields.object(
+          {
+            title: fields.text({ label: 'Title', validation: { isRequired: true } }),
+            body: fields.text({ label: 'Body', multiline: true }),
+            hint: fields.text({ label: 'Hint' }),
+          },
+          { label: 'Landing' },
+        ),
+        nodes: fields.array(
+          fields.object({
+            id: fields.text({
+              label: 'Id',
+              description: 'Stable name. landing is the parent of the first choices.',
+              validation: { isRequired: true },
+            }),
+            parent: fields.text({
+              label: 'Parent id',
+              description: 'landing, or another screen id.',
+              validation: { isRequired: true },
+            }),
+            dir: fields.select({
+              label: 'Direction',
+              options: [
+                { label: 'Left', value: 'left' },
+                { label: 'Right', value: 'right' },
+                { label: 'Up', value: 'up' },
+                { label: 'Down', value: 'down' },
+              ],
+              defaultValue: 'right',
+            }),
+            label: fields.text({ label: 'Button label' }),
+            title: fields.text({ label: 'Screen title' }),
+            body: fields.text({ label: 'Screen text', multiline: true }),
+            kind: fields.select({
+              label: 'Kind',
+              options: [
+                { label: 'Branch', value: 'branch' },
+                { label: 'Gallery', value: 'gallery' },
+                { label: 'Placeholder', value: 'placeholder' },
+              ],
+              defaultValue: 'placeholder',
+            }),
+            groups: fields.array(
+              fields.object({
+                caption: fields.text({
+                  label: 'Caption',
+                  description: 'One caption for every image in this group.',
+                  multiline: true,
+                }),
+                images: fields.array(
+                  fields.object({
+                    src: fields.text({
+                      label: 'Image path',
+                      description: 'Repo path, like /src/content/projects/analogue-counters/cover.jpg',
+                      validation: { isRequired: true },
+                    }),
+                    alt: fields.text({ label: 'Alt' }),
+                  }),
+                  { label: 'Images', itemLabel: (props) => props.fields.alt.value || 'Image' },
+                ),
+              }),
+              { label: 'Image groups', itemLabel: (props) => props.fields.caption.value || 'Group' },
+            ),
+          }),
+          { label: 'Screens', itemLabel: (props) => props.fields.title.value || props.fields.id.value || 'Screen' },
+        ),
+      },
+    }),
   },
 });

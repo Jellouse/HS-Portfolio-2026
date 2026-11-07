@@ -50,8 +50,8 @@ export const sections = [
     name: 'IntroHero',
     file: 'src/components/sections/IntroHero.astro',
     props: ['variant: "home" | "shop"', 'site?: SiteData', 'slot: illustration'],
-    pages: ['/', '/shop/'],
-    files: ['src/pages/index.astro', 'src/pages/shop/index.astro'],
+    pages: ['/shop/'],
+    files: ['src/pages/shop/index.astro'],
     roots: ['shop-head', 'mark-wrap'],
   },
   {
