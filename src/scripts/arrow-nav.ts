@@ -43,8 +43,12 @@ function cssEase(name: string) {
 }
 
 function cssMs(name: string) {
-  const n = parseFloat(getComputedStyle(document.documentElement).getPropertyValue(name));
-  return Number.isFinite(n) ? Math.round(n) : 0;
+  const raw = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  const n = parseFloat(raw);
+  if (!Number.isFinite(n)) return 0;
+  if (raw.endsWith('ms')) return Math.round(n);
+  if (raw.endsWith('s')) return Math.round(n * 1000);
+  return Math.round(n);
 }
 
 export function initArrowNav(root: ParentNode = document) {
@@ -58,7 +62,7 @@ export function initArrowNav(root: ParentNode = document) {
   const nodes = new Map(tree.nodes.map((node) => [node.id, node]));
   const stage = nav.querySelector<HTMLElement>('[data-nav-stage]')!;
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const moveMs = cssMs('--dur-nav');
+  const moveMs = () => cssMs('--dur-nav');
   const gap = 8;
 
   let screenId = 'landing';
@@ -407,7 +411,7 @@ export function initArrowNav(root: ParentNode = document) {
           borderRadius: target.borderRadius,
         },
       ],
-      { duration: moveMs, easing: ease, fill: 'both' },
+      { duration: moveMs(), easing: ease, fill: 'both' },
     );
     anim.finished.finally(() => {
       if (gen !== fullGen) return;
@@ -431,7 +435,7 @@ export function initArrowNav(root: ParentNode = document) {
       if (!dx && !dy) return;
       const move = el.animate(
         [{ transform: `translate(${dx}px, ${dy}px)` }, { transform: 'translate(0px, 0px)' }],
-        { duration: moveMs, easing: ease, fill: 'both' },
+        { duration: moveMs(), easing: ease, fill: 'both' },
       );
       move.finished.finally(() => {
         if (gen !== fullGen) return;
@@ -528,7 +532,7 @@ export function initArrowNav(root: ParentNode = document) {
       const lines = block.hasAttribute('data-nav-caption') || !block.querySelector('button') ? splitLines(block) : [block];
       lines.forEach((line) => {
         const anim = line.animate([{ opacity: 0 }, { opacity: 1 }], {
-          duration: moveMs,
+          duration: moveMs(),
           delay: index * lineDelay,
           easing: ease,
           fill: 'both',
@@ -550,7 +554,7 @@ export function initArrowNav(root: ParentNode = document) {
     ghost.style.transform = 'none';
     ghost.style.textAlign = 'center';
     document.body.append(ghost);
-    ghost.animate([{ opacity: 1 }, { opacity: 0 }], { duration: moveMs, easing: cssEase('--ease-out'), fill: 'forwards' }).finished.finally(() => ghost.remove());
+    ghost.animate([{ opacity: 1 }, { opacity: 0 }], { duration: moveMs(), easing: cssEase('--ease-out'), fill: 'forwards' }).finished.finally(() => ghost.remove());
   };
 
   const dropFlights = () => {
@@ -575,7 +579,7 @@ export function initArrowNav(root: ParentNode = document) {
     const rest = 'translate(-50%, -50%) scale(1)';
     const at = (scale: number) => `translate(-50%, -50%) scale(${scale.toFixed(3)})`;
     const anim = gallery.animate(open ? [{ transform: at(from) }, { transform: rest }] : [{ transform: at(from) }, { transform: at(small), opacity: 0 }], {
-      duration: moveMs,
+      duration: moveMs(),
       easing: cssEase('--ease-nav'),
       fill: 'both',
     });
@@ -754,7 +758,7 @@ export function initArrowNav(root: ParentNode = document) {
               { transform: 'translate(0px, 0px)', opacity: prev.opacity },
               { transform: `translate(${move.x}px, ${move.y}px)`, opacity: 0 },
             ],
-            { duration: moveMs, easing: ease, fill: 'both' },
+            { duration: moveMs(), easing: ease, fill: 'both' },
           )
           .finished.finally(() => {
             if (gen === generation) clip.remove();
@@ -788,7 +792,7 @@ export function initArrowNav(root: ParentNode = document) {
           { transform: `translate(${dx}px, ${dy}px)`, opacity: moved ? 1 : 0 },
           { transform: 'translate(0px, 0px)', opacity: 1 },
         ],
-        { duration: moveMs, easing: ease, fill: 'both' },
+        { duration: moveMs(), easing: ease, fill: 'both' },
       );
       anim.finished.finally(() => {
         if (gen !== generation) return;
