@@ -9,6 +9,8 @@
   --lh-meta: 16px;
   --text-fine: 11px;
   --lh-fine: 14px;
+  --text-hint: 18px;
+  --lh-hint: 24px;
   --lh-snug: 20px;
   --track: -0.02em;
   --track-none: 0px;
@@ -16,4 +18,11 @@
   --text-body: var(--text);
   --lh-title: var(--lh);
   --lh-body: var(--lh);
+}
+
+@media (max-width: 759px) {
+  :root {
+    --text: var(--text-hint);
+    --lh: var(--lh-hint);
+  }
 }

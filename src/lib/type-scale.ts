@@ -9,6 +9,8 @@ export const typeScale = {
   'lh-meta': '16px',
   'text-fine': '11px',
   'lh-fine': '14px',
+  'text-hint': '18px',
+  'lh-hint': '24px',
   'lh-snug': '20px',
   track: '-0.02em',
   'track-none': '0px',

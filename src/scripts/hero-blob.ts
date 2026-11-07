@@ -119,8 +119,10 @@ export function initHeroBlob(root: ParentNode = document) {
 
   if (!fine.matches) {
     if (reduce.matches || new URLSearchParams(location.search).has('dials')) return;
-    initTouchLoop(svg);
-    return;
+    if (svg.hasAttribute('data-hero-blob')) {
+      initTouchLoop(svg);
+      return;
+    }
   }
 
   let curX = 0;
@@ -170,6 +172,8 @@ export function initHeroBlob(root: ParentNode = document) {
       });
   }
 
+  const driftScale = (svg.viewBox.baseVal.width || 559) / 559;
+
   const tick = (now: number) => {
     if (reduce.matches) {
       curX = 0;
@@ -182,8 +186,8 @@ export function initHeroBlob(root: ParentNode = document) {
     const { max, ease, idleAmp, idleSpeed } = heroBlobDrift;
 
     if (!fine.matches || now - lastPointer > 1800) {
-      tgtX = Math.sin(now * idleSpeed) * idleAmp;
-      tgtY = Math.cos(now * idleSpeed * 0.85) * idleAmp * 0.65;
+      tgtX = Math.sin(now * idleSpeed) * idleAmp * driftScale;
+      tgtY = Math.cos(now * idleSpeed * 0.85) * idleAmp * 0.65 * driftScale;
     }
 
     curX += (tgtX - curX) * ease;
@@ -215,8 +219,8 @@ export function initHeroBlob(root: ParentNode = document) {
       lastPointer = performance.now();
       const nx = (event.clientX / window.innerWidth) * 2 - 1;
       const ny = (event.clientY / window.innerHeight) * 2 - 1;
-      tgtX = nx * heroBlobDrift.max;
-      tgtY = ny * heroBlobDrift.max * 0.7;
+      tgtX = nx * heroBlobDrift.max * driftScale;
+      tgtY = ny * heroBlobDrift.max * 0.7 * driftScale;
       wake();
     },
     { passive: true },

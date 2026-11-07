@@ -252,4 +252,42 @@ const services = defineCollection({
   }),
 });
 
-export const collections = { projects, site, projectOrder, products, services };
+const arrowImage = z.object({
+  src: z.string(),
+  alt: z.string().default(''),
+});
+
+const arrowGroup = z.object({
+  caption: z.string().default(''),
+  images: z.array(arrowImage).default([]),
+});
+
+const arrowNav = defineCollection({
+  loader: glob({
+    pattern: 'arrow-nav.yaml',
+    base: './src/content/site',
+  }),
+  schema: z.object({
+    landing: z.object({
+      title: z.string(),
+      body: z.string().default(''),
+      hint: z.string().default(''),
+    }),
+    nodes: z
+      .array(
+        z.object({
+          id: z.string(),
+          parent: z.string(),
+          dir: z.enum(['left', 'right', 'up', 'down']),
+          label: z.string().default(''),
+          title: z.string().default(''),
+          body: z.string().default(''),
+          kind: z.enum(['branch', 'gallery', 'placeholder']),
+          groups: z.array(arrowGroup).default([]),
+        }),
+      )
+      .default([]),
+  }),
+});
+
+export const collections = { projects, site, projectOrder, products, services, arrowNav };

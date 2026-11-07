@@ -15,6 +15,7 @@ Whole pixels only. Sizes live in `src/styles/type.css`. `src/lib/type-scale.ts` 
 | `--text-ui` / `--lh-ui` | 16px / 22px | Admin and utility UI. |
 | `--text-meta` / `--lh-meta` | 13px / 16px | Badges, canvas chrome, small CMS labels. |
 | `--text-fine` / `--lh-fine` | 11px / 14px | Hero dials (`?dials` only). |
+| `--text-hint` / `--lh-hint` | 18px / 24px | The arrow-key hint on the landing. |
 | `--lh-snug` | 20px | Canvas group labels. |
 | `--track` | -0.02em | Every line of site text. |
 | `--track-none` | 0px | The preview badge. |
