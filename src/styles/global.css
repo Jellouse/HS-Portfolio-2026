@@ -546,6 +546,7 @@ html:has([data-sky]) body {
 .hero .mark-blob {
   --mark-scale: 1;
   color: var(--red);
+  opacity: 0.6;
 
   top: 50svh;
   width: min(500px, 46vw);
@@ -2220,6 +2221,7 @@ body .site-header.is-menu-fade:not(.is-menu-open) .who .time {
 
 .mark-blob-gl {
   contain: strict;
+  opacity: 0.6;
 }
 
 .js .mark-blob-gl:not([data-ready]) {
