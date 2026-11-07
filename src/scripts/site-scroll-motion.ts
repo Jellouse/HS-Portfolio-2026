@@ -1,3 +1,4 @@
+import { clearStackMates, isStackFrame, paintProjectMedia } from './project-media-scroll';
 import { SCROLL_MEDIA, UI_MEDIA } from './scroll-media-selectors';
 import { markSiteIntroSeen, siteIntroSeen } from '../lib/site-intro';
 import { paintScrollWords } from './text-blur-scroll';
@@ -126,6 +127,8 @@ function initMediaScrollFade() {
   if (reduced.matches) {
     scrollHosts().forEach((frame) => {
       frame.style.opacity = '1';
+      frame.style.transform = '';
+      clearStackMates(frame);
       primeFrame(frame);
     });
     return;
@@ -137,9 +140,12 @@ function initMediaScrollFade() {
     const end = Math.round(vh * 0.7);
     const span = Math.max(1, start - end);
     for (const frame of scrollHosts()) {
-      const top = frame.getBoundingClientRect().top;
-      const opacity = Math.min(1, Math.max(0, (start - top) / span));
-      frame.style.opacity = opacity.toFixed(3);
+      const stack = isStackFrame(frame);
+      const top = stack ? paintProjectMedia(frame, vh) : frame.getBoundingClientRect().top;
+      if (!stack) {
+        const opacity = Math.min(1, Math.max(0, (start - top) / span));
+        frame.style.opacity = opacity.toFixed(3);
+      }
       if (top < start + vh) primeFrame(frame);
     }
   };

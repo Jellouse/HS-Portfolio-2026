@@ -85,12 +85,26 @@ for (const url of routes) {
     fail = 1;
   }
   const range = await page.evaluate(() => {
+    const layoutTop = (el) => {
+      const rect = el.getBoundingClientRect();
+      const shift = new DOMMatrix(getComputedStyle(el).transform).m42 || 0;
+      return rect.top - shift;
+    };
     const frames = [...document.querySelectorAll('.scroll-media')];
-    const frame = frames.find((el) => el.getBoundingClientRect().top > innerHeight * 1.05 + 40);
+    const frame = frames.find((el) => layoutTop(el) > innerHeight * 1.05 + 40);
     if (!frame) return frames.length ? { inView: frames.length } : null;
     frame.setAttribute('data-opacity-probe', '1');
-    const top = frame.getBoundingClientRect().top + scrollY;
-    return { start: Math.max(0, Math.round(top - innerHeight * 1.05 - 12)), end: Math.round(top + frame.offsetHeight + 24) };
+    const top = layoutTop(frame) + scrollY;
+    const project =
+      location.pathname.startsWith('/work/') ||
+      location.pathname === '/' ||
+      location.pathname.startsWith('/shop');
+    const past = project ? innerHeight * 0.12 : 0;
+    return {
+      project,
+      start: Math.max(0, Math.round(top - innerHeight * 1.05 - 12)),
+      end: Math.round(top + frame.offsetHeight + 24 + past),
+    };
   });
   if (!range) {
     log(`ok   ${name}: no media`);
@@ -138,10 +152,49 @@ for (const url of routes) {
   }
   const final = samples[samples.length - 1];
   const returned = back[back.length - 1];
-  const ok = !drop && !rise && final >= 0.99 && samples[0] <= 0.05 && returned <= 0.05;
+  let ok = !drop && !rise && final >= 0.99 && samples[0] <= 0.05 && returned <= 0.05;
+  if (range.project) {
+    const down = (() => {
+      let peak = samples[0];
+      let falling = false;
+      let reversed = false;
+      for (let i = 1; i < samples.length; i++) {
+        const delta = samples[i] - samples[i - 1];
+        if (!falling && delta < -0.02) falling = true;
+        if (!falling) peak = Math.max(peak, samples[i]);
+        if (falling && delta > 0.02) reversed = true;
+      }
+      return { peak, falling, reversed };
+    })();
+    const up = (() => {
+      let peak = back[0];
+      let rising = false;
+      let falling = false;
+      let reversed = false;
+      for (let i = 1; i < back.length; i++) {
+        const delta = back[i] - back[i - 1];
+        if (!rising && delta > 0.02) rising = true;
+        if (rising) peak = Math.max(peak, back[i]);
+        if (rising && !falling && delta < -0.02) falling = true;
+        if (falling && delta > 0.02) reversed = true;
+      }
+      return { peak, rising, falling, reversed };
+    })();
+    ok =
+      samples[0] <= 0.05 &&
+      final <= 0.05 &&
+      returned <= 0.05 &&
+      down.peak >= 0.99 &&
+      down.falling &&
+      !down.reversed &&
+      up.peak >= 0.99 &&
+      up.rising &&
+      up.falling &&
+      !up.reversed;
+  }
   if (!ok) fail = 1;
   log(
-    `${ok ? 'ok  ' : 'FAIL'} ${name}: start ${samples[0].toFixed(3)} end ${final.toFixed(3)} back ${returned.toFixed(3)} drop ${drop} rise ${rise}`,
+    `${ok ? 'ok  ' : 'FAIL'} ${name}: start ${samples[0].toFixed(3)} end ${final.toFixed(3)} back ${returned.toFixed(3)} drop ${drop} rise ${rise}${range.project ? ' exit-fade' : ''}`,
   );
   log(`  ${name} samples: ${samples.map((n) => n.toFixed(3)).join(' ')}`);
   log(`  ${name} back: ${back.map((n) => n.toFixed(3)).join(' ')}`);
