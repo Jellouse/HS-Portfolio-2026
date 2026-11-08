@@ -5,7 +5,7 @@ import { resolveImage } from './images';
 
 export type ArrowDir = 'left' | 'right' | 'up' | 'down';
 
-export type ArrowSlide = { src: string; alt: string; caption: string; alpha: boolean };
+export type ArrowSlide = { src: string; alt: string; title: string; caption: string; product: string; alpha: boolean };
 
 export type ArrowNode = {
   id: string;
@@ -48,7 +48,9 @@ export async function getArrowNav(): Promise<ArrowTree> {
               return {
                 src: file.src,
                 alt: image.alt,
+                title: group.title,
                 caption: group.caption,
+                product: group.product,
                 alpha: await imageHasAlpha(file),
               };
             }),

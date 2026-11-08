@@ -258,7 +258,12 @@ const arrowImage = z.object({
 });
 
 const arrowGroup = z.object({
+  title: z.string().default(''),
   caption: z.string().default(''),
+  product: z
+    .union([z.string(), z.number(), z.null()])
+    .optional()
+    .transform((value) => (value == null ? '' : String(value))),
   images: z.array(arrowImage).default([]),
 });
 

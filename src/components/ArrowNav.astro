@@ -60,7 +60,14 @@ const first = tree.nodes.find((node) => node.kind === 'gallery')?.slides[0];
     </button>
   </div>
 
-  <p class="arrow-caption" data-nav-caption hidden></p>
+  <div class="arrow-caption" data-nav-caption hidden>
+    <p class="arrow-caption-title" data-nav-line></p>
+    <p class="arrow-caption-body arrow-body" data-nav-line></p>
+    <form class="arrow-caption-buy shop-buy-form" data-nav-buy hidden method="post" action="/api/shop/buy">
+      <input type="hidden" name="slug" data-nav-buy-slug value="" />
+      <button class="shop-buy-button" type="submit">Buy</button>
+    </form>
+  </div>
   <p class="arrow-hint" data-nav-hint>{tree.landing.hint}</p>
   <script type="application/json" data-nav-tree set:html={JSON.stringify(tree)}></script>
 </div>

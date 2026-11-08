@@ -29,19 +29,25 @@ nodes:
     title: Shop
     kind: gallery
     groups:
-      - caption: >-
+      - title: Type-660
+        product: "660"
+        caption: >-
           A tall vase in solid aluminium, 200 mm high. Made for long stems like
           branches, lilies. Raw finish, 0.5 kg.
         images:
           - src: /src/content/products/660/overview/left/src.jpg
             alt: Type-660 tall aluminium vase
-      - caption: >-
+      - title: Type-120
+        product: "120"
+        caption: >-
           An aluminium vase made from one textured extrusion profile, for a
           medium-sized bouquet.
         images:
           - src: /src/content/products/120/overview/left/src.jpg
             alt: Type-120 aluminium vase
-      - caption: >-
+      - title: Type-490
+        product: "490"
+        caption: >-
           A heavy aluminium ring vase for a large bouquet, or for branches that
           need a strong base.
         images:
@@ -61,14 +67,16 @@ nodes:
     title: Web
     kind: gallery
     groups:
-      - caption: >-
+      - title: Atomic Ski
+        caption: >-
           Identity refresh and web design for atomic.com, made with Analogue. It
           grew out of the Boot Hub and became a visual language for the whole
           site, built around tension and ski nets.
         images:
           - src: /src/content/projects/atomic-ski/cover.png
             alt: Atomic Ski
-      - caption: >-
+      - title: Tony's Chocolonely
+        caption: >-
           Tony's Chocolonely called us for a new website! Their branding has no
           rules, and so many rules. It really grew on me.
         images:
@@ -81,7 +89,8 @@ nodes:
     title: 3D
     kind: gallery
     groups:
-      - caption: >-
+      - title: Analogue AF1
+        caption: >-
           3D rendering and animation in Blender for the Analogue AF1 website:
           product renders, a LiDAR animation and a product showcase video.
         images:
@@ -100,7 +109,8 @@ nodes:
     title: Product
     kind: gallery
     groups:
-      - caption: >-
+      - title: Industrial Bloom
+        caption: >-
           Industrial Bloom is a series of aluminium vases, handmade by Johann
           Schnettker in Germany with laser cutting, 3D printing and embossing.
         images:
@@ -119,7 +129,8 @@ nodes:
     title: Retail
     kind: gallery
     groups:
-      - caption: >-
+      - title: Analogue Store
+        caption: >-
           With Analogue I did a fair amount of retail building. Ultimately
           leading towards one of the most anticipated store openings in
           Amsterdam 2026.

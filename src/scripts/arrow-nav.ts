@@ -190,6 +190,10 @@ export function initArrowNav(root: ParentNode = document) {
     const item = node.slides[slide];
     const photo = nav.querySelector<HTMLImageElement>('[data-nav-photo]')!;
     const caption = nav.querySelector<HTMLElement>('[data-nav-caption]')!;
+    const title = caption.querySelector<HTMLElement>('.arrow-caption-title')!;
+    const body = caption.querySelector<HTMLElement>('.arrow-caption-body')!;
+    const buy = caption.querySelector<HTMLElement>('[data-nav-buy]')!;
+    const slug = caption.querySelector<HTMLInputElement>('[data-nav-buy-slug]')!;
     const gallery = nav.querySelector<HTMLElement>('[data-nav-gallery]')!;
     const cutout = !!item.alpha;
     photo.classList.toggle('is-alpha', cutout);
@@ -198,8 +202,13 @@ export function initArrowNav(root: ParentNode = document) {
     photo.src = item.src;
     photo.alt = item.alt;
     photo.style.opacity = '';
-    caption.textContent = item.caption;
-    caption.hidden = !item.caption;
+    title.textContent = item.title;
+    body.textContent = item.caption;
+    title.hidden = !item.title;
+    body.hidden = !item.caption;
+    slug.value = item.product;
+    buy.hidden = !item.product;
+    caption.hidden = !item.title && !item.caption && !item.product;
     const dots = nav.querySelector<HTMLElement>('[data-nav-dots]')!;
     dots.replaceChildren(
       ...node.slides.map((_, i) => {
@@ -274,7 +283,7 @@ export function initArrowNav(root: ParentNode = document) {
     return { left, top, right: left + width, bottom: top + height, width, height };
   };
 
-  const placeGalleryArrows = () => {
+  const placeGalleryArrows = (frame: { left: number; top: number; right: number; bottom: number; width: number; height: number } | null = null) => {
     const left = nav.querySelector<HTMLElement>('[data-dir="left"]')!;
     const right = nav.querySelector<HTMLElement>('[data-dir="right"]')!;
     const back = nav.querySelector<HTMLElement>('[data-dir="up"]')!;
@@ -287,9 +296,10 @@ export function initArrowNav(root: ParentNode = document) {
     const edges = nav.classList.contains('is-full');
     const box = edges
       ? { left: 0, top: 0, right: window.innerWidth, bottom: window.innerHeight, width: window.innerWidth, height: window.innerHeight }
-      : nav.classList.contains('is-cover')
-        ? restingFrame()
-        : nav.querySelector<HTMLElement>('[data-nav-gallery]')!.getBoundingClientRect();
+      : frame
+        ?? (nav.classList.contains('is-cover')
+          ? restingFrame()
+          : nav.querySelector<HTMLElement>('[data-nav-gallery]')!.getBoundingClientRect());
     const size = controlSize();
     const pad = phone() ? 20 : 48;
     const y = edges ? Math.round((window.innerHeight - size) / 2) : Math.round(box.top + box.height / 2 - size / 2);
@@ -426,8 +436,12 @@ export function initArrowNav(root: ParentNode = document) {
       anim.cancel();
       clearBox();
       nav.classList.remove('is-zoom');
+      if (!full) {
+        buttons.forEach((el) => el.getAnimations().forEach((item) => item.cancel()));
+        placeGalleryArrows();
+      }
     }).catch(() => {});
-    placeGalleryArrows();
+    placeGalleryArrows(open ? null : rest);
     before.forEach((rect, el) => {
       const next = el.getBoundingClientRect();
       const dx = Math.round(rect.left - next.left);
@@ -469,7 +483,7 @@ export function initArrowNav(root: ParentNode = document) {
     const back = nav.querySelector<HTMLElement>('[data-dir="up"]')!;
     if (nav.dataset.screen === 'about') {
       copy.style.top = '';
-      copy.style.transform = 'translate(-50%, 0)';
+      copy.style.transform = '';
       return;
     }
     copy.style.transform = '';
@@ -523,13 +537,20 @@ export function initArrowNav(root: ParentNode = document) {
 
   const fadeLines = (root: ParentNode) => {
     const blocks = [...root.querySelectorAll<HTMLElement>('[data-nav-line], [data-nav-caption]')].filter(
-      (el) => !el.closest('[hidden]') && (el.textContent ?? '').trim(),
+      (el) => !el.closest('[hidden]') && (el.hasAttribute('data-nav-caption') || !el.closest('[data-nav-caption]')) && (el.textContent ?? '').trim(),
     );
     const lineDelay = 80;
     const ease = cssEase('--ease-out');
     let index = 0;
     blocks.forEach((block) => {
-      const lines = block.hasAttribute('data-nav-caption') || !block.querySelector('button') ? splitLines(block) : [block];
+      const lines = block.hasAttribute('data-nav-caption')
+        ? [
+            ...[...block.querySelectorAll<HTMLElement>('[data-nav-line]')].filter((line) => !line.hidden).flatMap((line) => splitLines(line)),
+            ...(!block.querySelector<HTMLElement>('[data-nav-buy]')?.hidden ? [block.querySelector<HTMLElement>('[data-nav-buy]')!] : []),
+          ]
+        : !block.querySelector('button')
+          ? splitLines(block)
+          : [block];
       lines.forEach((line) => {
         const anim = line.animate([{ opacity: 0 }, { opacity: 1 }], {
           duration: moveMs(),
@@ -633,7 +654,9 @@ export function initArrowNav(root: ParentNode = document) {
     applyCopy(id);
     screenId = id;
     paintChrome(id);
+    window.scrollTo(0, 0);
     const enteringGallery = !wasGallery && nav.dataset.kind === 'gallery';
+    const outward = enteringGallery || id === 'about';
     if (enteringGallery && !reduce) faceEl().hidden = false;
     if (screen()?.kind === 'gallery') showSlide(0);
     placeGalleryArrows();
@@ -701,7 +724,7 @@ export function initArrowNav(root: ParentNode = document) {
     };
     const horizontal = (dir: string) => dir === 'left' || dir === 'right';
     const pairMove = (dir: string, lead: DOMRect, dest: DOMRect) => {
-      const motion = (enteringGallery ? 1 : -1) * (dir === 'left' || dir === 'up' ? -1 : 1);
+      const motion = (outward ? 1 : -1) * (dir === 'left' || dir === 'up' ? -1 : 1);
       const startLeft = horizontal(dir) ? (motion > 0 ? lead.left - gap - dest.width : lead.right + gap) : dest.left;
       const startTop = horizontal(dir) ? dest.top : motion > 0 ? lead.top - gap - dest.height : lead.bottom + gap;
       return {
@@ -721,13 +744,13 @@ export function initArrowNav(root: ParentNode = document) {
     });
     const departMove = (dir: string, prev: { rect: DOMRect }, arrival: { rect: DOMRect } | undefined) => {
       if (!arrival) {
-        if (!enteringGallery) return hideMove(dir, prev.rect);
+        if (!outward) return hideMove(dir, prev.rect);
         const sign = dir === 'left' || dir === 'up' ? -1 : 1;
         const dist = Math.round((horizontal(dir) ? prev.rect.width : prev.rect.height) + gap);
         return horizontal(dir) ? { x: sign * dist, y: 0 } : { x: 0, y: sign * dist };
       }
       const arrive = pairMove(dir, prev.rect, arrival.rect);
-      return enteringGallery ? arrive : further(hideMove(dir, prev.rect), arrive);
+      return outward ? arrive : further(hideMove(dir, prev.rect), arrive);
     };
     if (!reduce) {
       oldState.forEach((prev, dir) => {
