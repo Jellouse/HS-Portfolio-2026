@@ -1,0 +1,78 @@
+---
+import HeroBlob from './HeroBlob.astro';
+import mark from '../assets/industrial-bloom-mark.svg?raw';
+import type { ArrowTree } from '../lib/arrow-nav';
+
+interface Props {
+  tree: ArrowTree;
+}
+
+const { tree } = Astro.props;
+const first = tree.nodes.find((node) => node.kind === 'gallery')?.slides[0];
+---
+
+<div class="arrow-nav is-intro" data-arrow-nav data-no-letter data-no-reveal data-kind="landing" data-screen="landing">
+  <div class="arrow-copy" data-nav-copy>
+    <h1 class="arrow-title" data-nav-title data-nav-line>{tree.landing.title}</h1>
+    <div data-nav-body>
+      <p class="arrow-body" data-nav-line>{tree.landing.body}</p>
+    </div>
+  </div>
+
+  <div class="arrow-stage" data-nav-stage>
+    <button type="button" class="arrow-back" data-nav-flight data-dir="up" hidden aria-label="Back">
+      <svg data-nav-back viewBox="0 0 21 20" aria-hidden="true">
+        <path d="M2.11719 7H13.1172C16.4309 7 19.1172 9.68629 19.1172 13C19.1172 16.3137 16.4309 19 13.1172 19H5.98082" fill="none" stroke="currentColor" stroke-width="2"></path>
+        <path d="M7.53027 13.2324L1.41406 7.11621L7.53027 0.999995" fill="none" stroke="currentColor" stroke-width="2"></path>
+      </svg>
+      <span class="arrow-mark" data-nav-mark hidden set:html={mark} />
+    </button>
+
+    <div class="arrow-slot">
+      <div class="arrow-face" data-nav-face>
+        <div class="arrow-face-scale" data-nav-scale>
+          <span class="arrow-face-plate" aria-hidden="true"></span>
+          <HeroBlob home={false} mark />
+        </div>
+      </div>
+      <div class="arrow-gallery" data-nav-gallery hidden>
+        <img src={first?.src} alt={first?.alt ?? ''} data-nav-photo />
+        <div class="arrow-dots" data-nav-dots></div>
+      </div>
+      <button type="button" class="arrow-pill" data-nav-flight data-dir="left">
+        <span data-nav-label>Digital</span>
+        <svg class="arrow-chevron" data-nav-chevron viewBox="0 0 20 20" aria-hidden="true">
+          <path d="M17 9.88379L4.02555 9.88379" fill="none" stroke="currentColor" stroke-width="2"></path>
+          <path d="M9.80322 16L3.68701 9.88379L9.80322 3.76757" fill="none" stroke="currentColor" stroke-width="2"></path>
+        </svg>
+      </button>
+      <button type="button" class="arrow-pill" data-nav-flight data-dir="right">
+        <span data-nav-label>Physical</span>
+        <svg class="arrow-chevron" data-nav-chevron viewBox="0 0 20 20" aria-hidden="true">
+          <path d="M17 9.88379L4.02555 9.88379" fill="none" stroke="currentColor" stroke-width="2"></path>
+          <path d="M9.80322 16L3.68701 9.88379L9.80322 3.76757" fill="none" stroke="currentColor" stroke-width="2"></path>
+        </svg>
+      </button>
+    </div>
+
+    <button type="button" class="arrow-pill" data-nav-flight data-dir="down" hidden>
+      <span data-nav-label>About</span>
+    </button>
+  </div>
+
+  <div class="arrow-caption" data-nav-caption hidden>
+    <p class="arrow-caption-title" data-nav-line></p>
+    <p class="arrow-caption-body arrow-body" data-nav-line></p>
+    <form class="arrow-caption-buy shop-buy-form" data-nav-buy hidden method="post" action="/api/shop/buy">
+      <input type="hidden" name="slug" data-nav-buy-slug value="" />
+      <button class="shop-buy-button" type="submit">Buy</button>
+    </form>
+  </div>
+  <p class="arrow-hint" data-nav-hint>{tree.landing.hint}</p>
+  <script type="application/json" data-nav-tree set:html={JSON.stringify(tree)}></script>
+</div>
+
+<script>
+  import { initArrowNav } from '../scripts/arrow-nav';
+  initArrowNav();
+</script>

@@ -15,6 +15,7 @@ Whole pixels only. Sizes live in `src/styles/type.css`. `src/lib/type-scale.ts` 
 | `--text-ui` / `--lh-ui` | 16px / 22px | Admin and utility UI. |
 | `--text-meta` / `--lh-meta` | 13px / 16px | Badges, canvas chrome, small CMS labels. |
 | `--text-fine` / `--lh-fine` | 11px / 14px | Hero dials (`?dials` only). |
+| `--text-hint` / `--lh-hint` | 18px / 24px | The arrow-key hint on the landing. |
 | `--lh-snug` | 20px | Canvas group labels. |
 | `--track` | -0.02em | Every line of site text. |
 | `--track-none` | 0px | The preview badge. |
@@ -87,6 +88,7 @@ The common pair is `var(--dur-hover)` with `var(--ease-out)`. Opacity on menus o
 | `--ease-in-out` | `cubic-bezier(0.77, 0, 0.175, 1)` |
 | `--ease-in-out-expo` | `cubic-bezier(0.65, 0, 0.15, 1)` |
 | `--ease-drawer` | `cubic-bezier(0.32, 0.72, 0, 1)` |
+| `--ease-nav` | `cubic-bezier(0.53, 0, 0.12, 0.99)` |
 | `--dur-fast` | 150ms |
 | `--dur-hover` | 160ms |
 | `--dur-ui` | 200ms |
@@ -94,6 +96,7 @@ The common pair is `var(--dur-hover)` with `var(--ease-out)`. Opacity on menus o
 | `--dur-sheet-out` | 260ms |
 | `--dur-media` | 300ms |
 | `--dur-sheet` | 400ms |
+| `--dur-nav` | 500ms |
 
 `linear` is the timing on the delayed visibility handoff (`0s linear`). `30ms` is the reveal stagger already used on text lines. `transition: none` is the reduced-motion stop.
 

@@ -46,7 +46,7 @@ function collectWords(root: ParentNode = document) {
   return [...root.querySelectorAll<HTMLElement>('.is-split .reveal-word')].filter((word) => {
     if (word.closest('.site-header')) return false;
     if (word.parentElement?.closest('.reveal-word')) return false;
-    if (word.closest('[data-no-reveal], .reveal-manual, .sr-only')) return false;
+    if (word.closest('[data-no-reveal], .reveal-manual, .sr-only, .arrow-hint')) return false;
     if (word.querySelector('.motion-letter')) return false;
     return true;
   });

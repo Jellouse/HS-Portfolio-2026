@@ -78,7 +78,7 @@ export default config({
   storage: storage(),
   ui: {
     brand: { name: 'Humansize' },
-    navigation: ['projects', 'projectOrder', 'services', '---', 'products', '---', 'site'],
+    navigation: ['projects', 'projectOrder', 'services', '---', 'products', '---', 'site', 'arrowNav'],
   },
   collections: {
     projects: collection({
@@ -459,7 +459,7 @@ export default config({
           {
             label: 'Projects',
             description:
-              'Drag to set the homepage order. Projects not in this list still appear, at the end (newer year first).',
+              'Drag to set the order of published projects. Projects not in this list still appear, at the end (newer year first).',
             itemLabel: (props) => props.value ?? 'Select a project',
           },
         ),
@@ -528,6 +528,121 @@ export default config({
         todo: fields.array(fields.text({ label: 'Note', multiline: true }), {
           label: 'TODOs',
         }),
+      },
+    }),
+    arrowNav: singleton({
+      label: 'Homepage',
+      path: 'src/content/site/arrow-nav',
+      format: { data: 'yaml' },
+      previewUrl: '/',
+      schema: {
+        landing: fields.object(
+          {
+            title: fields.text({
+              label: 'Title',
+              description: 'The line above the face.',
+              validation: { isRequired: true },
+            }),
+            body: fields.text({
+              label: 'Body',
+              description: 'The line under the title.',
+              multiline: true,
+            }),
+            hint: fields.text({
+              label: 'Hint',
+              description: 'The line at the bottom. Hidden on a phone.',
+            }),
+          },
+          { label: 'Landing' },
+        ),
+        nodes: fields.array(
+          fields.object({
+            id: fields.text({
+              label: 'Id',
+              description:
+                'Stable name. Other screens use it as their parent. The screen named about shows the About paragraphs from Site.',
+              validation: { isRequired: true },
+            }),
+            parent: fields.text({
+              label: 'Parent id',
+              description: 'landing, or another screen id.',
+              validation: { isRequired: true },
+            }),
+            dir: fields.select({
+              label: 'Direction',
+              description: 'Where the button sits on the parent screen.',
+              options: [
+                { label: 'Left', value: 'left' },
+                { label: 'Right', value: 'right' },
+                { label: 'Up', value: 'up' },
+                { label: 'Down', value: 'down' },
+              ],
+              defaultValue: 'right',
+            }),
+            label: fields.text({
+              label: 'Button label',
+              description: 'The word on the button that opens this screen.',
+            }),
+            title: fields.text({
+              label: 'Screen title',
+              description: 'Shown above the face on a branch. Leave empty to hide it. A gallery uses each group headline.',
+            }),
+            body: fields.text({
+              label: 'Screen text',
+              description: 'The line under the screen title. Leave empty to hide it.',
+              multiline: true,
+            }),
+            kind: fields.select({
+              label: 'Kind',
+              description: 'Branch is another set of buttons. Gallery is photos. Placeholder is an empty screen.',
+              options: [
+                { label: 'Branch', value: 'branch' },
+                { label: 'Gallery', value: 'gallery' },
+                { label: 'Placeholder', value: 'placeholder' },
+              ],
+              defaultValue: 'branch',
+            }),
+            groups: fields.array(
+              fields.object({
+                title: fields.text({
+                  label: 'Headline',
+                  description: 'Shown under the photo.',
+                }),
+                caption: fields.text({
+                  label: 'Caption',
+                  description: 'The line under the headline. Shared by every photo in the group.',
+                  multiline: true,
+                }),
+                product: fields.relationship({
+                  label: 'Product',
+                  collection: 'products',
+                  description: 'Adds a Buy button. Leave empty to hide it.',
+                }),
+                images: fields.array(
+                  fields.object({
+                    src: fields.text({
+                      label: 'Image path',
+                      description: 'Path in the repo, such as /src/content/projects/atomic-ski/cover.png',
+                      validation: { isRequired: true },
+                    }),
+                    alt: fields.text({ label: 'Alt text' }),
+                  }),
+                  { label: 'Images', itemLabel: (props) => props.fields.alt.value || 'Image' },
+                ),
+              }),
+              {
+                label: 'Image groups',
+                description: 'Gallery only. Each group is one stop. Left and right move through its photos, then the next group.',
+                itemLabel: (props) => props.fields.title.value || 'Group',
+              },
+            ),
+          }),
+          {
+            label: 'Screens',
+            description: 'Each screen is a button on its parent. About copy is edited under Site.',
+            itemLabel: (props) => props.fields.label.value || props.fields.id.value || 'Screen',
+          },
+        ),
       },
     }),
   },

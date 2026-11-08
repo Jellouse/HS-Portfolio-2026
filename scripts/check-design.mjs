@@ -10,7 +10,7 @@ const mapPath = join(root, 'docs/agents/COMPONENTS.md');
 const SPACE = new Set([0, 1, 3, 4, 6, 8, 10, 12, 16, 20, 40, 48, 80, 84, 96, 100, 150, 160, 240]);
 const RADIUS = new Set([0, 15, 31]);
 const BREAKPOINTS = new Set([759, 760, 1439, 1440]);
-const DURATIONS = new Set([0, 30, 150, 160, 200, 240, 260, 300, 400]);
+const DURATIONS = new Set([0, 30, 150, 160, 200, 240, 260, 300, 400, 500]);
 const EASINGS = new Set([
   '0.23,1,0.32,1',
   '0.16,1,0.3,1',
@@ -18,6 +18,7 @@ const EASINGS = new Set([
   '0.65,0,0.15,1',
   '0.77,0,0.175,1',
   '0.32,0.72,0,1',
+  '0.53,0,0.12,0.99',
 ]);
 
 const SPACE_PROPS = 'margin|padding|gap|row-gap|column-gap|inset|top|right|bottom|left|outline|outline-offset|text-underline-offset|text-decoration-thickness';

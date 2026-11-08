@@ -22,6 +22,7 @@ File names are kebab-case. A module that both pages use lives in `src/lib/` or `
 ## Where content lives
 
 - Site copy, email, about, socials: `src/content/site/site.yaml`
+- Homepage screens, galleries, and captions: `src/content/site/arrow-nav.yaml`, edited in Keystatic as Homepage. The About screen reads the About paragraphs from `site.yaml`. Shop Buy buttons store a product slug.
 - One folder per project: `src/content/projects/<slug>/index.yaml` plus images in that folder
 - Products: `src/content/products/<slug>/index.yaml`
 - Image paths in YAML are absolute from the repo, like `/src/content/projects/atomic-ski/cover.jpg`
@@ -47,6 +48,7 @@ Defined in `src/styles/type.css`. Whole pixels. Use the variables. Do not write 
 | `--text-ui` / `--lh-ui` | 16px / 22px | Admin and utility UI |
 | `--text-meta` / `--lh-meta` | 13px / 16px | Badges, canvas chrome, small CMS labels |
 | `--text-fine` / `--lh-fine` | 11px / 14px | Hero dials (`?dials` only) |
+| `--text-hint` / `--lh-hint` | 18px / 24px | The arrow-key hint on the landing |
 | `--lh-snug` | 20px | Canvas group labels |
 | `--track` | -0.02em | Every line of site text |
 | `--track-none` | 0px | The preview badge, which opts out |

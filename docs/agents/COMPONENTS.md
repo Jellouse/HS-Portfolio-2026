@@ -14,7 +14,7 @@ These were repeated, or the same menu and price markup copied across pages. The 
 | Price | `src/components/sections/Price.astro` | `slug`, `mode` (`suffix` or `prefix`), `text` | `/shop/`, `/shop/:slug` |
 | MainMenu | `src/components/sections/MainMenu.astro` | `variant` (`header`, `shop`, or `project`), `home?` | `/`, `/shop/`, `/shop/:slug`, `/work/:slug` |
 | CornerMark | `src/components/sections/CornerMark.astro` | `class`, `href`, `label`, slot for the mark | dev catalogue |
-| IntroHero | `src/components/sections/IntroHero.astro` | `variant` (`home` or `shop`), `site?`, illustration slot | `/`, `/shop/` |
+| IntroHero | `src/components/sections/IntroHero.astro` | `variant` (`home` or `shop`), `site?`, illustration slot | `/shop/` |
 | ShopIntro | `src/components/sections/ShopIntro.astro` | none | `/shop/` |
 | ShopProduct | `src/components/sections/ShopProduct.astro` | `product`, `index`, `sizes` | `/shop/` |
 | ShopDetailHead | `src/components/sections/ShopDetailHead.astro` | `title`, `slug`, `eur` | `/shop/:slug` |

@@ -2,28 +2,32 @@
 interface Props {
   filterId?: string;
   home?: boolean;
+  /** Small resting face. Cursor turbulence stays on the SVG filter. */
+  mark?: boolean;
 }
 
-const { filterId = 'hero-blob-texture', home = true } = Astro.props;
+const { filterId = 'hero-blob-texture', home = true, mark = false } = Astro.props;
 const fill = 'currentColor';
+const round = mark && !home;
 ---
 
 <svg
-  class={home ? 'mark mark-blob' : 'service-face'}
-  viewBox="0 0 559 249"
+  class={home ? 'mark mark-blob' : round ? 'arrow-face-blob' : 'service-face'}
+  viewBox={round ? '0 0 70 70' : '0 0 559 249'}
   fill="none"
   aria-hidden="true"
   xmlns="http://www.w3.org/2000/svg"
   data-hero-blob={home || undefined}
+  data-mark-face={mark || undefined}
   overflow="visible"
 >
   <defs>
     <filter
       id={filterId}
-      x="-45%"
-      y="-55%"
-      width="190%"
-      height="210%"
+      x={round ? '0' : '-45%'}
+      y={round ? '0' : '-55%'}
+      width={round ? '100%' : '190%'}
+      height={round ? '100%' : '210%'}
       filterUnits="objectBoundingBox"
       color-interpolation-filters="sRGB"
     >
@@ -38,7 +42,7 @@ const fill = 'currentColor';
       <feDisplacementMap
         in="SourceGraphic"
         in2="shifted"
-        scale="111"
+        scale={round ? '100' : '111'}
         xChannelSelector="R"
         yChannelSelector="G"
         result="displaced"
@@ -55,11 +59,20 @@ const fill = 'currentColor';
     </filter>
   </defs>
   <g filter={`url(#${filterId})`}>
-    <path
-      d="M279.042 0C433.153 -6.7364e-06 558.085 58.867 558.085 131.482C558.085 182.171 497.209 226.158 408.028 248.102V245.562C476.807 225.284 522.552 189.272 522.552 148.225C522.552 84.8558 413.529 33.4854 279.042 33.4854C144.555 33.4854 35.5312 84.8557 35.5312 148.225C35.5314 189.275 81.2831 225.289 150.07 245.566V248.104C60.8819 226.162 0.000283291 182.174 0 131.482C-3.17412e-06 58.8671 124.931 0.000104863 279.042 0Z"
-      fill={fill}></path>
-    <ellipse cx="153.872" cy="149.482" rx="84.8098" ry="60.171" fill={fill}></ellipse>
-    <ellipse cx="404.224" cy="149.482" rx="84.8098" ry="60.171" fill={fill}></ellipse>
-    <ellipse cx="280.484" cy="235.027" rx="78.7657" ry="10.0642" fill={fill}></ellipse>
+    {round ? (
+      <path
+        fill-rule="evenodd"
+        d="M34.6953 0C53.8571 0 69.3916 15.5855 69.3916 34.8105C69.3914 54.0354 53.857 69.6201 34.6953 69.6201C15.5338 69.6199 0.000238371 54.0353 0 34.8105C0 15.5856 15.5337 0.000210079 34.6953 0ZM34.9707 58.3516C29.4484 58.3516 24.9712 59.471 24.9707 60.8516C24.9715 62.2321 29.4486 63.3515 34.9707 63.3516C40.4931 63.3516 44.97 62.2321 44.9707 60.8516C44.9702 59.471 40.4932 58.3516 34.9707 58.3516ZM18.4707 18.3516C12.672 18.3521 7.97078 26.187 7.9707 35.8516C7.97082 45.5161 12.672 53.351 18.4707 53.3516C24.2696 53.3516 28.9706 45.5164 28.9707 35.8516C28.9706 26.1867 24.2696 18.3516 18.4707 18.3516ZM50.4707 18.3516C44.672 18.3521 39.9708 26.187 39.9707 35.8516C39.9708 45.5161 44.672 53.351 50.4707 53.3516C56.2696 53.3516 60.9706 45.5164 60.9707 35.8516C60.9706 26.1867 56.2696 18.3516 50.4707 18.3516Z"
+        fill={fill}></path>
+    ) : (
+      <>
+        <path
+          d="M279.042 0C433.153 -6.7364e-06 558.085 58.867 558.085 131.482C558.085 182.171 497.209 226.158 408.028 248.102V245.562C476.807 225.284 522.552 189.272 522.552 148.225C522.552 84.8558 413.529 33.4854 279.042 33.4854C144.555 33.4854 35.5312 84.8557 35.5312 148.225C35.5314 189.275 81.2831 225.289 150.07 245.566V248.104C60.8819 226.162 0.000283291 182.174 0 131.482C-3.17412e-06 58.8671 124.931 0.000104863 279.042 0Z"
+          fill={fill}></path>
+        <ellipse cx="153.872" cy="149.482" rx="84.8098" ry="60.171" fill={fill}></ellipse>
+        <ellipse cx="404.224" cy="149.482" rx="84.8098" ry="60.171" fill={fill}></ellipse>
+        <ellipse cx="280.484" cy="235.027" rx="78.7657" ry="10.0642" fill={fill}></ellipse>
+      </>
+    )}
   </g>
 </svg>
