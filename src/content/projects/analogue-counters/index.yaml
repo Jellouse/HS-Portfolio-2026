@@ -9,6 +9,7 @@ cover: /src/content/projects/analogue-counters/cover.jpg
 coverGallery: retail
 coverVideo: >-
   https://humansize-media.schnettker-johann.workers.dev/projects/analogue-couters/cover-mvaoawdg.mp4
+coverVideoGallery: none
 coverAlt: Analogue store on Zeedijk in Amsterdam
 coverFrame: wide
 coverFlush: false
@@ -30,6 +31,7 @@ blocks:
     value:
       src: >-
         https://humansize-media.schnettker-johann.workers.dev/projects/analogue-couters/cover-mvaoawdg.mp4
+      gallery: retail
       frame: wide
       flush: false
       outline: false
@@ -42,6 +44,7 @@ blocks:
   - discriminant: image
     value:
       src: /src/content/projects/analogue-counters/blocks/2/value/src.jpg
+      gallery: retail
       frame: wide
       flush: false
       outline: false
@@ -78,12 +81,14 @@ blocks:
   - discriminant: image
     value:
       src: /src/content/projects/analogue-counters/blocks/6/value/src.jpg
+      gallery: retail
       frame: default
       flush: false
       outline: false
   - discriminant: image
     value:
       src: /src/content/projects/analogue-counters/blocks/7/value/src.jpg
+      gallery: none
       frame: default
       flush: false
       outline: false
@@ -101,6 +106,7 @@ blocks:
       alt: >-
         Glass vitrine top with photo prints laid on milk glass, Analogue store
         Zeedijk
+      gallery: retail
       frame: default
       flush: false
       outline: false
@@ -110,6 +116,7 @@ blocks:
       alt: >-
         Close-up of an aluminium extrusion corner with a 3D printed end cap,
         Analogue store Zeedijk
+      gallery: retail
       frame: default
       flush: false
       outline: false
@@ -118,6 +125,7 @@ blocks:
       src: >-
         https://humansize-media.schnettker-johann.workers.dev/projects/industrial-bloom/tapping-timelapse-web-mvdavl9k.mp4
       poster: /src/content/projects/analogue-counters/blocks/11/value/poster.jpg
+      gallery: retail
       frame: default
       flush: false
       outline: false
@@ -127,6 +135,7 @@ blocks:
       alt: >-
         Transparent caster wheel under an aluminium vitrine, Analogue store
         Zeedijk
+      gallery: retail
       frame: default
       flush: false
       outline: false
@@ -136,6 +145,7 @@ blocks:
       alt: >-
         Side of a vitrine with glass panel and aluminium frame, Analogue store
         Zeedijk
+      gallery: retail
       frame: default
       flush: false
       outline: false
@@ -146,10 +156,12 @@ blocks:
       leftAlt: >-
         Corner of a vitrine with glass top and printed connector, Analogue store
         Zeedijk
+      leftGallery: retail
       right: /src/content/projects/analogue-counters/blocks/14/value/right.jpg
       rightAlt: >-
         3D printed clip holding a glass panel in an aluminium extrusion,
         Analogue store Zeedijk
+      rightGallery: retail
       frame: default
       outline: false
   - discriminant: text
@@ -164,6 +176,7 @@ blocks:
       src: >-
         https://humansize-media.schnettker-johann.workers.dev/projects/analogue-counters/my-movie-mvwkvx1u.mp4
       poster: /src/content/projects/analogue-counters/blocks/16/value/poster.jpg
+      gallery: retail
       frame: wide
       flush: false
       outline: false
@@ -174,10 +187,12 @@ blocks:
       leftAlt: >-
         Print gallery card held by a 3D printed clip on an extrusion frame,
         Analogue store Zeedijk
+      leftGallery: retail
       right: /src/content/projects/analogue-counters/blocks/17/value/right.jpg
       rightAlt: >-
         Steel cable with a clamp holding a print in the gallery, Analogue store
         Zeedijk
+      rightGallery: retail
       frame: default
       outline: false
   - discriminant: process
@@ -186,6 +201,7 @@ blocks:
         - src: >-
             /src/content/projects/analogue-counters/blocks/18/value/images/0/src.jpg
           alt: Box of sorted 3D printed parts and fasteners, Analogue store Zeedijk
+          gallery: none
           flush: false
           outline: false
         - src: >-
@@ -193,6 +209,7 @@ blocks:
           alt: >-
             Hand fitting a caster wheel into a 3D printed mount, Analogue store
             Zeedijk
+          gallery: none
           flush: false
           outline: false
         - src: >-
@@ -200,6 +217,7 @@ blocks:
           alt: >-
             Hand holding an aluminium extrusion with mounted connector blocks,
             Analogue store Zeedijk
+          gallery: none
           flush: false
           outline: false
         - src: >-
@@ -207,6 +225,7 @@ blocks:
           alt: >-
             3D printed brackets and caps laid out on a table, Analogue store
             Zeedijk
+          gallery: none
           flush: false
           outline: false
         - src: >-
@@ -214,6 +233,7 @@ blocks:
           alt: >-
             Hand assembling small parts on a sheet of acrylic glass, Analogue
             store Zeedijk
+          gallery: none
           flush: false
           outline: false
         - src: >-
@@ -221,6 +241,7 @@ blocks:
           alt: >-
             Half assembled vitrine frame with milk glass panels, Analogue store
             Zeedijk
+          gallery: none
           flush: false
           outline: false
         - src: >-
@@ -228,6 +249,7 @@ blocks:
           alt: >-
             Two vitrine frames under construction in the empty shop, Analogue
             store Zeedijk
+          gallery: none
           flush: false
           outline: false
         - src: >-
@@ -235,6 +257,7 @@ blocks:
           alt: >-
             Shop interior during the build with vitrines and tools, Analogue
             store Zeedijk
+          gallery: none
           flush: false
           outline: false
         - src: >-
@@ -242,6 +265,7 @@ blocks:
           alt: >-
             CAD section of a bolt joining extrusion profiles, Analogue store
             Zeedijk
+          gallery: none
           flush: false
           outline: false
         - src: >-
@@ -249,6 +273,7 @@ blocks:
           alt: >-
             CAD view of an extrusion profile with its connector, Analogue store
             Zeedijk
+          gallery: none
           flush: false
           outline: false
         - src: >-
@@ -256,6 +281,7 @@ blocks:
           alt: >-
             CAD close-up of a 3D printed bracket on an extrusion, Analogue store
             Zeedijk
+          gallery: none
           flush: false
           outline: false
         - src: >-
@@ -263,6 +289,7 @@ blocks:
           alt: >-
             CAD detail of a caster mount next to the parts list, Analogue store
             Zeedijk
+          gallery: none
           flush: false
           outline: false
         - src: >-
@@ -270,6 +297,7 @@ blocks:
           alt: >-
             CAD model of a complete vitrine frame with its parts tree, Analogue
             store Zeedijk
+          gallery: none
           flush: false
           outline: false
         - src: >-
@@ -277,6 +305,7 @@ blocks:
           alt: >-
             CAD close-up of a blue corner connector joining extrusions, Analogue
             store Zeedijk
+          gallery: none
           flush: false
           outline: false
         - src: >-
@@ -284,11 +313,13 @@ blocks:
           alt: >-
             Build plate filled with blue 3D printed connectors, Analogue store
             Zeedijk
+          gallery: none
           flush: false
           outline: false
         - src: >-
             /src/content/projects/analogue-counters/blocks/18/value/images/15/src.jpg
           alt: CAD model of a 3D printed caster plate, Analogue store Zeedijk
+          gallery: none
           flush: false
           outline: false
         - src: >-
@@ -296,5 +327,6 @@ blocks:
           alt: >-
             Unfinished vitrines with frames and glass in the workshop, Analogue
             store Zeedijk
+          gallery: none
           flush: false
           outline: false
