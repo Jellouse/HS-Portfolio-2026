@@ -1627,6 +1627,18 @@ html:active-view-transition-type(hs-shrink)::view-transition-new(hs-mark) {
   animation: vt-in 300ms var(--ease-out-quad) both;
 }
 
+.arrow-nav[data-screen='about'] .arrow-face-scale,
+.services-hub .arrow-face-scale {
+  view-transition-name: services-face;
+}
+
+.arrow-nav[data-screen='about'] .arrow-back,
+.services-hub .arrow-back {
+  view-transition-name: services-back;
+}
+
+::view-transition-group(services-face),
+::view-transition-group(services-back),
 ::view-transition-group(work-frame),
 ::view-transition-group(work-back) {
   animation-duration: var(--dur-nav);
@@ -1656,12 +1668,22 @@ html:active-view-transition-type(hs-shrink)::view-transition-new(hs-mark) {
   animation: vt-in var(--dur-nav) linear both;
 }
 
-::view-transition-image-pair(work-back) {
+::view-transition-image-pair(work-back),
+::view-transition-image-pair(services-back) {
   background: var(--page-bg);
 }
 
+::view-transition-old(services-face),
+::view-transition-old(services-back),
 ::view-transition-old(work-back) {
   display: none;
+}
+
+::view-transition-new(services-face),
+::view-transition-new(services-back) {
+  animation: none;
+  mix-blend-mode: normal;
+  height: 100%;
 }
 
 ::view-transition-new(work-back) {
