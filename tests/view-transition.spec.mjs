@@ -76,7 +76,7 @@ await go('/shop -> detail again', () => page.click('a.shop-pair >> nth=0'), firs
 await go('detail menu -> /shop again', () => page.click('.project-menu a[href="/shop"]'), '/shop');
 
 await page.goto(`${BASE}/work/atomic-ski/`, { waitUntil: 'load' });
-await go('project menu -> home', () => page.click('.project-menu a[href="/"]'), '/');
+await go('project back -> home', () => page.click('[data-project-back]'), '/');
 
 await page.goto(`${BASE}/`, { waitUntil: 'load' });
 await wait(2000);
@@ -85,7 +85,7 @@ await wait(400);
 const firstWork = await page.getAttribute('.card a', 'href');
 if (firstWork) {
   await go('home (scrolled) -> project', () => page.click('.card a'), firstWork);
-  await go('project -> home again', () => page.click('.project-menu a[href="/"]'), '/');
+  await go('project -> home again', () => page.click('[data-project-back]'), '/');
 }
 
 await browser.close();

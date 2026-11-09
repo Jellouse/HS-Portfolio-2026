@@ -36,6 +36,7 @@ const first = tree.nodes.find((node) => node.kind === 'gallery')?.slides[0];
       </div>
       <div class="arrow-gallery" data-nav-gallery hidden>
         <img src={first?.src} alt={first?.alt ?? ''} data-nav-photo />
+        <video data-nav-video hidden muted loop playsinline></video>
         <div class="arrow-dots" data-nav-dots></div>
       </div>
       <button type="button" class="arrow-pill" data-nav-flight data-dir="left">
@@ -62,6 +63,10 @@ const first = tree.nodes.find((node) => node.kind === 'gallery')?.slides[0];
   <div class="arrow-caption" data-nav-caption hidden>
     <p class="arrow-caption-title" data-nav-line></p>
     <p class="arrow-caption-body arrow-body" data-nav-line></p>
+    <a class="arrow-project" data-nav-project hidden href="/">
+      <span data-nav-project-title></span>
+      <span class="arrow-project-action">View project</span>
+    </a>
     <form class="arrow-caption-buy shop-buy-form" data-nav-buy hidden method="post" action="/api/shop/buy">
       <input type="hidden" name="slug" data-nav-buy-slug value="" />
       <button class="shop-buy-button" type="submit">Buy</button>

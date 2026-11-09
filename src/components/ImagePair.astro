@@ -11,12 +11,13 @@ interface Props {
   rightPriority?: boolean;
   frame?: 'default' | 'wide';
   outline?: boolean;
+  entry?: boolean;
 }
 
-const { left, leftAlt, right, rightAlt, leftPriority = false, rightPriority = false, frame = 'default', outline = false } = Astro.props;
+const { left, leftAlt, right, rightAlt, leftPriority = false, rightPriority = false, frame = 'default', outline = false, entry = false } = Astro.props;
 ---
 
-<div class="pair fade-in" data-frame={frame}>
+<div class:list={['pair', 'fade-in', { 'is-entry': entry }]} data-frame={frame}>
   <BlurImage
     src={resolveImageSource(left)}
     alt={leftAlt}

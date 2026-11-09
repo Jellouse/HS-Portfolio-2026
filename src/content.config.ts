@@ -1,5 +1,11 @@
 import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
+import { galleryCategoryValues } from './lib/gallery-categories';
+
+const galleryField = z.preprocess(
+  (value) => (value == null || value === '' || value === 'none' ? undefined : value),
+  z.enum(galleryCategoryValues).optional(),
+);
 
 const frame = z.enum(['default', 'wide']);
 
@@ -19,6 +25,7 @@ const imageBlock = z.object({
     frame: frame.default('default'),
     flush: z.boolean().default(false),
     outline: z.boolean().default(false),
+    gallery: galleryField,
   }),
 });
 
@@ -31,6 +38,7 @@ const videoBlock = z.object({
     frame: frame.default('default'),
     flush: z.boolean().default(false),
     outline: z.boolean().default(false),
+    gallery: galleryField,
   }),
 });
 
@@ -40,8 +48,10 @@ const pairBlock = z.object({
     layout: z.enum(['pair', 'stack']).default('pair'),
     left: z.string(),
     leftAlt: z.string().default(''),
+    leftGallery: galleryField,
     right: z.string(),
     rightAlt: z.string().default(''),
+    rightGallery: galleryField,
     frame: frame.default('default'),
     outline: z.boolean().default(false),
   }),
@@ -57,6 +67,7 @@ const processBlock = z.object({
           alt: z.string().default(''),
           flush: z.boolean().default(false),
           outline: z.boolean().default(false),
+          gallery: galleryField,
         }),
       )
       .default([]),
@@ -96,6 +107,8 @@ const projects = defineCollection({
     cover: z.string().optional(),
     coverVideo: z.string().nullish(),
     coverAlt: z.string().optional(),
+    coverGallery: galleryField,
+    coverVideoGallery: galleryField,
     coverFrame: frame.default('default'),
     coverFlush: z.boolean().default(false),
     coverOutline: z.boolean().default(false),

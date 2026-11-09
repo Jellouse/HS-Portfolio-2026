@@ -47,10 +47,8 @@ await p.goto(B + '/work/' + work[0] + '/', { waitUntil: 'load' });
 check(!(await p.evaluate(() => document.querySelector('.skip'))), 'no skip link');
 
 await p.keyboard.press('Tab');
-check(await p.evaluate(() => document.activeElement.matches('.project-menu a') && document.activeElement.textContent.trim() === 'Home'), 'Tab lands on Home');
-await p.keyboard.press('Tab');
-check(await p.evaluate(() => document.activeElement.matches('.project-menu a') && document.activeElement.textContent.trim() === 'Shop'), 'next Tab lands on Shop');
-check(await p.evaluate(() => !document.querySelector('.project-menu').inert), 'menu stays available');
+check(await p.evaluate(() => document.activeElement.matches('[data-project-back]')), 'Tab lands on Back');
+check(await p.evaluate(() => !document.querySelector('.project-menu')), 'project page has no old menu');
 
 await p.goto(B + '/', { waitUntil: 'load' });
 await p.waitForTimeout(400);

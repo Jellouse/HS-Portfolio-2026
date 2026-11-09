@@ -12,7 +12,7 @@ These were repeated, or the same menu and price markup copied across pages. The 
 | --- | --- | --- | --- |
 | Prose | `src/components/sections/Prose.astro` | `paragraphs: string[]` | `/`, `/shop/`, `/shop/:slug`, `/work/:slug` |
 | Price | `src/components/sections/Price.astro` | `slug`, `mode` (`suffix` or `prefix`), `text` | `/shop/`, `/shop/:slug` |
-| MainMenu | `src/components/sections/MainMenu.astro` | `variant` (`header`, `shop`, or `project`), `home?` | `/`, `/shop/`, `/shop/:slug`, `/work/:slug` |
+| MainMenu | `src/components/sections/MainMenu.astro` | `variant` (`header`, `shop`, or `project`), `home?` | `/`, `/shop/`, `/shop/:slug` |
 | CornerMark | `src/components/sections/CornerMark.astro` | `class`, `href`, `label`, slot for the mark | dev catalogue |
 | IntroHero | `src/components/sections/IntroHero.astro` | `variant` (`home` or `shop`), `site?`, illustration slot | `/shop/` |
 | ShopIntro | `src/components/sections/ShopIntro.astro` | none | `/shop/` |

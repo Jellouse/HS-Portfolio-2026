@@ -1,4 +1,5 @@
 import { withUpload } from './src/lib/VideoUrlInput';
+import { galleryCategories } from './src/lib/gallery-categories';
 import { withImageCms } from './src/lib/image-field-cms';
 import { config, fields, collection, singleton } from '@keystatic/core';
 
@@ -31,6 +32,16 @@ const inlineLink = {
   image: false,
   link: true,
 } as const;
+
+function gallerySelect() {
+  return fields.select({
+    label: 'Gallery',
+    description:
+      'Include this in a homepage gallery. The project title and summary are the headline and caption.',
+    options: [{ label: 'Not in a gallery', value: 'none' }, ...galleryCategories],
+    defaultValue: 'none',
+  });
+}
 
 const frame = fields.select({
   label: 'Frame',
@@ -145,10 +156,12 @@ export default config({
           description:
             'Required for the homepage card. Also used as the poster when a cover video is set. (The build allows cover video alone, but Keystatic cannot express that OR rule.)',
         }),
+        coverGallery: gallerySelect(),
         coverVideo: videoField(
           'Cover video',
           'Optional mp4 or webm. Plays muted on a loop instead of the cover image, which becomes the poster. Keep it short; H.264 MP4 plays everywhere.',
         ),
+        coverVideoGallery: gallerySelect(),
         coverAlt: fields.text({
           label: 'Cover alt text',
           description: 'Required. Alt for the cover image, or the accessible label for a cover video.',
@@ -223,6 +236,7 @@ export default config({
                   label: 'Alt text',
                   description: 'Optional. Empty is allowed; fill it when the image needs a description.',
                 }),
+                gallery: gallerySelect(),
                 frame,
                 flush: fields.checkbox({
                   label: 'Flush',
@@ -239,6 +253,7 @@ export default config({
                 src: videoField('Video', 'mp4 or webm. Plays muted on a loop. Keep it short; H.264 MP4 plays everywhere.'),
                 poster: imageField('Poster'),
                 alt: fields.text({ label: 'Label', description: 'Optional description of the video.' }),
+                gallery: gallerySelect(),
                 frame,
                 flush: fields.checkbox({
                   label: 'Flush',
@@ -267,11 +282,13 @@ export default config({
                   label: 'Left alt text',
                   description: 'Optional.',
                 }),
+                leftGallery: gallerySelect(),
                 right: imageField('Right image', { required: true }),
                 rightAlt: fields.text({
                   label: 'Right alt text',
                   description: 'Optional.',
                 }),
+                rightGallery: gallerySelect(),
                 frame,
                 outline,
               }),
@@ -286,6 +303,7 @@ export default config({
                       label: 'Alt text',
                       description: 'Optional.',
                     }),
+                    gallery: gallerySelect(),
                     flush: fields.checkbox({
                       label: 'Flush',
                       defaultValue: false,
@@ -296,6 +314,8 @@ export default config({
                   }),
                   {
                     label: 'Photos',
+                    description:
+                      'When the process folder is on, the page uses that folder. A Gallery choice here still includes the photo.',
                     itemLabel: (props) => props.fields.alt.value || 'Photo',
                   },
                 ),
@@ -650,7 +670,8 @@ export default config({
               }),
               {
                 label: 'Image groups',
-                description: 'Gallery only. Each group is one stop. Left and right move through its photos, then the next group.',
+                description:
+                  'Shop only. Web, 3D, Product, and Retail take their photos and videos from the Gallery field on each project.',
                 itemLabel: (props) => props.fields.title.value || 'Group',
               },
             ),

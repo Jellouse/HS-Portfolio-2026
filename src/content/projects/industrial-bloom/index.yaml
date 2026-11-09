@@ -6,6 +6,7 @@ summary: >-
   in Germany with laser cutting, 3D printing and embossing. Available in the
   [Humansize shop](/shop/).
 cover: /src/content/projects/industrial-bloom/cover.png
+coverGallery: product
 coverAlt: Industrial Bloom
 coverFrame: default
 coverFlush: true
@@ -136,3 +137,13 @@ blocks:
           alt: Industrial Bloom vase
           flush: false
           outline: false
+        - src: /src/content/projects/industrial-bloom/process/frame-2147269490.jpg
+          alt: Hand holding a cut aluminium extrusion profile, Industrial Bloom
+          gallery: product
+        - src: /src/content/projects/industrial-bloom/process/frame-2147269489.jpg
+          alt: Purple flowers in an aluminium vase on a windowsill, Industrial Bloom
+          gallery: product
+        - src: >-
+            /src/content/projects/industrial-bloom/process/screenshot-2026-06-09-at-14.27.59-1.jpg
+          alt: Cutaway render of a round vase with a perforated flower holder, Industrial Bloom
+          gallery: product

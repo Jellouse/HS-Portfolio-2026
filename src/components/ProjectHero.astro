@@ -12,9 +12,9 @@ const { title, years, summary } = Astro.props;
 const parts = summary && summary.trim() ? paragraphs(summary) : [];
 ---
 
-<header class="project-hero">
+<header class="project-hero" data-no-reveal>
   <h1>
-    {title}{years ? <span class="project-year">{years}</span> : null}
+    <span class="project-title">{title}</span>{years ? <span class="project-year">{years}</span> : null}
   </h1>
   {parts.length > 0 && (
     <div class="summary project-summary">

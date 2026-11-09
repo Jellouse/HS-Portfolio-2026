@@ -40,6 +40,12 @@ const hasProcessBlock = blocks.some((b) => b.discriminant === 'process');
 
 let imageCount = 0;
 const eager = () => imageCount++ < 2;
+let namedEntry = false;
+const markEntry = () => {
+  if (namedEntry) return false;
+  namedEntry = true;
+  return true;
+};
 ---
 
 {
@@ -56,6 +62,7 @@ const eager = () => imageCount++ < 2;
           flush={block.value.flush}
           outline={block.value.outline}
           priority={eager()}
+          entry={markEntry()}
         />
       );
     }
@@ -69,6 +76,7 @@ const eager = () => imageCount++ < 2;
           frame={block.value.frame}
           flush={block.value.flush}
           outline={block.value.outline}
+          entry={markEntry()}
         />
       );
     }
@@ -83,7 +91,7 @@ const eager = () => imageCount++ < 2;
     if (block.value.layout === 'stack') {
       return (
         <>
-          <ImageBlock src={block.value.left} alt={block.value.leftAlt ?? ''} priority={eager()} frame={block.value.frame} outline={block.value.outline} />
+          <ImageBlock src={block.value.left} alt={block.value.leftAlt ?? ''} priority={eager()} frame={block.value.frame} outline={block.value.outline} entry={markEntry()} />
           <ImageBlock src={block.value.right} alt={block.value.rightAlt ?? ''} priority={eager()} frame={block.value.frame} outline={block.value.outline} />
         </>
       );
@@ -98,6 +106,7 @@ const eager = () => imageCount++ < 2;
         outline={block.value.outline}
         leftPriority={eager()}
         rightPriority={eager()}
+        entry={markEntry()}
       />
     );
   })
