@@ -121,7 +121,6 @@ export function initArrowNav(root: ParentNode = document) {
     nav.querySelector<HTMLElement>('[data-nav-face]')!.hidden = gallery;
     nav.querySelector<HTMLElement>('[data-nav-gallery]')!.hidden = !gallery;
     nav.querySelector<HTMLElement>('[data-nav-caption]')!.hidden = !gallery;
-    nav.querySelector<HTMLElement>('[data-nav-hint]')!.hidden = id !== 'landing';
     const up = nav.querySelector<HTMLElement>('[data-dir="up"]')!;
     const upNext = child(id, 'up');
     const mark = up.querySelector<HTMLElement>('[data-nav-mark]');
@@ -652,8 +651,10 @@ export function initArrowNav(root: ParentNode = document) {
     if (!reduce && !caption.hidden) ghostBox(caption);
 
     applyCopy(id);
+    const wasLanding = screenId === 'landing';
     screenId = id;
     paintChrome(id);
+    if (wasLanding !== (id === 'landing')) fadeHint(id === 'landing');
     window.scrollTo(0, 0);
     const enteringGallery = !wasGallery && nav.dataset.kind === 'gallery';
     const outward = enteringGallery || id === 'about';
@@ -1002,8 +1003,11 @@ export function initArrowNav(root: ParentNode = document) {
     travel(String(id), false);
   });
 
+  const hintEl = () => nav.querySelector<HTMLElement>('[data-nav-hint]');
+  let hintGen = 0;
+
   const pulseHint = () => {
-    const hint = nav.querySelector<HTMLElement>('[data-nav-hint]');
+    const hint = hintEl();
     if (!hint || reduce || hint.hidden) return;
     const pulseMs = 2200;
     const hintSolid = 0.9;
@@ -1014,6 +1018,34 @@ export function initArrowNav(root: ParentNode = document) {
       direction: 'alternate',
       iterations: Infinity,
     });
+  };
+
+  const fadeHint = (show: boolean) => {
+    const hint = hintEl();
+    if (!hint) return;
+    const gen = ++hintGen;
+    const wasHidden = hint.hidden;
+    const from = show && wasHidden ? 0 : Number(getComputedStyle(hint).opacity);
+    hint.getAnimations().forEach((anim) => anim.cancel());
+    if (reduce) {
+      hint.hidden = !show;
+      hint.style.opacity = '';
+      if (show) pulseHint();
+      return;
+    }
+    if (show) hint.hidden = false;
+    const anim = hint.animate([{ opacity: Number.isFinite(from) ? from : 1 }, { opacity: show ? 1 : 0 }], {
+      duration: moveMs(),
+      easing: cssEase('--ease-out'),
+      fill: 'forwards',
+    });
+    anim.finished.finally(() => {
+      if (gen !== hintGen) return;
+      anim.cancel();
+      hint.style.opacity = '';
+      if (show) pulseHint();
+      else hint.hidden = true;
+    }).catch(() => {});
   };
 
   const revealIntro = () => {

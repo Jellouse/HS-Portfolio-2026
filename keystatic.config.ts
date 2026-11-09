@@ -74,6 +74,28 @@ function imageField(
   return { ...field, Input: withImageCms(field.Input as any) };
 }
 
+function galleryImageField() {
+  const field = imageField('Image', {
+    required: true,
+    directory: 'src/content',
+    publicPath: '/src/content',
+    description: 'Upload a photo. A project or product image already in the repo stays linked.',
+  });
+  const serialize = (field as { serialize?: (value: any, args: any) => any }).serialize;
+  return {
+    ...field,
+    serialize(value: { filename: string; data: Uint8Array } | null, args: unknown) {
+      if (value?.filename.includes('/')) {
+        return {
+          value: `/src/content/${value.filename}`,
+          asset: { filename: value.filename, content: value.data },
+        };
+      }
+      return serialize?.(value, args);
+    },
+  };
+}
+
 export default config({
   storage: storage(),
   ui: {
@@ -620,11 +642,7 @@ export default config({
                 }),
                 images: fields.array(
                   fields.object({
-                    src: fields.text({
-                      label: 'Image path',
-                      description: 'Path in the repo, such as /src/content/projects/atomic-ski/cover.png',
-                      validation: { isRequired: true },
-                    }),
+                    src: galleryImageField(),
                     alt: fields.text({ label: 'Alt text' }),
                   }),
                   { label: 'Images', itemLabel: (props) => props.fields.alt.value || 'Image' },
