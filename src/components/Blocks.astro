@@ -16,9 +16,10 @@ interface Props {
 
   processFolderSrcs?: string[];
   info?: { label: string; value: string; href?: string }[];
+  posterFallback?: string;
 }
 
-const { blocks, slug, processFromFolder = false, processFolderSrcs, info = [] } = Astro.props;
+const { blocks, slug, processFromFolder = false, processFolderSrcs, info = [], posterFallback } = Astro.props;
 
 let infoShown = false;
 const takeInfo = () => {
@@ -68,15 +69,16 @@ const markEntry = () => {
     }
     if (block.discriminant === 'video') {
       if (!block.value.src) return null;
+      const entry = markEntry();
       return (
         <VideoBlock
           src={block.value.src}
-          poster={block.value.poster ?? undefined}
+          poster={block.value.poster || (entry ? posterFallback : undefined)}
           label={block.value.alt ?? undefined}
           frame={block.value.frame}
           flush={block.value.flush}
           outline={block.value.outline}
-          entry={markEntry()}
+          entry={entry}
         />
       );
     }

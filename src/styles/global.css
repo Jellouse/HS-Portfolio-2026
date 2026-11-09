@@ -66,6 +66,7 @@
   --service-face: #b0b0b0;
   --line: #d6d6d6;
   --image-stroke: #e5e5e5;
+  --image-stroke-night: #333333;
   --button-fill: #f2f2f2;
   --scroll-nudge: 100px;
   --space-title: 80px;
@@ -1648,7 +1649,8 @@ html:active-view-transition-type(hs-shrink)::view-transition-new(hs-mark) {
 ::view-transition-image-pair(work-frame) {
   overflow: hidden;
   border-radius: var(--radius);
-  background: var(--button-fill);
+  corner-shape: squircle;
+  background: transparent;
 }
 
 ::view-transition-old(work-frame),
@@ -1657,11 +1659,12 @@ html:active-view-transition-type(hs-shrink)::view-transition-new(hs-mark) {
   height: 100%;
   object-fit: cover;
   object-position: center;
-  mix-blend-mode: plus-lighter;
+  mix-blend-mode: normal;
 }
 
 ::view-transition-old(work-frame) {
-  animation: vt-out var(--dur-nav) linear both;
+  animation: none;
+  opacity: 1;
 }
 
 ::view-transition-new(work-frame) {
@@ -3793,6 +3796,10 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-nav {
   --arrow-fill: rgb(255 255 255 / 10%);
 }
 
+html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
+  --image-stroke: var(--image-stroke-night);
+}
+
 .arrow-copy {
   position: absolute;
   left: 50%;
@@ -3865,6 +3872,7 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-nav {
 
 .arrow-face {
   z-index: 4;
+  pointer-events: none;
 }
 
 .arrow-gallery {
@@ -4046,6 +4054,24 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-nav {
   }
 }
 
+.arrow-nav :is(.arrow-pill, .arrow-back, .arrow-project):focus-visible,
+.project-back:focus-visible {
+  outline: none;
+}
+
+.arrow-nav :is(.arrow-pill, .arrow-back, .arrow-project):focus-visible::after,
+.project-back:focus-visible::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -8px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--red);
+  transform: translateX(-50%);
+}
+
 .arrow-pill.is-pressed,
 .arrow-back.is-pressed,
 .arrow-flight.is-pressed,
@@ -4122,7 +4148,8 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-nav {
   width: min(720px, 62vw);
   aspect-ratio: 16 / 10;
   border-radius: var(--radius);
-  overflow: hidden;
+  corner-shape: squircle;
+  overflow: visible;
   background: var(--button-fill);
   cursor: zoom-in;
   transition:
@@ -4131,11 +4158,20 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-nav {
     clip-path var(--dur-media) var(--ease-nav);
 }
 
+.arrow-gallery-media {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  corner-shape: inherit;
+}
+
 .arrow-gallery::after {
   content: '';
   position: absolute;
   inset: 0;
   border-radius: inherit;
+  corner-shape: inherit;
   box-shadow: inset 0 0 0 1px var(--image-stroke);
   pointer-events: none;
 }
@@ -4153,6 +4189,7 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-nav {
   height: auto;
   aspect-ratio: auto;
   border-radius: 0;
+  corner-shape: unset;
   transform: none;
   cursor: zoom-out;
   background: transparent;
@@ -4169,6 +4206,11 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-nav {
   max-width: none;
   object-fit: cover;
   display: block;
+  corner-shape: inherit;
+}
+
+.arrow-nav.is-full .arrow-gallery {
+  corner-shape: unset;
 }
 
 .arrow-gallery :is(img, video)[hidden] {
@@ -4189,19 +4231,20 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-nav {
   position: absolute;
   left: 0;
   right: 0;
-  bottom: var(--space-sm);
+  top: calc(100% + var(--space-2xs));
   z-index: 1;
   display: flex;
   justify-content: center;
   align-items: center;
   gap: var(--space-2xs);
+  pointer-events: none;
 }
 
 .arrow-dot {
   width: 3px;
   height: 3px;
   border-radius: 50%;
-  background: color-mix(in srgb, var(--bg) 40%, transparent);
+  background: color-mix(in srgb, var(--ink) 40%, transparent);
 }
 
 .arrow-dot.is-on {
@@ -4210,20 +4253,34 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-nav {
   border-radius: var(--space-2xs);
   position: relative;
   overflow: hidden;
-  background: color-mix(in srgb, var(--bg) 40%, transparent);
+  background: color-mix(in srgb, var(--ink) 40%, transparent);
 }
 
 .arrow-dot.is-on::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: var(--bg);
+  background: var(--ink);
   transform: scaleX(var(--nav-progress, 0));
   transform-origin: left center;
 }
 
-.arrow-nav.is-cover .arrow-dots {
+.arrow-nav.is-cover .arrow-dots,
+.arrow-nav.is-full .arrow-dots {
+  top: auto;
   bottom: 48px;
+}
+
+.arrow-nav.is-cover .arrow-dot,
+.arrow-nav.is-full .arrow-dot,
+.arrow-nav.is-cover .arrow-dot.is-on,
+.arrow-nav.is-full .arrow-dot.is-on {
+  background: color-mix(in srgb, var(--bg) 40%, transparent);
+}
+
+.arrow-nav.is-cover .arrow-dot.is-on::before,
+.arrow-nav.is-full .arrow-dot.is-on::before {
+  background: var(--bg);
 }
 
 .arrow-nav.is-cover .arrow-dot {
@@ -4255,7 +4312,7 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-nav {
   margin-top: var(--lh);
 }
 
-.arrow-nav[data-kind='gallery']:not(.is-full, .is-cover) .arrow-gallery[data-project] {
+.arrow-nav[data-kind='gallery']:not(.is-full, .is-cover) .arrow-gallery[data-project] .arrow-gallery-media {
   view-transition-name: work-frame;
 }
 
@@ -4264,6 +4321,7 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-nav {
 }
 
 .arrow-project {
+  position: relative;
   display: inline-flex;
   align-items: center;
   gap: var(--space-2xs);
@@ -4367,6 +4425,10 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-nav {
 
   .arrow-hint {
     display: none;
+  }
+
+  .arrow-nav.is-intro .arrow-face-blob g {
+    filter: none;
   }
 
   .arrow-nav[data-screen='about'] .arrow-pill[data-dir='left'],
