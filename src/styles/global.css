@@ -3853,6 +3853,12 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-nav {
   overflow: hidden;
 }
 
+.arrow-nav.is-intro .arrow-face-scale,
+.arrow-nav.is-intro .arrow-face-blob {
+  overflow: visible;
+  border-radius: 0;
+}
+
 .arrow-pill,
 .arrow-back,
 .arrow-flight {

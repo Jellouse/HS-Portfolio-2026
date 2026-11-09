@@ -22,7 +22,7 @@ File names are kebab-case. A module that both pages use lives in `src/lib/` or `
 ## Where content lives
 
 - Site copy, email, about, socials: `src/content/site/site.yaml`
-- Homepage screens, galleries, and captions: `src/content/site/arrow-nav.yaml`, edited in Keystatic as Homepage. The About screen reads the About paragraphs from `site.yaml`. Shop Buy buttons store a product slug.
+- Homepage screens, galleries, and captions: `src/content/site/arrow-nav.yaml`, edited in Keystatic as Homepage. Gallery photos are uploaded on that entry. An image already in the repo stays linked. The About screen reads the About paragraphs from `site.yaml`. Shop Buy buttons store a product slug.
 - One folder per project: `src/content/projects/<slug>/index.yaml` plus images in that folder
 - Products: `src/content/products/<slug>/index.yaml`
 - Image paths in YAML are absolute from the repo, like `/src/content/projects/atomic-ski/cover.jpg`
