@@ -123,18 +123,21 @@ export function initArrowNav(root: ParentNode = document) {
     nav.querySelector<HTMLElement>('[data-nav-caption]')!.hidden = !gallery;
     const up = nav.querySelector<HTMLElement>('[data-dir="up"]')!;
     const upNext = child(id, 'up');
-    const mark = up.querySelector<HTMLElement>('[data-nav-mark]');
+    const upLabel = up.querySelector<HTMLElement>('[data-nav-label]');
     const backIcon = up.querySelector<HTMLElement>('[data-nav-back]');
     if (!node && upNext) {
       up.hidden = false;
-      up.dataset.mode = 'mark';
-      if (mark) mark.hidden = false;
+      up.dataset.mode = 'text';
+      if (upLabel) {
+        upLabel.hidden = false;
+        upLabel.textContent = upNext.label;
+      }
       if (backIcon) backIcon.hidden = true;
-      up.setAttribute('aria-label', upNext.label);
+      up.removeAttribute('aria-label');
     } else if (node) {
       up.hidden = false;
       up.dataset.mode = 'back';
-      if (mark) mark.hidden = true;
+      if (upLabel) upLabel.hidden = true;
       if (backIcon) backIcon.hidden = false;
       up.setAttribute('aria-label', 'Back');
     } else {
@@ -565,6 +568,8 @@ export function initArrowNav(root: ParentNode = document) {
 
   const ghostBox = (el: HTMLElement) => {
     const ghost = el.cloneNode(true) as HTMLElement;
+    const shape = getComputedStyle(el);
+    const lineStyles = [...el.querySelectorAll<HTMLElement>('.arrow-line')].map((line) => getComputedStyle(line));
     ghost.setAttribute('aria-hidden', 'true');
     ghost.classList.add('arrow-copy-ghost');
     const rect = el.getBoundingClientRect();
@@ -572,7 +577,15 @@ export function initArrowNav(root: ParentNode = document) {
     ghost.style.top = `${Math.round(rect.top)}px`;
     ghost.style.width = `${Math.round(rect.width)}px`;
     ghost.style.transform = 'none';
-    ghost.style.textAlign = 'center';
+    ghost.style.textAlign = shape.textAlign;
+    ghost.style.alignItems = shape.alignItems;
+    ghost.style.color = shape.color;
+    ghost.querySelectorAll<HTMLElement>('.arrow-line').forEach((line, index) => {
+      const from = lineStyles[index];
+      if (!from) return;
+      line.style.textAlign = from.textAlign;
+      line.style.color = from.color;
+    });
     document.body.append(ghost);
     ghost.animate([{ opacity: 1 }, { opacity: 0 }], { duration: moveMs(), easing: cssEase('--ease-out'), fill: 'forwards' }).finished.finally(() => ghost.remove());
   };
@@ -776,17 +789,18 @@ export function initArrowNav(root: ParentNode = document) {
         slot.append(clip);
         clips.push(clip);
         const move = departMove(dir, prev, arrival);
-        clone
-          .animate(
-            [
-              { transform: 'translate(0px, 0px)', opacity: prev.opacity },
-              { transform: `translate(${move.x}px, ${move.y}px)`, opacity: 0 },
-            ],
-            { duration: moveMs(), easing: ease, fill: 'both' },
-          )
-          .finished.finally(() => {
-            if (gen === generation) clip.remove();
-          });
+        const motion = clone.animate(
+          [{ transform: 'translate(0px, 0px)' }, { transform: `translate(${move.x}px, ${move.y}px)` }],
+          { duration: moveMs(), easing: ease, fill: 'both' },
+        );
+        clone.animate([{ opacity: prev.opacity }, { opacity: 0 }], {
+          duration: Math.round(moveMs() * 0.7),
+          easing: ease,
+          fill: 'forwards',
+        });
+        motion.finished.finally(() => {
+          if (gen === generation) clip.remove();
+        });
       });
     }
     const anims = placed.filter((item) => !item.same).map(({ el, rect, prev, moved }) => {

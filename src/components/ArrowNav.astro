@@ -1,6 +1,5 @@
 ---
 import HeroBlob from './HeroBlob.astro';
-import mark from '../assets/industrial-bloom-mark.svg?raw';
 import type { ArrowTree } from '../lib/arrow-nav';
 
 interface Props {
@@ -25,7 +24,7 @@ const first = tree.nodes.find((node) => node.kind === 'gallery')?.slides[0];
         <path d="M2.11719 7H13.1172C16.4309 7 19.1172 9.68629 19.1172 13C19.1172 16.3137 16.4309 19 13.1172 19H5.98082" fill="none" stroke="currentColor" stroke-width="2"></path>
         <path d="M7.53027 13.2324L1.41406 7.11621L7.53027 0.999995" fill="none" stroke="currentColor" stroke-width="2"></path>
       </svg>
-      <span class="arrow-mark" data-nav-mark hidden set:html={mark} />
+      <span data-nav-label hidden>Shop</span>
     </button>
 
     <div class="arrow-slot">
