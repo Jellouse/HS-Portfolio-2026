@@ -7,7 +7,8 @@ summary: >-
   3D rendering and animation in Blender for the Analogue AF1 website: product
   renders, a LiDAR animation and a product showcase video.
 cover: /src/content/projects/analogue-af1/cover.png
-coverGallery: renders
+coverGallery: none
+coverVideoGallery: none
 coverAlt: Black Analogue AF1 film camera from the front
 coverFrame: default
 coverFlush: false
@@ -25,6 +26,7 @@ blocks:
       src: >-
         https://humansize-media.schnettker-johann.workers.dev/projects/analogue-af1/analogue-af1-1-mvd42svq.mp4
       alt: Animation of the Analogue AF1 camera turning in the dark
+      gallery: renders
       frame: default
       flush: false
       outline: false
@@ -33,8 +35,10 @@ blocks:
       layout: stack
       left: /src/content/projects/analogue-af1/blocks/1/value/left.jpg
       leftAlt: Black Analogue AF1 film camera from the front
+      leftGallery: renders
       right: /src/content/projects/analogue-af1/blocks/1/value/right.jpg
       rightAlt: Analogue AF1 camera surrounded by splashing water
+      rightGallery: renders
       frame: default
       outline: false
   - discriminant: video
@@ -42,6 +46,7 @@ blocks:
       src: >-
         https://humansize-media.schnettker-johann.workers.dev/projects/analogue-af1/analogue-af1-2-mvd42um0.mp4
       alt: Glowing particles floating on a black background
+      gallery: none
       frame: default
       flush: false
       outline: false
@@ -49,6 +54,7 @@ blocks:
     value:
       src: /src/content/projects/analogue-af1/blocks/3/value/src.jpg
       alt: Render of the black Analogue AF1 camera from the front
+      gallery: renders
       frame: default
       flush: false
       outline: false
@@ -56,6 +62,7 @@ blocks:
     value:
       src: /src/content/projects/analogue-af1/blocks/4/value/src.jpg
       alt: Analogue AF1 camera rendered from all six sides
+      gallery: none
       frame: default
       flush: false
       outline: false
@@ -63,6 +70,7 @@ blocks:
     value:
       src: /src/content/projects/analogue-af1/blocks/5/value/src.jpg
       alt: Website hero with the camera rising into frame, Analogue AF1
+      gallery: renders
       frame: default
       flush: false
       outline: false
@@ -70,18 +78,25 @@ blocks:
     value:
       src: /src/content/projects/analogue-af1/blocks/6/value/src.jpg
       alt: Render of the lens elements spread out on blue, Analogue AF1
+      gallery: renders
       frame: default
       flush: false
       outline: false
   - discriminant: process
     value:
       images:
-        - src: /src/content/projects/analogue-af1/process/frame-267.jpg
+        - src: /src/content/projects/analogue-af1/blocks/7/value/images/0/src.jpg
           alt: Front render of the camera on a blue gradient, Analogue AF1
           gallery: renders
-        - src: /src/content/projects/analogue-af1/process/group-19.jpg
+          flush: false
+          outline: false
+        - src: /src/content/projects/analogue-af1/blocks/7/value/images/1/src.jpg
           alt: Hand holding the camera in front view, Analogue AF1
           gallery: renders
-        - src: /src/content/projects/analogue-af1/process/angle-1-1.jpg
+          flush: false
+          outline: false
+        - src: /src/content/projects/analogue-af1/blocks/7/value/images/2/src.jpg
           alt: Angled render of the glossy black camera, Analogue AF1
           gallery: renders
+          flush: false
+          outline: false
