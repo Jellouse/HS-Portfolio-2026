@@ -5,7 +5,8 @@ summary: >
   Tony's Chocolonely called us for a new website! Their branding has no rules,
   and so many rules. It really grew on me.
 cover: /src/content/projects/tonys-chocolonely/cover.png
-coverGallery: web
+coverGallery: none
+coverVideoGallery: none
 coverAlt: Tony's Chocolonely
 coverFrame: default
 coverFlush: false
@@ -27,48 +28,56 @@ blocks:
       src: >-
         https://humansize-media.schnettker-johann.workers.dev/projects/tonys-chocolonely/sejmigtui0qwuzhrgd6oh7upk0-mvqrmusr.mp4
       poster: /src/content/projects/tonys-chocolonely/blocks/0/value/poster.jpg
+      gallery: web
       frame: wide
       flush: false
       outline: false
   - discriminant: image
     value:
       src: /src/content/projects/tonys-chocolonely/blocks/1/value/src.jpg
+      gallery: web
       frame: default
       flush: false
       outline: false
   - discriminant: image
     value:
       src: /src/content/projects/tonys-chocolonely/blocks/2/value/src.jpg
+      gallery: web
       frame: default
       flush: false
       outline: false
   - discriminant: image
     value:
       src: /src/content/projects/tonys-chocolonely/blocks/3/value/src.jpg
+      gallery: web
       frame: default
       flush: false
       outline: false
   - discriminant: image
     value:
       src: /src/content/projects/tonys-chocolonely/blocks/4/value/src.jpg
+      gallery: web
       frame: default
       flush: false
       outline: false
   - discriminant: image
     value:
       src: /src/content/projects/tonys-chocolonely/blocks/5/value/src.jpg
+      gallery: web
       frame: default
       flush: false
       outline: false
   - discriminant: image
     value:
       src: /src/content/projects/tonys-chocolonely/blocks/6/value/src.jpg
+      gallery: web
       frame: default
       flush: false
       outline: true
   - discriminant: image
     value:
       src: /src/content/projects/tonys-chocolonely/blocks/7/value/src.jpg
+      gallery: web
       frame: default
       flush: false
       outline: false
