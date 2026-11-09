@@ -5,6 +5,7 @@ summary: >
   Tony's Chocolonely called us for a new website! Their branding has no rules,
   and so many rules. It really grew on me.
 cover: /src/content/projects/tonys-chocolonely/cover.png
+coverGallery: web
 coverAlt: Tony's Chocolonely
 coverFrame: default
 coverFlush: false

@@ -88,6 +88,20 @@ export function initArrowNav(root: ParentNode = document) {
   const child = (id: string, dir: ArrowDir) =>
     tree.nodes.find((node) => node.parent === id && node.dir === dir);
 
+  const depthOf = (id: string) => {
+    let depth = 0;
+    let cursor = id;
+    const seen = new Set<string>();
+    while (cursor !== 'landing' && !seen.has(cursor)) {
+      seen.add(cursor);
+      const parent = nodes.get(cursor)?.parent;
+      if (!parent) break;
+      depth += 1;
+      cursor = parent;
+    }
+    return depth;
+  };
+
   const applyCopy = (id: string) => {
     const node = id === 'landing' ? null : nodes.get(id);
     const title = nav.querySelector<HTMLElement>('[data-nav-title]')!;
@@ -184,16 +198,26 @@ export function initArrowNav(root: ParentNode = document) {
     }
   };
 
-  const showSlide = (index: number) => {
+  const showSlide = (index: number, morph = true) => {
     const node = screen();
     if (!node || node.kind !== 'gallery' || !node.slides.length) return;
     const count = node.slides.length;
     slide = (index + count) % count;
     const item = node.slides[slide];
     const photo = nav.querySelector<HTMLImageElement>('[data-nav-photo]')!;
+    const clip = nav.querySelector<HTMLVideoElement>('[data-nav-video]')!;
     const caption = nav.querySelector<HTMLElement>('[data-nav-caption]')!;
     const title = caption.querySelector<HTMLElement>('.arrow-caption-title')!;
     const body = caption.querySelector<HTMLElement>('.arrow-caption-body')!;
+    const projectLink = caption.querySelector<HTMLAnchorElement>('[data-nav-project]')!;
+    if (!projectLink.dataset.returnBound) {
+      projectLink.dataset.returnBound = 'true';
+      projectLink.addEventListener('click', () => {
+        if (projectLink.hidden) return;
+        sessionStorage.setItem('arrow-return', '1');
+      });
+    }
+    const projectTitle = caption.querySelector<HTMLElement>('[data-nav-project-title]')!;
     const buy = caption.querySelector<HTMLElement>('[data-nav-buy]')!;
     const slug = caption.querySelector<HTMLInputElement>('[data-nav-buy-slug]')!;
     const gallery = nav.querySelector<HTMLElement>('[data-nav-gallery]')!;
@@ -201,13 +225,43 @@ export function initArrowNav(root: ParentNode = document) {
     photo.classList.toggle('is-alpha', cutout);
     gallery.classList.toggle('is-alpha', cutout);
     photo.getAnimations().forEach((anim) => anim.cancel());
-    photo.src = item.src;
-    photo.alt = item.alt;
+    if (item.kind === 'video') {
+      photo.hidden = true;
+      clip.hidden = false;
+      clip.poster = item.poster || '';
+      if (clip.getAttribute('src') !== item.src) clip.src = item.src;
+      clip.play().catch(() => {});
+    } else {
+      clip.pause();
+      clip.hidden = true;
+      clip.removeAttribute('src');
+      photo.hidden = false;
+      photo.src = item.src;
+      photo.alt = item.alt;
+    }
     photo.style.opacity = '';
+    if (item.kind === 'video') {
+      clip.onloadedmetadata = () => {
+        if (screen()?.slides[slide] !== item || !clip.videoWidth) return;
+        fitGallery({ width: clip.videoWidth, height: clip.videoHeight }, true);
+      };
+    }
+    fitGallery(item, morph && !full);
     title.textContent = item.title;
-    body.textContent = item.caption;
-    title.hidden = !item.title;
-    body.hidden = !item.caption;
+    body.innerHTML = item.caption;
+    if (item.slug) {
+      projectLink.hidden = false;
+      projectLink.href = `/work/${item.slug}/`;
+      projectTitle.textContent = item.title;
+      title.hidden = true;
+      body.hidden = true;
+      gallery.dataset.project = item.slug;
+    } else {
+      projectLink.hidden = true;
+      delete gallery.dataset.project;
+      title.hidden = !item.title;
+      body.hidden = !item.caption;
+    }
     slug.value = item.product;
     buy.hidden = !item.product;
     caption.hidden = !item.title && !item.caption && !item.product;
@@ -273,16 +327,55 @@ export function initArrowNav(root: ParentNode = document) {
     return Number.isFinite(n) ? Math.round(n) : 64;
   };
 
-  const restingFrame = () => {
+  const frameFor = (width: number, height: number) => {
     const host = nav.getBoundingClientRect();
     const margin = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--margin')) || 20;
-    const width = phone()
+    const maxWidth = phone()
       ? Math.round(host.width - 2 * controlSize() - 2 * margin)
       : Math.round(Math.min(720, host.width * 0.62));
-    const height = Math.round((width * 10) / 16);
-    const left = Math.round(host.left + (host.width - width) / 2);
-    const top = Math.round(host.top + (host.height - height) / 2);
-    return { left, top, right: left + width, bottom: top + height, width, height };
+    const maxHeight = Math.round(Math.min(host.height * 0.62, host.height - controlSize() * 2));
+    const ratio = width > 0 && height > 0 ? width / height : 1.6;
+    let nextWidth = Math.max(1, maxWidth);
+    let nextHeight = Math.max(1, Math.round(nextWidth / ratio));
+    if (maxHeight > 0 && nextHeight > maxHeight) {
+      nextHeight = maxHeight;
+      nextWidth = Math.max(1, Math.round(nextHeight * ratio));
+    }
+    const left = Math.round(host.left + (host.width - nextWidth) / 2);
+    const top = Math.round(host.top + (host.height - nextHeight) / 2);
+    return { left, top, right: left + nextWidth, bottom: top + nextHeight, width: nextWidth, height: nextHeight };
+  };
+
+  const restingFrame = () => {
+    const item = screen()?.slides[slide];
+    return frameFor(item?.width || 16, item?.height || 10);
+  };
+
+  let frameWatch = 0;
+  const fitGallery = (item: { width: number; height: number }, morph: boolean) => {
+    if (full) return;
+    const gallery = galleryEl();
+    const box = frameFor(item.width, item.height);
+    const jump = !morph || reduce || full;
+    if (jump) gallery.style.transition = 'none';
+    gallery.style.width = `${box.width}px`;
+    gallery.style.height = `${box.height}px`;
+    if (jump) {
+      gallery.getBoundingClientRect();
+      gallery.style.transition = '';
+    }
+    if (frameWatch) cancelAnimationFrame(frameWatch);
+    if (!jump && !full) {
+      const start = performance.now();
+      const tick = () => {
+        frameWatch = 0;
+        if (nav.dataset.kind !== 'gallery' || full) return;
+        placeGalleryArrows();
+        placeCaption();
+        if (performance.now() - start < moveMs() + 50) frameWatch = requestAnimationFrame(tick);
+      };
+      frameWatch = requestAnimationFrame(tick);
+    }
   };
 
   const placeGalleryArrows = (frame: { left: number; top: number; right: number; bottom: number; width: number; height: number } | null = null) => {
@@ -355,6 +448,7 @@ export function initArrowNav(root: ParentNode = document) {
   const setFull = (open: boolean) => {
     if (screen()?.kind !== 'gallery' || open === full) return;
     const gallery = galleryEl();
+    gallery.style.transition = 'none';
     const radius = getComputedStyle(document.documentElement).getPropertyValue('--radius').trim() || '31px';
     const buttons = (['left', 'right', 'up'] as const).map((dir) => nav.querySelector<HTMLElement>(`[data-dir="${dir}"]`)!);
     const before = new Map(buttons.filter((el) => !el.hidden).map((el) => [el, el.getBoundingClientRect()]));
@@ -395,6 +489,8 @@ export function initArrowNav(root: ParentNode = document) {
       nav.classList.toggle('is-full', open);
       nav.classList.remove('is-zoom');
       clearBox();
+      const current = screen()?.slides[slide];
+      if (current) fitGallery(current, false);
       placeGalleryArrows();
       return;
     }
@@ -440,6 +536,8 @@ export function initArrowNav(root: ParentNode = document) {
       nav.classList.remove('is-zoom');
       if (!full) {
         buttons.forEach((el) => el.getAnimations().forEach((item) => item.cancel()));
+        const current = screen()?.slides[slide];
+        if (current) fitGallery(current, false);
         placeGalleryArrows();
       }
     }).catch(() => {});
@@ -548,6 +646,9 @@ export function initArrowNav(root: ParentNode = document) {
       const lines = block.hasAttribute('data-nav-caption')
         ? [
             ...[...block.querySelectorAll<HTMLElement>('[data-nav-line]')].filter((line) => !line.hidden).flatMap((line) => splitLines(line)),
+            ...(!block.querySelector<HTMLElement>('[data-nav-project]')?.hidden
+              ? [block.querySelector<HTMLElement>('[data-nav-project]')!]
+              : []),
             ...(!block.querySelector<HTMLElement>('[data-nav-buy]')?.hidden ? [block.querySelector<HTMLElement>('[data-nav-buy]')!] : []),
           ]
         : !block.querySelector('button')
@@ -664,15 +765,16 @@ export function initArrowNav(root: ParentNode = document) {
     if (!reduce && !caption.hidden) ghostBox(caption);
 
     applyCopy(id);
+    const fromId = screenId;
     const wasLanding = screenId === 'landing';
     screenId = id;
     paintChrome(id);
     if (wasLanding !== (id === 'landing')) fadeHint(id === 'landing');
     window.scrollTo(0, 0);
     const enteringGallery = !wasGallery && nav.dataset.kind === 'gallery';
-    const outward = enteringGallery || id === 'about';
+    const outward = depthOf(id) > depthOf(fromId);
     if (enteringGallery && !reduce) faceEl().hidden = false;
-    if (screen()?.kind === 'gallery') showSlide(0);
+    if (screen()?.kind === 'gallery') showSlide(0, false);
     placeGalleryArrows();
     placeCopy();
     placeCaption();
@@ -860,6 +962,14 @@ export function initArrowNav(root: ParentNode = document) {
       showSlide(slide + (dir === 'right' ? 1 : -1));
       return;
     }
+    if (dir === 'down' && node?.kind === 'gallery') {
+      const link = nav.querySelector<HTMLAnchorElement>('[data-nav-project]');
+      if (link && !link.hidden) {
+        sessionStorage.setItem('arrow-return', '1');
+        link.click();
+        return;
+      }
+    }
     if (dir === 'up' && full) {
       setFull(false);
       return;
@@ -996,7 +1106,11 @@ export function initArrowNav(root: ParentNode = document) {
     }
     event.preventDefault();
     if (event.repeat || introOn || pressFrom) return;
-    const button = nav.querySelector<HTMLElement>(`[data-dir="${dir}"]`);
+    const projectLink = nav.querySelector<HTMLElement>('[data-nav-project]');
+    const button =
+      dir === 'down' && screen()?.kind === 'gallery' && projectLink && !projectLink.hidden
+        ? projectLink
+        : nav.querySelector<HTMLElement>(`[data-dir="${dir}"]`);
     if (!button || button.hidden) return;
     setPressed(button, 'key', event.key);
     if (!backKey(event.key)) startHold(dir);
@@ -1128,13 +1242,32 @@ export function initArrowNav(root: ParentNode = document) {
     requestAnimationFrame(frame);
   };
 
-  history.replaceState({ arrow: 'landing' }, '', location.pathname + location.search);
-  paintChrome('landing');
+  const hash = location.hash.replace('#', '');
+  const opened = hash && nodes.has(hash) ? hash : 'landing';
+  history.replaceState(
+    { arrow: opened },
+    '',
+    opened === 'landing' ? location.pathname + location.search : `${location.pathname}${location.search}#${opened}`,
+  );
+  screenId = opened;
+  paintChrome(opened);
+  if (opened !== 'landing' && nodes.get(opened)?.kind === 'gallery') showSlide(0, false);
   placeCopy();
+  placeCaption();
+  placeGalleryArrows();
   window.addEventListener('resize', () => {
+    const current = screen()?.kind === 'gallery' ? screen()?.slides[slide] : null;
+    if (current && !full) fitGallery(current, false);
     placeCopy();
     placeCaption();
     placeGalleryArrows();
   });
-  runIntro();
+  if (opened === 'landing') runIntro();
+  else {
+    introPlaying = false;
+    introOn = false;
+    nav.classList.remove('is-intro');
+    nav.classList.add('is-controls');
+    settleFace();
+  }
 }

@@ -60,6 +60,18 @@ const site = await getSite();
         } else if (document.querySelector('[data-hero-root]')) {
           vt.types.add('hs-grow');
         }
+        var from = typeof navigation !== 'undefined' && navigation.activation && navigation.activation.from && navigation.activation.from.url;
+        var fromWork = from && /\/work\/[^/]+\/?$/.test(from.pathname);
+        if (document.querySelector('[data-project-back]') || (fromWork && document.querySelector('[data-arrow-nav]'))) {
+          vt.types.add('work');
+        }
+      });
+      addEventListener('pageswap', function (e) {
+        var vt = e.viewTransition;
+        if (!vt || !vt.types) return;
+        var dest = e.activation && e.activation.entry && e.activation.entry.url;
+        var toWork = dest && /\/work\/[^/]+\/?$/.test(dest.pathname);
+        if (toWork || document.querySelector('[data-project-back]')) vt.types.add('work');
       });
 </script>
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />

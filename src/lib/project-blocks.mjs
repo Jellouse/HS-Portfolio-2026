@@ -18,9 +18,23 @@ export function collectBlockImageSrcs(blocks) {
   return srcs;
 }
 
+function blockSrcsOutsideProcess(blocks) {
+  const srcs = [];
+  for (const block of blocks || []) {
+    const d = block.discriminant;
+    const v = block.value || {};
+    if (d === 'image' && v.src) srcs.push(v.src);
+    else if (d === 'pair') {
+      if (v.left) srcs.push(v.left);
+      if (v.right) srcs.push(v.right);
+    }
+  }
+  return srcs;
+}
+
 export function resolveProcessFolderForRender(processFromFolder, folderSrcs, blocks) {
   if (!processFromFolder || !folderSrcs?.length) return [];
-  const inBlocks = new Set(collectBlockImageSrcs(blocks));
+  const inBlocks = new Set(blockSrcsOutsideProcess(blocks));
   return folderSrcs.filter((src) => !inBlocks.has(src));
 }
 

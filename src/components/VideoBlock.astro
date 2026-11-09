@@ -9,12 +9,13 @@ interface Props {
   frame?: 'default' | 'wide';
   flush?: boolean;
   outline?: boolean;
+  entry?: boolean;
 }
 
-const { src, poster, label, frame = 'default', flush = false, outline = false } = Astro.props;
+const { src, poster, label, frame = 'default', flush = false, outline = false, entry = false } = Astro.props;
 const posterImage = poster ? resolveImageSource(poster) : undefined;
 ---
 
-<figure class="image-block video-block fade-in" data-frame={frame}>
+<figure class:list={['image-block', 'video-block', 'fade-in', { 'is-entry': entry }]} data-frame={frame}>
   <VideoFrame src={src} poster={posterImage} label={label} flush={flush} outline={outline} />
 </figure>

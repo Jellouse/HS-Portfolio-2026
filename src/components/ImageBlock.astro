@@ -9,9 +9,10 @@ interface Props {
   priority?: boolean;
   flush?: boolean;
   outline?: boolean;
+  entry?: boolean;
 }
 
-const { src, alt, frame = 'default', priority = false, flush = false, outline = false } = Astro.props;
+const { src, alt, frame = 'default', priority = false, flush = false, outline = false, entry = false } = Astro.props;
 const image = resolveImageSource(src);
 const sizes =
   frame === 'wide'
@@ -19,6 +20,6 @@ const sizes =
     : '(min-width: 1440px) 666px, (min-width: 760px) 552px, calc(100vw - 40px)';
 ---
 
-<figure class="image-block fade-in" data-frame={frame}>
+<figure class:list={['image-block', 'fade-in', { 'is-entry': entry }]} data-frame={frame}>
   <BlurImage src={image} alt={alt} sizes={sizes} priority={priority} flush={flush} outline={outline} />
 </figure>

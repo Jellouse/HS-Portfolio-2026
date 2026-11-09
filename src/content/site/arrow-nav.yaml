@@ -1,6 +1,6 @@
 # Desktop arrow navigation.
 # landing is the root. Each screen's parent id and dir place its button.
-# A gallery is image groups. One caption covers every image in that group.
+# Project galleries read the Gallery field on each project. Shop groups stay here.
 landing:
   title: Humansize
   body: >-
@@ -66,86 +66,21 @@ nodes:
     label: Web
     title: Web
     kind: gallery
-    groups:
-      - title: Atomic Ski
-        caption: >-
-          Identity refresh and web design for atomic.com, made with Analogue. It
-          grew out of the Boot Hub and became a visual language for the whole
-          site, built around tension and ski nets.
-        images:
-          - src: /src/content/projects/atomic-ski/cover.png
-            alt: Atomic Ski
-      - title: Tony's Chocolonely
-        caption: >-
-          Tony's Chocolonely called us for a new website! Their branding has no
-          rules, and so many rules. It really grew on me.
-        images:
-          - src: /src/content/projects/tonys-chocolonely/cover.png
-            alt: Tony's Chocolonely
   - id: renders
     parent: digital
     dir: right
     label: 3D
     title: 3D
     kind: gallery
-    groups:
-      - title: Analogue AF1
-        caption: >-
-          3D rendering and animation in Blender for the Analogue AF1 website:
-          product renders, a LiDAR animation and a product showcase video.
-        images:
-          - src: /src/content/projects/analogue-af1/cover.png
-            alt: Black Analogue AF1 film camera from the front
-          - src: /src/content/projects/analogue-af1/process/frame-267.jpg
-            alt: Front render of the camera on a blue gradient, Analogue AF1
-          - src: /src/content/projects/analogue-af1/process/group-19.jpg
-            alt: Hand holding the camera in front view, Analogue AF1
-          - src: /src/content/projects/analogue-af1/process/angle-1-1.jpg
-            alt: Angled render of the glossy black camera, Analogue AF1
   - id: product
     parent: physical
     dir: left
     label: Product
     title: Product
     kind: gallery
-    groups:
-      - title: Industrial Bloom
-        caption: >-
-          Industrial Bloom is a series of aluminium vases, handmade by Johann
-          Schnettker in Germany with laser cutting, 3D printing and embossing.
-        images:
-          - src: /src/content/projects/industrial-bloom/cover.png
-            alt: Industrial Bloom
-          - src: /src/content/projects/industrial-bloom/process/frame-2147269490.jpg
-            alt: Hand holding a cut aluminium extrusion profile, Industrial Bloom
-          - src: /src/content/projects/industrial-bloom/process/frame-2147269489.jpg
-            alt: Purple flowers in an aluminium vase on a windowsill, Industrial Bloom
-          - src: /src/content/projects/industrial-bloom/process/screenshot-2026-06-09-at-14.27.59-1.jpg
-            alt: Cutaway render of a round vase with a perforated flower holder, Industrial Bloom
   - id: retail
     parent: physical
     dir: right
     label: Retail
     title: Retail
     kind: gallery
-    groups:
-      - title: Analogue Store
-        caption: >-
-          With Analogue I did a fair amount of retail building. Ultimately
-          leading towards one of the most anticipated store openings in
-          Amsterdam 2026.
-        images:
-          - src: /src/content/projects/analogue-counters/cover.jpg
-            alt: Analogue store on Zeedijk in Amsterdam
-          - src: /src/content/projects/analogue-counters/blocks/5/value/src.jpg
-            alt: >-
-              Shop window with the Analogue logo and vitrines inside, Analogue
-              store Zeedijk
-          - src: /src/content/projects/analogue-counters/blocks/3/value/src.jpg
-            alt: >-
-              Rolling vitrine with aluminium frame, glass top and backlit milk
-              glass, Analogue store Zeedijk
-          - src: /src/content/projects/analogue-counters/blocks/4/value/src.jpg
-            alt: >-
-              Film cameras and boxed cameras on backlit milk glass inside a
-              vitrine, Analogue store Zeedijk

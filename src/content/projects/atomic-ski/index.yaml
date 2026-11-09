@@ -8,6 +8,7 @@ summary: >-
   out of the Boot Hub and became a visual language for the whole site, built
   around tension and ski nets.
 cover: /src/content/projects/atomic-ski/cover.png
+coverGallery: web
 coverAlt: Atomic Ski
 coverFrame: default
 coverFlush: true

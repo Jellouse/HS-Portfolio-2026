@@ -22,7 +22,7 @@ File names are kebab-case. A module that both pages use lives in `src/lib/` or `
 ## Where content lives
 
 - Site copy, email, about, socials: `src/content/site/site.yaml`
-- Homepage screens, galleries, and captions: `src/content/site/arrow-nav.yaml`, edited in Keystatic as Homepage. Gallery photos are uploaded on that entry. An image already in the repo stays linked. The About screen reads the About paragraphs from `site.yaml`. Shop Buy buttons store a product slug.
+- Homepage screens: `src/content/site/arrow-nav.yaml`, edited in Keystatic as Homepage. Web, 3D, Product, and Retail galleries come from the Gallery field on each project image or video. The project title and summary are the headline and caption. Shop groups stay on Homepage, and a product slug adds Buy. The About screen reads the About paragraphs from `site.yaml`.
 - One folder per project: `src/content/projects/<slug>/index.yaml` plus images in that folder
 - Products: `src/content/products/<slug>/index.yaml`
 - Image paths in YAML are absolute from the repo, like `/src/content/projects/atomic-ski/cover.jpg`
@@ -32,7 +32,7 @@ File names are kebab-case. A module that both pages use lives in `src/lib/` or `
 
 1. `npm run dev` and open `/keystatic`, or duplicate a project folder.
 2. Set title, caption (`Name, Year`), order, summary (two or three sentences), cover, alt text, info lines (`Key: Value`, optional link on the value), and blocks. Leave out unknown info lines.
-3. Blocks are `text`, `image`, `pair`, `video`, or `process`. `process` is an optional centred Process label and a two-column grid of photos. The project page ends with a centred Info label and the info list, aligned to the image column.
+3. Blocks are `text`, `image`, `pair`, `video`, or `process`. `process` is an optional centred Process label and a two-column grid of photos. The project page ends with a centred Info label and the info list, aligned to the image column. Gallery on a cover, image, video, or pair side puts that piece in Web, 3D, Product, or Retail.
 4. Leave `published` off until the cover image and alt text exist.
 5. Put unknowns in `todo`. Those notes are not rendered.
 6. Update `src/pages/llms.txt.ts` only if you want a line the generator does not already build. It reads the collection.
@@ -72,7 +72,7 @@ Do not change these. They are the design.
 - Links: 1px underline, 3px offset (`text-underline-offset: 3px`).
 - `@Humansize` on desktop hover: the `@` fades in and the word slides so the pair stays centred on the same point. The shift is `translateX(-50%)` of the `@` itself (`Header.astro`, `.brand-shift`). No measured width.
 - Homepage face and shop ring: size comes from `src/lib/intro-layout.ts` and `src/lib/viewport-layout.ts`. They sit in the page and scroll with it. Intro nav fade still uses `src/scripts/intro-face.ts`, `src/scripts/shop-intro.ts`, and `src/lib/intro-scroll.ts`.
-- View transitions: the root transition fades the new page in over the old one. Project and product pages open with the menu, not the mark.
+- View transitions: the root transition fades the new page in over the old one. Product pages open with the menu, not the mark. Project pages open with the back control.
 
 ## Layout grid
 
