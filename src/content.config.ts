@@ -265,21 +265,6 @@ const services = defineCollection({
   }),
 });
 
-const arrowImage = z.object({
-  src: z.string(),
-  alt: z.string().default(''),
-});
-
-const arrowGroup = z.object({
-  title: z.string().default(''),
-  caption: z.string().default(''),
-  product: z
-    .union([z.string(), z.number(), z.null()])
-    .optional()
-    .transform((value) => (value == null ? '' : String(value))),
-  images: z.array(arrowImage).default([]),
-});
-
 const arrowNav = defineCollection({
   loader: glob({
     pattern: 'arrow-nav.yaml',
@@ -301,7 +286,6 @@ const arrowNav = defineCollection({
           title: z.string().default(''),
           body: z.string().default(''),
           kind: z.enum(['branch', 'gallery', 'placeholder']),
-          groups: z.array(arrowGroup).default([]),
         }),
       )
       .default([]),

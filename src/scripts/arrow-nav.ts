@@ -1,4 +1,5 @@
 import { initHeroBlob } from './hero-blob';
+import { playSnick } from './ui-sound';
 import type { ArrowDir, ArrowTree } from '../lib/arrow-nav';
 
 type Dir = ArrowDir | 'up';
@@ -75,6 +76,7 @@ export function initArrowNav(root: ParentNode = document) {
   let slide = 0;
   let progressFrame = 0;
   let progressStart = 0;
+  let videoTime = 0;
   let autoplay = false;
   let full = false;
   let fullGen = 0;
@@ -198,6 +200,55 @@ export function initArrowNav(root: ParentNode = document) {
     }
   };
 
+  const warmImages = new Map<string, HTMLImageElement>();
+  const warmVideos = new Map<string, HTMLVideoElement>();
+
+  const warmSlide = (item: { src: string; poster: string; kind: string } | undefined, priority: 'high' | 'low' | 'auto') => {
+    if (!item?.src) return;
+    if (item.kind === 'video') {
+      if (item.poster && !warmImages.has(item.poster)) {
+        const poster = new Image();
+        poster.decoding = 'async';
+        poster.fetchPriority = priority;
+        poster.src = item.poster;
+        warmImages.set(item.poster, poster);
+      }
+      if (!warmVideos.has(item.src)) {
+        const clip = document.createElement('video');
+        clip.preload = 'auto';
+        clip.muted = true;
+        clip.playsInline = true;
+        clip.src = item.src;
+        warmVideos.set(item.src, clip);
+      }
+      return;
+    }
+    if (warmImages.has(item.src)) return;
+    const img = new Image();
+    img.decoding = 'async';
+    img.fetchPriority = priority;
+    img.src = item.src;
+    img.decode().catch(() => {});
+    warmImages.set(item.src, img);
+  };
+
+  const warmGallery = (slides: { src: string; poster: string; kind: string }[], index: number) => {
+    const count = slides.length;
+    const seen = new Set<number>();
+    const order: number[] = [];
+    const add = (i: number) => {
+      if (seen.has(i)) return;
+      seen.add(i);
+      order.push(i);
+    };
+    add(index);
+    for (let step = 1; step < count; step++) {
+      add((index + step) % count);
+      add((index - step + count) % count);
+    }
+    order.forEach((i, place) => warmSlide(slides[i], place === 1 ? 'high' : place === 0 ? 'auto' : 'low'));
+  };
+
   const showSlide = (index: number, morph = true) => {
     const node = screen();
     if (!node || node.kind !== 'gallery' || !node.slides.length) return;
@@ -274,7 +325,9 @@ export function initArrowNav(root: ParentNode = document) {
       }),
     );
     progressStart = performance.now();
+    videoTime = 0;
     if (autoplay) wakeProgress();
+    warmGallery(node.slides, slide);
   };
 
   const stopAutoplay = () => {
@@ -287,9 +340,31 @@ export function initArrowNav(root: ParentNode = document) {
     if (progressFrame) cancelAnimationFrame(progressFrame);
     const tick = (now: number) => {
       if (!autoplay) return;
-      const t = Math.min(1, (now - progressStart) / SLIDE_MS);
+      const item = screen()?.slides[slide];
+      const clip = nav.querySelector<HTMLVideoElement>('[data-nav-video]');
+      let t = 0;
+      let done = false;
+      if (
+        item?.kind === 'video' &&
+        clip &&
+        clip.getAttribute('src') === item.src &&
+        Number.isFinite(clip.duration) &&
+        clip.duration > 0
+      ) {
+        const nearEnd = clip.currentTime >= clip.duration - 0.05;
+        if (videoTime > clip.duration * 0.5 && clip.currentTime < 0.2) done = true;
+        done = done || (nearEnd && videoTime > 0);
+        videoTime = clip.currentTime;
+        t = Math.min(1, clip.currentTime / clip.duration);
+      } else if (item?.kind === 'video' && clip?.error) {
+        t = Math.min(1, (now - progressStart) / SLIDE_MS);
+        done = t >= 1;
+      } else if (item?.kind !== 'video') {
+        t = Math.min(1, (now - progressStart) / SLIDE_MS);
+        done = t >= 1;
+      }
       nav.querySelector<HTMLElement>('.arrow-dot.is-on')?.style.setProperty('--nav-progress', t.toFixed(3));
-      if (t >= 1) {
+      if (done) {
         showSlide(slide + 1);
         return;
       }
@@ -1009,7 +1084,10 @@ export function initArrowNav(root: ParentNode = document) {
   const startHold = (dir: Dir) => {
     if (!canFlip(dir)) return false;
     stopAutoplay();
-    const step = () => showSlide(slide + (dir === 'right' ? 1 : -1));
+    const step = () => {
+      showSlide(slide + (dir === 'right' ? 1 : -1));
+      playSnick();
+    };
     step();
     const holdFast = 80;
     let wait = 480;
@@ -1040,10 +1118,15 @@ export function initArrowNav(root: ParentNode = document) {
 
   nav.addEventListener('pointerdown', (event) => {
     if (event.button !== 0) return;
+    const project = (event.target as Element).closest<HTMLElement>('[data-nav-project]');
+    if (project && !project.hidden && nav.contains(project) && !introOn) {
+      playSnick();
+      return;
+    }
     const button = (event.target as Element).closest<HTMLElement>('[data-dir]');
     if (!button || button.hidden || introOn || !nav.contains(button)) return;
     setPressed(button, 'pointer', '');
-    startHold(button.dataset.dir as Dir);
+    if (!startHold(button.dataset.dir as Dir)) playSnick();
   });
 
   window.addEventListener('pointerup', (event) => {
@@ -1113,7 +1196,7 @@ export function initArrowNav(root: ParentNode = document) {
         : nav.querySelector<HTMLElement>(`[data-dir="${dir}"]`);
     if (!button || button.hidden) return;
     setPressed(button, 'key', event.key);
-    if (!backKey(event.key)) startHold(dir);
+    if (backKey(event.key) || !startHold(dir)) playSnick();
   });
 
   window.addEventListener('keyup', (event) => {

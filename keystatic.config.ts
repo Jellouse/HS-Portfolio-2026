@@ -85,28 +85,6 @@ function imageField(
   return { ...field, Input: withImageCms(field.Input as any) };
 }
 
-function galleryImageField() {
-  const field = imageField('Image', {
-    required: true,
-    directory: 'src/content',
-    publicPath: '/src/content',
-    description: 'Upload a photo. A project or product image already in the repo stays linked.',
-  });
-  const serialize = (field as { serialize?: (value: any, args: any) => any }).serialize;
-  return {
-    ...field,
-    serialize(value: { filename: string; data: Uint8Array } | null, args: unknown) {
-      if (value?.filename.includes('/')) {
-        return {
-          value: `/src/content/${value.filename}`,
-          asset: { filename: value.filename, content: value.data },
-        };
-      }
-      return serialize?.(value, args);
-    },
-  };
-}
-
 export default config({
   storage: storage(),
   ui: {
@@ -627,7 +605,7 @@ export default config({
             }),
             title: fields.text({
               label: 'Screen title',
-              description: 'Shown above the face on a branch. Leave empty to hide it. A gallery uses each group headline.',
+              description: 'Shown above the face on a branch. Leave empty to hide it. A gallery uses the project title.',
             }),
             body: fields.text({
               label: 'Screen text',
@@ -644,37 +622,6 @@ export default config({
               ],
               defaultValue: 'branch',
             }),
-            groups: fields.array(
-              fields.object({
-                title: fields.text({
-                  label: 'Headline',
-                  description: 'Shown under the photo.',
-                }),
-                caption: fields.text({
-                  label: 'Caption',
-                  description: 'The line under the headline. Shared by every photo in the group.',
-                  multiline: true,
-                }),
-                product: fields.relationship({
-                  label: 'Product',
-                  collection: 'products',
-                  description: 'Adds a Buy button. Leave empty to hide it.',
-                }),
-                images: fields.array(
-                  fields.object({
-                    src: galleryImageField(),
-                    alt: fields.text({ label: 'Alt text' }),
-                  }),
-                  { label: 'Images', itemLabel: (props) => props.fields.alt.value || 'Image' },
-                ),
-              }),
-              {
-                label: 'Image groups',
-                description:
-                  'Shop only. Web, 3D, Product, and Retail take their photos and videos from the Gallery field on each project.',
-                itemLabel: (props) => props.fields.title.value || 'Group',
-              },
-            ),
           }),
           {
             label: 'Screens',

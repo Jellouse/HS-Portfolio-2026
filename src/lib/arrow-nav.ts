@@ -120,37 +120,18 @@ export async function getArrowNav(): Promise<ArrowTree> {
     landing,
     nodes: await Promise.all(
       nodes.map(async (node) => {
-        const fromProjects = node.kind === 'gallery' && node.id !== 'shop';
-        const slides = fromProjects
-          ? (
-              await Promise.all(
-                projects.map(async (project) => {
-                  const caption = renderInline(project.data.summary.replace(/\s+/g, ' ').trim());
-                  const mine = projectPieces(project.data).filter((piece) => piece.gallery === node.id);
-                  return Promise.all(mine.map((piece) => imageSlide(piece, project.data.title, caption, project.id)));
-                }),
-              )
-            ).flat()
-          : await Promise.all(
-              node.groups.flatMap((group) =>
-                group.images.map(async (image) => {
-                  const file = resolveImage(image.src);
-                  return {
-                    src: file.src,
-                    poster: '',
-                    alt: image.alt,
-                    title: group.title,
-                    caption: renderInline(group.caption),
-                    product: group.product,
-                    alpha: await imageHasAlpha(file),
-                    kind: 'image' as const,
-                    width: file.width,
-                    height: file.height,
-                    slug: '',
-                  };
-                }),
-              ),
-            );
+        const slides =
+          node.kind === 'gallery'
+            ? (
+                await Promise.all(
+                  projects.map(async (project) => {
+                    const caption = renderInline(project.data.summary.replace(/\s+/g, ' ').trim());
+                    const mine = projectPieces(project.data).filter((piece) => piece.gallery === node.id);
+                    return Promise.all(mine.map((piece) => imageSlide(piece, project.data.title, caption, project.id)));
+                  }),
+                )
+              ).flat()
+            : [];
         return {
           id: node.id,
           parent: node.parent,
