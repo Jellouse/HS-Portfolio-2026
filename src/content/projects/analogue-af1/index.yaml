@@ -87,16 +87,16 @@ blocks:
       images:
         - src: /src/content/projects/analogue-af1/blocks/7/value/images/0/src.jpg
           alt: Front render of the camera on a blue gradient, Analogue AF1
-          gallery: renders
+          gallery: none
           flush: false
           outline: false
         - src: /src/content/projects/analogue-af1/blocks/7/value/images/1/src.jpg
           alt: Hand holding the camera in front view, Analogue AF1
-          gallery: renders
+          gallery: none
           flush: false
           outline: false
         - src: /src/content/projects/analogue-af1/blocks/7/value/images/2/src.jpg
           alt: Angled render of the glossy black camera, Analogue AF1
-          gallery: renders
+          gallery: none
           flush: false
           outline: false
