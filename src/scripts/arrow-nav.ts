@@ -232,21 +232,51 @@ export function initArrowNav(root: ParentNode = document) {
     warmImages.set(item.src, img);
   };
 
-  const warmGallery = (slides: { src: string; poster: string; kind: string }[], index: number) => {
+  const warmedPages = new Set<string>();
+
+  const warmDestination = (href: string | undefined) => {
+    if (!href || warmedPages.has(href)) return;
+    warmedPages.add(href);
+    fetch(href)
+      .then((response) => (response.ok ? response.text() : ''))
+      .then((html) => {
+        if (!html) return;
+        const doc = new DOMParser().parseFromString(html, 'text/html');
+        const entry = doc.querySelector('.is-entry');
+        if (!entry) return;
+        entry.querySelectorAll('img').forEach((img) => {
+          const src = img.getAttribute('src');
+          if (!src) return;
+          const pre = new Image();
+          const srcset = img.getAttribute('srcset');
+          const sizes = img.getAttribute('sizes');
+          if (srcset) pre.srcset = srcset;
+          if (sizes) pre.sizes = sizes;
+          pre.decoding = 'async';
+          pre.src = src;
+          pre.decode().catch(() => {});
+          warmImages.set(src, pre);
+        });
+        entry.querySelectorAll('video').forEach((video) => {
+          const poster = video.getAttribute('poster');
+          const source = video.getAttribute('data-src') || video.getAttribute('src');
+          if (poster) warmSlide({ src: poster, poster: '', kind: 'image' }, 'high');
+          if (source) warmSlide({ src: source, poster: poster || '', kind: 'video' }, 'auto');
+        });
+      })
+      .catch(() => {});
+  };
+
+  const warmGallery = (slides: { src: string; poster: string; kind: string; href?: string }[], index: number) => {
     const count = slides.length;
-    const seen = new Set<number>();
-    const order: number[] = [];
-    const add = (i: number) => {
-      if (seen.has(i)) return;
-      seen.add(i);
-      order.push(i);
-    };
-    add(index);
-    for (let step = 1; step < count; step++) {
-      add((index + step) % count);
-      add((index - step + count) % count);
-    }
-    order.forEach((i, place) => warmSlide(slides[i], place === 1 ? 'high' : place === 0 ? 'auto' : 'low'));
+    const next = (index + 1) % count;
+    const prev = (index - 1 + count) % count;
+    warmSlide(slides[index], 'high');
+    warmDestination(slides[index]?.href);
+    if (count < 2) return;
+    warmSlide(slides[next], 'high');
+    warmDestination(slides[next]?.href);
+    if (prev !== next) warmSlide(slides[prev], 'auto');
   };
 
   const showSlide = (index: number, morph = true) => {
@@ -264,11 +294,12 @@ export function initArrowNav(root: ParentNode = document) {
     if (!projectLink.dataset.returnBound) {
       projectLink.dataset.returnBound = 'true';
       projectLink.addEventListener('click', () => {
-        if (projectLink.hidden) return;
+        if (projectLink.hidden || !projectLink.dataset.return) return;
         sessionStorage.setItem('arrow-return', '1');
       });
     }
     const projectTitle = caption.querySelector<HTMLElement>('[data-nav-project-title]')!;
+    const projectAction = caption.querySelector<HTMLElement>('[data-nav-project-action]')!;
     const buy = caption.querySelector<HTMLElement>('[data-nav-buy]')!;
     const slug = caption.querySelector<HTMLInputElement>('[data-nav-buy-slug]')!;
     const gallery = nav.querySelector<HTMLElement>('[data-nav-gallery]')!;
@@ -287,6 +318,7 @@ export function initArrowNav(root: ParentNode = document) {
       clip.hidden = true;
       clip.removeAttribute('src');
       photo.hidden = false;
+      photo.fetchPriority = 'high';
       photo.src = item.src;
       photo.alt = item.alt;
     }
@@ -300,15 +332,23 @@ export function initArrowNav(root: ParentNode = document) {
     fitGallery(item, morph && !full);
     title.textContent = item.title;
     body.innerHTML = item.caption;
-    if (item.slug) {
+    if (item.href) {
       projectLink.hidden = false;
-      projectLink.href = `/work/${item.slug}/`;
+      projectLink.href = item.href;
       projectTitle.textContent = item.title;
+      projectAction.textContent = item.action;
       title.hidden = true;
       body.hidden = true;
-      gallery.dataset.project = item.slug;
+      if (item.slug) {
+        projectLink.dataset.return = '1';
+        gallery.dataset.project = item.slug;
+      } else {
+        delete projectLink.dataset.return;
+        delete gallery.dataset.project;
+      }
     } else {
       projectLink.hidden = true;
+      delete projectLink.dataset.return;
       delete gallery.dataset.project;
       title.hidden = !item.title;
       body.hidden = !item.caption;
@@ -782,20 +822,28 @@ export function initArrowNav(root: ParentNode = document) {
     const gallery = galleryEl();
     const genAt = generation;
     gallery.hidden = false;
+    gallery.style.opacity = '1';
     const faceW = faceEl().getBoundingClientRect().width || controlSize();
     const small = Math.max(0.12, faceW / (gallery.offsetWidth || 1));
     const from = fromScale == null ? (open ? small : 1) : Math.min(1, Math.max(small, fromScale));
     const rest = 'translate(-50%, -50%) scale(1)';
     const at = (scale: number) => `translate(-50%, -50%) scale(${scale.toFixed(3)})`;
-    const anim = gallery.animate(open ? [{ transform: at(from) }, { transform: rest }] : [{ transform: at(from) }, { transform: at(small), opacity: 0 }], {
-      duration: moveMs(),
-      easing: cssEase('--ease-nav'),
-      fill: 'both',
-    });
+    const anim = gallery.animate(
+      open
+        ? [{ transform: at(from), opacity: 1 }, { transform: rest, opacity: 1 }]
+        : [{ transform: at(from), opacity: 1 }, { transform: at(small), opacity: 0 }],
+      {
+        duration: moveMs(),
+        easing: cssEase('--ease-nav'),
+        fill: 'both',
+      },
+    );
     anim.finished.finally(() => {
       if (genAt !== generation) return;
       anim.cancel();
-      if (!open) gallery.hidden = true;
+      gallery.style.opacity = '';
+      if (!open && nav.dataset.kind !== 'gallery') gallery.hidden = true;
+      else if (open) gallery.hidden = false;
     });
   };
 
@@ -848,7 +896,11 @@ export function initArrowNav(root: ParentNode = document) {
     window.scrollTo(0, 0);
     const enteringGallery = !wasGallery && nav.dataset.kind === 'gallery';
     const outward = depthOf(id) > depthOf(fromId);
-    if (enteringGallery && !reduce) faceEl().hidden = false;
+    if (enteringGallery) {
+      galleryEl().hidden = false;
+      galleryEl().style.opacity = '1';
+      if (!reduce) faceEl().hidden = false;
+    }
     if (screen()?.kind === 'gallery') showSlide(0, false);
     placeGalleryArrows();
     placeCopy();
@@ -1040,7 +1092,7 @@ export function initArrowNav(root: ParentNode = document) {
     if (dir === 'down' && node?.kind === 'gallery') {
       const link = nav.querySelector<HTMLAnchorElement>('[data-nav-project]');
       if (link && !link.hidden) {
-        sessionStorage.setItem('arrow-return', '1');
+        if (link.dataset.return) sessionStorage.setItem('arrow-return', '1');
         link.click();
         return;
       }
@@ -1278,6 +1330,7 @@ export function initArrowNav(root: ParentNode = document) {
   function endIntro() {
     introPlaying = false;
     const scaleEl = nav.querySelector<HTMLElement>('[data-nav-scale]');
+    scaleEl?.getAnimations().forEach((anim) => anim.cancel());
     if (scaleEl) scaleEl.style.transform = '';
     settleFace();
     nav.classList.remove('is-intro');
@@ -1300,6 +1353,27 @@ export function initArrowNav(root: ParentNode = document) {
     }
     const started = performance.now();
     let revealed = false;
+    // The displacement filter, redrawn every frame under a 7× scale, does not
+    // paint on a phone until the face has nearly settled. Zoom the vector face
+    // on the compositor instead, and let the buttons fade in over it.
+    if (matchMedia('(max-width: 759px)').matches) {
+      settleFace();
+      scaleEl.animate(
+        [{ transform: `scale(${INTRO_ZOOM}) scaleX(${INTRO_STRETCH})` }, { transform: 'scale(1) scaleX(1)' }],
+        { duration: INTRO_MS, easing: 'cubic-bezier(0.77, 0, 0.175, 1)', fill: 'forwards' },
+      );
+      const watch = (now: number) => {
+        if (!introPlaying) return;
+        if (!revealed && now - started >= INTRO_REVEAL_MS) {
+          revealed = true;
+          revealIntro();
+        }
+        if (now - started < INTRO_MS) requestAnimationFrame(watch);
+        else endIntro();
+      };
+      requestAnimationFrame(watch);
+      return;
+    }
     const frame = (now: number) => {
       if (!introPlaying) return;
       const t = Math.min(1, (now - started) / INTRO_MS);
@@ -1352,5 +1426,7 @@ export function initArrowNav(root: ParentNode = document) {
     nav.classList.remove('is-intro');
     nav.classList.add('is-controls');
     settleFace();
+    const hint = nav.querySelector<HTMLElement>('[data-nav-hint]');
+    if (hint) hint.hidden = true;
   }
 }

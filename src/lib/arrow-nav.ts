@@ -3,6 +3,7 @@ import { getProjects, getSite, renderInline } from './content';
 import { galleryCategoryValues } from './gallery-categories';
 import { imageHasAlpha } from './image-alpha';
 import { resolveImage } from './images';
+import { getProducts } from './shop';
 
 export type ArrowDir = 'left' | 'right' | 'up' | 'down';
 
@@ -18,6 +19,8 @@ export type ArrowSlide = {
   width: number;
   height: number;
   slug: string;
+  href: string;
+  action: string;
 };
 
 export type ArrowNode = {
@@ -77,7 +80,7 @@ function projectPieces(data: CollectionEntry<'projects'>['data']): Piece[] {
   return pieces;
 }
 
-async function imageSlide(piece: Piece, title: string, caption: string, slug: string): Promise<ArrowSlide> {
+async function imageSlide(piece: Piece, title: string, caption: string, slug: string, href: string, action: string): Promise<ArrowSlide> {
   if (piece.video) {
     const poster = piece.poster ? resolveImage(piece.poster) : null;
     return {
@@ -92,6 +95,8 @@ async function imageSlide(piece: Piece, title: string, caption: string, slug: st
       width: poster?.width || 16,
       height: poster?.height || 10,
       slug,
+      href,
+      action,
     };
   }
   const file = resolveImage(piece.src);
@@ -107,7 +112,39 @@ async function imageSlide(piece: Piece, title: string, caption: string, slug: st
     width: file.width,
     height: file.height,
     slug,
+    href,
+    action,
   };
+}
+
+async function shopSlides(): Promise<ArrowSlide[]> {
+  const products = (await getProducts()).filter((product) => product.data.overview.show !== false);
+  const slides: ArrowSlide[] = [];
+  for (const product of products) {
+    const seen = new Set<string>();
+    const images = [product.data.overview.left, product.data.overview.right, ...product.data.detail.images];
+    for (const image of images) {
+      if (!image?.src || seen.has(image.src)) continue;
+      seen.add(image.src);
+      const file = resolveImage(image.src);
+      slides.push({
+        src: file.src,
+        poster: '',
+        alt: image.alt || product.data.name,
+        title: product.data.name,
+        caption: '',
+        product: '',
+        alpha: await imageHasAlpha(file),
+        kind: 'image',
+        width: file.width,
+        height: file.height,
+        slug: '',
+        href: `/shop/${product.id}/`,
+        action: 'Learn more',
+      });
+    }
+  }
+  return slides;
 }
 
 export async function getArrowNav(): Promise<ArrowTree> {
@@ -121,17 +158,21 @@ export async function getArrowNav(): Promise<ArrowTree> {
     nodes: await Promise.all(
       nodes.map(async (node) => {
         const slides =
-          node.kind === 'gallery'
-            ? (
-                await Promise.all(
-                  projects.map(async (project) => {
-                    const caption = renderInline(project.data.summary.replace(/\s+/g, ' ').trim());
-                    const mine = projectPieces(project.data).filter((piece) => piece.gallery === node.id);
-                    return Promise.all(mine.map((piece) => imageSlide(piece, project.data.title, caption, project.id)));
-                  }),
-                )
-              ).flat()
-            : [];
+          node.kind !== 'gallery'
+            ? []
+            : node.id === 'shop'
+              ? await shopSlides()
+              : (
+                  await Promise.all(
+                    projects.map(async (project) => {
+                      const caption = renderInline(project.data.summary.replace(/\s+/g, ' ').trim());
+                      const mine = projectPieces(project.data).filter((piece) => piece.gallery === node.id);
+                      return Promise.all(
+                        mine.map((piece) => imageSlide(piece, project.data.title, caption, project.id, `/work/${project.id}/`, 'View project')),
+                      );
+                    }),
+                  )
+                ).flat();
         return {
           id: node.id,
           parent: node.parent,

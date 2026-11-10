@@ -39,8 +39,9 @@ export const heroBlobDrift: HeroBlobDrift = {
   idleSpeed: 0.00028,
 };
 
-/** Coarser fractal noise below 760 so the goo reads at phone scale. */
+/** Coarser fractal noise below 760 so the large hero goo reads at phone scale. */
 function tuneBlobTurbulence(svg: SVGSVGElement) {
+  if (!svg.hasAttribute('data-hero-blob')) return;
   if (!matchMedia('(max-width: 759px)').matches) return;
   const turb = svg.querySelector('feTurbulence');
   const disp = svg.querySelector('feDisplacementMap');
@@ -123,6 +124,9 @@ export function initHeroBlob(root: ParentNode = document) {
       initTouchLoop(svg);
       return;
     }
+    // The arrow face has no cursor to follow. A live filter loop repaints every
+    // frame and, under the intro scale, keeps the face from painting.
+    if (svg.hasAttribute('data-mark-face')) return;
   }
 
   let curX = 0;
