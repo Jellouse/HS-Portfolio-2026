@@ -1,13 +1,15 @@
 title: Analogue window stickers
 year: 2023
 yearEnd: 2026
-published: false
+published: true
 seoTitle: Analogue window stickers, Amsterdam, 2023 to 2026
 seoDescription: Window sticker designs for the Analogue store in Amsterdam, 2023 to 2026.
 summary: >-
   Inspiring our local Amsterdam foot traffic with beautiful window stickers has
   been a delight.
 cover: /src/content/projects/analogue-window-stickers/cover.jpg
+coverGallery: retail
+coverVideoGallery: none
 coverAlt: Film workshops window sticker, Analogue
 coverFrame: wide
 coverFlush: false
@@ -30,6 +32,7 @@ blocks:
     value:
       src: /src/content/projects/analogue-window-stickers/blocks/0/value/src.jpg
       alt: Film workshops window sticker, Analogue window stickers
+      gallery: retail
       frame: default
       flush: false
       outline: false
@@ -37,6 +40,7 @@ blocks:
     value:
       src: /src/content/projects/analogue-window-stickers/blocks/1/value/src.jpg
       alt: Illustrated figures sticker on a window, Analogue window stickers
+      gallery: retail
       frame: default
       flush: false
       outline: false
@@ -45,14 +49,17 @@ blocks:
       layout: pair
       left: /src/content/projects/analogue-window-stickers/blocks/2/value/left.jpg
       leftAlt: Applying the figures sticker, Analogue window stickers
+      leftGallery: none
       right: /src/content/projects/analogue-window-stickers/blocks/2/value/right.jpg
       rightAlt: Applying the figures sticker, Analogue window stickers
+      rightGallery: none
       frame: default
       outline: false
   - discriminant: image
     value:
       src: /src/content/projects/analogue-window-stickers/blocks/3/value/src.jpg
       alt: Summer focus window stickers on the shopfront, Analogue window stickers
+      gallery: none
       frame: wide
       flush: false
       outline: false
@@ -62,6 +69,7 @@ blocks:
       alt: >-
         Orange lettering sticker behind a window display, Analogue window
         stickers
+      gallery: none
       frame: default
       flush: false
       outline: false
@@ -69,6 +77,7 @@ blocks:
     value:
       src: /src/content/projects/analogue-window-stickers/blocks/5/value/src.jpg
       alt: No filters, no apps window lettering, Analogue window stickers
+      gallery: retail
       frame: default
       flush: false
       outline: false
@@ -76,6 +85,7 @@ blocks:
     value:
       src: /src/content/projects/analogue-window-stickers/blocks/6/value/src.jpg
       alt: Shopfront with No filters window lettering, Analogue window stickers
+      gallery: retail
       frame: wide
       flush: false
       outline: false
@@ -83,6 +93,7 @@ blocks:
     value:
       src: /src/content/projects/analogue-window-stickers/blocks/7/value/src.jpg
       alt: Lettering sticker reflected on the pavement, Analogue window stickers
+      gallery: none
       frame: default
       flush: false
       outline: false
@@ -90,6 +101,7 @@ blocks:
     value:
       src: /src/content/projects/analogue-window-stickers/blocks/8/value/src.jpg
       alt: Analogue logo sticker on a shop window, Analogue window stickers
+      gallery: none
       frame: default
       flush: false
       outline: false
@@ -97,6 +109,7 @@ blocks:
     value:
       src: /src/content/projects/analogue-window-stickers/blocks/9/value/src.jpg
       alt: Shopfront with window stickers, Analogue window stickers
+      gallery: retail
       frame: wide
       flush: false
       outline: false
@@ -106,6 +119,7 @@ blocks:
       alt: >-
         Analogue store window with logo lettering above the counter, Analogue
         window stickers
+      gallery: none
       frame: wide
       flush: false
       outline: false
@@ -113,6 +127,7 @@ blocks:
     value:
       src: /src/content/projects/analogue-window-stickers/blocks/11/value/src.jpg
       alt: Window with camera brands lettering, Analogue window stickers
+      gallery: none
       frame: default
       flush: false
       outline: false
@@ -120,6 +135,7 @@ blocks:
     value:
       src: /src/content/projects/analogue-window-stickers/blocks/12/value/src.jpg
       alt: Applying camera brand lettering, Analogue window stickers
+      gallery: retail
       frame: default
       flush: false
       outline: false
@@ -127,6 +143,7 @@ blocks:
     value:
       src: /src/content/projects/analogue-window-stickers/blocks/13/value/src.jpg
       alt: Applying a large sticker to a window, Analogue window stickers
+      gallery: none
       frame: default
       flush: false
       outline: false
@@ -134,6 +151,7 @@ blocks:
     value:
       src: /src/content/projects/analogue-window-stickers/blocks/14/value/src.jpg
       alt: Illuminated Analogue sign, Analogue window stickers
+      gallery: retail
       frame: default
       flush: false
       outline: false
@@ -141,6 +159,7 @@ blocks:
     value:
       src: /src/content/projects/analogue-window-stickers/blocks/15/value/src.jpg
       alt: Placing a sidewalk sign, Analogue window stickers
+      gallery: none
       frame: default
       flush: false
       outline: false
@@ -148,6 +167,7 @@ blocks:
     value:
       src: /src/content/projects/analogue-window-stickers/blocks/16/value/src.jpg
       alt: Analogue sidewalk sign on the street, Analogue window stickers
+      gallery: none
       frame: default
       flush: false
       outline: false
