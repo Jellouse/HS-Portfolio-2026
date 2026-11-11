@@ -1,4 +1,5 @@
 import { initHeroBlob } from './hero-blob';
+import { mountFaceGL, type FaceGL } from './arrow-face-gl';
 import { playSnick } from './ui-sound';
 import type { ArrowDir, ArrowTree } from '../lib/arrow-nav';
 
@@ -70,6 +71,7 @@ export function initArrowNav(root: ParentNode = document) {
   let generation = 0;
   let introOn = true;
   let introPlaying = true;
+  let faceGL: FaceGL | null = null;
   let pressed: HTMLElement | null = null;
   let pressFrom: 'key' | 'pointer' | null = null;
   let pressKey = '';
@@ -1360,6 +1362,9 @@ export function initArrowNav(root: ParentNode = document) {
 
   function endIntro() {
     introPlaying = false;
+    faceGL?.destroy();
+    faceGL = null;
+    nav.classList.remove('is-face-gl');
     const scaleEl = nav.querySelector<HTMLElement>('[data-nav-scale]');
     const blob = nav.querySelector<HTMLElement>('.arrow-face-blob');
     scaleEl?.getAnimations().forEach((anim) => anim.cancel());
@@ -1391,7 +1396,6 @@ export function initArrowNav(root: ParentNode = document) {
       pulseHint();
       return;
     }
-    const started = performance.now();
     let revealed = false;
     // A CSS scale of the small filtered face paints a soft bitmap and drops
     // the displacement. On a phone the face is laid out at the size it is
@@ -1401,27 +1405,32 @@ export function initArrowNav(root: ParentNode = document) {
     const stretchFrom = phone ? nav.clientWidth / Math.max(1, nav.clientHeight) : INTRO_STRETCH;
     const blob = phone ? nav.querySelector<HTMLElement>('.arrow-face-blob') : null;
     if (phone) scaleEl.style.transform = 'none';
+    let started = performance.now();
     const frame = (now: number) => {
       if (!introPlaying) return;
       const t = Math.min(1, (now - started) / INTRO_MS);
       const eased = easeInOut(t);
       const zoom = INTRO_ZOOM + (1 - INTRO_ZOOM) * eased;
       const stretch = stretchFrom + (1 - stretchFrom) * eased;
+      const dispNow = Math.round(DISP_FROM + (DISP_REST - DISP_FROM) * eased);
+      const soft = BLUR_FROM + (BLUR_REST - BLUR_FROM) * eased;
       if (phone) {
         const w = Math.max(1, Math.round(face * zoom * stretch));
         const h = Math.max(1, Math.round(face * zoom));
         scaleEl.style.width = `${w}px`;
         scaleEl.style.height = `${h}px`;
-        if (blob) {
+        if (faceGL) faceGL.draw({ w, h, disp: dispNow, blur: soft });
+        else if (blob) {
           blob.style.width = `${w}px`;
           blob.style.height = `${h}px`;
         }
       } else {
         scaleEl.style.transform = `scale(${zoom.toFixed(3)}) scaleX(${stretch.toFixed(3)})`;
       }
-      disp?.setAttribute('scale', String(Math.round(DISP_FROM + (DISP_REST - DISP_FROM) * eased)));
-      const soft = BLUR_FROM + (BLUR_REST - BLUR_FROM) * eased;
-      blur?.setAttribute('stdDeviation', soft.toFixed(2));
+      if (!faceGL) {
+        disp?.setAttribute('scale', String(dispNow));
+        blur?.setAttribute('stdDeviation', soft.toFixed(2));
+      }
       if (!revealed && now - started >= INTRO_REVEAL_MS) {
         revealed = true;
         revealIntro();
@@ -1434,7 +1443,49 @@ export function initArrowNav(root: ParentNode = document) {
         if (hash && nodes.has(hash)) travel(hash, false);
       }
     };
-    requestAnimationFrame(frame);
+    const svgFace = phone ? nav.querySelector<SVGSVGElement>('.arrow-face-blob') : null;
+    const slot = scaleEl.closest<HTMLElement>('.arrow-slot');
+    if (!svgFace || !slot || typeof ResizeObserver === 'undefined') {
+      requestAnimationFrame(frame);
+      return;
+    }
+    // On a phone the SVG filter would be re-rasterised every frame over a
+    // region several screens tall. The GPU face draws the same filter from
+    // numbers. It takes over before the first frame, and the clock starts on
+    // that frame. If it is not ready in time, the SVG filter runs as before.
+    let settled = false;
+    const fallback = window.setTimeout(() => {
+      if (settled) return;
+      settled = true;
+      started = performance.now();
+      requestAnimationFrame(frame);
+    }, 800);
+    const maxW = Math.max(1, Math.round(face * INTRO_ZOOM * stretchFrom));
+    const maxH = Math.max(1, Math.round(face * INTRO_ZOOM));
+    mountFaceGL(svgFace, slot, maxW, maxH, DISP_FROM, BLUR_FROM)
+      .catch(() => null)
+      .then((gl) => {
+        if (settled || !introPlaying) {
+          gl?.destroy();
+          return;
+        }
+        settled = true;
+        window.clearTimeout(fallback);
+        if (!gl) {
+          started = performance.now();
+          requestAnimationFrame(frame);
+          return;
+        }
+        faceGL = gl;
+        requestAnimationFrame((now) => {
+          if (!introPlaying) return;
+          started = now;
+          frame(now);
+          // The canvas now shows the face, so the filtered SVG can go.
+          nav.classList.add('is-face-gl');
+          settleFace();
+        });
+      });
   };
 
   const hash = location.hash.replace('#', '');

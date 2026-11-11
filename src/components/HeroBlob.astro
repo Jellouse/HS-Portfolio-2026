@@ -9,6 +9,9 @@ interface Props {
 const { filterId = 'hero-blob-texture', home = true, mark = false } = Astro.props;
 const fill = 'currentColor';
 const round = mark && !home;
+// The round face displaces by at most scale / 2 (50 units) plus three blur
+// sigmas (7 units) past its 70 unit box, so its filter region stops at 85%
+// out on each side. A larger region only adds pixels the browser filters.
 ---
 
 <svg
@@ -25,10 +28,10 @@ const round = mark && !home;
   <defs>
     <filter
       id={filterId}
-      x={round ? '-150%' : '-45%'}
-      y={round ? '-150%' : '-55%'}
-      width={round ? '400%' : '190%'}
-      height={round ? '400%' : '210%'}
+      x={round ? '-85%' : '-45%'}
+      y={round ? '-85%' : '-55%'}
+      width={round ? '270%' : '190%'}
+      height={round ? '270%' : '210%'}
       filterUnits="objectBoundingBox"
       color-interpolation-filters="sRGB"
     >
