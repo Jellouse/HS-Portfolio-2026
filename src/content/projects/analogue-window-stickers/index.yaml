@@ -8,7 +8,7 @@ summary: >-
   Inspiring our local Amsterdam foot traffic with beautiful window stickers has
   been a delight.
 cover: /src/content/projects/analogue-window-stickers/cover.jpg
-coverGallery: retail
+coverGallery: space
 coverVideoGallery: none
 coverAlt: Film workshops window sticker, Analogue
 coverFrame: wide
@@ -32,7 +32,7 @@ blocks:
     value:
       src: /src/content/projects/analogue-window-stickers/blocks/0/value/src.jpg
       alt: Film workshops window sticker, Analogue window stickers
-      gallery: retail
+      gallery: space
       frame: default
       flush: false
       outline: false
@@ -40,7 +40,7 @@ blocks:
     value:
       src: /src/content/projects/analogue-window-stickers/blocks/1/value/src.jpg
       alt: Illustrated figures sticker on a window, Analogue window stickers
-      gallery: retail
+      gallery: space
       frame: default
       flush: false
       outline: false
@@ -77,7 +77,7 @@ blocks:
     value:
       src: /src/content/projects/analogue-window-stickers/blocks/5/value/src.jpg
       alt: No filters, no apps window lettering, Analogue window stickers
-      gallery: retail
+      gallery: space
       frame: default
       flush: false
       outline: false
@@ -85,7 +85,7 @@ blocks:
     value:
       src: /src/content/projects/analogue-window-stickers/blocks/6/value/src.jpg
       alt: Shopfront with No filters window lettering, Analogue window stickers
-      gallery: retail
+      gallery: space
       frame: wide
       flush: false
       outline: false
@@ -109,7 +109,7 @@ blocks:
     value:
       src: /src/content/projects/analogue-window-stickers/blocks/9/value/src.jpg
       alt: Shopfront with window stickers, Analogue window stickers
-      gallery: retail
+      gallery: space
       frame: wide
       flush: false
       outline: false
@@ -135,7 +135,7 @@ blocks:
     value:
       src: /src/content/projects/analogue-window-stickers/blocks/12/value/src.jpg
       alt: Applying camera brand lettering, Analogue window stickers
-      gallery: retail
+      gallery: space
       frame: default
       flush: false
       outline: false
@@ -151,7 +151,7 @@ blocks:
     value:
       src: /src/content/projects/analogue-window-stickers/blocks/14/value/src.jpg
       alt: Illuminated Analogue sign, Analogue window stickers
-      gallery: retail
+      gallery: space
       frame: default
       flush: false
       outline: false

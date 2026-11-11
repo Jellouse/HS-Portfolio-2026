@@ -31,7 +31,7 @@ blocks:
     value:
       src: >-
         https://humansize-media.schnettker-johann.workers.dev/projects/analogue-couters/cover-mvaoawdg.mp4
-      gallery: retail
+      gallery: space
       frame: wide
       flush: false
       outline: false
@@ -44,7 +44,7 @@ blocks:
   - discriminant: image
     value:
       src: /src/content/projects/analogue-counters/blocks/2/value/src.jpg
-      gallery: retail
+      gallery: space
       frame: wide
       flush: false
       outline: false
@@ -81,7 +81,7 @@ blocks:
   - discriminant: image
     value:
       src: /src/content/projects/analogue-counters/blocks/6/value/src.jpg
-      gallery: retail
+      gallery: space
       frame: default
       flush: false
       outline: false
@@ -106,7 +106,7 @@ blocks:
       alt: >-
         Glass vitrine top with photo prints laid on milk glass, Analogue store
         Zeedijk
-      gallery: retail
+      gallery: space
       frame: default
       flush: false
       outline: false
@@ -116,7 +116,7 @@ blocks:
       alt: >-
         Close-up of an aluminium extrusion corner with a 3D printed end cap,
         Analogue store Zeedijk
-      gallery: retail
+      gallery: space
       frame: default
       flush: false
       outline: false
@@ -125,7 +125,7 @@ blocks:
       src: >-
         https://humansize-media.schnettker-johann.workers.dev/projects/industrial-bloom/tapping-timelapse-web-mvdavl9k.mp4
       poster: /src/content/projects/analogue-counters/blocks/11/value/poster.jpg
-      gallery: retail
+      gallery: space
       frame: default
       flush: false
       outline: false
@@ -135,7 +135,7 @@ blocks:
       alt: >-
         Transparent caster wheel under an aluminium vitrine, Analogue store
         Zeedijk
-      gallery: retail
+      gallery: space
       frame: default
       flush: false
       outline: false
@@ -145,7 +145,7 @@ blocks:
       alt: >-
         Side of a vitrine with glass panel and aluminium frame, Analogue store
         Zeedijk
-      gallery: retail
+      gallery: space
       frame: default
       flush: false
       outline: false
@@ -156,12 +156,12 @@ blocks:
       leftAlt: >-
         Corner of a vitrine with glass top and printed connector, Analogue store
         Zeedijk
-      leftGallery: retail
+      leftGallery: space
       right: /src/content/projects/analogue-counters/blocks/14/value/right.jpg
       rightAlt: >-
         3D printed clip holding a glass panel in an aluminium extrusion,
         Analogue store Zeedijk
-      rightGallery: retail
+      rightGallery: space
       frame: default
       outline: false
   - discriminant: text
@@ -176,7 +176,7 @@ blocks:
       src: >-
         https://humansize-media.schnettker-johann.workers.dev/projects/analogue-counters/my-movie-mvwkvx1u.mp4
       poster: /src/content/projects/analogue-counters/blocks/16/value/poster.jpg
-      gallery: retail
+      gallery: space
       frame: wide
       flush: false
       outline: false
@@ -187,12 +187,12 @@ blocks:
       leftAlt: >-
         Print gallery card held by a 3D printed clip on an extrusion frame,
         Analogue store Zeedijk
-      leftGallery: retail
+      leftGallery: space
       right: /src/content/projects/analogue-counters/blocks/17/value/right.jpg
       rightAlt: >-
         Steel cable with a clamp holding a print in the gallery, Analogue store
         Zeedijk
-      rightGallery: retail
+      rightGallery: space
       frame: default
       outline: false
   - discriminant: process
