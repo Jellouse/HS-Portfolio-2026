@@ -1,6 +1,6 @@
 // Deterministic stills of the phone intro at fixed times (fake clock), for before/after comparison.
 // Usage: node tests/intro-frames.mjs --out=/tmp/frames-before
-import { chromium } from 'playwright';
+import { chromium, webkit } from 'playwright';
 import { createServer } from 'node:http';
 import { readFileSync, existsSync, statSync, mkdirSync } from 'node:fs';
 import { join, extname } from 'node:path';
@@ -22,7 +22,7 @@ const server = createServer((req, res) => {
   res.end(readFileSync(file));
 });
 await new Promise((r) => server.listen(4336, '127.0.0.1', r));
-const browser = await chromium.launch();
+const browser = await (process.env.BROWSER === 'webkit' ? webkit : chromium).launch();
 const ctx = await browser.newContext({ viewport: { width: W, height: H }, deviceScaleFactor: DPR, isMobile: W < 760, hasTouch: W < 760 });
 const page = await ctx.newPage();
 await page.clock.install({ time: new Date('2026-11-11T13:00:00+09:00') });

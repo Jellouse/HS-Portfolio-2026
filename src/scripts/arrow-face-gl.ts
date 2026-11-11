@@ -4,9 +4,12 @@
 // re-rasterised by the browser every time the intro changes its size,
 // displacement or blur, over a filter region far larger than the screen. On an
 // iPhone that runs on the CPU and drops most frames. Here the same filter runs
-// as shaders: the turbulence is baked once by the browser's own feTurbulence,
-// and each frame only moves numbers. Everything is computed in the face's own
+// as shaders: the turbulence is computed once in JS with the spec's own
+// algorithm (turbulence.ts), and each frame only moves numbers. Nothing waits
+// on the browser rasterising an SVG, so it is ready in the same task. Everything is computed in the face's own
 // viewBox units, so the picture matches the filter at full device resolution.
+
+import { turbulenceParams, turbulenceTexture } from './turbulence';
 
 const VERT = `attribute vec2 a;varying vec2 v;void main(){v=a*.5+.5;gl_Position=vec4(a,0.,1.);}`;
 
@@ -70,7 +73,12 @@ export type FaceGL = {
   canvas: HTMLCanvasElement;
   draw: (frame: FaceFrame) => void;
   destroy: () => void;
+  /** ms spent mounting (noise, mask, shaders, first upload). */
+  setupMs: number;
+  renderer: string;
 };
+
+export type FaceMount = { gl: FaceGL; reason?: undefined } | { gl: null; reason: string };
 
 const num = (el: Element | null, name: string, fallback: number) => {
   const n = parseFloat(el?.getAttribute(name) ?? '');
@@ -95,13 +103,13 @@ function compile(gl: WebGLRenderingContext, fs: string) {
   return p;
 }
 
-function texture(gl: WebGLRenderingContext, source: TexImageSource | null, w = 0, h = 0) {
+function texture(gl: WebGLRenderingContext, source: TexImageSource | null, w = 0, h = 0, data: ArrayBufferView | null = null) {
   const t = gl.createTexture()!;
   gl.bindTexture(gl.TEXTURE_2D, t);
   gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
   gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
   if (source) gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, source);
-  else gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, w, h, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+  else gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, w, h, 0, gl.RGBA, gl.UNSIGNED_BYTE, data);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
@@ -128,46 +136,31 @@ function parseColour(css: string) {
 }
 
 /**
- * Bake the face's own feTurbulence once, over the region the intro can reach.
- * Red and green are the displacement channels. Blue carries the noise alpha:
- * the browser keeps the noise premultiplied in 8 bits, and the shader repeats
- * that rounding so the edge grain matches the filter.
+ * Mount the GPU face over `host`, synchronously. `maxW` / `maxH` are the
+ * largest face box the intro lays out (CSS px), which sets the source
+ * resolution. When it cannot run, it says why and the SVG filter stays in charge.
  */
-async function bakeNoise(turb: SVGFETurbulenceElement, region: number[]) {
-  const nw = Math.round(region[2] * NOISE_RES);
-  const nh = Math.round(region[3] * NOISE_RES);
-  const freq = turb.getAttribute('baseFrequency') || '0.015';
-  const octaves = turb.getAttribute('numOctaves') || '1';
-  const seed = turb.getAttribute('seed') || '0';
-  const type = turb.getAttribute('type') || 'turbulence';
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${nw}" height="${nh}" viewBox="${region.join(' ')}"><filter id="n" x="${region[0]}" y="${region[1]}" width="${region[2]}" height="${region[3]}" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feTurbulence type="${type}" baseFrequency="${freq}" numOctaves="${octaves}" seed="${seed}"/><feColorMatrix type="matrix" values="1 0 0 0 0 0 1 0 0 0 0 0 0 1 0 0 0 0 0 1"/></filter><rect x="${region[0]}" y="${region[1]}" width="${region[2]}" height="${region[3]}" filter="url(#n)"/></svg>`;
-  const img = new Image();
-  img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
-  await img.decode();
-  const c = document.createElement('canvas');
-  c.width = nw;
-  c.height = nh;
-  c.getContext('2d')!.drawImage(img, 0, 0, nw, nh);
-  return c;
-}
-
-/**
- * Mount the GPU face over `host`. `maxW` / `maxH` are the largest face box the
- * intro lays out (CSS px), which sets the source resolution. Resolves null when
- * WebGL or the noise bake is not available, and the SVG filter stays in charge.
- */
-export async function mountFaceGL(svg: SVGSVGElement, host: HTMLElement, maxW: number, maxH: number, maxDisp: number, maxBlur: number): Promise<FaceGL | null> {
+export function mountFaceGL(svg: SVGSVGElement, host: HTMLElement, maxW: number, maxH: number, maxDisp: number, maxBlur: number): FaceMount {
+  const t0 = performance.now();
+  const fail = (reason: string): FaceMount => ({ gl: null, reason });
   const group = svg.querySelector<SVGGElement>('g[filter]');
   const turb = svg.querySelector<SVGFETurbulenceElement>('feTurbulence');
-  if (!group || !turb) return null;
+  if (!group || !turb) return fail('no-filter');
+  if ((turb.getAttribute('stitchTiles') || 'noStitch') !== 'noStitch') return fail('stitch-tiles');
   const vb = svg.viewBox.baseVal;
-  if (!vb || !vb.width || !vb.height) return null;
+  if (!vb || !vb.width || !vb.height) return fail('no-viewbox');
 
   const canvas = document.createElement('canvas');
   canvas.className = 'arrow-face-gl';
   canvas.setAttribute('aria-hidden', 'true');
-  const gl = canvas.getContext('webgl', { premultipliedAlpha: true, antialias: false, alpha: true, depth: false, stencil: false, preserveDrawingBuffer: false });
-  if (!gl) return null;
+  let gl: WebGLRenderingContext | null = null;
+  try {
+    gl = canvas.getContext('webgl', { premultipliedAlpha: true, antialias: false, alpha: true, depth: false, stencil: false, preserveDrawingBuffer: false });
+  } catch {
+    gl = null;
+  }
+  if (!gl) return fail('no-webgl');
+  if (gl.isContextLost()) return fail('context-lost');
 
   const offsetEl = svg.querySelector('feOffset');
   const off = [num(offsetEl, 'dx', 0), num(offsetEl, 'dy', 0)];
@@ -178,12 +171,7 @@ export async function mountFaceGL(svg: SVGSVGElement, host: HTMLElement, maxW: n
   // Everything the displaced, blurred face can touch, in viewBox units.
   const reach = maxDisp / 2 + maxBlur * 3 + 2;
   const nreg = [vb.x - reach, vb.y - reach, vb.width + 2 * reach, vb.height + 2 * reach];
-  let noiseCanvas: HTMLCanvasElement;
-  try {
-    noiseCanvas = await bakeNoise(turb, nreg);
-  } catch {
-    return null;
-  }
+  const noise = turbulenceTexture(turbulenceParams(turb), nreg, NOISE_RES);
 
   // Source alpha at the largest device scale the intro shows.
   const dpr = window.devicePixelRatio || 1;
@@ -195,7 +183,8 @@ export async function mountFaceGL(svg: SVGSVGElement, host: HTMLElement, maxW: n
   const mc = document.createElement('canvas');
   mc.width = mw;
   mc.height = mh;
-  const ctx = mc.getContext('2d')!;
+  const ctx = mc.getContext('2d');
+  if (!ctx) return fail('no-2d-canvas');
   ctx.setTransform(mw / mreg[2], 0, 0, mh / mreg[3], (-mreg[0] * mw) / mreg[2], (-mreg[1] * mh) / mreg[3]);
   ctx.fillStyle = 'black';
   group.querySelectorAll('path, ellipse, circle').forEach((el) => {
@@ -216,16 +205,16 @@ export async function mountFaceGL(svg: SVGSVGElement, host: HTMLElement, maxW: n
     pDisp = compile(gl, DISPLACE);
     pBlur = compile(gl, BLUR);
     pCut = compile(gl, CUT);
-  } catch {
-    return null;
+  } catch (error) {
+    return fail(`shader: ${(error as Error)?.message || error}`);
   }
   let maskTex: WebGLTexture;
   let noiseTex: WebGLTexture;
   try {
     maskTex = texture(gl, mc);
-    noiseTex = texture(gl, noiseCanvas);
-  } catch {
-    return null;
+    noiseTex = texture(gl, null, noise.w, noise.h, noise.data);
+  } catch (error) {
+    return fail(`texture: ${(error as Error)?.message || error}`);
   }
   const buf = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, buf);
@@ -390,5 +379,11 @@ export async function mountFaceGL(svg: SVGSVGElement, host: HTMLElement, maxW: n
     gl.getExtension('WEBGL_lose_context')?.loseContext();
   };
 
-  return { canvas, draw, destroy };
+  if (gl.getError() === gl.OUT_OF_MEMORY) {
+    destroy();
+    return fail('out-of-memory');
+  }
+  const info = gl.getExtension('WEBGL_debug_renderer_info');
+  const renderer = String((info && gl.getParameter(info.UNMASKED_RENDERER_WEBGL)) || gl.getParameter(gl.RENDERER) || '');
+  return { gl: { canvas, draw, destroy, setupMs: performance.now() - t0, renderer } };
 }

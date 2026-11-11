@@ -3978,6 +3978,27 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
   visibility: hidden;
 }
 
+/* ?introdebug readout of how the intro ran. */
+.intro-debug {
+  position: fixed;
+  bottom: var(--pad);
+  left: var(--pad);
+  right: var(--pad);
+  z-index: 100;
+  margin: 0;
+  padding: var(--space-2xs);
+  max-height: 40svh;
+  overflow: hidden;
+  font-size: var(--text-meta);
+  line-height: var(--lh-meta);
+  white-space: pre-wrap;
+  word-break: break-all;
+  color: var(--ink);
+  background: var(--page-bg);
+  border: 1px solid var(--ink);
+  pointer-events: none;
+}
+
 .arrow-pill,
 .arrow-back,
 .arrow-flight {
@@ -4451,6 +4472,17 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
 
   .js .arrow-nav.is-intro .arrow-face-scale {
     transform: none;
+  }
+
+  /* The phone intro face is drawn by the GPU (arrow-face-gl.ts). Until the
+     script has mounted it, the SVG face stays hidden and unfiltered, so no
+     frame pays for the SVG filter. The SVG only comes back as a fallback. */
+  .js .arrow-nav.is-intro:not(.is-face-svg) .arrow-face-blob {
+    visibility: hidden;
+  }
+
+  .js .arrow-nav.is-intro:not(.is-face-svg) .arrow-face-blob g {
+    filter: none;
   }
 
   .arrow-nav[data-screen='about'] .arrow-face-scale,
