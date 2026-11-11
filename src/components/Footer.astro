@@ -5,25 +5,24 @@ import { renderInline, type SiteData } from '../lib/content';
 interface Props {
   site: SiteData;
   footerText?: string;
-  serviceFooter?: boolean;
 }
 
-const { site, footerText, serviceFooter = false } = Astro.props;
+const { site, footerText } = Astro.props;
 ---
 
-<footer class="site-footer" data-service-footer={serviceFooter || undefined}>
+<footer class="site-footer">
   <div class="footer-copy">
     <div class="page-grid">
       <div class="footer-text">
         {footerText ? <p>{footerText}</p> : <p set:html={renderInline(site.footerText)} />}
         <p>
           <a href={`mailto:${site.email}`}>{site.email}</a>
-          {!serviceFooter && site.footerName && <><br />{site.footerName}</>}
+          {site.footerName && <><br />{site.footerName}</>}
         </p>
       </div>
     </div>
   </div>
   <div class="footer-faces" aria-hidden="true">
-    <Peeps maxH={serviceFooter ? 1.2 : 2} />
+    <Peeps maxH={2} />
   </div>
 </footer>

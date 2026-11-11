@@ -279,6 +279,42 @@ export function initArrowNav(root: ParentNode = document) {
     if (prev !== next) warmSlide(slides[prev], 'auto');
   };
 
+  const packDots = (dots: HTMLElement[]) => {
+    const active = Math.max(0, dots.findIndex((dot) => dot.classList.contains('is-on')));
+    const furthest = Math.max(active, dots.length - 1 - active) - 0.5;
+    dots.forEach((dot, i) => {
+      if (i === 0) return;
+      const dist = furthest <= 0 ? 0 : Math.min(1, (Math.abs(i - 0.5 - active) - 0.5) / furthest);
+      const gap = Math.round(8 * (1 - dist) ** 2);
+      dot.style.marginLeft = `${gap}px`;
+    });
+  };
+
+  const fitProjectLink = () => {
+    const link = nav.querySelector<HTMLAnchorElement>('[data-nav-project]');
+    const title = nav.querySelector<HTMLElement>('[data-nav-project-title]');
+    const action = nav.querySelector<HTMLElement>('[data-nav-project-action]');
+    if (!link || !title || !action || link.hidden) return;
+    const item = screen()?.slides[slide];
+    const full = item?.action || '';
+    action.textContent = full;
+    if (!matchMedia('(max-width: 759px)').matches || !full) return;
+    const max = link.parentElement?.clientWidth ?? 0;
+    const width = () => {
+      link.style.width = 'max-content';
+      link.style.maxWidth = 'none';
+      title.style.minWidth = 'max-content';
+      title.style.overflow = 'visible';
+      const value = link.offsetWidth;
+      link.style.width = '';
+      link.style.maxWidth = '';
+      title.style.minWidth = '';
+      title.style.overflow = '';
+      return value;
+    };
+    if (width() > max && full === 'View project') action.textContent = 'View';
+  };
+
   const showSlide = (index: number, morph = true) => {
     const node = screen();
     if (!node || node.kind !== 'gallery' || !node.slides.length) return;
@@ -339,13 +375,9 @@ export function initArrowNav(root: ParentNode = document) {
       projectAction.textContent = item.action;
       title.hidden = true;
       body.hidden = true;
-      if (item.slug) {
-        projectLink.dataset.return = '1';
-        gallery.dataset.project = item.slug;
-      } else {
-        delete projectLink.dataset.return;
-        delete gallery.dataset.project;
-      }
+      projectLink.dataset.return = '1';
+      if (item.slug) gallery.dataset.project = item.slug;
+      else delete gallery.dataset.project;
     } else {
       projectLink.hidden = true;
       delete projectLink.dataset.return;
@@ -356,14 +388,15 @@ export function initArrowNav(root: ParentNode = document) {
     slug.value = item.product;
     buy.hidden = !item.product;
     caption.hidden = !item.title && !item.caption && !item.product;
+    fitProjectLink();
     const dots = nav.querySelector<HTMLElement>('[data-nav-dots]')!;
-    dots.replaceChildren(
-      ...node.slides.map((_, i) => {
-        const dot = document.createElement('span');
-        dot.className = i === slide ? 'arrow-dot is-on' : 'arrow-dot';
-        return dot;
-      }),
-    );
+    const built = node.slides.map((_, i) => {
+      const dot = document.createElement('span');
+      dot.className = i === slide ? 'arrow-dot is-on' : 'arrow-dot';
+      return dot;
+    });
+    dots.replaceChildren(...built);
+    packDots(built);
     progressStart = performance.now();
     videoTime = 0;
     if (autoplay) wakeProgress();
@@ -1330,8 +1363,17 @@ export function initArrowNav(root: ParentNode = document) {
   function endIntro() {
     introPlaying = false;
     const scaleEl = nav.querySelector<HTMLElement>('[data-nav-scale]');
+    const blob = nav.querySelector<HTMLElement>('.arrow-face-blob');
     scaleEl?.getAnimations().forEach((anim) => anim.cancel());
-    if (scaleEl) scaleEl.style.transform = '';
+    if (scaleEl) {
+      scaleEl.style.transform = '';
+      scaleEl.style.width = '';
+      scaleEl.style.height = '';
+    }
+    if (blob) {
+      blob.style.width = '';
+      blob.style.height = '';
+    }
     settleFace();
     nav.classList.remove('is-intro');
   }
@@ -1353,34 +1395,32 @@ export function initArrowNav(root: ParentNode = document) {
     }
     const started = performance.now();
     let revealed = false;
-    // The displacement filter, redrawn every frame under a 7× scale, does not
-    // paint on a phone until the face has nearly settled. Zoom the vector face
-    // on the compositor instead, and let the buttons fade in over it.
-    if (matchMedia('(max-width: 759px)').matches) {
-      settleFace();
-      scaleEl.animate(
-        [{ transform: `scale(${INTRO_ZOOM}) scaleX(${INTRO_STRETCH})` }, { transform: 'scale(1) scaleX(1)' }],
-        { duration: INTRO_MS, easing: 'cubic-bezier(0.77, 0, 0.175, 1)', fill: 'forwards' },
-      );
-      const watch = (now: number) => {
-        if (!introPlaying) return;
-        if (!revealed && now - started >= INTRO_REVEAL_MS) {
-          revealed = true;
-          revealIntro();
-        }
-        if (now - started < INTRO_MS) requestAnimationFrame(watch);
-        else endIntro();
-      };
-      requestAnimationFrame(watch);
-      return;
-    }
+    // A CSS scale of the small filtered face paints a soft bitmap and drops
+    // the displacement. On a phone the face is laid out at the size it is
+    // drawn, and the stretch follows the screen.
+    const phone = matchMedia('(max-width: 759px)').matches;
+    const face = phone ? parseFloat(getComputedStyle(nav).getPropertyValue('--arrow-face')) : 0;
+    const stretchFrom = phone ? nav.clientWidth / Math.max(1, nav.clientHeight) : INTRO_STRETCH;
+    const blob = phone ? nav.querySelector<HTMLElement>('.arrow-face-blob') : null;
+    if (phone) scaleEl.style.transform = 'none';
     const frame = (now: number) => {
       if (!introPlaying) return;
       const t = Math.min(1, (now - started) / INTRO_MS);
       const eased = easeInOut(t);
       const zoom = INTRO_ZOOM + (1 - INTRO_ZOOM) * eased;
-      const stretch = INTRO_STRETCH + (1 - INTRO_STRETCH) * eased;
-      scaleEl.style.transform = `scale(${zoom.toFixed(3)}) scaleX(${stretch.toFixed(3)})`;
+      const stretch = stretchFrom + (1 - stretchFrom) * eased;
+      if (phone) {
+        const w = Math.max(1, Math.round(face * zoom * stretch));
+        const h = Math.max(1, Math.round(face * zoom));
+        scaleEl.style.width = `${w}px`;
+        scaleEl.style.height = `${h}px`;
+        if (blob) {
+          blob.style.width = `${w}px`;
+          blob.style.height = `${h}px`;
+        }
+      } else {
+        scaleEl.style.transform = `scale(${zoom.toFixed(3)}) scaleX(${stretch.toFixed(3)})`;
+      }
       disp?.setAttribute('scale', String(Math.round(DISP_FROM + (DISP_REST - DISP_FROM) * eased)));
       const soft = BLUR_FROM + (BLUR_REST - BLUR_FROM) * eased;
       blur?.setAttribute('stdDeviation', soft.toFixed(2));
@@ -1418,6 +1458,7 @@ export function initArrowNav(root: ParentNode = document) {
     placeCopy();
     placeCaption();
     placeGalleryArrows();
+    fitProjectLink();
   });
   if (opened === 'landing') runIntro();
   else {
@@ -1429,4 +1470,5 @@ export function initArrowNav(root: ParentNode = document) {
     const hint = nav.querySelector<HTMLElement>('[data-nav-hint]');
     if (hint) hint.hidden = true;
   }
+  document.fonts?.ready.then(() => fitProjectLink());
 }

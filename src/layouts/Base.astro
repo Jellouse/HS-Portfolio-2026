@@ -20,8 +20,8 @@ interface Props {
 
   header?: boolean;
   footerText?: string;
-  serviceFooter?: boolean;
   hideFooter?: boolean;
+  landing?: boolean;
 }
 
 const {
@@ -33,8 +33,8 @@ const {
   noindex = false,
   header = false,
   footerText,
-  serviceFooter = false,
   hideFooter = false,
+  landing = false,
 } = Astro.props;
 const site = await getSite();
 ---
@@ -164,7 +164,7 @@ const site = await getSite();
       })();
 </script>
   </head>
-  <body class:list={[{ 'is-service-page': serviceFooter, 'is-services-landing': hideFooter }]}>
+  <body class:list={[{ 'is-services-landing': landing }]}>
     <div class="sky" data-sky data-sky-places={SKY_PLACES} aria-hidden="true"></div>
     <script is:inline>
       (function () {
@@ -265,7 +265,7 @@ const site = await getSite();
     <main id="content">
       <slot />
     </main>
-    {!hideFooter && <Footer site={site} footerText={footerText} serviceFooter={serviceFooter} />}
+    {!hideFooter && <Footer site={site} footerText={footerText} />}
     <ContactSheet email={site.email} />
     <div class="grid-overlay" aria-hidden="true">
       <div class="page-grid">

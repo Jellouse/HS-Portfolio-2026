@@ -12,7 +12,7 @@ These were repeated, or the same menu and price markup copied across pages. The 
 | --- | --- | --- | --- |
 | Prose | `src/components/sections/Prose.astro` | `paragraphs: string[]` | `/`, `/shop/`, `/shop/:slug`, `/work/:slug` |
 | Price | `src/components/sections/Price.astro` | `slug`, `mode` (`suffix` or `prefix`), `text` | `/shop/`, `/shop/:slug` |
-| MainMenu | `src/components/sections/MainMenu.astro` | `variant` (`header`, `shop`, or `project`), `home?` | `/`, `/shop/`, `/shop/:slug` |
+| MainMenu | `src/components/sections/MainMenu.astro` | `variant` (`header`, `shop`, or `project`), `home?` | `/`, `/shop/` |
 | CornerMark | `src/components/sections/CornerMark.astro` | `class`, `href`, `label`, slot for the mark | dev catalogue |
 | IntroHero | `src/components/sections/IntroHero.astro` | `variant` (`home` or `shop`), `site?`, illustration slot | `/shop/` |
 | ShopIntro | `src/components/sections/ShopIntro.astro` | none | `/shop/` |
@@ -74,4 +74,4 @@ These look related and stay separate. Folding them into one component would pick
 | Text section | `about`, `shop-intro`, `text-block`, `project-summary` | `Prose` is the shared paragraphs. The shells use `--space-text`, `--space-text-titled`, and the shop intro offset. |
 | Media frame | `image-block` and `shop-detail-image` | Project images use the content span. Shop figures use their own bottom margin. |
 | Services landing | `services-hub` | Back, the face, and Physical Build / Digital Build. Same controls as the homepage. |
-| Services detail | `service-page` | Grey face, process chart, FAQ, and the service footer. `Prose`, `BlurImage`, and `VideoFrame` are the shared pieces inside it. |
+| Services detail | `service-page` | Grey face, process chart, and FAQ. `Prose`, `BlurImage`, and `VideoFrame` are the shared pieces inside it. |
