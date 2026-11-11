@@ -1,5 +1,6 @@
 import { initHeroBlob } from './hero-blob';
-import { mountFaceGL, type FaceGL } from './arrow-face-gl';
+import { mountFaceGL, type FaceGL, type FaceMount } from './arrow-face-gl';
+import { introDebug, introDebugOn } from './intro-debug';
 import { playSnick } from './ui-sound';
 import type { ArrowDir, ArrowTree } from '../lib/arrow-nav';
 
@@ -14,6 +15,9 @@ const DISP_FROM = 100;
 const DISP_REST = 0;
 const BLUR_FROM = 2.2;
 const BLUR_REST = 0;
+/** The intro holds its first frame until two frames in a row drop at most one vsync. */
+const HOLD_CALM_MS = 34;
+const HOLD_MAX_MS = 400;
 
 const easeInOut = bezier(0.77, 0, 0.175, 1);
 
@@ -56,6 +60,7 @@ function cssMs(name: string) {
 export function initArrowNav(root: ParentNode = document) {
   const nav = root.querySelector<HTMLElement>('[data-arrow-nav]');
   if (!nav || nav.dataset.ready === '1') return;
+  introDebug.script();
   nav.dataset.ready = '1';
 
   const raw = nav.querySelector<HTMLScriptElement>('[data-nav-tree]')?.textContent;
@@ -1362,6 +1367,7 @@ export function initArrowNav(root: ParentNode = document) {
 
   function endIntro() {
     introPlaying = false;
+    introDebug.end();
     faceGL?.destroy();
     faceGL = null;
     nav.classList.remove('is-face-gl');
@@ -1406,8 +1412,30 @@ export function initArrowNav(root: ParentNode = document) {
     const blob = phone ? nav.querySelector<HTMLElement>('.arrow-face-blob') : null;
     if (phone) scaleEl.style.transform = 'none';
     let started = performance.now();
-    const frame = (now: number) => {
+    // The first frames after load are slow on a phone: fonts, the first GPU
+    // draw and its compositing layer all land there. The intro holds its first
+    // frame until two frames in a row arrive on time (or HOLD_MAX_MS), then the
+    // clock starts, so a late frame never lands while the face is moving.
+    let holding = true;
+    let holdFrom = 0;
+    let lastTick = 0;
+    let calm = 0;
+    const frame = (now: number, sync = false) => {
       if (!introPlaying) return;
+      const workFrom = introDebugOn ? performance.now() : 0;
+      if (holding) {
+        if (!sync) {
+          if (!holdFrom) holdFrom = now;
+          if (lastTick) introDebug.held(now - lastTick);
+          calm = lastTick && now - lastTick < HOLD_CALM_MS ? calm + 1 : 0;
+          lastTick = now;
+          if (calm >= 2 || now - holdFrom >= HOLD_MAX_MS) {
+            holding = false;
+            introDebug.start(now);
+          }
+        }
+        started = now;
+      }
       const t = Math.min(1, (now - started) / INTRO_MS);
       const eased = easeInOut(t);
       const zoom = INTRO_ZOOM + (1 - INTRO_ZOOM) * eased;
@@ -1435,6 +1463,7 @@ export function initArrowNav(root: ParentNode = document) {
         revealed = true;
         revealIntro();
       }
+      if (introDebugOn) introDebug.frame(now, performance.now() - workFrom);
       if (t < 1) requestAnimationFrame(frame);
       else {
         endIntro();
@@ -1443,49 +1472,55 @@ export function initArrowNav(root: ParentNode = document) {
         if (hash && nodes.has(hash)) travel(hash, false);
       }
     };
-    const svgFace = phone ? nav.querySelector<SVGSVGElement>('.arrow-face-blob') : null;
-    const slot = scaleEl.closest<HTMLElement>('.arrow-slot');
-    if (!svgFace || !slot || typeof ResizeObserver === 'undefined') {
-      requestAnimationFrame(frame);
+    const run = () => {
+      introDebug.hold(performance.now());
+      frame(performance.now(), true);
+    };
+    if (!phone) {
+      introDebug.path('svg', 'desktop');
+      run();
       return;
     }
     // On a phone the SVG filter would be re-rasterised every frame over a
     // region several screens tall. The GPU face draws the same filter from
-    // numbers. It takes over before the first frame, and the clock starts on
-    // that frame. If it is not ready in time, the SVG filter runs as before.
-    let settled = false;
-    const fallback = window.setTimeout(() => {
-      if (settled) return;
-      settled = true;
-      started = performance.now();
-      requestAnimationFrame(frame);
-    }, 800);
-    const maxW = Math.max(1, Math.round(face * INTRO_ZOOM * stretchFrom));
-    const maxH = Math.max(1, Math.round(face * INTRO_ZOOM));
-    mountFaceGL(svgFace, slot, maxW, maxH, DISP_FROM, BLUR_FROM)
-      .catch(() => null)
-      .then((gl) => {
-        if (settled || !introPlaying) {
-          gl?.destroy();
-          return;
-        }
-        settled = true;
-        window.clearTimeout(fallback);
-        if (!gl) {
-          started = performance.now();
-          requestAnimationFrame(frame);
-          return;
-        }
-        faceGL = gl;
-        requestAnimationFrame((now) => {
-          if (!introPlaying) return;
-          started = now;
-          frame(now);
-          // The canvas now shows the face, so the filtered SVG can go.
-          nav.classList.add('is-face-gl');
-          settleFace();
-        });
+    // numbers. It mounts in this task (no SVG raster, no async decode), draws
+    // the first frame before the next paint, and the SVG face is hidden by CSS
+    // until then. Only when WebGL cannot run does the SVG filter come back,
+    // and ?introdebug says why.
+    const svgFace = nav.querySelector<SVGSVGElement>('.arrow-face-blob');
+    const slot = scaleEl.closest<HTMLElement>('.arrow-slot');
+    let mount: FaceMount;
+    if (!svgFace || !slot) mount = { gl: null, reason: 'no-face' };
+    else if (typeof ResizeObserver === 'undefined') mount = { gl: null, reason: 'no-resize-observer' };
+    else {
+      const maxW = Math.max(1, Math.round(face * INTRO_ZOOM * stretchFrom));
+      const maxH = Math.max(1, Math.round(face * INTRO_ZOOM));
+      try {
+        mount = mountFaceGL(svgFace, slot, maxW, maxH, DISP_FROM, BLUR_FROM);
+      } catch (error) {
+        mount = { gl: null, reason: `error: ${(error as Error)?.message || error}` };
+      }
+    }
+    if (mount.gl) {
+      faceGL = mount.gl;
+      faceGL.canvas.addEventListener('webglcontextlost', () => {
+        if (!introPlaying || !faceGL) return;
+        // The GPU dropped the canvas mid-intro: finish on the SVG filter.
+        faceGL.destroy();
+        faceGL = null;
+        nav.classList.remove('is-face-gl');
+        nav.classList.add('is-face-svg');
+        nav.querySelector('.arrow-face-blob g')?.setAttribute('filter', `url(#${svgFace?.querySelector('filter')?.id ?? ''})`);
+        introDebug.path('svg', 'context-lost');
       });
+      nav.classList.add('is-face-gl');
+      settleFace();
+      introDebug.path('gl', '', mount.gl.setupMs, mount.gl.renderer);
+    } else {
+      nav.classList.add('is-face-svg');
+      introDebug.path('svg', mount.reason);
+    }
+    run();
   };
 
   const hash = location.hash.replace('#', '');
