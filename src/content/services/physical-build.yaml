@@ -82,8 +82,6 @@ sections:
           caption: ''
           href: ''
 faq:
-  - question: Do you work outside Germany?
-    answer: Yes, on site across Europe.
   - question: Can you build a pop-up store?
     answer: Yes. Pop-ups, new openings and updates to existing stores.
   - question: Do you only design, or also build?
@@ -92,16 +90,16 @@ faq:
     answer: Aluminium extrusion, 3D print and wood.
   - question: How long does a project take?
     answer: >-
-      A pop-up usually takes [x to y] weeks from first call to installation. A full store fit-out takes [x to y] weeks. Installation on site takes [x] days.
+      A pop-up usually takes 4 to 6 weeks from first call to installation. A full store fit-out takes 6 to 10 weeks. Installation on site takes 2 to 3 days.
   - question: How far ahead should I get in touch?
     answer: >-
-      Ideally [x] weeks before your opening date. Shorter timelines can work for smaller builds, so just ask.
+      Ideally 4 weeks before your opening date. Shorter timelines can work for smaller builds, so just ask.
   - question: Where do you work?
     answer: >-
-      I'm based in [city, country] and install on site across Europe. Travel costs [are included / are added at cost / are quoted per project].
+      I'm based in Germany and install on site across Europe. Travel costs are quoted per project.
   - question: What does a project cost?
     answer: >-
-      Every build is quoted at a flat rate, excluding VAT. As a rough guide, a single display or piece of furniture starts at around €[x]. A pop-up runs €[x] to €[y], and a full store fit-out €[x] and up. I send a fixed quote once the design direction is clear.
+      Every build is quoted at a flat rate, excluding VAT. As a rough guide, a pop-up runs €5k to €15k, and a full store fit-out €20k and up. I send a fixed quote once the design direction is clear.
   - question: What affects the price?
     answer: Mostly size, materials and how much is custom made.
   - question: How do I start a project?
