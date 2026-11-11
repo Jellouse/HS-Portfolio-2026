@@ -4130,7 +4130,7 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
   border-radius: var(--gallery-radius);
   corner-shape: superellipse(1.436);
   overflow: visible;
-  background: var(--button-fill);
+  background: var(--arrow-fill);
   cursor: zoom-in;
   transition:
     width var(--dur-media) var(--ease-nav),
