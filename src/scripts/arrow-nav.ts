@@ -706,10 +706,13 @@ export function initArrowNav(root: ParentNode = document) {
     });
   };
 
+  // Holds a control where it rests while it flies, in its own parent's
+  // coordinates, so no fixed-position containing block is involved.
   const pinAt = (el: HTMLElement, rect: DOMRect) => {
-    el.style.position = 'fixed';
-    el.style.left = `${Math.round(rect.left)}px`;
-    el.style.top = `${Math.round(rect.top)}px`;
+    const parent = (el.offsetParent as HTMLElement | null)?.getBoundingClientRect() ?? { left: 0, top: 0 };
+    el.style.position = 'absolute';
+    el.style.left = `${Math.round(rect.left - parent.left)}px`;
+    el.style.top = `${Math.round(rect.top - parent.top)}px`;
     el.style.right = 'auto';
     el.style.bottom = 'auto';
     el.style.margin = '0';
@@ -840,7 +843,7 @@ export function initArrowNav(root: ParentNode = document) {
   };
 
   const dropFlights = () => {
-    nav.querySelectorAll('.arrow-clip').forEach((el) => el.remove());
+    nav.querySelectorAll('.arrow-flight').forEach((el) => el.remove());
     document.querySelectorAll('.arrow-copy-ghost').forEach((el) => el.remove());
     flights().forEach((el) => {
       el.getAnimations().forEach((anim) => anim.cancel());
@@ -886,8 +889,9 @@ export function initArrowNav(root: ParentNode = document) {
     if (full) dropFull();
     const gen = ++generation;
     stopAutoplay();
-    const hub = hubPoint();
     const ease = cssEase('--ease-nav');
+    const slot = nav.querySelector<HTMLElement>('.arrow-slot')!;
+    const slotBefore = slot.getBoundingClientRect();
     const wasGallery = nav.dataset.kind === 'gallery';
     let fromScale: number | null = null;
     if (galleryEl().getAnimations().length) {
@@ -902,6 +906,14 @@ export function initArrowNav(root: ParentNode = document) {
         const shape = getComputedStyle(el);
         const opacity = Number(shape.opacity);
         clone.classList.add('arrow-flight');
+        // A clone is never mistaken for the live control it copies.
+        clone.removeAttribute('data-nav-flight');
+        clone.removeAttribute('data-dir');
+        clone.dataset.ghostDir = el.dataset.dir || '';
+        clone.removeAttribute('aria-pressed');
+        clone.setAttribute('aria-hidden', 'true');
+        clone.tabIndex = -1;
+        clone.inert = true;
         clone.style.boxSizing = 'border-box';
         clone.style.padding = shape.padding;
         clone.style.borderRadius = shape.borderRadius;
@@ -949,6 +961,17 @@ export function initArrowNav(root: ParentNode = document) {
       return;
     }
 
+    // Everything below is measured after the new screen is laid out and the
+    // page is back at the top. Old rects move with the slot if it scrolled.
+    const slotNow = slot.getBoundingClientRect();
+    const shiftX = slotNow.left - slotBefore.left;
+    const shiftY = slotNow.top - slotBefore.top;
+    if (shiftX || shiftY) {
+      oldState.forEach((prev) => {
+        prev.rect = new DOMRect(prev.rect.left + shiftX, prev.rect.top + shiftY, prev.rect.width, prev.rect.height);
+      });
+    }
+    const hub = hubPoint();
     const shifted = (from: DOMRect, to: DOMRect) =>
       Math.abs(from.left + from.width / 2 - (to.left + to.width / 2)) > 4 ||
       Math.abs(from.top + from.height / 2 - (to.top + to.height / 2)) > 4;
@@ -962,41 +985,19 @@ export function initArrowNav(root: ParentNode = document) {
       const same = identity && !moved;
       return { el, rect, prev, same, moved };
     });
-    const slot = nav.querySelector<HTMLElement>('.arrow-slot')!;
-    const clips: HTMLElement[] = [];
     const verticalDir = (dir: string) => dir === 'up' || dir === 'down';
-    const clipFor = (dir: string) => {
-      const clip = document.createElement('div');
-      clip.className = 'arrow-clip';
-      clip.style.position = 'fixed';
-      clip.style.overflow = 'hidden';
-      clip.style.pointerEvents = 'none';
-      clip.style.zIndex = '2';
-      clip.style.transform = 'translateZ(0)';
-      const x = `${Math.round(hub.x)}px`;
-      const y = `${Math.round(hub.y)}px`;
-      if (dir === 'right') {
-        clip.style.left = x;
-        clip.style.top = '0';
-        clip.style.right = '0';
-        clip.style.bottom = '0';
-      } else if (dir === 'down') {
-        clip.style.left = '0';
-        clip.style.top = y;
-        clip.style.right = '0';
-        clip.style.bottom = '0';
-      } else if (dir === 'up') {
-        clip.style.left = '0';
-        clip.style.top = '0';
-        clip.style.right = '0';
-        clip.style.height = y;
-      } else {
-        clip.style.left = '0';
-        clip.style.top = '0';
-        clip.style.width = x;
-        clip.style.bottom = '0';
-      }
-      return clip;
+    // Each direction owns the half-plane on its side of the hub. Every control
+    // that flies is clipped to it, so it slides out of and into the face and
+    // never across it. The clip is drawn in the control's own box and moves
+    // against its translate, which keeps the edge still on the hub line.
+    const far = 10000;
+    const maskAt = (dir: string, rect: DOMRect, x: number, y: number) => {
+      const edgeX = (hub.x - rect.left - x).toFixed(2);
+      const edgeY = (hub.y - rect.top - y).toFixed(2);
+      if (dir === 'right') return `polygon(${edgeX}px ${-far}px, ${far}px ${-far}px, ${far}px ${far}px, ${edgeX}px ${far}px)`;
+      if (dir === 'left') return `polygon(${-far}px ${-far}px, ${edgeX}px ${-far}px, ${edgeX}px ${far}px, ${-far}px ${far}px)`;
+      if (dir === 'down') return `polygon(${-far}px ${edgeY}px, ${far}px ${edgeY}px, ${far}px ${far}px, ${-far}px ${far}px)`;
+      return `polygon(${-far}px ${-far}px, ${far}px ${-far}px, ${far}px ${edgeY}px, ${-far}px ${edgeY}px)`;
     };
     const horizontal = (dir: string) => dir === 'left' || dir === 'right';
     const pairMove = (dir: string, lead: DOMRect, dest: DOMRect) => {
@@ -1034,12 +1035,9 @@ export function initArrowNav(root: ParentNode = document) {
         if (stay) return;
         const arrival = placed.find((item) => item.el.dataset.dir === dir && !item.same && !item.moved);
         const clone = prev.clone;
-        const clip = clipFor(dir);
-        const originX = dir === 'right' ? hub.x : 0;
-        const originY = dir === 'down' ? hub.y : 0;
         clone.style.position = 'absolute';
-        clone.style.left = `${Math.round(prev.rect.left - originX)}px`;
-        clone.style.top = `${Math.round(prev.rect.top - originY)}px`;
+        clone.style.left = `${Math.round(prev.rect.left - slotNow.left)}px`;
+        clone.style.top = `${Math.round(prev.rect.top - slotNow.top)}px`;
         clone.style.right = 'auto';
         clone.style.bottom = 'auto';
         clone.style.margin = '0';
@@ -1047,12 +1045,15 @@ export function initArrowNav(root: ParentNode = document) {
         clone.style.height = `${Math.round(prev.rect.height)}px`;
         clone.style.transform = 'none';
         clone.style.opacity = String(prev.opacity);
-        clip.append(clone);
-        slot.append(clip);
-        clips.push(clip);
+        clone.style.zIndex = '';
+        clone.style.clipPath = '';
+        slot.append(clone);
         const move = departMove(dir, prev, arrival);
         const motion = clone.animate(
-          [{ transform: 'translate(0px, 0px)' }, { transform: `translate(${move.x}px, ${move.y}px)` }],
+          [
+            { transform: 'translate(0px, 0px)', clipPath: maskAt(dir, prev.rect, 0, 0) },
+            { transform: `translate(${move.x}px, ${move.y}px)`, clipPath: maskAt(dir, prev.rect, move.x, move.y) },
+          ],
           { duration: moveMs(), easing: ease, fill: 'both' },
         );
         clone.animate([{ opacity: prev.opacity }, { opacity: 0 }], {
@@ -1060,9 +1061,7 @@ export function initArrowNav(root: ParentNode = document) {
           easing: ease,
           fill: 'forwards',
         });
-        motion.finished.finally(() => {
-          if (gen === generation) clip.remove();
-        });
+        motion.finished.finally(() => clone.remove()).catch(() => {});
       });
     }
     const anims = placed.filter((item) => !item.same).map(({ el, rect, prev, moved }) => {
@@ -1089,8 +1088,8 @@ export function initArrowNav(root: ParentNode = document) {
       el.style.zIndex = '1';
       const anim = el.animate(
         [
-          { transform: `translate(${dx}px, ${dy}px)`, opacity: moved ? 1 : 0 },
-          { transform: 'translate(0px, 0px)', opacity: 1 },
+          { transform: `translate(${dx}px, ${dy}px)`, opacity: moved ? 1 : 0, clipPath: maskAt(dir, rect, dx, dy) },
+          { transform: 'translate(0px, 0px)', opacity: 1, clipPath: maskAt(dir, rect, 0, 0) },
         ],
         { duration: moveMs(), easing: ease, fill: 'both' },
       );
@@ -1107,7 +1106,6 @@ export function initArrowNav(root: ParentNode = document) {
     fadeLines(nav);
     Promise.all(anims).finally(() => {
       if (gen !== generation) return;
-      clips.forEach((clip) => clip.remove());
       if (nav.dataset.kind === 'gallery') faceEl().hidden = true;
       placeGalleryArrows();
       startAutoplay();
