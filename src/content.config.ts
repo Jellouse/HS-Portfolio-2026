@@ -155,6 +155,13 @@ const projectOrder = defineCollection({
   }),
 });
 
+const productPhoto = z.object({
+  src: z.string().nullish(),
+  alt: z.string().default(''),
+  outline: z.boolean().default(false),
+  gallery: galleryField,
+});
+
 const products = defineCollection({
   loader: glob({
     pattern: '**/index.yaml',
@@ -175,8 +182,8 @@ const products = defineCollection({
         show: z.boolean().default(true),
         title: z.string().optional(),
         description: z.string().optional(),
-        left: z.object({ src: z.string().nullish(), alt: z.string().default(''), outline: z.boolean().default(false) }).optional(),
-        right: z.object({ src: z.string().nullish(), alt: z.string().default(''), outline: z.boolean().default(false) }).optional(),
+        left: productPhoto.optional(),
+        right: productPhoto.optional(),
       })
       .default({ show: true }),
 
@@ -184,12 +191,12 @@ const products = defineCollection({
       .object({
         title: z.string().optional(),
         description: z.string().optional(),
-        images: z.array(z.object({ src: z.string(), alt: z.string().default(''), outline: z.boolean().default(false) })).default([]),
+        images: z.array(productPhoto.extend({ src: z.string() })).default([]),
         sections: z
-          .array(z.object({ heading: z.string().default(''), text: z.string().default(''), image: z.object({ src: z.string().nullish(), alt: z.string().default(''), outline: z.boolean().default(false) }).optional() }))
+          .array(z.object({ heading: z.string().default(''), text: z.string().default(''), image: productPhoto.optional() }))
           .default([]),
         wildTitle: z.string().optional(),
-        wild: z.array(z.object({ src: z.string(), alt: z.string().default(''), outline: z.boolean().default(false) })).default([]),
+        wild: z.array(productPhoto.extend({ src: z.string() })).default([]),
         info: z.array(z.object({ label: z.string(), value: z.string() })).default([]),
       })
       .default({}),

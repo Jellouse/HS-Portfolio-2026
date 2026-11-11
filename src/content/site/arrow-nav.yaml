@@ -53,9 +53,9 @@ nodes:
     label: Product
     title: Product
     kind: gallery
-  - id: retail
+  - id: space
     parent: physical
     dir: right
-    label: Retail
-    title: Retail
+    label: Space
+    title: Space
     kind: gallery

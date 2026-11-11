@@ -122,9 +122,16 @@ async function shopSlides(): Promise<ArrowSlide[]> {
   const slides: ArrowSlide[] = [];
   for (const product of products) {
     const seen = new Set<string>();
-    const images = [product.data.overview.left, product.data.overview.right, ...product.data.detail.images];
+    const detail = product.data.detail;
+    const images = [
+      product.data.overview.left,
+      product.data.overview.right,
+      ...detail.images,
+      ...detail.sections.map((section) => section.image),
+      ...detail.wild,
+    ];
     for (const image of images) {
-      if (!image?.src || seen.has(image.src)) continue;
+      if (!image?.src || image.gallery !== 'shop' || seen.has(image.src)) continue;
       seen.add(image.src);
       const file = resolveImage(image.src);
       slides.push({

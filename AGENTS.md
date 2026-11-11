@@ -22,7 +22,7 @@ File names are kebab-case. A module that both pages use lives in `src/lib/` or `
 ## Where content lives
 
 - Site copy, email, about, socials: `src/content/site/site.yaml`
-- Homepage screens: `src/content/site/arrow-nav.yaml`, edited in Keystatic as Homepage. Web, 3D, Product, and Retail galleries come from the Gallery field on each project image or video. The project title and summary are the headline and caption. Shop uses the vases that are shown on `/shop`, with the product name and Learn more. The About screen reads the About paragraphs from `site.yaml`.
+- Homepage screens: `src/content/site/arrow-nav.yaml`, edited in Keystatic as Homepage. Web, 3D, Product, and Space galleries come from the Gallery field on each project image or video. The project title and summary are the headline and caption. Shop uses the product images whose Gallery field is Shop, with the product name and Learn more. The About screen reads the About paragraphs from `site.yaml`.
 - One folder per project: `src/content/projects/<slug>/index.yaml` plus images in that folder
 - Products: `src/content/products/<slug>/index.yaml`
 - Image paths in YAML are absolute from the repo, like `/src/content/projects/atomic-ski/cover.jpg`
@@ -32,7 +32,7 @@ File names are kebab-case. A module that both pages use lives in `src/lib/` or `
 
 1. `npm run dev` and open `/keystatic`, or duplicate a project folder.
 2. Set title, caption (`Name, Year`), order, summary (two or three sentences), cover, alt text, info lines (`Key: Value`, optional link on the value), and blocks. Leave out unknown info lines.
-3. Blocks are `text`, `image`, `pair`, `video`, or `process`. `process` is an optional centred Process label and a two-column grid of photos. The project page ends with a centred Info label and the info list, aligned to the image column. Gallery on a cover, image, video, or pair side puts that piece in Web, 3D, Product, or Retail.
+3. Blocks are `text`, `image`, `pair`, `video`, or `process`. `process` is an optional centred Process label and a two-column grid of photos. The project page ends with a centred Info label and the info list, aligned to the image column. Gallery on a cover, image, video, or pair side puts that piece in Web, 3D, Product, or Space.
 4. Leave `published` off until the cover image and alt text exist.
 5. Put unknowns in `todo`. Those notes are not rendered.
 6. Update `src/pages/llms.txt.ts` only if you want a line the generator does not already build. It reads the collection.

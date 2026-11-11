@@ -33,11 +33,12 @@ const inlineLink = {
   link: true,
 } as const;
 
-function gallerySelect() {
+function gallerySelect(
+  description = 'Include this in a homepage gallery. The project title and summary are the headline and caption.',
+) {
   return fields.select({
     label: 'Gallery',
-    description:
-      'Include this in a homepage gallery. The project title and summary are the headline and caption.',
+    description,
     options: [{ label: 'Not in a gallery', value: 'none' }, ...galleryCategories],
     defaultValue: 'none',
   });
@@ -60,6 +61,8 @@ function videoField(label: string, description?: string) {
   });
   return { ...field, Input: withUpload(field.Input as any) };
 }
+
+const productGallery = gallerySelect('Include this in a homepage gallery. Shop uses the product name and Learn more.');
 
 const outline = fields.checkbox({
   label: 'Outline',
@@ -333,11 +336,11 @@ export default config({
             description: fields.text({ label: 'Description', description: 'Optional line under the caption.', multiline: true }),
             left: fields.object({
               src: { ...fields.image({ label: 'Image', directory: 'src/content/products', publicPath: '/src/content/products' }) },
-              alt: fields.text({ label: 'Alt text' }), outline,
+              alt: fields.text({ label: 'Alt text' }), outline, gallery: productGallery,
             }, { label: 'Left image' }),
             right: fields.object({
               src: { ...fields.image({ label: 'Image', directory: 'src/content/products', publicPath: '/src/content/products' }) },
-              alt: fields.text({ label: 'Alt text' }), outline,
+              alt: fields.text({ label: 'Alt text' }), outline, gallery: productGallery,
             }, { label: 'Right image' }),
           },
           { label: '/shop overview', description: 'The product section on /shop: an image pair and its caption.' },
@@ -347,20 +350,20 @@ export default config({
             title: fields.text({ label: 'Title', description: 'e.g. Type-660. Empty: the name.' }),
             description: fields.text({ label: 'Intro', multiline: true, description: 'Empty: the description above.' }),
             images: fields.array(
-              fields.object({ src: { ...fields.image({ label: 'Image', directory: 'src/content/products', publicPath: '/src/content/products', validation: { isRequired: true } }) }, alt: fields.text({ label: 'Alt text' }), outline }),
+              fields.object({ src: { ...fields.image({ label: 'Image', directory: 'src/content/products', publicPath: '/src/content/products', validation: { isRequired: true } }) }, alt: fields.text({ label: 'Alt text' }), outline, gallery: productGallery }),
               { label: 'Top images', description: 'Big images at the top of the detail page.', itemLabel: (props) => props.fields.alt.value || 'Image' },
             ),
             sections: fields.array(
               fields.object({
                 heading: fields.text({ label: 'Heading' }),
                 text: fields.text({ label: 'Text', multiline: true }),
-                image: fields.object({ src: { ...fields.image({ label: 'Image', directory: 'src/content/products', publicPath: '/src/content/products' }) }, alt: fields.text({ label: 'Alt text' }), outline }, { label: 'Image' }),
+                image: fields.object({ src: { ...fields.image({ label: 'Image', directory: 'src/content/products', publicPath: '/src/content/products' }) }, alt: fields.text({ label: 'Alt text' }), outline, gallery: productGallery }, { label: 'Image' }),
               }),
               { label: 'Sections', description: 'Centred heading, text, one image.', itemLabel: (props) => props.fields.heading.value || 'Section' },
             ),
             wildTitle: fields.text({ label: 'Gallery heading', description: 'e.g. In the wild' }),
             wild: fields.array(
-              fields.object({ src: { ...fields.image({ label: 'Image', directory: 'src/content/products', publicPath: '/src/content/products', validation: { isRequired: true } }) }, alt: fields.text({ label: 'Alt text' }), outline }),
+              fields.object({ src: { ...fields.image({ label: 'Image', directory: 'src/content/products', publicPath: '/src/content/products', validation: { isRequired: true } }) }, alt: fields.text({ label: 'Alt text' }), outline, gallery: productGallery }),
               { label: 'Gallery images', description: 'Two columns, in reading order.', itemLabel: (props) => props.fields.alt.value || 'Image' },
             ),
             info: fields.array(

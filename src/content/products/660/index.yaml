@@ -18,10 +18,12 @@ overview:
     src: /src/content/products/660/overview/left/src.jpg
     alt: Type-660 tall aluminium vase
     outline: false
+    gallery: shop
   right:
     src: /src/content/products/660/overview/right/src.jpg
     alt: Type-660 tall aluminium vase
     outline: false
+    gallery: shop
 detail:
   title: Type-660
   description: >-
@@ -31,12 +33,15 @@ detail:
     - src: /src/content/products/660/detail/images/0/src.jpg
       alt: Type 660 vase with an orange flower
       outline: false
+      gallery: shop
     - src: /src/content/products/660/detail/images/1/src.jpg
       alt: Type 660 vase from above with an orange flower
       outline: false
+      gallery: shop
     - src: /src/content/products/660/detail/images/2/src.png
       alt: Technical drawing of the Type-660 vase
       outline: true
+      gallery: shop
   sections:
     - heading: Cork Base
       text: >-
