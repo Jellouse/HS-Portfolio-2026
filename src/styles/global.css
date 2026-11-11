@@ -99,6 +99,7 @@
   --service-divider-top: 78px;
   --radius: 31px;
   --radius-sm: 15px;
+  --gallery-radius: 48px;
   --pad: 20px;
   --mark-stretch-max: 1.35;
 
@@ -1648,8 +1649,8 @@ html:active-view-transition-type(hs-shrink)::view-transition-new(hs-mark) {
 
 ::view-transition-image-pair(work-frame) {
   overflow: hidden;
-  border-radius: var(--radius);
-  corner-shape: squircle;
+  border-radius: var(--gallery-radius);
+  corner-shape: superellipse(1.436);
   background: transparent;
 }
 
@@ -4147,8 +4148,8 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
 .arrow-gallery {
   width: min(720px, 62vw);
   aspect-ratio: 16 / 10;
-  border-radius: var(--radius);
-  corner-shape: squircle;
+  border-radius: var(--gallery-radius);
+  corner-shape: superellipse(1.436);
   overflow: visible;
   background: var(--button-fill);
   cursor: zoom-in;
@@ -4170,9 +4171,10 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
   content: '';
   position: absolute;
   inset: 0;
+  box-sizing: border-box;
+  border: 1px solid var(--image-stroke);
   border-radius: inherit;
   corner-shape: inherit;
-  box-shadow: inset 0 0 0 1px var(--image-stroke);
   pointer-events: none;
 }
 
@@ -4231,7 +4233,7 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
   position: absolute;
   left: 0;
   right: 0;
-  top: calc(100% + var(--space-2xs));
+  top: calc(100% + var(--space-xs));
   z-index: 1;
   display: flex;
   justify-content: center;
@@ -4244,7 +4246,7 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
   width: 3px;
   height: 3px;
   border-radius: 50%;
-  background: color-mix(in srgb, var(--ink) 40%, transparent);
+  background: var(--arrow-fill);
 }
 
 .arrow-dot.is-on {
@@ -4253,7 +4255,7 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
   border-radius: var(--space-2xs);
   position: relative;
   overflow: hidden;
-  background: color-mix(in srgb, var(--ink) 40%, transparent);
+  background: var(--arrow-fill);
 }
 
 .arrow-dot.is-on::before {
@@ -4387,6 +4389,10 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
   .project {
     --arrow-about-face: 200px;
     --arrow-control: 48px;
+  }
+
+  :root {
+    --gallery-radius: 36px;
   }
 
   .arrow-pill,
