@@ -73,7 +73,6 @@ export function initArrowNav(root: ParentNode = document) {
   const stage = nav.querySelector<HTMLElement>('[data-nav-stage]')!;
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const moveMs = () => cssMs('--dur-nav');
-  const holdWait = () => Math.max(moveMs(), 80);
   const gap = 8;
 
   const visibleRect = () => {
@@ -1264,16 +1263,22 @@ export function initArrowNav(root: ParentNode = document) {
       playSnick();
     };
     step();
+    // First repeat after 480ms, then each wait is 78% of the last, down to
+    // 80ms. That is the hold-to-speed-up on the gallery arrows. Capping
+    // every repeat to moveMs() (500ms) made them all the same speed.
+    const holdFast = 80;
+    let wait = 480;
     const tick = () => {
       if (!canFlip(dir)) {
         stopHold(false);
         return;
       }
       step();
-      holdTimer = window.setTimeout(tick, holdWait());
+      wait = Math.max(holdFast, Math.round(wait * 0.78));
+      holdTimer = window.setTimeout(tick, wait);
     };
     flipping = true;
-    holdTimer = window.setTimeout(tick, holdWait());
+    holdTimer = window.setTimeout(tick, wait);
     return true;
   };
 

@@ -1,5 +1,5 @@
-// Hold-to-repeat on the arrow gallery: a lost pointer cannot keep firing, and
-// the repeat cannot outrun the move animation.
+// Hold-to-repeat on the arrow gallery: holding left/right speeds up through
+// images, and a lost pointer cannot keep firing.
 //
 // npm run build && npm run test:arrow-hold
 import { chromium } from 'playwright';
@@ -73,7 +73,7 @@ const moveMs = async (page) => page.evaluate(() => {
   }, start.index, { timeout: 2000 });
   const times = [performance.now()];
   let last = await page.evaluate(() => [...document.querySelectorAll('.arrow-dot')].findIndex((el) => el.classList.contains('is-on')));
-  const deadline = Date.now() + duration * 4 + 400;
+  const deadline = Date.now() + 3000;
   while (Date.now() < deadline) {
     await page.waitForTimeout(30);
     const now = await page.evaluate(slideState);
@@ -83,9 +83,16 @@ const moveMs = async (page) => page.evaluate(() => {
     }
   }
   const gaps = times.slice(1).map((t, i) => t - times[i]);
-  if (gaps.length < 2) failures.push(`hold did not advance the gallery (gaps ${gaps.length})`);
-  for (const gap of gaps) {
-    if (gap < duration - 40) failures.push(`hold interval ${Math.round(gap)}ms is faster than the ${duration}ms move`);
+  const shown = gaps.map((g) => Math.round(g)).join(', ');
+  if (gaps.length < 5) failures.push(`hold did not advance enough to speed up (gaps ${shown})`);
+  else {
+    const first = gaps[0];
+    const later = gaps.slice(-3);
+    const laterAvg = later.reduce((a, b) => a + b, 0) / later.length;
+    // First repeat is 480ms; later ones ramp toward 80ms.
+    if (first < 350 || first > 650) failures.push(`first hold interval ${Math.round(first)}ms, expected about 480ms (gaps ${shown})`);
+    if (laterAvg > first * 0.55) failures.push(`hold did not accelerate (first ${Math.round(first)}ms, later ~${Math.round(laterAvg)}ms; gaps ${shown})`);
+    if (laterAvg < 40) failures.push(`hold later interval ${Math.round(laterAvg)}ms dropped below the 80ms floor (gaps ${shown})`);
   }
   // A lost pointer (blur, hidden tab, lost capture) must stop the repeat.
   await page.evaluate(() => {
