@@ -5,7 +5,7 @@ import Prose from './sections/Prose.astro';
 import { getCollection, type CollectionEntry } from 'astro:content';
 import { paragraphs } from '../lib/content';
 import { resolveImageSource } from '../lib/images';
-import { resolveServiceImage } from '../lib/service-images.mjs';
+import { projectSlugForServiceImage, resolveServiceImage } from '../lib/service-images.mjs';
 import { hasBracket, renderPlaceholders } from '../lib/services';
 
 interface Props {
@@ -22,7 +22,7 @@ const sections = d.sections.map((section, sectionIndex) => ({
   images: section.images.map((image, imageIndex) =>
     resolveServiceImage(
       image,
-      image.discriminant === 'project' ? projects.get(image.value.project) : undefined,
+      projects.get(projectSlugForServiceImage(image)),
       `src/content/services/${s.id}.yaml sections[${sectionIndex}].images[${imageIndex}]`,
     ),
   ),

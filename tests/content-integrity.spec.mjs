@@ -4,7 +4,8 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 import { checkContent } from '../scripts/check-content.mjs';
-import { resolveServiceImage } from '../src/lib/service-images.mjs';
+import { projectLabel } from '../src/lib/project-label.mjs';
+import { projectSlugForServiceImage, resolveServiceImage } from '../src/lib/service-images.mjs';
 
 const require = createRequire(import.meta.url);
 const { parse } = require('yaml');
@@ -40,22 +41,53 @@ assert(
   'physical photos live with the service',
 );
 
-const atomic = resolveServiceImage(
-  digitalImages[0],
-  { cover: '/src/content/projects/atomic-ski/cover.png', coverAlt: 'Atomic Ski' },
-  'digital',
-);
+const atomicProject = {
+  title: 'Atomic Ski',
+  year: 2024,
+  yearEnd: 2026,
+  cover: '/src/content/projects/atomic-ski/cover.png',
+  coverAlt: 'Atomic Ski',
+};
+const af1Project = {
+  title: 'Analogue AF1',
+  year: 2024,
+  yearEnd: 2026,
+  cover: '/src/content/projects/analogue-af1/cover.png',
+  coverAlt: 'Analogue AF1',
+};
+
+assert(projectSlugForServiceImage(digitalImages[0]) === 'atomic-ski', 'project cover slug');
+assert(projectSlugForServiceImage(digitalImages[2]) === 'analogue-af1', 'file image slug comes from the work link');
+
+const atomic = resolveServiceImage(digitalImages[0], atomicProject, 'digital');
 assert(atomic.src === '/src/content/projects/atomic-ski/cover.png' && atomic.video === false, 'project cover src');
 assert(atomic.alt === 'Atomic Ski website hero with a skier mid jump', 'service alt stays');
-assert(atomic.caption === 'Atomic Ski, [year]' && atomic.href === '/work/atomic-ski/', 'caption and link stay');
+assert(atomic.caption === projectLabel(atomicProject) && atomic.caption === 'Atomic Ski, 2024 \u2013 2026', 'caption comes from the project');
+assert(atomic.href === '/work/atomic-ski/', 'project link stays');
+
+const af1Cover = resolveServiceImage(digitalImages[1], af1Project, 'digital-af1');
+assert(af1Cover.caption === projectLabel(af1Project) && af1Cover.caption === 'Analogue AF1, 2024 \u2013 2026', 'af1 cover caption comes from the project');
+
+const af1Render = resolveServiceImage(digitalImages[2], af1Project, 'digital-render');
+assert(af1Render.caption === projectLabel(af1Project), 'af1 render caption comes from the linked project');
+assert(af1Render.href === '/work/analogue-af1/', 'af1 render link stays');
+
+const later = resolveServiceImage(digitalImages[0], { ...atomicProject, yearEnd: 2027 }, 'digital-later');
+assert(later.caption === 'Atomic Ski, 2024 \u2013 2027', 'a project year edit updates the service caption');
+
+assert(
+  [atomic, af1Cover, af1Render].every((image) => !image.caption.includes('[year]')),
+  'no leftover [year] in resolved digital captions',
+);
 
 const video = resolveServiceImage(
   physicalImages[0],
-  { cover: '/src/content/projects/analogue-counters/cover.jpg', coverAlt: 'Store' },
+  { title: 'Analogue Counters', year: 2025, yearEnd: 2026, cover: '/src/content/projects/analogue-counters/cover.jpg', coverAlt: 'Store' },
   'physical',
 );
 assert(video.video === true && video.poster === '/src/content/projects/analogue-counters/cover.jpg', 'video poster is the project cover');
 assert(video.src === physicalImages[0].value.video, 'video url stays');
+assert(video.caption === 'Analogue Store Zeedijk', 'custom service caption stays');
 
 const dir = mkdtempSync(join(tmpdir(), 'hs-content-'));
 try {
