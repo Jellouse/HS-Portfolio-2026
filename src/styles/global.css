@@ -4516,7 +4516,7 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
 
   .service-step-stage {
     width: calc(100% - 2 * var(--arrow-control) - 2 * var(--arrow-edge));
-    max-height: calc(var(--app-vh) - 2 * var(--arrow-control) - 2 * var(--space-sm));
+    max-height: calc(var(--app-vh) - 2 * var(--arrow-control) - 2 * var(--space-lg));
   }
 }
 

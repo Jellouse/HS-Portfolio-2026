@@ -118,6 +118,11 @@ for (const [name, vp] of Object.entries(viewports)) {
       must(inset + 0.5 >= 12, `${tag}: ${btn.dir} button crowds the edge (${inset.toFixed(1)}px)`);
     }
 
+    for (const btn of data.ends) {
+      const area = data.stage ? overlap(data.stage, btn.box) : 0;
+      must(area < 0.5, `${tag}: stage overlaps the ${btn.dir} button by ${area.toFixed(1)}px²`);
+    }
+
     const fade = data.fade || 24;
     const core = data.stage
       ? { x: data.stage.x, r: data.stage.r, y: data.stage.y + fade, b: data.stage.b - fade }
