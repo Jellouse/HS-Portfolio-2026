@@ -48,6 +48,13 @@ const site = await getSite();
     <style is:inline>.reveal-gate:not(.canvas-mode) :is(main :is(p,h1,h2,h3,h4,li,blockquote,figcaption,summary,.caption,.project-summary),.site-footer :is(p,li)):not(.is-split,.is-split *,.sr-only,[data-no-reveal],[data-no-reveal] *){opacity:0}.is-split{transition:opacity 350ms cubic-bezier(.16,1,.3,1)}</style>
     <script is:inline>
 
+      function chromeFace() {
+        var els = document.querySelectorAll('.arrow-face-scale');
+        for (var i = 0; i < els.length; i++) {
+          if (getComputedStyle(els[i]).viewTransitionName === 'services-face') return els[i];
+        }
+        return null;
+      }
       addEventListener('pagereveal', function (e) {
         var vt = e.viewTransition;
         if (!vt || !vt.types) return;
@@ -65,6 +72,16 @@ const site = await getSite();
         if (document.querySelector('[data-project-back]') || (fromWork && document.querySelector('[data-arrow-nav]'))) {
           vt.types.add('work');
         }
+        var prev = null;
+        try {
+          prev = sessionStorage.getItem('hs-chrome-face');
+          sessionStorage.removeItem('hs-chrome-face');
+        } catch (err) {}
+        var face = chromeFace();
+        if (prev && face) {
+          var next = Math.round(face.getBoundingClientRect().height);
+          vt.types.add(Number(prev) > next ? 'chrome-shrink' : 'chrome-grow');
+        }
       });
       addEventListener('pageswap', function (e) {
         var vt = e.viewTransition;
@@ -72,6 +89,11 @@ const site = await getSite();
         var dest = e.activation && e.activation.entry && e.activation.entry.url;
         var toWork = dest && /\/work\/[^/]+\/?$/.test(dest.pathname);
         if (toWork || document.querySelector('[data-project-back]')) vt.types.add('work');
+        var face = chromeFace();
+        try {
+          if (face) sessionStorage.setItem('hs-chrome-face', String(Math.round(face.getBoundingClientRect().height)));
+          else sessionStorage.removeItem('hs-chrome-face');
+        } catch (err) {}
       });
 </script>
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />

@@ -1735,28 +1735,45 @@ html:active-view-transition-type(hs-shrink)::view-transition-new(hs-mark) {
   object-fit: fill;
 }
 
-::view-transition-old(services-face):not(:only-child),
-::view-transition-new(services-face):not(:only-child),
-::view-transition-old(services-back):not(:only-child),
-::view-transition-new(services-back):not(:only-child),
-::view-transition-old(arrow-pill-left):not(:only-child),
-::view-transition-new(arrow-pill-left):not(:only-child),
-::view-transition-old(arrow-pill-right):not(:only-child),
-::view-transition-new(arrow-pill-right):not(:only-child) {
+/* :only-child does not match these snapshot pseudos, so it cannot
+   turn off the UA fade or plus-lighter blend. Set animation explicitly. */
+::view-transition-old(services-back),
+::view-transition-new(services-back) {
   animation: none;
 }
 
-::view-transition-old(services-face):only-child,
-::view-transition-old(services-back):only-child,
-::view-transition-old(arrow-pill-left):only-child,
-::view-transition-old(arrow-pill-right):only-child {
+::view-transition-old(services-face) {
   animation: vt-out var(--dur-nav) var(--ease-nav) both;
 }
 
-::view-transition-new(services-face):only-child,
-::view-transition-new(services-back):only-child,
-::view-transition-new(arrow-pill-left):only-child,
-::view-transition-new(arrow-pill-right):only-child {
+::view-transition-new(services-face) {
+  animation: vt-in var(--dur-nav) var(--ease-nav) both;
+}
+
+html:active-view-transition-type(chrome-shrink)::view-transition-old(services-face),
+html:active-view-transition-type(chrome-shrink)::view-transition-new(services-face),
+html:active-view-transition-type(chrome-grow)::view-transition-old(services-face),
+html:active-view-transition-type(chrome-grow)::view-transition-new(services-face) {
+  animation: none;
+}
+
+html:active-view-transition-type(chrome-shrink)::view-transition-old(services-face),
+html:active-view-transition-type(chrome-grow)::view-transition-new(services-face) {
+  opacity: 1;
+}
+
+html:active-view-transition-type(chrome-shrink)::view-transition-new(services-face),
+html:active-view-transition-type(chrome-grow)::view-transition-old(services-face) {
+  opacity: 0;
+}
+
+::view-transition-old(arrow-pill-left),
+::view-transition-old(arrow-pill-right) {
+  animation: vt-out var(--dur-nav) var(--ease-nav) both;
+}
+
+::view-transition-new(arrow-pill-left),
+::view-transition-new(arrow-pill-right) {
   animation: vt-in var(--dur-nav) var(--ease-nav) both;
 }
 

@@ -102,7 +102,7 @@ The common pair is `var(--dur-hover)` with `var(--ease-out)`. Opacity on menus o
 
 New motion uses these tokens. A new duration or a new cubic-bezier waits for Johann.
 
-The face, back control, and left/right text pills share view-transition names so they morph the same way on every screen: `services-face`, `services-back`, `arrow-pill-left`, and `arrow-pill-right`. A new screen opts in with `data-chrome-vt` on its `.arrow-nav` root, using those same element classes. The homepage about screen is already opted in by `[data-screen='about']`. Do not put the pill names on icon-mode L/R controls (`[data-mode='icon']`). Those are a different shape.
+The face, back control, and left/right text pills share view-transition names so they morph the same way on every screen: `services-face`, `services-back`, `arrow-pill-left`, and `arrow-pill-right`. A new screen opts in with `data-chrome-vt` on its `.arrow-nav` root, using those same element classes. The homepage about screen is already opted in by `[data-screen='about']`. Do not put the pill names on icon-mode L/R controls (`[data-mode='icon']`). Those are a different shape. Paired faces interpolate size and position with no fade (`chrome-shrink` / `chrome-grow`). Pill labels crossfade inside the morphing control, with no plus-lighter blend, so two labels never sit on top of each other.
 
 `BlurImage` and `VideoFrame` default `fade` to true, which adds `scroll-media`. Keep that default.
 

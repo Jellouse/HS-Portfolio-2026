@@ -48,10 +48,16 @@ must(
 );
 must(!/::view-transition-image-pair\(arrow-pill-(?:left|right)\) \{[^}]*var\(--page-bg\)/.test(css), 'pill image-pairs use page-bg');
 must(
-  css.includes('::view-transition-old(arrow-pill-left):only-child') &&
-    css.includes('::view-transition-new(arrow-pill-left):only-child'),
-  'unpaired pill snapshots do not fade with only-child',
+  css.includes('::view-transition-old(arrow-pill-left)') &&
+    /::view-transition-old\(arrow-pill-left\),\s*::view-transition-old\(arrow-pill-right\) \{\s*animation: vt-out var\(--dur-nav\) var\(--ease-nav\) both;/.test(css),
+  'pill old snapshots do not crossfade with vt-out',
 );
+must(
+  /::view-transition-new\(arrow-pill-left\),\s*::view-transition-new\(arrow-pill-right\) \{\s*animation: vt-in var\(--dur-nav\) var\(--ease-nav\) both;/.test(css),
+  'pill new snapshots do not crossfade with vt-in',
+);
+must(css.includes('active-view-transition-type(chrome-shrink)'), 'chrome-shrink face morph type is missing');
+must(css.includes('active-view-transition-type(chrome-grow)'), 'chrome-grow face morph type is missing');
 
 if (failures.length) {
   console.error(failures.join('\n'));
@@ -143,6 +149,89 @@ expectNames('service-steps', detail, {
   left: 'none',
   right: 'none',
 });
+
+const mid = async (viewport, label) => {
+  const shot = await browser.newPage({ viewport, colorScheme: 'light' });
+  await shot.route(/\/_vercel\/(insights|speed-insights)\//, (r) => r.fulfill({ status: 200, contentType: 'text/javascript', body: '' }));
+  await shot.addInitScript(() => {
+    addEventListener('pagereveal', (e) => {
+      const vt = e.viewTransition;
+      window.__chromeVt = { ran: !!vt, href: location.href };
+      if (!vt) return;
+      vt.ready.then(() => {
+        try {
+          const styleOf = (pseudo) => {
+            const s = getComputedStyle(document.documentElement, pseudo);
+            return { animation: s.animationName, mix: s.mixBlendMode, opacity: s.opacity, width: s.width, height: s.height };
+          };
+          const anims = document.getAnimations().map((a) => ({
+            pseudo: a.effect?.pseudoElement || '',
+            name: a.animationName,
+          }));
+          window.__chromeVt.ready = {
+            types: vt.types ? [...vt.types] : [],
+            face: styleOf('::view-transition-old(services-face)'),
+            faceNew: styleOf('::view-transition-new(services-face)'),
+            pill: styleOf('::view-transition-old(arrow-pill-left)'),
+            pillNew: styleOf('::view-transition-new(arrow-pill-left)'),
+            pairedFace: {
+              group: anims.some((a) => a.pseudo === '::view-transition-group(services-face)'),
+              old: anims.filter((a) => a.pseudo === '::view-transition-old(services-face)').map((a) => a.name),
+              new: anims.filter((a) => a.pseudo === '::view-transition-new(services-face)').map((a) => a.name),
+              pillOld: anims.filter((a) => a.pseudo === '::view-transition-old(arrow-pill-left)').map((a) => a.name),
+              pillNew: anims.filter((a) => a.pseudo === '::view-transition-new(arrow-pill-left)').map((a) => a.name),
+            },
+          };
+        } catch (err) {
+          window.__chromeVt.ready = { error: String(err) };
+        }
+      }, (err) => { window.__chromeVt.ready = { error: String(err) }; });
+    });
+  });
+  await shot.goto(`${BASE}/#about`, { waitUntil: 'load' });
+  await shot.waitForFunction(() => document.querySelector('[data-arrow-nav]')?.dataset.screen === 'about', null, { timeout: 20000 });
+  await shot.waitForTimeout(400);
+  await Promise.all([
+    shot.waitForURL('**/services/**', { timeout: 10000 }),
+    shot.evaluate(() => {
+      const link = document.createElement('a');
+      link.href = '/services/';
+      document.body.append(link);
+      link.click();
+      link.remove();
+    }),
+  ]);
+  try {
+    await shot.waitForFunction(() => window.__chromeVt && window.__chromeVt.ready, null, { timeout: 8000 });
+  } catch (err) {
+    const state = await shot.evaluate(() => ({ href: location.href, vt: window.__chromeVt || null }));
+    throw new Error(`${label} never captured the transition: ${JSON.stringify(state)}`);
+  }
+  const got = await shot.evaluate(() => window.__chromeVt.ready);
+  if (got.error) throw new Error(`${label} probe failed: ${got.error}`);
+  await shot.close();
+  const uaFade = (names) => (names || []).some((n) => String(n).includes('-ua-view-transition-fade') || String(n).includes('plus-lighter'));
+  if (!got.pairedFace.group) failures.push(`${label}: services-face group did not pair`);
+  if (!got.types.includes('chrome-shrink') && !got.types.includes('chrome-grow')) {
+    failures.push(`${label}: missing chrome-shrink/grow type (got ${got.types.join(',') || 'none'})`);
+  }
+  if (got.face.mix === 'plus-lighter' || got.faceNew.mix === 'plus-lighter') failures.push(`${label}: face still uses plus-lighter`);
+  if (got.pill.mix === 'plus-lighter' || got.pillNew.mix === 'plus-lighter') failures.push(`${label}: pills still use plus-lighter`);
+  if (uaFade(got.pairedFace.old) || uaFade(got.pairedFace.new)) failures.push(`${label}: face still uses the UA fade (${got.pairedFace.old} / ${got.pairedFace.new})`);
+  if (uaFade(got.pairedFace.pillOld) || uaFade(got.pairedFace.pillNew)) failures.push(`${label}: pills still use the UA fade (${got.pairedFace.pillOld} / ${got.pairedFace.pillNew})`);
+  const pillHasIn = (got.pairedFace.pillNew || []).includes('vt-in');
+  const pillHasOut = (got.pairedFace.pillOld || []).includes('vt-out');
+  if (!pillHasOut || !pillHasIn) failures.push(`${label}: pills are not crossfading with vt-out/vt-in`);
+  if (got.types.includes('chrome-shrink') && (got.face.opacity !== '1' || got.faceNew.opacity !== '0')) {
+    failures.push(`${label}: shrink morph is not holding the old face (old ${got.face.opacity}, new ${got.faceNew.opacity})`);
+  }
+  if (label.startsWith('desktop') && !got.face.height.startsWith('360')) {
+    failures.push(`${label}: face group did not start from the about size (${got.face.width} x ${got.face.height})`);
+  }
+};
+
+await mid({ width: 1440, height: 900 }, 'desktop about→services');
+await mid({ width: 390, height: 844 }, 'phone about→services');
 
 await browser.close();
 server.close();
