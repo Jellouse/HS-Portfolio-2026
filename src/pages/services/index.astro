@@ -57,8 +57,10 @@ const description = 'Physical Build and Digital Build. Retail store design, Fram
 </Base>
 
 <script>
+  import { bindAppViewport } from '../../lib/viewport-layout';
   import { playSnick } from '../../scripts/ui-sound';
 
+  bindAppViewport();
   const root = document.querySelector<HTMLElement>('[data-services-hub]');
   const back = root?.querySelector<HTMLAnchorElement>('[data-services-back]');
   if (root && back) {

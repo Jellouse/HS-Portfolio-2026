@@ -77,8 +77,8 @@ const setView = (height, extra = {}) => page.evaluate(([height, extra]) => {
 }, [height, extra]);
 
 const metrics = () => page.evaluate(() => {
-  const nav = document.querySelector('[data-arrow-nav]');
-  const face = nav.querySelector('[data-nav-face]');
+  const nav = document.querySelector('[data-arrow-nav], [data-services-hub], [data-service-steps], .arrow-nav');
+  const face = nav && nav.querySelector('[data-nav-face], .arrow-face');
   const gallery = nav.querySelector('[data-nav-gallery]');
   const caption = nav.querySelector('[data-nav-caption]');
   const title = nav.querySelector('[data-nav-title]');
@@ -189,6 +189,46 @@ if (!landingAfter.inset) failures.push('landing after dismissing the tweet shoul
 check('landing after tweet', landingAfter, AFTER);
 if (landingAfter.nav.top > 8) failures.push(`landing after tweet left a top gap (${landingAfter.nav.top}px)`);
 await page.screenshot({ path: join(SHOTS, 'x-in-app-landing-after.png'), scale: 'css' });
+
+const landingMid = landingAfter.face?.mid;
+await page.click('[data-dir="down"]');
+await page.waitForFunction(() => document.querySelector('[data-arrow-nav]')?.dataset.screen === 'about', null, { timeout: 8000 });
+await page.waitForTimeout(200);
+const aboutAfter = await metrics();
+if (!aboutAfter.inset) failures.push('about after the tweet should keep data-app-inset');
+check('about after tweet', aboutAfter, AFTER);
+if (landingMid != null && aboutAfter.face && Math.abs(aboutAfter.face.mid - landingMid) > 8) {
+  failures.push(`about face mid ${aboutAfter.face.mid.toFixed(1)} moved from landing ${landingMid.toFixed(1)}`);
+}
+await page.screenshot({ path: join(SHOTS, 'x-in-app-about-after.png'), scale: 'css' });
+
+await page.goto(`${BASE}services/`, { waitUntil: 'load' });
+await page.waitForSelector('[data-services-hub] .arrow-face', { timeout: 15000 });
+await page.waitForTimeout(200);
+await setView(AFTER);
+await page.waitForTimeout(200);
+const servicesAfter = await metrics();
+if (!servicesAfter.inset) failures.push('services hub after the tweet should set data-app-inset');
+check('services hub after tweet', servicesAfter, AFTER);
+if (landingMid != null && servicesAfter.face && Math.abs(servicesAfter.face.mid - landingMid) > 8) {
+  failures.push(`services face mid ${servicesAfter.face.mid.toFixed(1)} moved from landing ${landingMid.toFixed(1)}`);
+}
+await page.screenshot({ path: join(SHOTS, 'x-in-app-services-after.png'), scale: 'css' });
+
+await page.goto(`${BASE}services/physical-build/`, { waitUntil: 'load' });
+await page.waitForSelector('[data-service-steps]', { timeout: 15000 });
+const stageWide = await page.evaluate(() => {
+  const stage = document.querySelector('.service-step-stage');
+  if (!stage) return null;
+  const width = stage.getBoundingClientRect().width;
+  const margin = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--margin')) || 20;
+  const control = parseFloat(getComputedStyle(stage).getPropertyValue('--arrow-control')) || 48;
+  return { width, margin, control, view: window.innerWidth };
+});
+if (!stageWide) failures.push('service detail has no text stage');
+else if (stageWide.width < stageWide.view - 2 * stageWide.control - 2 * stageWide.margin - 20) {
+  failures.push(`service text is too narrow (${stageWide.width}px in a ${stageWide.view}px view)`);
+}
 
 await browser.close();
 server.close();

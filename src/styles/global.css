@@ -1644,7 +1644,8 @@ html:active-view-transition-type(hs-shrink)::view-transition-new(hs-mark) {
 }
 
 .arrow-nav[data-screen='about'] .arrow-back,
-.services-hub .arrow-back {
+.services-hub .arrow-back,
+.service-steps .arrow-back {
   view-transition-name: services-back;
 }
 
@@ -1681,33 +1682,47 @@ html:active-view-transition-type(hs-shrink)::view-transition-new(hs-mark) {
   animation: vt-in var(--dur-nav) linear both;
 }
 
-::view-transition-image-pair(work-back),
-::view-transition-image-pair(services-back) {
+::view-transition-image-pair(work-back) {
   background: var(--page-bg);
 }
 
-::view-transition-old(services-back),
+::view-transition-image-pair(services-back),
+::view-transition-image-pair(services-face) {
+  isolation: auto;
+  overflow: hidden;
+  background: transparent;
+  border-radius: 50%;
+}
+
 ::view-transition-old(work-back) {
   display: none;
 }
 
-::view-transition-image-pair(services-face) {
-  isolation: auto;
-}
-
 ::view-transition-old(services-face),
-::view-transition-new(services-face) {
-  animation: none;
+::view-transition-new(services-face),
+::view-transition-old(services-back),
+::view-transition-new(services-back) {
   mix-blend-mode: normal;
   width: 100%;
   height: 100%;
   object-fit: fill;
 }
 
-::view-transition-new(services-back) {
+::view-transition-old(services-face):not(:only-child),
+::view-transition-new(services-face):not(:only-child),
+::view-transition-old(services-back):not(:only-child),
+::view-transition-new(services-back):not(:only-child) {
   animation: none;
-  mix-blend-mode: normal;
-  height: 100%;
+}
+
+::view-transition-old(services-face):only-child,
+::view-transition-old(services-back):only-child {
+  animation: vt-out var(--dur-nav) var(--ease-nav) both;
+}
+
+::view-transition-new(services-face):only-child,
+::view-transition-new(services-back):only-child {
+  animation: vt-in var(--dur-nav) var(--ease-nav) both;
 }
 
 ::view-transition-new(work-back) {
@@ -3467,6 +3482,24 @@ html[data-app-inset] .arrow-nav:not([data-screen='about']) {
   height: var(--app-vh);
 }
 
+html[data-app-inset] .arrow-nav[data-screen='about'] {
+  position: fixed;
+  top: var(--app-vt);
+  left: var(--app-vl);
+  width: var(--app-vw);
+  height: var(--app-vh);
+  min-height: 0;
+  overflow: auto;
+}
+
+html[data-app-inset] body:has(.arrow-nav[data-screen='about']) {
+  overflow: hidden;
+}
+
+html[data-app-inset] body:has(.arrow-nav[data-screen='about']) main#content {
+  min-height: 0;
+}
+
 html[data-sky-ink='white'] body:has([data-sky]) .arrow-nav {
   --arrow-fill: rgb(255 255 255 / 10%);
 }
@@ -4286,7 +4319,7 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
   left: 50%;
   top: 50%;
   z-index: 2;
-  width: min(var(--content-width), calc(100% - 2 * var(--arrow-control) - 2 * var(--space-lg)));
+  width: min(var(--content-width), calc(100% - 2 * var(--arrow-control) - 2 * var(--margin) - 2 * var(--space-2xs)));
   max-height: calc(100svh - 2 * var(--arrow-control) - 2 * var(--space-lg));
   overflow: auto;
   transform: translate(-50%, -50%);
@@ -4381,6 +4414,13 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
   background: var(--arrow-fill);
   color: var(--ink);
   transform: translateX(-50%);
+}
+
+@media (max-width: 759px) {
+  .service-step-stage {
+    width: calc(100% - 2 * var(--arrow-control) - 2 * var(--margin) - 2 * var(--space-2xs));
+    max-height: calc(var(--app-vh) - 2 * var(--arrow-control) - 2 * var(--space-sm));
+  }
 }
 
 @media (min-width: 760px) {
