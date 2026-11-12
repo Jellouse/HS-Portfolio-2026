@@ -4354,11 +4354,6 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
   }
 }
 
-.service-steps {
-  --arrow-edge: 48px;
-  --stage-fade: 24px;
-}
-
 .service-steps .arrow-pill {
   width: var(--arrow-control);
   height: var(--arrow-control);
@@ -4366,7 +4361,6 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
   border-radius: 50%;
   display: grid;
   place-items: center;
-  z-index: 3;
 }
 
 .service-steps .arrow-pill[hidden] {
@@ -4374,19 +4368,18 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
 }
 
 .service-steps .arrow-pill[data-dir='left'] {
-  left: var(--arrow-edge);
+  left: var(--margin);
   right: auto;
 }
 
 .service-steps .arrow-pill[data-dir='right'] {
-  right: var(--arrow-edge);
+  right: var(--margin);
   left: auto;
 }
 
 .service-steps .arrow-back {
   top: var(--space-lg);
   bottom: auto;
-  z-index: 3;
 }
 
 .service-step-stage {
@@ -4394,7 +4387,7 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
   left: 50%;
   top: 50%;
   z-index: 2;
-  width: min(var(--content-width), calc(100% - 2 * var(--arrow-control) - 2 * var(--arrow-edge)));
+  width: min(var(--content-width), calc(100% - 2 * var(--arrow-control) - 2 * var(--margin) - 2 * var(--space-2xs)));
   max-height: calc(100svh - 2 * var(--arrow-control) - 2 * var(--space-lg));
   overflow: auto;
   transform: translate(-50%, -50%);
@@ -4492,27 +4485,9 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
 }
 
 @media (max-width: 759px) {
-  .service-steps {
-    --arrow-edge: 16px;
-  }
-
   .service-step-stage {
-    width: calc(100% - 2 * var(--arrow-control) - 2 * var(--arrow-edge));
+    width: calc(100% - 2 * var(--arrow-control) - 2 * var(--margin) - 2 * var(--space-2xs));
     max-height: calc(var(--app-vh) - 2 * var(--arrow-control) - 2 * var(--space-sm));
-    -webkit-mask-image: linear-gradient(
-      to right,
-      transparent,
-      #000 var(--stage-fade),
-      #000 calc(100% - var(--stage-fade)),
-      transparent
-    );
-    mask-image: linear-gradient(
-      to right,
-      transparent,
-      #000 var(--stage-fade),
-      #000 calc(100% - var(--stage-fade)),
-      transparent
-    );
   }
 }
 

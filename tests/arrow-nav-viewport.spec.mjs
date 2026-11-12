@@ -221,15 +221,12 @@ const stageWide = await page.evaluate(() => {
   const stage = document.querySelector('.service-step-stage');
   if (!stage) return null;
   const width = stage.getBoundingClientRect().width;
-  const host = stage.closest('.service-steps') || document.documentElement;
-  const edge = parseFloat(getComputedStyle(host).getPropertyValue('--arrow-edge'))
-    || parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--margin'))
-    || 20;
+  const margin = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--margin')) || 20;
   const control = parseFloat(getComputedStyle(stage).getPropertyValue('--arrow-control')) || 48;
-  return { width, edge, control, view: window.innerWidth };
+  return { width, margin, control, view: window.innerWidth };
 });
 if (!stageWide) failures.push('service detail has no text stage');
-else if (stageWide.width < stageWide.view - 2 * stageWide.control - 2 * stageWide.edge - 20) {
+else if (stageWide.width < stageWide.view - 2 * stageWide.control - 2 * stageWide.margin - 20) {
   failures.push(`service text is too narrow (${stageWide.width}px in a ${stageWide.view}px view)`);
 }
 
