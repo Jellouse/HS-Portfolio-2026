@@ -4357,6 +4357,10 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
 .service-steps {
   --arrow-edge: 48px;
   --stage-fade: 24px;
+  --fade-top-w: var(--arrow-control);
+  --fade-top-h: calc(var(--arrow-control) + var(--stage-fade));
+  --fade-bottom-w: calc(2 * var(--space-md) + 8ch);
+  --fade-bottom-h: calc(var(--arrow-control) + var(--stage-fade));
 }
 
 .service-steps .arrow-pill {
@@ -4399,23 +4403,31 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
   top: 50%;
   z-index: 2;
   width: min(var(--content-width), calc(100% - 2 * var(--arrow-control) - 2 * var(--arrow-edge)));
-  max-height: calc(100svh - 2 * var(--arrow-control) - 2 * var(--space-lg));
+  max-height: calc(100svh - 2 * var(--space-lg));
   overflow: auto;
   transform: translate(-50%, -50%);
-  -webkit-mask-image: linear-gradient(
-    to bottom,
-    transparent,
-    #000 var(--stage-fade),
-    #000 calc(100% - var(--stage-fade)),
-    transparent
-  );
-  mask-image: linear-gradient(
-    to bottom,
-    transparent,
-    #000 var(--stage-fade),
-    #000 calc(100% - var(--stage-fade)),
-    transparent
-  );
+  -webkit-mask-image:
+    linear-gradient(to bottom, #000 calc(100% - var(--stage-fade)), transparent),
+    linear-gradient(to top, #000 calc(100% - var(--stage-fade)), transparent),
+    linear-gradient(#000, #000);
+  -webkit-mask-size:
+    var(--fade-top-w) var(--fade-top-h),
+    var(--fade-bottom-w) var(--fade-bottom-h),
+    100% 100%;
+  -webkit-mask-position: 50% 0, 50% 100%, 0 0;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-composite: destination-out, destination-out, source-over;
+  mask-image:
+    linear-gradient(to bottom, #000 calc(100% - var(--stage-fade)), transparent),
+    linear-gradient(to top, #000 calc(100% - var(--stage-fade)), transparent),
+    linear-gradient(#000, #000);
+  mask-size:
+    var(--fade-top-w) var(--fade-top-h),
+    var(--fade-bottom-w) var(--fade-bottom-h),
+    100% 100%;
+  mask-position: 50% 0, 50% 100%, 0 0;
+  mask-repeat: no-repeat;
+  mask-composite: destination-out, destination-out, source-over;
 }
 
 .service-step[hidden] {
@@ -4516,7 +4528,7 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
 
   .service-step-stage {
     width: calc(100% - 2 * var(--arrow-control) - 2 * var(--arrow-edge));
-    max-height: calc(var(--app-vh) - 2 * var(--arrow-control) - 2 * var(--space-lg));
+    max-height: calc(var(--app-vh) - 2 * var(--space-lg));
   }
 }
 

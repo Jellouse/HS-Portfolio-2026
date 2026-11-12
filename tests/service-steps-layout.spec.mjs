@@ -1,6 +1,6 @@
-// Service-step center copy must fade at the top and bottom before the back
-// and Inquire buttons, not left and right. The L/R arrows sit on a tighter
-// edge pad, not the page margin.
+// Service-step copy fades only where it would hit the back and Inquire
+// buttons, not across the full width, and not left and right. The L/R
+// arrows sit on a tighter edge pad, not the page margin.
 //
 // npm run build && npm run test:service-steps
 import { chromium } from 'playwright';
@@ -83,6 +83,13 @@ const inspect = () => {
     edge: host ? parseFloat(host.getPropertyValue('--arrow-edge')) : NaN,
     fade: host ? parseFloat(host.getPropertyValue('--stage-fade')) : NaN,
     mask: cs ? (cs.maskImage || cs.webkitMaskImage || 'none') : 'none',
+    maskSize: cs ? (cs.maskSize || cs.webkitMaskSize || '') : '',
+    maskPosition: cs ? (cs.maskPosition || cs.webkitMaskPosition || '') : '',
+    maskComposite: cs ? `${cs.maskComposite || ''} ${cs.webkitMaskComposite || ''}` : '',
+    fadeTopW: host ? parseFloat(host.getPropertyValue('--fade-top-w')) : NaN,
+    fadeTopH: host ? parseFloat(host.getPropertyValue('--fade-top-h')) : NaN,
+    fadeBottomW: host ? parseFloat(host.getPropertyValue('--fade-bottom-w')) : NaN,
+    fadeBottomH: host ? parseFloat(host.getPropertyValue('--fade-bottom-h')) : NaN,
     stage: box(stage),
     sides,
     ends,
@@ -106,9 +113,17 @@ for (const [name, vp] of Object.entries(viewports)) {
     must(Number.isFinite(data.edge) && Math.round(data.edge) === vp.edge, `${tag}: --arrow-edge is ${data.edge}, expected ${vp.edge}`);
     must(/linear-gradient/i.test(data.mask), `${tag}: stage is missing a gradient mask (${data.mask})`);
     must(!/to right|to left|90deg|270deg/i.test(data.mask), `${tag}: mask fades left/right, expected top and bottom (${data.mask})`);
-    // Computed style drops "to bottom" because that is the default direction.
-    must(/24px/.test(data.mask) && /100%/.test(data.mask), `${tag}: mask is not a 24px top-and-bottom fade (${data.mask})`);
+    must((data.maskSize || '').split(',').filter(Boolean).length >= 3, `${tag}: mask is not split into button-local layers (${data.maskSize})`);
     must(data.fade >= 24, `${tag}: --stage-fade is ${data.fade}, expected at least 24px`);
+
+    const back = data.ends.find((btn) => btn.dir === 'up');
+    const inquire = data.ends.find((btn) => btn.dir === 'inquire');
+    if (back) {
+      must(Math.abs(data.fadeTopW - back.box.w) <= 2, `${tag}: --fade-top-w is ${data.fadeTopW}, expected back width ${back.box.w.toFixed(1)}`);
+    }
+    if (inquire) {
+      must(Math.abs(data.fadeBottomW - inquire.box.w) <= 2, `${tag}: --fade-bottom-w is ${data.fadeBottomW}, expected inquire width ${inquire.box.w.toFixed(1)}`);
+    }
 
     for (const btn of data.sides) {
       const inset = btn.dir === 'left' ? btn.box.x : data.vw - btn.box.r;
@@ -118,28 +133,56 @@ for (const [name, vp] of Object.entries(viewports)) {
       must(inset + 0.5 >= 12, `${tag}: ${btn.dir} button crowds the edge (${inset.toFixed(1)}px)`);
     }
 
-    for (const btn of data.ends) {
-      const area = data.stage ? overlap(data.stage, btn.box) : 0;
-      must(area < 0.5, `${tag}: stage overlaps the ${btn.dir} button by ${area.toFixed(1)}px²`);
-    }
-
-    const fade = data.fade || 24;
-    const core = data.stage
-      ? { x: data.stage.x, r: data.stage.r, y: data.stage.y + fade, b: data.stage.b - fade }
-      : null;
-    for (const btn of [...data.sides, ...data.ends]) {
+    for (const btn of data.sides) {
       for (const ink of data.ink) {
-        const visible = core
-          ? { ...ink, y: Math.max(ink.y, core.y), b: Math.min(ink.b, core.b) }
-          : ink;
-        if (visible.b <= visible.y) continue;
-        const area = overlap(visible, btn.box);
+        const area = overlap(ink, btn.box);
         must(area < 0.5, `${tag}: text "${ink.t}" overlaps the ${btn.dir} button by ${area.toFixed(1)}px²`);
       }
     }
 
     const file = join(SHOTS, `service-steps-${name}-${id}-vertical-after.png`);
     await page.screenshot({ path: file, fullPage: false });
+
+    for (let i = 0; i < 8; i++) {
+      const tall = await page.evaluate(() => {
+        const stage = document.querySelector('.service-step-stage');
+        return stage ? stage.scrollHeight - stage.clientHeight > 40 : false;
+      });
+      if (tall) break;
+      const right = page.locator('.service-steps .arrow-pill[data-dir="right"]');
+      if (await right.isHidden()) break;
+      await right.click();
+      await page.waitForTimeout(400);
+    }
+
+    const tall = await page.evaluate(() => {
+      const stage = document.querySelector('.service-step-stage');
+      return stage ? stage.scrollHeight - stage.clientHeight > 40 : false;
+    });
+    if (tall) {
+      await page.evaluate(() => {
+        const stage = document.querySelector('.service-step-stage');
+        if (stage) stage.scrollTop = Math.min(160, stage.scrollHeight);
+      });
+      await page.waitForTimeout(150);
+      const long = await page.evaluate(inspect);
+      const longTag = `${tag} long`;
+      for (const btn of long.ends) {
+        const area = long.stage ? overlap(long.stage, btn.box) : 0;
+        must(area > 100, `${longTag}: stage does not reach the ${btn.dir} button (overlap ${area.toFixed(1)}px²)`);
+      }
+      const back = long.ends.find((btn) => btn.dir === 'up');
+      const inquire = long.ends.find((btn) => btn.dir === 'inquire');
+      if (back) {
+        must(Math.abs(long.fadeTopW - back.box.w) <= 2, `${longTag}: --fade-top-w is ${long.fadeTopW}, expected back width ${back.box.w.toFixed(1)}`);
+        must(long.fadeTopH + 0.5 >= back.box.h, `${longTag}: --fade-top-h is ${long.fadeTopH}, expected at least back height ${back.box.h.toFixed(1)}`);
+      }
+      if (inquire) {
+        must(Math.abs(long.fadeBottomW - inquire.box.w) <= 2, `${longTag}: --fade-bottom-w is ${long.fadeBottomW}, expected inquire width ${inquire.box.w.toFixed(1)}`);
+      }
+      await page.screenshot({ path: join(SHOTS, `service-steps-${name}-${id}-vertical-long.png`), fullPage: false });
+    }
+
     await context.close();
   }
 }

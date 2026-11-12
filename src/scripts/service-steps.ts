@@ -78,5 +78,29 @@ export function initServiceSteps() {
     el.click();
   });
 
+  const stage = root.querySelector<HTMLElement>('.service-step-stage');
+  const inquire = root.querySelector<HTMLElement>('.service-inquire');
+
+  const syncFade = () => {
+    if (!stage || !back || !inquire) return;
+    const fade = parseFloat(getComputedStyle(root).getPropertyValue('--stage-fade')) || 24;
+    const s = stage.getBoundingClientRect();
+    const b = back.getBoundingClientRect();
+    const q = inquire.getBoundingClientRect();
+    root.style.setProperty('--fade-top-w', `${Math.round(b.width)}px`);
+    root.style.setProperty('--fade-top-h', `${Math.max(0, Math.round(b.bottom - s.top + fade))}px`);
+    root.style.setProperty('--fade-bottom-w', `${Math.round(q.width)}px`);
+    root.style.setProperty('--fade-bottom-h', `${Math.max(0, Math.round(s.bottom - q.top + fade))}px`);
+  };
+
+  syncFade();
+  window.addEventListener('resize', syncFade);
+  if (typeof ResizeObserver !== 'undefined') {
+    const fadeWatch = new ResizeObserver(syncFade);
+    fadeWatch.observe(stage);
+    fadeWatch.observe(inquire);
+  }
+  document.fonts?.ready.then(syncFade);
+
   show(index);
 }
