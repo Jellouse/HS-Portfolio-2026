@@ -42,6 +42,7 @@
     "test:chrome-vt": "node tests/chrome-vt.spec.mjs",
     "test:about-services": "node tests/about-services-flight.spec.mjs",
     "test:landing-face": "node tests/landing-face-settle.spec.mjs",
+    "test:intro-face-pos": "node tests/intro-face-position.spec.mjs",
     "test:intro-perf": "node tests/intro-trace.mjs --max-raster=400",
     "test:intro-fps": "node tests/intro-perf.spec.mjs --browser=webkit --runs=2 --min-fps=50",
     "test:turbulence": "node tests/turbulence.spec.mjs",

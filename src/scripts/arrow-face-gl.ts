@@ -261,14 +261,20 @@ export async function mountFaceGL(svg: SVGSVGElement, host: HTMLElement, maxW: n
     H = Math.max(1, Math.round(cssH * dpr));
     canvas.width = W;
     canvas.height = H;
+    // Pin every side as a longhand. `inset` is a shorthand for
+    // top/right/bottom/left, so setting it after left/top would clear them
+    // and leave the canvas at the top of the slot (the stylesheet used to
+    // say inset: 0). Combined with translate(-50%, -50%), the shrinking
+    // face then sits at the top of the screen like a header logo.
     Object.assign(canvas.style, {
       position: 'absolute',
       left: '50%',
       top: '50%',
+      right: 'auto',
+      bottom: 'auto',
       width: `${cssW}px`,
       height: `${cssH}px`,
       transform: 'translate(-50%, -50%)',
-      inset: 'auto',
       zIndex: '4',
       pointerEvents: 'none',
     });
