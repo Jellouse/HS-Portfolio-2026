@@ -107,22 +107,4 @@ export function absoluteUrl(site: URL | undefined, path: string): string {
   return new URL(path, origin).href;
 }
 
-export function projectTitleParts(data: {
-  title: string;
-  year?: number | null;
-  yearEnd?: number | null;
-}): { title: string; years?: string } {
-  const years = yearRange(data.year, data.yearEnd);
-  return years ? { title: data.title, years } : { title: data.title };
-}
-
-export function projectLabel(data: { title: string; year?: number | null; yearEnd?: number | null }): string {
-  const { title, years } = projectTitleParts(data);
-  return years ? `${title}, ${years}` : title;
-}
-
-export function yearRange(start?: number | null, end?: number | null): string | undefined {
-  if (start == null) return end == null ? undefined : String(end);
-  if (end == null || end === start) return String(start);
-  return `${start} \u2013 ${end}`;
-}
+export { projectLabel, projectTitleParts, yearRange } from './project-label.mjs';

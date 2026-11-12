@@ -28,13 +28,13 @@ sections:
         value:
           project: atomic-ski
           alt: Atomic Ski website hero with a skier mid jump
-          caption: Atomic Ski, [year]
+          caption: ''
           href: /work/atomic-ski/
       - discriminant: project
         value:
           project: analogue-af1
           alt: Analogue AF1 product page
-          caption: Analogue AF1, [year]
+          caption: ''
           href: /work/analogue-af1/
   - heading: 3D renders
     body: >-
@@ -44,7 +44,7 @@ sections:
         value:
           src: /src/content/services/images/analogue-af1-render.jpg
           alt: 3D render of an Analogue camera
-          caption: Analogue AF1, [year]
+          caption: ''
           href: /work/analogue-af1/
 bottomCta: Planning a site or need renders? Get in touch.
 footerLine: >-
