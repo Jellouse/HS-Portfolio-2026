@@ -2,6 +2,7 @@ import { initHeroBlob } from './hero-blob';
 import { mountFaceGL, type FaceGL, type FaceMount } from './arrow-face-gl';
 import { introDebug, introDebugOn } from './intro-debug';
 import { playSnick } from './ui-sound';
+import { bindAppViewport, syncAppViewport } from '../lib/viewport-layout';
 import type { ArrowDir, ArrowTree } from '../lib/arrow-nav';
 
 type Dir = ArrowDir | 'up';
@@ -62,6 +63,7 @@ export function initArrowNav(root: ParentNode = document) {
   if (!nav || nav.dataset.ready === '1') return;
   introDebug.script();
   nav.dataset.ready = '1';
+  syncAppViewport();
 
   const raw = nav.querySelector<HTMLScriptElement>('[data-nav-tree]')?.textContent;
   if (!raw) return;
@@ -70,7 +72,30 @@ export function initArrowNav(root: ParentNode = document) {
   const stage = nav.querySelector<HTMLElement>('[data-nav-stage]')!;
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const moveMs = () => cssMs('--dur-nav');
+  const holdWait = () => Math.max(moveMs(), 80);
   const gap = 8;
+
+  const visibleRect = () => {
+    const vv = window.visualViewport;
+    if (document.documentElement.hasAttribute('data-app-inset') && vv) {
+      return {
+        left: Math.round(vv.offsetLeft),
+        top: Math.round(vv.offsetTop),
+        width: Math.round(vv.width),
+        height: Math.round(vv.height),
+        right: Math.round(vv.offsetLeft + vv.width),
+        bottom: Math.round(vv.offsetTop + vv.height),
+      };
+    }
+    return {
+      left: 0,
+      top: 0,
+      width: window.innerWidth,
+      height: window.innerHeight,
+      right: window.innerWidth,
+      bottom: window.innerHeight,
+    };
+  };
 
   let screenId = 'landing';
   let generation = 0;
@@ -424,22 +449,31 @@ export function initArrowNav(root: ParentNode = document) {
       const clip = nav.querySelector<HTMLVideoElement>('[data-nav-video]');
       let t = 0;
       let done = false;
-      if (
-        item?.kind === 'video' &&
-        clip &&
-        clip.getAttribute('src') === item.src &&
+      const sameClip = (() => {
+        if (!clip || item?.kind !== 'video' || clip.getAttribute('src') !== item.src || !clip.currentSrc) return false;
+        try {
+          return new URL(clip.currentSrc, location.href).pathname === new URL(item.src, location.href).pathname;
+        } catch {
+          return clip.currentSrc.includes(item.src);
+        }
+      })();
+      const playing =
+        sameClip &&
         Number.isFinite(clip.duration) &&
-        clip.duration > 0
-      ) {
+        clip.duration > 0 &&
+        clip.readyState >= 1 &&
+        !clip.paused &&
+        !clip.error;
+      if (playing && clip) {
         const nearEnd = clip.currentTime >= clip.duration - 0.05;
         if (videoTime > clip.duration * 0.5 && clip.currentTime < 0.2) done = true;
         done = done || (nearEnd && videoTime > 0);
         videoTime = clip.currentTime;
         t = Math.min(1, clip.currentTime / clip.duration);
-      } else if (item?.kind === 'video' && clip?.error) {
-        t = Math.min(1, (now - progressStart) / SLIDE_MS);
-        done = t >= 1;
-      } else if (item?.kind !== 'video') {
+      } else {
+        // Stills, blocked autoplay, or a reused video element still showing a
+        // previous clip's currentTime all use the still timer so the gallery
+        // cannot skip a frame later.
         t = Math.min(1, (now - progressStart) / SLIDE_MS);
         done = t >= 1;
       }
@@ -544,18 +578,19 @@ export function initArrowNav(root: ParentNode = document) {
       return;
     }
     const edges = nav.classList.contains('is-full');
+    const view = visibleRect();
     const box = edges
-      ? { left: 0, top: 0, right: window.innerWidth, bottom: window.innerHeight, width: window.innerWidth, height: window.innerHeight }
+      ? view
       : frame
         ?? (nav.classList.contains('is-cover')
           ? restingFrame()
           : nav.querySelector<HTMLElement>('[data-nav-gallery]')!.getBoundingClientRect());
     const size = controlSize();
     const pad = phone() ? 20 : 48;
-    const y = edges ? Math.round((window.innerHeight - size) / 2) : Math.round(box.top + box.height / 2 - size / 2);
+    const y = edges ? Math.round(view.top + (view.height - size) / 2) : Math.round(box.top + box.height / 2 - size / 2);
     const spots: [HTMLElement, number][] = [
-      [left, edges ? pad : Math.round(box.left / 2 - size / 2)],
-      [right, edges ? Math.round(window.innerWidth - pad - size) : Math.round(box.right + (window.innerWidth - box.right) / 2 - size / 2)],
+      [left, edges ? view.left + pad : Math.round(view.left + (box.left - view.left) / 2 - size / 2)],
+      [right, edges ? Math.round(view.right - pad - size) : Math.round(box.right + (view.right - box.right) / 2 - size / 2)],
     ];
     for (const [el, x] of spots) {
       el.style.position = 'fixed';
@@ -570,10 +605,10 @@ export function initArrowNav(root: ParentNode = document) {
     }
     const above = Math.round((nav.clientHeight - box.height) / 4);
     back.style.position = edges ? 'fixed' : 'absolute';
-    back.style.left = edges ? `${Math.round((window.innerWidth - size) / 2)}px` : `${Math.round(nav.clientWidth / 2 - size / 2)}px`;
+    back.style.left = edges ? `${Math.round(view.left + (view.width - size) / 2)}px` : `${Math.round(nav.clientWidth / 2 - size / 2)}px`;
     back.style.right = 'auto';
     back.style.bottom = 'auto';
-    back.style.top = edges ? `${pad}px` : `${Math.round(above - size / 2)}px`;
+    back.style.top = edges ? `${view.top + pad}px` : `${Math.round(above - size / 2)}px`;
     back.style.width = `${size}px`;
     back.style.height = `${size}px`;
     back.style.transform = 'none';
@@ -654,8 +689,9 @@ export function initArrowNav(root: ParentNode = document) {
     nav.classList.add('is-zoom');
     if (!open) nav.classList.remove('is-cover');
     const ease = cssEase('--ease-nav');
+    const view = visibleRect();
     const target = open
-      ? { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight, borderRadius: '0px' }
+      ? { left: view.left, top: view.top, width: view.width, height: view.height, borderRadius: '0px' }
       : { left: rest.left, top: rest.top, width: rest.width, height: rest.height, borderRadius: radius };
     const anim = gallery.animate(
       [
@@ -745,9 +781,12 @@ export function initArrowNav(root: ParentNode = document) {
       return;
     }
     copy.style.transform = '';
+    const origin = document.documentElement.hasAttribute('data-app-inset')
+      ? nav.getBoundingClientRect().top
+      : 0;
     const faceTop = faceEl().getBoundingClientRect().top;
     const limit = back.hidden ? faceTop : back.getBoundingClientRect().top;
-    copy.style.top = `${Math.round(limit / 2)}px`;
+    copy.style.top = `${Math.round((limit - origin) / 2)}px`;
   };
 
   const placeCaption = () => {
@@ -1161,14 +1200,35 @@ export function initArrowNav(root: ParentNode = document) {
 
   let holdTimer = 0;
   let flipping = false;
+  let holdPointer = 0;
+  let holdTarget: HTMLElement | null = null;
 
   const canFlip = (dir: Dir) => screen()?.kind === 'gallery' && (dir === 'left' || dir === 'right');
+
+  const releasePointer = () => {
+    if (holdTarget && holdPointer) {
+      try {
+        holdTarget.releasePointerCapture(holdPointer);
+      } catch {
+        /* already released */
+      }
+    }
+    holdPointer = 0;
+    holdTarget = null;
+  };
 
   const stopHold = (resume: boolean) => {
     if (holdTimer) window.clearTimeout(holdTimer);
     holdTimer = 0;
     flipping = false;
     if (resume) startAutoplay();
+  };
+
+  const abandonHold = () => {
+    if (!pressFrom) return;
+    stopHold(false);
+    releasePointer();
+    setPressed(null, null);
   };
 
   const startHold = (dir: Dir) => {
@@ -1179,19 +1239,16 @@ export function initArrowNav(root: ParentNode = document) {
       playSnick();
     };
     step();
-    const holdFast = 80;
-    let wait = 480;
     const tick = () => {
       if (!canFlip(dir)) {
         stopHold(false);
         return;
       }
       step();
-      wait = Math.max(holdFast, Math.round(wait * 0.78));
-      holdTimer = window.setTimeout(tick, wait);
+      holdTimer = window.setTimeout(tick, holdWait());
     };
     flipping = true;
-    holdTimer = window.setTimeout(tick, wait);
+    holdTimer = window.setTimeout(tick, holdWait());
     return true;
   };
 
@@ -1216,24 +1273,37 @@ export function initArrowNav(root: ParentNode = document) {
     const button = (event.target as Element).closest<HTMLElement>('[data-dir]');
     if (!button || button.hidden || introOn || !nav.contains(button)) return;
     setPressed(button, 'pointer', '');
+    try {
+      button.setPointerCapture(event.pointerId);
+      holdPointer = event.pointerId;
+      holdTarget = button;
+    } catch {
+      holdPointer = event.pointerId;
+      holdTarget = button;
+    }
     if (!startHold(button.dataset.dir as Dir)) playSnick();
   });
 
-  window.addEventListener('pointerup', (event) => {
+  const onPointerEnd = (event: PointerEvent, cancelled: boolean) => {
     if (pressFrom !== 'pointer' || !pressed) return;
+    if (holdPointer && event.pointerId !== holdPointer) return;
     const button = pressed;
     const dir = button.dataset.dir as Dir;
     const releasedOn = (event.target as Element | null)?.closest?.('[data-dir]') === button;
     const wasFlip = flipping;
-    stopHold(wasFlip);
-    if (!wasFlip && releasedOn) activate(dir);
+    stopHold(cancelled ? false : wasFlip);
     setPressed(null, null);
-  });
+    releasePointer();
+    if (!cancelled && !wasFlip && releasedOn) activate(dir);
+  };
 
-  window.addEventListener('pointercancel', () => {
-    if (pressFrom !== 'pointer') return;
-    stopHold(false);
-    setPressed(null, null);
+  window.addEventListener('pointerup', (event) => onPointerEnd(event, false));
+  window.addEventListener('pointercancel', (event) => onPointerEnd(event, true));
+  nav.addEventListener('lostpointercapture', (event) => onPointerEnd(event, true));
+  window.addEventListener('blur', abandonHold);
+  window.addEventListener('pagehide', abandonHold);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState !== 'visible') abandonHold();
   });
 
   const keyDir: Record<string, Dir> = {
@@ -1536,14 +1606,20 @@ export function initArrowNav(root: ParentNode = document) {
   placeCopy();
   placeCaption();
   placeGalleryArrows();
-  window.addEventListener('resize', () => {
+  const relayout = () => {
     const current = screen()?.kind === 'gallery' ? screen()?.slides[slide] : null;
     if (current && !full) fitGallery(current, false);
     placeCopy();
     placeCaption();
     placeGalleryArrows();
     fitProjectLink();
+  };
+
+  bindAppViewport(() => {
+    if (nav.dataset.screen !== 'about' && (scrollX || scrollY)) window.scrollTo(0, 0);
+    relayout();
   });
+  window.addEventListener('resize', relayout);
   if (opened === 'landing') runIntro();
   else {
     introPlaying = false;

@@ -119,6 +119,10 @@
   --dur-sheet: 400ms;
   --dur-nav: 500ms;
   --dur-sheet-out: 260ms;
+  --app-vt: 0px;
+  --app-vl: 0px;
+  --app-vw: 100%;
+  --app-vh: 100svh;
   --page-bg: var(--bg);
   color: var(--ink);
   background: var(--page-bg);
@@ -3427,7 +3431,7 @@ body.is-services-landing main#content {
 }
 
 body:has(.arrow-nav) {
-  height: 100svh;
+  height: var(--app-vh);
   overflow: hidden;
 }
 
@@ -3437,10 +3441,19 @@ body:has(.arrow-nav) {
   --arrow-control: 64px;
   --arrow-fill: rgb(0 0 0 / 6%);
   position: relative;
-  height: 100svh;
+  height: var(--app-vh);
   overflow: hidden;
   color: var(--ink);
   text-align: center;
+}
+
+
+html[data-app-inset] .arrow-nav:not([data-screen='about']) {
+  position: fixed;
+  top: var(--app-vt);
+  left: var(--app-vl);
+  width: var(--app-vw);
+  height: var(--app-vh);
 }
 
 html[data-sky-ink='white'] body:has([data-sky]) .arrow-nav {
@@ -3573,9 +3586,9 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
 
 .arrow-nav[data-screen='about'] {
   height: auto;
-  min-height: 100svh;
+  min-height: var(--app-vh);
   overflow: visible;
-  padding-top: calc(50svh + var(--arrow-about-face) / 2 + var(--space-text-titled));
+  padding-top: calc(var(--app-vh) / 2 + var(--arrow-about-face) / 2 + var(--space-text-titled));
   padding-bottom: var(--space-lg);
 }
 
@@ -3584,7 +3597,7 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
   top: 0;
   right: 0;
   left: 0;
-  height: 100svh;
+  height: var(--app-vh);
   bottom: auto;
 }
 
@@ -4140,7 +4153,7 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
 
   .js .arrow-nav.is-intro .arrow-face-scale,
   .js .arrow-nav.is-intro .arrow-face-blob {
-    width: calc(var(--arrow-face) * 7 * 100vw / 100svh);
+    width: calc(var(--arrow-face) * 7 * 100vw / var(--app-vh));
     height: calc(var(--arrow-face) * 7);
   }
 
@@ -4187,7 +4200,7 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
   }
 
   .arrow-nav[data-screen='about'] {
-    padding-top: calc(50svh + var(--arrow-face) / 2 + var(--space-text-titled));
+    padding-top: calc(var(--app-vh) / 2 + var(--arrow-face) / 2 + var(--space-text-titled));
   }
 
   .arrow-nav[data-screen='about'] .arrow-copy {
