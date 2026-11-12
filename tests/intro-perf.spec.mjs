@@ -1,5 +1,5 @@
 // Frame timings for the homepage intro on an emulated iPhone 12.
-// Usage: npm run build && node tests/intro-perf.spec.mjs [--throttle=4] [--browser=chromium|webkit] [--runs=3]
+// Usage: npm run build && node tests/intro-perf.spec.mjs [--throttle=4] [--browser=chromium|webkit] [--runs=3] [--min-fps=50]
 import { chromium, webkit } from 'playwright';
 import { createServer } from 'node:http';
 import { readFileSync, existsSync, statSync } from 'node:fs';
@@ -14,6 +14,7 @@ const THROTTLE = Number(arg('throttle', '4'));
 const BROWSER = arg('browser', 'chromium');
 const RUNS = Number(arg('runs', '3'));
 const BUDGET = Number(arg('budget', '0'));
+const MIN_FPS = Number(arg('min-fps', '0'));
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.jpg': 'image/jpeg', '.webp': 'image/webp', '.png': 'image/png', '.woff2': 'font/woff2', '.json': 'application/json' };
@@ -94,3 +95,4 @@ console.log(JSON.stringify({ browser: BROWSER, throttle: BROWSER === 'chromium' 
 await browser.close();
 server.close();
 if (BUDGET && avg('p95', 'intro') > BUDGET) { console.error(`intro p95 ${avg('p95', 'intro')}ms over ${BUDGET}ms`); process.exit(1); }
+if (MIN_FPS && avg('fps', 'intro') < MIN_FPS) { console.error(`intro fps ${avg('fps', 'intro')} is under ${MIN_FPS}`); process.exit(1); }

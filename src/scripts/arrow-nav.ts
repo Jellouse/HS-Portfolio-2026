@@ -1513,13 +1513,13 @@ export function initArrowNav(root: ParentNode = document) {
     }
     let revealed = false;
     // A CSS scale of the small filtered face paints a soft bitmap and drops
-    // the displacement. On a phone the face is laid out at the size it is
-    // drawn, and the stretch follows the screen.
+    // the displacement. The face is laid out at the size it is drawn, on
+    // every viewport, and the stretch follows the screen on a phone.
     const phone = matchMedia('(max-width: 759px)').matches;
-    const face = phone ? parseFloat(getComputedStyle(nav).getPropertyValue('--arrow-face')) : 0;
+    const face = parseFloat(getComputedStyle(nav).getPropertyValue('--arrow-face')) || (phone ? 48 : 64);
     const stretchFrom = phone ? nav.clientWidth / Math.max(1, nav.clientHeight) : INTRO_STRETCH;
-    const blob = phone ? nav.querySelector<HTMLElement>('.arrow-face-blob') : null;
-    if (phone) scaleEl.style.transform = 'none';
+    const blob = nav.querySelector<HTMLElement>('.arrow-face-blob');
+    scaleEl.style.transform = 'none';
     let started = performance.now();
     // The first frames after load are slow on a phone: fonts, the first GPU
     // draw and its compositing layer all land there. The intro holds its first
@@ -1551,18 +1551,14 @@ export function initArrowNav(root: ParentNode = document) {
       const stretch = stretchFrom + (1 - stretchFrom) * eased;
       const dispNow = Math.round(DISP_FROM + (DISP_REST - DISP_FROM) * eased);
       const soft = BLUR_FROM + (BLUR_REST - BLUR_FROM) * eased;
-      if (phone) {
-        const w = Math.max(1, Math.round(face * zoom * stretch));
-        const h = Math.max(1, Math.round(face * zoom));
-        scaleEl.style.width = `${w}px`;
-        scaleEl.style.height = `${h}px`;
-        if (faceGL) faceGL.draw({ w, h, disp: dispNow, blur: soft });
-        else if (blob) {
-          blob.style.width = `${w}px`;
-          blob.style.height = `${h}px`;
-        }
-      } else {
-        scaleEl.style.transform = `scale(${zoom.toFixed(3)}) scaleX(${stretch.toFixed(3)})`;
+      const w = Math.max(1, Math.round(face * zoom * stretch));
+      const h = Math.max(1, Math.round(face * zoom));
+      scaleEl.style.width = `${w}px`;
+      scaleEl.style.height = `${h}px`;
+      if (faceGL) faceGL.draw({ w, h, disp: dispNow, blur: soft });
+      else if (blob) {
+        blob.style.width = `${w}px`;
+        blob.style.height = `${h}px`;
       }
       if (!faceGL) {
         disp?.setAttribute('scale', String(dispNow));
@@ -1585,51 +1581,51 @@ export function initArrowNav(root: ParentNode = document) {
       introDebug.hold(performance.now());
       frame(performance.now(), true);
     };
-    if (!phone) {
-      introDebug.path('svg', 'desktop');
-      run();
-      return;
-    }
-    // On a phone the SVG filter would be re-rasterised every frame over a
-    // region several screens tall. The GPU face draws the same filter from
-    // numbers. It mounts in this task (no SVG raster, no async decode), draws
-    // the first frame before the next paint, and the SVG face is hidden by CSS
-    // until then. Only when WebGL cannot run does the SVG filter come back,
-    // and ?introdebug says why.
-    const svgFace = nav.querySelector<SVGSVGElement>('.arrow-face-blob');
-    const slot = scaleEl.closest<HTMLElement>('.arrow-slot');
-    let mount: FaceMount;
-    if (!svgFace || !slot) mount = { gl: null, reason: 'no-face' };
-    else if (typeof ResizeObserver === 'undefined') mount = { gl: null, reason: 'no-resize-observer' };
-    else {
-      const maxW = Math.max(1, Math.round(face * INTRO_ZOOM * stretchFrom));
-      const maxH = Math.max(1, Math.round(face * INTRO_ZOOM));
-      try {
-        mount = mountFaceGL(svgFace, slot, maxW, maxH, DISP_FROM, BLUR_FROM);
-      } catch (error) {
-        mount = { gl: null, reason: `error: ${(error as Error)?.message || error}` };
+    // The SVG filter would be re-rasterised every frame over a region several
+    // screens tall. The GPU face draws the same filter from numbers. Noise is
+    // built in short slices so the landing long task can yield, then the first
+    // frame is drawn and the SVG face stays hidden until then. Only when
+    // WebGL cannot run does the SVG filter come back, and ?introdebug says why.
+    void (async () => {
+      await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+      const svgFace = nav.querySelector<SVGSVGElement>('.arrow-face-blob');
+      const slot = scaleEl.closest<HTMLElement>('.arrow-slot');
+      let mount: FaceMount;
+      if (!svgFace || !slot) mount = { gl: null, reason: 'no-face' };
+      else {
+        const maxW = Math.max(1, Math.round(face * INTRO_ZOOM * stretchFrom));
+        const maxH = Math.max(1, Math.round(face * INTRO_ZOOM));
+        try {
+          mount = await mountFaceGL(svgFace, slot, maxW, maxH, DISP_FROM, BLUR_FROM);
+        } catch (error) {
+          mount = { gl: null, reason: `error: ${(error as Error)?.message || error}` };
+        }
       }
-    }
-    if (mount.gl) {
-      faceGL = mount.gl;
-      faceGL.canvas.addEventListener('webglcontextlost', () => {
-        if (!introPlaying || !faceGL) return;
-        // The GPU dropped the canvas mid-intro: finish on the SVG filter.
-        faceGL.destroy();
-        faceGL = null;
-        nav.classList.remove('is-face-gl');
+      if (!introPlaying) {
+        mount.gl?.destroy();
+        return;
+      }
+      if (mount.gl) {
+        faceGL = mount.gl;
+        faceGL.canvas.addEventListener('webglcontextlost', () => {
+          if (!introPlaying || !faceGL) return;
+          // The GPU dropped the canvas mid-intro: finish on the SVG filter.
+          faceGL.destroy();
+          faceGL = null;
+          nav.classList.remove('is-face-gl');
+          nav.classList.add('is-face-svg');
+          nav.querySelector('.arrow-face-blob g')?.setAttribute('filter', `url(#${svgFace?.querySelector('filter')?.id ?? ''})`);
+          introDebug.path('svg', 'context-lost');
+        });
+        nav.classList.add('is-face-gl');
+        settleFace();
+        introDebug.path('gl', '', mount.gl.setupMs, mount.gl.renderer);
+      } else {
         nav.classList.add('is-face-svg');
-        nav.querySelector('.arrow-face-blob g')?.setAttribute('filter', `url(#${svgFace?.querySelector('filter')?.id ?? ''})`);
-        introDebug.path('svg', 'context-lost');
-      });
-      nav.classList.add('is-face-gl');
-      settleFace();
-      introDebug.path('gl', '', mount.gl.setupMs, mount.gl.renderer);
-    } else {
-      nav.classList.add('is-face-svg');
-      introDebug.path('svg', mount.reason);
-    }
-    run();
+        introDebug.path('svg', mount.reason);
+      }
+      run();
+    })();
   };
 
   const hash = location.hash.replace('#', '');

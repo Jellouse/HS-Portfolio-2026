@@ -697,7 +697,6 @@ html:has([data-sky]) body {
   height: var(--rest);
   overflow: visible;
   transform-origin: 0 50%;
-  will-change: transform;
   fill: #f8f8f8;
 }
 
@@ -3747,14 +3746,18 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
   border-radius: 0;
 }
 
-/* The phone intro draws the face filter on the GPU. The canvas covers the slot
-   above the face and goes away when the intro ends. */
+/* The GPU intro draws the face on a canvas sized to the face plus filter
+   reach, then centered in the slot — the same place as .arrow-face. Do not
+   use inset: 0 here. That pins a face-sized canvas to the top of the stage,
+   and an inset shorthand in JS would also wipe left/top. */
 .arrow-face-gl {
   position: absolute;
-  inset: 0;
+  top: 50%;
+  left: 50%;
+  right: auto;
+  bottom: auto;
+  transform: translate(-50%, -50%);
   z-index: 4;
-  width: 100%;
-  height: 100%;
   pointer-events: none;
 }
 
@@ -4173,8 +4176,21 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
   filter: none;
 }
 
-.js .arrow-nav.is-intro .arrow-face-scale {
-  transform: scale(7) scaleX(2.4);
+.js .arrow-nav.is-intro .arrow-face-scale,
+.js .arrow-nav.is-intro .arrow-face-blob {
+  width: calc(var(--arrow-face) * 7 * 2.4);
+  height: calc(var(--arrow-face) * 7);
+  transform: none;
+}
+
+/* The intro face is drawn on the GPU. Until that canvas is mounted, the
+   SVG stays hidden and unfiltered so no frame pays for the SVG filter. */
+.js .arrow-nav.is-intro:not(.is-face-svg) .arrow-face-blob {
+  visibility: hidden;
+}
+
+.js .arrow-nav.is-intro:not(.is-face-svg) .arrow-face-blob g {
+  filter: none;
 }
 
 .js .arrow-nav.is-intro:not(.is-controls) :is(.arrow-copy, .arrow-caption, .arrow-pill, .arrow-back, .arrow-hint) {

@@ -112,19 +112,40 @@ export function mountFaces(host: HTMLElement) {
   };
 
   paint(0.5, 0.5, 0);
+  let visible = false;
+  let raf = 0;
   const frame = (now: number) => {
-
-    if (!reduce.matches) {
-      const t = (now / 1000) * S.speed;
-      const k = fine.matches ? 1 : 0.6;
-      const p = readInput(now) ?? {
-        u: 0.5 + 0.48 * k * Math.sin(t * 0.5) * Math.cos(t * 0.17),
-        v: 0.5 + 0.4 * k * Math.sin(t * 0.37 + 1),
-      };
-      paint(p.u, p.v, t);
+    if (!visible || document.hidden || reduce.matches) {
+      raf = 0;
+      return;
     }
-    requestAnimationFrame(frame);
+    const t = (now / 1000) * S.speed;
+    const k = fine.matches ? 1 : 0.6;
+    const p = readInput(now) ?? {
+      u: 0.5 + 0.48 * k * Math.sin(t * 0.5) * Math.cos(t * 0.17),
+      v: 0.5 + 0.4 * k * Math.sin(t * 0.37 + 1),
+    };
+    paint(p.u, p.v, t);
+    raf = requestAnimationFrame(frame);
   };
-  reduce.addEventListener('change', () => paint(0.5, 0.5, 0));
-  requestAnimationFrame(frame);
+  const wake = () => {
+    if (!raf && visible && !document.hidden && !reduce.matches) raf = requestAnimationFrame(frame);
+  };
+  if (typeof IntersectionObserver === 'function') {
+    new IntersectionObserver(([e]) => {
+      visible = e.isIntersecting;
+      els.forEach((el) => (el.style.willChange = visible ? 'transform' : 'auto'));
+      if (visible) wake();
+    }, { rootMargin: '80px' }).observe(host);
+  } else {
+    visible = true;
+    wake();
+  }
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) wake();
+  });
+  reduce.addEventListener('change', () => {
+    paint(0.5, 0.5, 0);
+    wake();
+  });
 }
