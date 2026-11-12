@@ -1469,17 +1469,31 @@ export function initArrowNav(root: ParentNode = document) {
     const scaleEl = nav.querySelector<HTMLElement>('[data-nav-scale]');
     const blob = nav.querySelector<HTMLElement>('.arrow-face-blob');
     scaleEl?.getAnimations().forEach((anim) => anim.cancel());
-    if (scaleEl) {
-      scaleEl.style.transform = '';
-      scaleEl.style.width = '';
-      scaleEl.style.height = '';
-    }
-    if (blob) {
-      blob.style.width = '';
-      blob.style.height = '';
+    // Leave the intro from the size the face is drawn at now. Under the GPU
+    // face on a phone the SVG blob sat hidden at the intro size, and without
+    // this it eased down from there once it showed: the face pulsed up and
+    // back down just after the intro. Pin both to the drawn size, drop
+    // is-intro, then let go, so the face only moves if it was not yet at rest.
+    const parts = [scaleEl, blob].filter((el): el is HTMLElement => !!el);
+    const drawn = scaleEl ? getComputedStyle(scaleEl) : null;
+    if (scaleEl && drawn) {
+      const { width, height, transform } = drawn;
+      parts.forEach((el) => {
+        el.style.transition = 'none';
+        el.style.width = width;
+        el.style.height = height;
+      });
+      scaleEl.style.transform = transform;
     }
     settleFace();
     nav.classList.remove('is-intro');
+    parts.forEach((el) => el.getBoundingClientRect());
+    parts.forEach((el) => {
+      el.style.transition = '';
+      el.style.width = '';
+      el.style.height = '';
+    });
+    if (scaleEl) scaleEl.style.transform = '';
   }
 
   const settleFace = () => {
