@@ -47,7 +47,20 @@ export function initShopIntro(head: HTMLElement) {
     img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(new XMLSerializer().serializeToString(src));
   };
 
-  const atTop = () => mark.classList.toggle('at-top', drawn > 0 && scrollY <= 1);
+  const atTop = () => {
+    const top = scrollY <= 1;
+    if (top) {
+      if (!drawn && ringW) paintCanvas(ringW);
+      mark.classList.toggle('at-top', drawn > 0);
+    } else {
+      mark.classList.remove('at-top');
+      if (canvas.width > 1) {
+        canvas.width = 1;
+        canvas.height = 1;
+        drawn = 0;
+      }
+    }
+  };
 
   const forceLayout = () => {
     lastW = -1;

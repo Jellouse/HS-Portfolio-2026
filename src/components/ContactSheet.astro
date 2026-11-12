@@ -1,7 +1,9 @@
 ---
-
-import ContactDrawer from './ContactDrawer';
 const { email } = Astro.props as { email: string };
 ---
 
-<ContactDrawer client:load email={email} />
+<div data-contact-root data-email={email}></div>
+<script>
+  import { bootContact } from '../scripts/contact-boot';
+  bootContact();
+</script>

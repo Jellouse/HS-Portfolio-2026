@@ -139,14 +139,18 @@ function initMediaScrollFade() {
     const start = Math.round(vh * 1.05);
     const end = Math.round(vh * 0.7);
     const span = Math.max(1, start - end);
-    for (const frame of scrollHosts()) {
+    const frames = scrollHosts();
+    const tops: { frame: HTMLElement; stack: boolean; top?: number }[] = frames.map((frame) => {
       const stack = isStackFrame(frame);
-      const top = stack ? paintProjectMedia(frame, vh) : frame.getBoundingClientRect().top;
-      if (!stack) {
+      return stack ? { frame, stack } : { frame, stack, top: frame.getBoundingClientRect().top };
+    });
+    for (const item of tops) {
+      const top = item.stack ? paintProjectMedia(item.frame, vh) : item.top!;
+      if (!item.stack) {
         const opacity = Math.min(1, Math.max(0, (start - top) / span));
-        frame.style.opacity = opacity.toFixed(3);
+        item.frame.style.opacity = opacity.toFixed(3);
       }
-      if (top < start + vh) primeFrame(frame);
+      if (top < start + vh) primeFrame(item.frame);
     }
   };
 

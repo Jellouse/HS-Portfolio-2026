@@ -104,5 +104,5 @@ const first = tree.nodes.find((node) => node.kind === 'gallery')?.slides[0];
 
 <script>
   import { initArrowNav } from '../scripts/arrow-nav';
-  initArrowNav();
+  requestAnimationFrame(() => initArrowNav());
 </script>

@@ -9,7 +9,7 @@
 // on the browser rasterising an SVG, so it is ready in the same task. Everything is computed in the face's own
 // viewBox units, so the picture matches the filter at full device resolution.
 
-import { turbulenceParams, turbulenceTexture } from './turbulence';
+import { turbulenceParams, turbulenceTextureAsync } from './turbulence';
 
 const VERT = `attribute vec2 a;varying vec2 v;void main(){v=a*.5+.5;gl_Position=vec4(a,0.,1.);}`;
 
@@ -140,7 +140,7 @@ function parseColour(css: string) {
  * largest face box the intro lays out (CSS px), which sets the source
  * resolution. When it cannot run, it says why and the SVG filter stays in charge.
  */
-export function mountFaceGL(svg: SVGSVGElement, host: HTMLElement, maxW: number, maxH: number, maxDisp: number, maxBlur: number): FaceMount {
+export async function mountFaceGL(svg: SVGSVGElement, host: HTMLElement, maxW: number, maxH: number, maxDisp: number, maxBlur: number): Promise<FaceMount> {
   const t0 = performance.now();
   const fail = (reason: string): FaceMount => ({ gl: null, reason });
   const group = svg.querySelector<SVGGElement>('g[filter]');
@@ -171,10 +171,21 @@ export function mountFaceGL(svg: SVGSVGElement, host: HTMLElement, maxW: number,
   // Everything the displaced, blurred face can touch, in viewBox units.
   const reach = maxDisp / 2 + maxBlur * 3 + 2;
   const nreg = [vb.x - reach, vb.y - reach, vb.width + 2 * reach, vb.height + 2 * reach];
-  const noise = turbulenceTexture(turbulenceParams(turb), nreg, NOISE_RES);
+  const noise = await turbulenceTextureAsync(turbulenceParams(turb), nreg, NOISE_RES);
+  if (gl.isContextLost()) return fail('context-lost');
+
+  const padCssX = (maxDisp / 2 + maxBlur * 3 + 2) * (maxW / vb.width);
+  const padCssY = (maxDisp / 2 + maxBlur * 3 + 2) * (maxH / vb.height);
+  const boxW = Math.max(1, Math.ceil(maxW + 2 * padCssX));
+  const boxH = Math.max(1, Math.ceil(maxH + 2 * padCssY));
+  // Keep the output sharp on phones; cap the desktop intro so a 7x-wide face
+  // does not run a multi-megapixel cut every frame.
+  const area = Math.max(1, boxW * boxH);
+  const budget = Math.max(1280 * 720, (window.innerWidth || boxW) * (window.innerHeight || boxH));
+  let dpr = Math.min(window.devicePixelRatio || 1, 2);
+  if (area * dpr * dpr > budget) dpr = Math.max(1, Math.sqrt(budget / area));
 
   // Source alpha at the largest device scale the intro shows.
-  const dpr = window.devicePixelRatio || 1;
   const maxTex = Math.min(4096, gl.getParameter(gl.MAX_TEXTURE_SIZE) as number);
   const mreg = [vb.x - MASK_PAD, vb.y - MASK_PAD, vb.width + 2 * MASK_PAD, vb.height + 2 * MASK_PAD];
   const unitPx = Math.max(maxW / vb.width, maxH / vb.height) * dpr;
@@ -238,30 +249,41 @@ export function mountFaceGL(svg: SVGSVGElement, host: HTMLElement, maxW: number,
   let cssH = 0;
   let W = 0;
   let H = 0;
+  let fboW = 0;
+  let fboH = 0;
   let a: Target | null = null;
   let b: Target | null = null;
   const size = () => {
-    const nextW = host.clientWidth;
-    const nextH = host.clientHeight;
-    if (nextW === cssW && nextH === cssH && a) return;
-    cssW = nextW;
-    cssH = nextH;
+    if (cssW === boxW && cssH === boxH && W) return;
+    cssW = boxW;
+    cssH = boxH;
     W = Math.max(1, Math.round(cssW * dpr));
     H = Math.max(1, Math.round(cssH * dpr));
     canvas.width = W;
     canvas.height = H;
+    Object.assign(canvas.style, {
+      position: 'absolute',
+      left: '50%',
+      top: '50%',
+      width: `${cssW}px`,
+      height: `${cssH}px`,
+      transform: 'translate(-50%, -50%)',
+      inset: 'auto',
+      zIndex: '4',
+      pointerEvents: 'none',
+    });
+  };
+  const ensureField = (lw: number, lh: number) => {
+    if (a && b && lw <= fboW && lh <= fboH) return;
+    fboW = Math.max(fboW, lw);
+    fboH = Math.max(fboH, lh);
     drop(a);
     drop(b);
-    a = target(W, H);
-    b = target(W, H);
+    a = target(fboW, fboH);
+    b = target(fboW, fboH);
   };
   host.appendChild(canvas);
   size();
-  let dirty = false;
-  const ro = new ResizeObserver(() => {
-    dirty = true;
-  });
-  ro.observe(host);
 
   const uniforms = new Map<WebGLProgram, Map<string, WebGLUniformLocation | null>>();
   const u = (p: WebGLProgram, name: string) => {
@@ -278,11 +300,7 @@ export function mountFaceGL(svg: SVGSVGElement, host: HTMLElement, maxW: number,
   };
 
   const draw = ({ w, h, disp, blur }: FaceFrame) => {
-    if (dirty) {
-      dirty = false;
-      size();
-    }
-    if (!a || !b) return;
+    if (!W) return;
     // Face box in device px. The face sits at the centre of the slot.
     const ax = (w / vb.width) * dpr;
     const ay = (h / vb.height) * dpr;
@@ -309,7 +327,9 @@ export function mountFaceGL(svg: SVGSVGElement, host: HTMLElement, maxW: number,
     const fy = Math.max(1, sy / FIELD_SIGMA);
     const lw = Math.max(1, Math.min(W, Math.ceil(roi[2] / fx)));
     const lh = Math.max(1, Math.min(H, Math.ceil(roi[3] / fy)));
-    const cover = [lw / W, lh / H];
+    ensureField(lw, lh);
+    if (!a || !b) return;
+    const cover = [lw / fboW, lh / fboH];
     const stepX = roi[2] / lw;
     const stepY = roi[3] / lh;
 
@@ -340,12 +360,12 @@ export function mountFaceGL(svg: SVGSVGElement, host: HTMLElement, maxW: number,
       gl.bindFramebuffer(gl.FRAMEBUFFER, b.fb);
       gl.bindTexture(gl.TEXTURE_2D, a.t);
       gl.uniform1f(u(pBlur, 'sigma'), Math.max(0.01, sx / stepX));
-      gl.uniform2f(u(pBlur, 'dir'), 1 / W, 0);
+      gl.uniform2f(u(pBlur, 'dir'), 1 / fboW, 0);
       quad(pBlur);
       gl.bindFramebuffer(gl.FRAMEBUFFER, a.fb);
       gl.bindTexture(gl.TEXTURE_2D, b.t);
       gl.uniform1f(u(pBlur, 'sigma'), Math.max(0.01, sy / stepY));
-      gl.uniform2f(u(pBlur, 'dir'), 0, 1 / H);
+      gl.uniform2f(u(pBlur, 'dir'), 0, 1 / fboH);
       quad(pBlur);
       field = a;
     }
@@ -368,7 +388,6 @@ export function mountFaceGL(svg: SVGSVGElement, host: HTMLElement, maxW: number,
   };
 
   const destroy = () => {
-    ro.disconnect();
     canvas.remove();
     drop(a);
     drop(b);

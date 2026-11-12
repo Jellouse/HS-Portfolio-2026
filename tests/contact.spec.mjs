@@ -33,7 +33,8 @@ const layoutBefore = await page.evaluate(() => {
   return grid ? Math.round(grid.getBoundingClientRect().left) : 0;
 });
 await page.click('.site-menu [data-contact-open]');
-await page.waitForTimeout(700);
+await page.waitForSelector('[data-contact]', { timeout: 8000 });
+await page.waitForTimeout(400);
 const layoutAfter = await page.evaluate(() => {
   const grid = document.querySelector('.page-grid');
   return grid ? Math.round(grid.getBoundingClientRect().left) : 0;
@@ -59,7 +60,8 @@ await page.mouse.click(700, 100);
 await page.waitForFunction(() => !document.querySelector('[data-contact]'), null, { timeout: 5000 }).catch(() => {});
 check(await page.evaluate(() => !document.querySelector('[data-contact]')), 'outside click closes');
 await page.click('.site-menu [data-contact-open]');
-await page.waitForTimeout(700);
+await page.waitForSelector('[data-contact]', { timeout: 8000 });
+await page.waitForTimeout(400);
 check(await page.evaluate(() => document.activeElement?.matches('[data-service]')), 'focus moves into the drawer');
 for (let i = 0; i < 6; i++) await page.keyboard.press('Tab');
 check(await page.evaluate(() => !!document.activeElement?.closest('[data-contact]')), 'Tab stays inside the drawer');

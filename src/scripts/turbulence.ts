@@ -136,19 +136,29 @@ const toByte = (sum: number, fractal: boolean) =>
  * sampled at texel centres. Red and green are the noise's colour channels
  * (unpremultiplied). Blue carries the noise alpha. Alpha is opaque.
  */
-export function turbulenceTexture(p: TurbulenceParams, region: number[], res: number) {
-  const w = Math.max(1, Math.round(region[2] * res));
-  const h = Math.max(1, Math.round(region[3] * res));
-  const data = new Uint8Array(w * h * 4);
+const yieldToMain = () => {
+  const sched = (globalThis as typeof globalThis & { scheduler?: { yield?: () => Promise<void> } }).scheduler;
+  return typeof sched?.yield === 'function' ? sched.yield() : new Promise<void>((resolve) => setTimeout(resolve, 0));
+};
+
+function fillTurbulenceRows(
+  p: TurbulenceParams,
+  region: number[],
+  res: number,
+  data: Uint8Array,
+  w: number,
+  h: number,
+  y0: number,
+  y1: number,
+) {
   const t = tables(p.seed);
   const L = t.lattice;
-  // R, G and A. The lattice walk is shared, only the gradients differ.
   const gR = t.gradient[0];
   const gG = t.gradient[1];
   const gA = t.gradient[3];
   const octaves = Math.max(0, Math.floor(p.numOctaves));
   const fractal = p.fractalNoise;
-  for (let yi = 0; yi < h; yi++) {
+  for (let yi = y0; yi < y1; yi++) {
     const y = region[1] + ((yi + 0.5) * region[3]) / h;
     for (let xi = 0; xi < w; xi++) {
       const x = region[0] + ((xi + 0.5) * region[2]) / w;
@@ -177,7 +187,6 @@ export function turbulenceTexture(p: TurbulenceParams, region: number[], res: nu
         const b11 = L[j + by1] * 2;
         const sx = sCurve(rx0);
         const sy = sCurve(ry0);
-        // R
         let u = rx0 * gR[b00] + ry0 * gR[b00 + 1];
         let v = rx1 * gR[b10] + ry0 * gR[b10 + 1];
         let a = u + sx * (v - u);
@@ -185,7 +194,6 @@ export function turbulenceTexture(p: TurbulenceParams, region: number[], res: nu
         v = rx1 * gR[b11] + ry1 * gR[b11 + 1];
         let n = a + sy * (u + sx * (v - u) - a);
         sR += (fractal ? n : Math.abs(n)) / ratio;
-        // G
         u = rx0 * gG[b00] + ry0 * gG[b00 + 1];
         v = rx1 * gG[b10] + ry0 * gG[b10 + 1];
         a = u + sx * (v - u);
@@ -193,7 +201,6 @@ export function turbulenceTexture(p: TurbulenceParams, region: number[], res: nu
         v = rx1 * gG[b11] + ry1 * gG[b11 + 1];
         n = a + sy * (u + sx * (v - u) - a);
         sG += (fractal ? n : Math.abs(n)) / ratio;
-        // A
         u = rx0 * gA[b00] + ry0 * gA[b00 + 1];
         v = rx1 * gA[b10] + ry0 * gA[b10 + 1];
         a = u + sx * (v - u);
@@ -211,6 +218,38 @@ export function turbulenceTexture(p: TurbulenceParams, region: number[], res: nu
       data[k + 2] = toByte(sA, fractal);
       data[k + 3] = 255;
     }
+  }
+}
+
+/**
+ * RGBA bytes over `region` (user units, [x, y, w, h]) at `res` texels per unit,
+ * sampled at texel centres. Red and green are the noise's colour channels
+ * (unpremultiplied). Blue carries the noise alpha. Alpha is opaque.
+ */
+export function turbulenceTexture(p: TurbulenceParams, region: number[], res: number) {
+  const w = Math.max(1, Math.round(region[2] * res));
+  const h = Math.max(1, Math.round(region[3] * res));
+  const data = new Uint8Array(w * h * 4);
+  fillTurbulenceRows(p, region, res, data, w, h, 0, h);
+  return { data, w, h };
+}
+
+/** Same texture, built in short slices so the landing long task can yield. */
+export async function turbulenceTextureAsync(p: TurbulenceParams, region: number[], res: number, budget = 8) {
+  const w = Math.max(1, Math.round(region[2] * res));
+  const h = Math.max(1, Math.round(region[3] * res));
+  const data = new Uint8Array(w * h * 4);
+  let y = 0;
+  while (y < h) {
+    const started = performance.now();
+    let y1 = y;
+    while (y1 < h && performance.now() - started < budget) {
+      const next = Math.min(h, y1 + 4);
+      fillTurbulenceRows(p, region, res, data, w, h, y1, next);
+      y1 = next;
+    }
+    y = y1;
+    if (y < h) await yieldToMain();
   }
   return { data, w, h };
 }
