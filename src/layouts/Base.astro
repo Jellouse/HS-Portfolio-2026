@@ -55,8 +55,27 @@ const site = await getSite();
         }
         return null;
       }
+      // arrow-route-swap (src/scripts/arrow-route.ts): the arrow page already
+      // flew its controls live, and both pages show the same screen, so the
+      // document swap skips its view transition.
+      function routeSwap(clear) {
+        try {
+          var on = sessionStorage.getItem('arrow-route-swap');
+          if (clear) sessionStorage.removeItem('arrow-route-swap');
+          return !!on;
+        } catch (err) {
+          return false;
+        }
+      }
+      addEventListener('pageshow', function () {
+        routeSwap(true);
+      });
       addEventListener('pagereveal', function (e) {
         var vt = e.viewTransition;
+        if (routeSwap(true)) {
+          if (vt) vt.skipTransition();
+          return;
+        }
         if (!vt || !vt.types) return;
         if (document.querySelector('.shop-detail-mark')) {
           vt.types.add('ib-shrink');
@@ -85,6 +104,10 @@ const site = await getSite();
       });
       addEventListener('pageswap', function (e) {
         var vt = e.viewTransition;
+        if (vt && routeSwap(false)) {
+          vt.skipTransition();
+          return;
+        }
         if (!vt || !vt.types) return;
         var dest = e.activation && e.activation.entry && e.activation.entry.url;
         var toWork = dest && /\/work\/[^/]+\/?$/.test(dest.pathname);
