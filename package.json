@@ -37,6 +37,7 @@
     "test:arrow-motion": "node tests/arrow-nav-motion.spec.mjs",
     "test:arrow-hold": "node tests/arrow-nav-hold.spec.mjs",
     "test:arrow-viewport": "node tests/arrow-nav-viewport.spec.mjs",
+    "test:service-steps": "node tests/service-steps-layout.spec.mjs",
     "test:viewport-layout": "node tests/viewport-layout.spec.mjs",
     "test:services-face": "node tests/services-hub-face.spec.mjs",
     "test:chrome-vt": "node tests/chrome-vt.spec.mjs",
