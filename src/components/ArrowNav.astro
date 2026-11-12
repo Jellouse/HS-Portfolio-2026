@@ -10,6 +10,30 @@ const { tree } = Astro.props;
 const first = tree.nodes.find((node) => node.kind === 'gallery')?.slides[0];
 ---
 
+<script is:inline>
+  (function () {
+    var vv = window.visualViewport;
+    if (!vv) return;
+    var probe = document.createElement('div');
+    probe.setAttribute('style', 'position:absolute;top:0;left:0;width:1px;height:100svh;visibility:hidden;pointer-events:none');
+    document.documentElement.appendChild(probe);
+    var svh = Math.round(probe.getBoundingClientRect().height) || Math.round(window.innerHeight);
+    if (probe.parentNode) probe.parentNode.removeChild(probe);
+    var top = Math.max(0, Math.round(vv.offsetTop));
+    var left = Math.max(0, Math.round(vv.offsetLeft));
+    var width = Math.max(1, Math.round(vv.width));
+    var height = Math.max(1, Math.round(vv.height));
+    var layoutW = document.documentElement.clientWidth || window.innerWidth;
+    if (top <= 0 && left <= 0 && height >= svh - 1 && width >= layoutW - 1) return;
+    var root = document.documentElement;
+    root.style.setProperty('--app-vt', top + 'px');
+    root.style.setProperty('--app-vl', left + 'px');
+    root.style.setProperty('--app-vw', width + 'px');
+    root.style.setProperty('--app-vh', (height < svh ? height : svh) + 'px');
+    root.setAttribute('data-app-inset', '');
+  })();
+</script>
+
 <div class="arrow-nav is-intro" data-arrow-nav data-no-letter data-no-reveal data-kind="landing" data-screen="landing">
   <div class="arrow-copy" data-nav-copy>
     <h1 class="arrow-title" data-nav-title data-nav-line>{tree.landing.title}</h1>
