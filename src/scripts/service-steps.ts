@@ -1,4 +1,7 @@
+import { bindAppViewport } from '../lib/viewport-layout';
 import { playSnick } from './ui-sound';
+
+bindAppViewport();
 
 const typing = (event: Event) =>
   event.target instanceof Element && !!event.target.closest('input, textarea, [contenteditable="true"]');

@@ -3,6 +3,7 @@ import { mountFaceGL, type FaceGL, type FaceMount } from './arrow-face-gl';
 import { introDebug, introDebugOn } from './intro-debug';
 import { playSnick } from './ui-sound';
 import { bindAppViewport, syncAppViewport } from '../lib/viewport-layout';
+import { isTraverse, leaveForRoute, takeRoute } from './arrow-route';
 import type { ArrowDir, ArrowTree } from '../lib/arrow-nav';
 
 type Dir = ArrowDir | 'up';
@@ -297,6 +298,19 @@ export function initArrowNav(root: ParentNode = document) {
         });
       })
       .catch(() => {});
+  };
+
+  // A route screen one press away is fetched ahead, so its page is ready
+  // when the controls land.
+  const warmRoutes = (id: string) => {
+    tree.nodes.forEach((node) => {
+      if (node.parent !== id || !node.href || warmedPages.has(node.href)) return;
+      warmedPages.add(node.href);
+      const link = document.createElement('link');
+      link.rel = 'prefetch';
+      link.href = node.href;
+      document.head.append(link);
+    });
   };
 
   const warmGallery = (slides: { src: string; poster: string; kind: string; href?: string }[], index: number) => {
@@ -983,6 +997,7 @@ export function initArrowNav(root: ParentNode = document) {
     const wasLanding = screenId === 'landing';
     screenId = id;
     paintChrome(id);
+    warmRoutes(id);
     if (wasLanding !== (id === 'landing')) fadeHint(id === 'landing');
     window.scrollTo(0, 0);
     const enteringGallery = !wasGallery && nav.dataset.kind === 'gallery';
@@ -999,11 +1014,22 @@ export function initArrowNav(root: ParentNode = document) {
     const nowGallery = nav.dataset.kind === 'gallery';
     if (!reduce && nowGallery !== wasGallery) growGallery(nowGallery, fromScale);
 
+    // A route screen (a node with an href) is its own page. The controls fly
+    // to it here like any other screen, then the browser opens the page, which
+    // shows the same screen. Its history entry is that page, not a hash.
+    const route = nodes.get(id)?.href;
+    const landed = () => {
+      if (gen !== generation || !route) return;
+      leaveForRoute(id, route);
+    };
+    if (route) push = false;
+
     if (reduce) {
       flights().forEach(clearPin);
       placeGalleryArrows();
       startAutoplay();
       if (push) history.pushState({ arrow: id }, '', id === 'landing' ? location.pathname + location.search : `#${id}`);
+      landed();
       return;
     }
 
@@ -1155,6 +1181,7 @@ export function initArrowNav(root: ParentNode = document) {
       if (nav.dataset.kind === 'gallery') faceEl().hidden = true;
       placeGalleryArrows();
       startAutoplay();
+      landed();
     });
 
     if (push) history.pushState({ arrow: id }, '', id === 'landing' ? location.pathname + location.search : `#${id}`);
@@ -1182,20 +1209,18 @@ export function initArrowNav(root: ParentNode = document) {
       travel(node.parent === 'landing' ? 'landing' : node.parent, true);
       return;
     }
-    if (screenId === 'about' && dir === 'left') {
-      const link = document.createElement('a');
-      link.href = '/services/';
-      document.body.append(link);
-      link.click();
-      link.remove();
-      return;
-    }
     if (screenId === 'about' && dir === 'right') {
       if (pressFrom === 'key') nav.querySelector<HTMLElement>('[data-dir="right"]')?.click();
       return;
     }
     const next = child(screenId, dir);
-    if (next) travel(next.id, true);
+    if (!next) return;
+    // A route leaf (a services pill on the services screen) is a plain link.
+    if (next.href && !tree.nodes.some((node) => node.parent === next.id)) {
+      location.assign(next.href);
+      return;
+    }
+    travel(next.id, true);
   };
 
   let holdTimer = 0;
@@ -1444,17 +1469,31 @@ export function initArrowNav(root: ParentNode = document) {
     const scaleEl = nav.querySelector<HTMLElement>('[data-nav-scale]');
     const blob = nav.querySelector<HTMLElement>('.arrow-face-blob');
     scaleEl?.getAnimations().forEach((anim) => anim.cancel());
-    if (scaleEl) {
-      scaleEl.style.transform = '';
-      scaleEl.style.width = '';
-      scaleEl.style.height = '';
-    }
-    if (blob) {
-      blob.style.width = '';
-      blob.style.height = '';
+    // Leave the intro from the size the face is drawn at now. Under the GPU
+    // face on a phone the SVG blob sat hidden at the intro size, and without
+    // this it eased down from there once it showed: the face pulsed up and
+    // back down just after the intro. Pin both to the drawn size, drop
+    // is-intro, then let go, so the face only moves if it was not yet at rest.
+    const parts = [scaleEl, blob].filter((el): el is HTMLElement => !!el);
+    const drawn = scaleEl ? getComputedStyle(scaleEl) : null;
+    if (scaleEl && drawn) {
+      const { width, height, transform } = drawn;
+      parts.forEach((el) => {
+        el.style.transition = 'none';
+        el.style.width = width;
+        el.style.height = height;
+      });
+      scaleEl.style.transform = transform;
     }
     settleFace();
     nav.classList.remove('is-intro');
+    parts.forEach((el) => el.getBoundingClientRect());
+    parts.forEach((el) => {
+      el.style.transition = '';
+      el.style.width = '';
+      el.style.height = '';
+    });
+    if (scaleEl) scaleEl.style.transform = '';
   }
 
   const settleFace = () => {
@@ -1594,14 +1633,20 @@ export function initArrowNav(root: ParentNode = document) {
   };
 
   const hash = location.hash.replace('#', '');
-  const opened = hash && nodes.has(hash) ? hash : 'landing';
+  const opened = hash && nodes.has(hash) && !nodes.get(hash)?.href ? hash : 'landing';
   history.replaceState(
     { arrow: opened },
     '',
     opened === 'landing' ? location.pathname + location.search : `${location.pathname}${location.search}#${opened}`,
   );
-  screenId = opened;
-  paintChrome(opened);
+  // Back from a route page: open on its screen, which looks like the page
+  // just left, then fly the controls home with travel().
+  const routed = takeRoute();
+  const returning = routed && opened !== 'landing' && nodes.get(routed)?.href && nodes.get(routed)?.parent === opened && isTraverse() ? routed : null;
+  screenId = returning ?? opened;
+  if (screenId !== 'landing') applyCopy(screenId);
+  paintChrome(screenId);
+  warmRoutes(screenId);
   if (opened !== 'landing' && nodes.get(opened)?.kind === 'gallery') showSlide(0, false);
   placeCopy();
   placeCaption();
@@ -1624,11 +1669,31 @@ export function initArrowNav(root: ParentNode = document) {
   else {
     introPlaying = false;
     introOn = false;
+    // Opened on a screen: the face starts at its resting size rather than
+    // easing down from the intro size.
+    const still = [...nav.querySelectorAll<HTMLElement>('.arrow-face-scale, .arrow-face-blob')];
+    still.forEach((el) => (el.style.transition = 'none'));
     nav.classList.remove('is-intro');
+    still.forEach((el) => el.getBoundingClientRect());
+    requestAnimationFrame(() => still.forEach((el) => (el.style.transition = '')));
     nav.classList.add('is-controls');
     settleFace();
     const hint = nav.querySelector<HTMLElement>('[data-nav-hint]');
     if (hint) hint.hidden = true;
   }
+  const flyHome = (to: string) => {
+    requestAnimationFrame(() => requestAnimationFrame(() => travel(to, false)));
+  };
+  if (returning) flyHome(opened);
+  // Back from a route page out of the back/forward cache: the page is still
+  // on the route screen it left from.
+  window.addEventListener('pageshow', (event) => {
+    if (!event.persisted) return;
+    takeRoute();
+    const node = screen();
+    if (!node?.href) return;
+    const state = history.state && history.state.arrow;
+    flyHome(typeof state === 'string' && nodes.has(state) && !nodes.get(state)?.href ? state : node.parent);
+  });
   document.fonts?.ready.then(() => fitProjectLink());
 }

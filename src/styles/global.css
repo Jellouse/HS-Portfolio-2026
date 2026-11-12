@@ -1638,18 +1638,34 @@ html:active-view-transition-type(hs-shrink)::view-transition-new(hs-mark) {
   animation: vt-in 300ms var(--ease-out-quad) both;
 }
 
-.arrow-nav[data-screen='about'] .arrow-face-scale,
-.services-hub .arrow-face-scale {
+/* Shared chrome view-transition names. A new screen opts in with
+   data-chrome-vt on its .arrow-nav root. The homepage about screen is
+   the in-page equivalent. Icon-mode L/R pills stay unnamed so they are
+   not morphed into the text pills. */
+[data-chrome-vt] .arrow-face-scale,
+.arrow-nav[data-screen='about'] .arrow-face-scale {
   view-transition-name: services-face;
 }
 
-.arrow-nav[data-screen='about'] .arrow-back,
-.services-hub .arrow-back {
+[data-chrome-vt] .arrow-back,
+.arrow-nav[data-screen='about'] .arrow-back {
   view-transition-name: services-back;
+}
+
+[data-chrome-vt] .arrow-pill[data-dir='left']:not([data-mode='icon']),
+.arrow-nav[data-screen='about'] .arrow-pill[data-dir='left'] {
+  view-transition-name: arrow-pill-left;
+}
+
+[data-chrome-vt] .arrow-pill[data-dir='right']:not([data-mode='icon']),
+.arrow-nav[data-screen='about'] .arrow-pill[data-dir='right'] {
+  view-transition-name: arrow-pill-right;
 }
 
 ::view-transition-group(services-face),
 ::view-transition-group(services-back),
+::view-transition-group(arrow-pill-left),
+::view-transition-group(arrow-pill-right),
 ::view-transition-group(work-frame),
 ::view-transition-group(work-back) {
   animation-duration: var(--dur-nav);
@@ -1681,22 +1697,84 @@ html:active-view-transition-type(hs-shrink)::view-transition-new(hs-mark) {
   animation: vt-in var(--dur-nav) linear both;
 }
 
-::view-transition-image-pair(work-back),
-::view-transition-image-pair(services-back) {
+::view-transition-image-pair(work-back) {
   background: var(--page-bg);
 }
 
-::view-transition-old(services-face),
-::view-transition-old(services-back),
+::view-transition-image-pair(services-back),
+::view-transition-image-pair(services-face) {
+  isolation: auto;
+  overflow: hidden;
+  background: transparent;
+  border-radius: 50%;
+}
+
+::view-transition-image-pair(arrow-pill-left),
+::view-transition-image-pair(arrow-pill-right) {
+  isolation: auto;
+  overflow: hidden;
+  background: transparent;
+  border-radius: var(--radius);
+}
+
 ::view-transition-old(work-back) {
   display: none;
 }
 
+::view-transition-old(services-face),
 ::view-transition-new(services-face),
+::view-transition-old(services-back),
+::view-transition-new(services-back),
+::view-transition-old(arrow-pill-left),
+::view-transition-new(arrow-pill-left),
+::view-transition-old(arrow-pill-right),
+::view-transition-new(arrow-pill-right) {
+  mix-blend-mode: normal;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+}
+
+/* :only-child does not match these snapshot pseudos, so it cannot
+   turn off the UA fade or plus-lighter blend. Set animation explicitly. */
+::view-transition-old(services-back),
 ::view-transition-new(services-back) {
   animation: none;
-  mix-blend-mode: normal;
-  height: 100%;
+}
+
+::view-transition-old(services-face) {
+  animation: vt-out var(--dur-nav) var(--ease-nav) both;
+}
+
+::view-transition-new(services-face) {
+  animation: vt-in var(--dur-nav) var(--ease-nav) both;
+}
+
+html:active-view-transition-type(chrome-shrink)::view-transition-old(services-face),
+html:active-view-transition-type(chrome-shrink)::view-transition-new(services-face),
+html:active-view-transition-type(chrome-grow)::view-transition-old(services-face),
+html:active-view-transition-type(chrome-grow)::view-transition-new(services-face) {
+  animation: none;
+}
+
+html:active-view-transition-type(chrome-shrink)::view-transition-old(services-face),
+html:active-view-transition-type(chrome-grow)::view-transition-new(services-face) {
+  opacity: 1;
+}
+
+html:active-view-transition-type(chrome-shrink)::view-transition-new(services-face),
+html:active-view-transition-type(chrome-grow)::view-transition-old(services-face) {
+  opacity: 0;
+}
+
+::view-transition-old(arrow-pill-left),
+::view-transition-old(arrow-pill-right) {
+  animation: vt-out var(--dur-nav) var(--ease-nav) both;
+}
+
+::view-transition-new(arrow-pill-left),
+::view-transition-new(arrow-pill-right) {
+  animation: vt-in var(--dur-nav) var(--ease-nav) both;
 }
 
 ::view-transition-new(work-back) {
@@ -3456,6 +3534,24 @@ html[data-app-inset] .arrow-nav:not([data-screen='about']) {
   height: var(--app-vh);
 }
 
+html[data-app-inset] .arrow-nav[data-screen='about'] {
+  position: fixed;
+  top: var(--app-vt);
+  left: var(--app-vl);
+  width: var(--app-vw);
+  height: var(--app-vh);
+  min-height: 0;
+  overflow: auto;
+}
+
+html[data-app-inset] body:has(.arrow-nav[data-screen='about']) {
+  overflow: hidden;
+}
+
+html[data-app-inset] body:has(.arrow-nav[data-screen='about']) main#content {
+  min-height: 0;
+}
+
 html[data-sky-ink='white'] body:has([data-sky]) .arrow-nav {
   --arrow-fill: rgb(255 255 255 / 10%);
 }
@@ -3555,11 +3651,15 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
 
 .arrow-nav:not(.is-intro) .arrow-face-scale,
 .arrow-nav:not(.is-intro) .arrow-face-blob {
-  transition: transform var(--dur-nav) var(--ease-nav);
+  transition:
+    transform var(--dur-nav) var(--ease-nav),
+    width var(--dur-nav) var(--ease-nav),
+    height var(--dur-nav) var(--ease-nav);
 }
 
 .arrow-nav[data-screen='about'] .arrow-face-scale {
-  transform: scale(calc(var(--arrow-about-face) / var(--arrow-face)));
+  width: var(--arrow-about-face);
+  height: var(--arrow-about-face);
 }
 
 .arrow-nav[data-screen='about'] .arrow-face-blob {
@@ -3635,8 +3735,8 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
   position: relative;
   z-index: 1;
   display: block;
-  width: var(--arrow-face);
-  height: var(--arrow-face);
+  width: 100%;
+  height: 100%;
   color: var(--red);
   overflow: hidden;
 }
@@ -4174,6 +4274,8 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
 
   .arrow-nav[data-screen='about'] .arrow-face-scale,
   .arrow-nav[data-screen='about'] .arrow-face-blob {
+    width: var(--arrow-face);
+    height: var(--arrow-face);
     transform: none;
   }
 
@@ -4269,7 +4371,7 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
   left: 50%;
   top: 50%;
   z-index: 2;
-  width: min(var(--content-width), calc(100% - 2 * var(--arrow-control) - 2 * var(--space-lg)));
+  width: min(var(--content-width), calc(100% - 2 * var(--arrow-control) - 2 * var(--margin) - 2 * var(--space-2xs)));
   max-height: calc(100svh - 2 * var(--arrow-control) - 2 * var(--space-lg));
   overflow: auto;
   transform: translate(-50%, -50%);
@@ -4364,6 +4466,13 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
   background: var(--arrow-fill);
   color: var(--ink);
   transform: translateX(-50%);
+}
+
+@media (max-width: 759px) {
+  .service-step-stage {
+    width: calc(100% - 2 * var(--arrow-control) - 2 * var(--margin) - 2 * var(--space-2xs));
+    max-height: calc(var(--app-vh) - 2 * var(--arrow-control) - 2 * var(--space-sm));
+  }
 }
 
 @media (min-width: 760px) {
