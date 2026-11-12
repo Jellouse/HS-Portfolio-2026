@@ -1638,19 +1638,34 @@ html:active-view-transition-type(hs-shrink)::view-transition-new(hs-mark) {
   animation: vt-in 300ms var(--ease-out-quad) both;
 }
 
-.arrow-nav[data-screen='about'] .arrow-face-scale,
-.services-hub .arrow-face-scale {
+/* Shared chrome view-transition names. A new screen opts in with
+   data-chrome-vt on its .arrow-nav root. The homepage about screen is
+   the in-page equivalent. Icon-mode L/R pills stay unnamed so they are
+   not morphed into the text pills. */
+[data-chrome-vt] .arrow-face-scale,
+.arrow-nav[data-screen='about'] .arrow-face-scale {
   view-transition-name: services-face;
 }
 
-.arrow-nav[data-screen='about'] .arrow-back,
-.services-hub .arrow-back,
-.service-steps .arrow-back {
+[data-chrome-vt] .arrow-back,
+.arrow-nav[data-screen='about'] .arrow-back {
   view-transition-name: services-back;
+}
+
+[data-chrome-vt] .arrow-pill[data-dir='left']:not([data-mode='icon']),
+.arrow-nav[data-screen='about'] .arrow-pill[data-dir='left'] {
+  view-transition-name: arrow-pill-left;
+}
+
+[data-chrome-vt] .arrow-pill[data-dir='right']:not([data-mode='icon']),
+.arrow-nav[data-screen='about'] .arrow-pill[data-dir='right'] {
+  view-transition-name: arrow-pill-right;
 }
 
 ::view-transition-group(services-face),
 ::view-transition-group(services-back),
+::view-transition-group(arrow-pill-left),
+::view-transition-group(arrow-pill-right),
 ::view-transition-group(work-frame),
 ::view-transition-group(work-back) {
   animation-duration: var(--dur-nav);
@@ -1694,6 +1709,14 @@ html:active-view-transition-type(hs-shrink)::view-transition-new(hs-mark) {
   border-radius: 50%;
 }
 
+::view-transition-image-pair(arrow-pill-left),
+::view-transition-image-pair(arrow-pill-right) {
+  isolation: auto;
+  overflow: hidden;
+  background: transparent;
+  border-radius: var(--radius);
+}
+
 ::view-transition-old(work-back) {
   display: none;
 }
@@ -1701,7 +1724,11 @@ html:active-view-transition-type(hs-shrink)::view-transition-new(hs-mark) {
 ::view-transition-old(services-face),
 ::view-transition-new(services-face),
 ::view-transition-old(services-back),
-::view-transition-new(services-back) {
+::view-transition-new(services-back),
+::view-transition-old(arrow-pill-left),
+::view-transition-new(arrow-pill-left),
+::view-transition-old(arrow-pill-right),
+::view-transition-new(arrow-pill-right) {
   mix-blend-mode: normal;
   width: 100%;
   height: 100%;
@@ -1711,17 +1738,25 @@ html:active-view-transition-type(hs-shrink)::view-transition-new(hs-mark) {
 ::view-transition-old(services-face):not(:only-child),
 ::view-transition-new(services-face):not(:only-child),
 ::view-transition-old(services-back):not(:only-child),
-::view-transition-new(services-back):not(:only-child) {
+::view-transition-new(services-back):not(:only-child),
+::view-transition-old(arrow-pill-left):not(:only-child),
+::view-transition-new(arrow-pill-left):not(:only-child),
+::view-transition-old(arrow-pill-right):not(:only-child),
+::view-transition-new(arrow-pill-right):not(:only-child) {
   animation: none;
 }
 
 ::view-transition-old(services-face):only-child,
-::view-transition-old(services-back):only-child {
+::view-transition-old(services-back):only-child,
+::view-transition-old(arrow-pill-left):only-child,
+::view-transition-old(arrow-pill-right):only-child {
   animation: vt-out var(--dur-nav) var(--ease-nav) both;
 }
 
 ::view-transition-new(services-face):only-child,
-::view-transition-new(services-back):only-child {
+::view-transition-new(services-back):only-child,
+::view-transition-new(arrow-pill-left):only-child,
+::view-transition-new(arrow-pill-right):only-child {
   animation: vt-in var(--dur-nav) var(--ease-nav) both;
 }
 
