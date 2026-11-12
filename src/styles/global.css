@@ -1686,13 +1686,24 @@ html:active-view-transition-type(hs-shrink)::view-transition-new(hs-mark) {
   background: var(--page-bg);
 }
 
-::view-transition-old(services-face),
 ::view-transition-old(services-back),
 ::view-transition-old(work-back) {
   display: none;
 }
 
-::view-transition-new(services-face),
+::view-transition-image-pair(services-face) {
+  isolation: auto;
+}
+
+::view-transition-old(services-face),
+::view-transition-new(services-face) {
+  animation: none;
+  mix-blend-mode: normal;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+}
+
 ::view-transition-new(services-back) {
   animation: none;
   mix-blend-mode: normal;
@@ -3555,11 +3566,15 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
 
 .arrow-nav:not(.is-intro) .arrow-face-scale,
 .arrow-nav:not(.is-intro) .arrow-face-blob {
-  transition: transform var(--dur-nav) var(--ease-nav);
+  transition:
+    transform var(--dur-nav) var(--ease-nav),
+    width var(--dur-nav) var(--ease-nav),
+    height var(--dur-nav) var(--ease-nav);
 }
 
 .arrow-nav[data-screen='about'] .arrow-face-scale {
-  transform: scale(calc(var(--arrow-about-face) / var(--arrow-face)));
+  width: var(--arrow-about-face);
+  height: var(--arrow-about-face);
 }
 
 .arrow-nav[data-screen='about'] .arrow-face-blob {
@@ -3635,8 +3650,8 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
   position: relative;
   z-index: 1;
   display: block;
-  width: var(--arrow-face);
-  height: var(--arrow-face);
+  width: 100%;
+  height: 100%;
   color: var(--red);
   overflow: hidden;
 }
@@ -4174,6 +4189,8 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
 
   .arrow-nav[data-screen='about'] .arrow-face-scale,
   .arrow-nav[data-screen='about'] .arrow-face-blob {
+    width: var(--arrow-face);
+    height: var(--arrow-face);
     transform: none;
   }
 
