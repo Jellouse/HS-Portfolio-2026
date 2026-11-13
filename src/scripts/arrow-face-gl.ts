@@ -65,6 +65,7 @@ const FIELD_SIGMA = 6;
  *  largest intro scale, so the grain stays as fine as the SVG filter. */
 const NOISE_RES = 2;
 const NOISE_RES_MAX = 8;
+const NOISE_MAX_SIDE = 2048;
 const MASK_PAD = 2;
 
 export type FaceFrame = {
@@ -184,7 +185,11 @@ export async function mountFaceGL(svg: SVGSVGElement, host: HTMLElement, maxW: n
   const phone = typeof matchMedia === 'function' && matchMedia('(max-width: 759px)').matches;
   const dprCap = Math.min(native, phone ? 3 : 2);
   const unitGuess = Math.max(maxW / vb.width, maxH / vb.height) * dprCap;
-  const noiseRes = Math.max(NOISE_RES, Math.min(NOISE_RES_MAX, Math.round(unitGuess / 2)));
+  // Keep the noise texture inside what every GPU takes (and a bounded CPU
+  // build): no side longer than NOISE_MAX_SIDE or MAX_TEXTURE_SIZE.
+  const noiseSide = Math.min(NOISE_MAX_SIDE, gl.getParameter(gl.MAX_TEXTURE_SIZE) as number);
+  const noiseFit = Math.max(1, Math.floor(noiseSide / Math.max(nreg[2], nreg[3])));
+  const noiseRes = Math.min(noiseFit, Math.max(NOISE_RES, Math.min(NOISE_RES_MAX, Math.round(unitGuess / 2))));
   const noise = await turbulenceTextureAsync(turbulenceParams(turb), nreg, noiseRes);
   if (gl.isContextLost()) return fail('context-lost');
 
@@ -344,6 +349,7 @@ export async function mountFaceGL(svg: SVGSVGElement, host: HTMLElement, maxW: n
         gl.scissor(prevClear[0], prevClear[1], prevClear[2], prevClear[3]);
         gl.clearColor(0, 0, 0, 0);
         gl.clear(gl.COLOR_BUFFER_BIT);
+        gl.disable(gl.SCISSOR_TEST);
         prevClear = null;
       }
       return;
@@ -362,6 +368,11 @@ export async function mountFaceGL(svg: SVGSVGElement, host: HTMLElement, maxW: n
     gl.scissor(clear[0], clear[1], clear[2], clear[3]);
     gl.clearColor(0, 0, 0, 0);
     gl.clear(gl.COLOR_BUFFER_BIT);
+    // The scissor is in canvas pixels. Left on, it would also clip the field
+    // passes below, which draw from (0, 0) into a smaller target: the field's
+    // left and bottom edge kept stale texels (a hard vertical cut), and once
+    // x0 passed the field width nothing was drawn and the face vanished.
+    gl.disable(gl.SCISSOR_TEST);
     prevClear = [x0, clearY, roi[2], roi[3]];
 
     // The blur is band-limited, so the field it blurs only needs FIELD_SIGMA
