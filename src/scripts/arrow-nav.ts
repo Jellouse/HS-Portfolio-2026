@@ -1000,11 +1000,101 @@ export function initArrowNav(root: ParentNode = document) {
     });
   };
 
+  let holdTimer = 0;
+  let flipping = false;
+  let holdPointer = 0;
+  let holdTarget: HTMLElement | null = null;
+  // Wheel delta accumulates into slide steps. Trackpad inertia keeps sending
+  // shrinking deltas, so the flip rate slows with the OS scroll, not a fake ease.
+  const SCROLL_SLIDE_PX = 80;
+  const SCROLL_IDLE_MS = 480;
+  const SCROLL_MAX_STEPS = 8;
+  let scrollCarry = 0;
+  let scrollIdle = 0;
+
+  const canFlip = (dir: Dir) => screen()?.kind === 'gallery' && (dir === 'left' || dir === 'right');
+
+  const clearScrollFlip = (resume: boolean) => {
+    scrollCarry = 0;
+    if (scrollIdle) window.clearTimeout(scrollIdle);
+    scrollIdle = 0;
+    if (resume) startAutoplay();
+  };
+
+  const releasePointer = () => {
+    if (holdTarget && holdPointer) {
+      try {
+        holdTarget.releasePointerCapture(holdPointer);
+      } catch {
+        /* already released */
+      }
+    }
+    holdPointer = 0;
+    holdTarget = null;
+  };
+
+  const stopHold = (resume: boolean) => {
+    if (holdTimer) window.clearTimeout(holdTimer);
+    holdTimer = 0;
+    flipping = false;
+    if (resume) startAutoplay();
+  };
+
+  const abandonHold = () => {
+    if (!pressFrom) return;
+    stopHold(false);
+    releasePointer();
+    setPressed(null, null);
+  };
+
+  const startHold = (dir: Dir) => {
+    if (!canFlip(dir)) return false;
+    clearScrollFlip(false);
+    stopAutoplay();
+    const step = () => {
+      showSlide(slide + (dir === 'right' ? 1 : -1));
+      playSnick();
+    };
+    step();
+    // First repeat after 480ms, then each wait is 78% of the last, down to
+    // 80ms. That is the hold-to-speed-up on the gallery arrows. Capping
+    // every repeat to moveMs() (500ms) made them all the same speed.
+    const holdFast = 80;
+    let wait = 480;
+    const tick = () => {
+      if (!canFlip(dir)) {
+        stopHold(false);
+        return;
+      }
+      step();
+      wait = Math.max(holdFast, Math.round(wait * 0.78));
+      holdTimer = window.setTimeout(tick, wait);
+    };
+    flipping = true;
+    holdTimer = window.setTimeout(tick, wait);
+    return true;
+  };
+
+  const wheelPixels = (event: WheelEvent) => {
+    let dx = event.deltaX;
+    let dy = event.deltaY;
+    if (event.deltaMode === 1) {
+      dx *= 16;
+      dy *= 16;
+    } else if (event.deltaMode === 2) {
+      dx *= window.innerWidth;
+      dy *= window.innerHeight;
+    }
+    return Math.abs(dy) >= Math.abs(dx) ? dy : dx;
+  };
+
   const travel = (id: string, push: boolean) => {
     if (introOn || id === screenId || (id !== 'landing' && !nodes.has(id))) return;
     if (introPlaying) endIntro();
     if (full) dropFull();
     const gen = ++generation;
+    clearScrollFlip(false);
+    stopHold(false);
     stopAutoplay();
     const ease = cssEase('--ease-nav');
     const slot = nav.querySelector<HTMLElement>('.arrow-slot')!;
@@ -1285,64 +1375,29 @@ export function initArrowNav(root: ParentNode = document) {
     travel(next.id, true);
   };
 
-  let holdTimer = 0;
-  let flipping = false;
-  let holdPointer = 0;
-  let holdTarget: HTMLElement | null = null;
-
-  const canFlip = (dir: Dir) => screen()?.kind === 'gallery' && (dir === 'left' || dir === 'right');
-
-  const releasePointer = () => {
-    if (holdTarget && holdPointer) {
-      try {
-        holdTarget.releasePointerCapture(holdPointer);
-      } catch {
-        /* already released */
-      }
-    }
-    holdPointer = 0;
-    holdTarget = null;
-  };
-
-  const stopHold = (resume: boolean) => {
-    if (holdTimer) window.clearTimeout(holdTimer);
-    holdTimer = 0;
-    flipping = false;
-    if (resume) startAutoplay();
-  };
-
-  const abandonHold = () => {
-    if (!pressFrom) return;
-    stopHold(false);
-    releasePointer();
-    setPressed(null, null);
-  };
-
-  const startHold = (dir: Dir) => {
-    if (!canFlip(dir)) return false;
+  const onGalleryWheel = (event: WheelEvent) => {
+    if (introOn || pressFrom) return;
+    if (event.ctrlKey || event.metaKey) return;
+    if (typingTarget(event)) return;
+    if (document.documentElement.classList.contains('is-contact-open')) return;
+    const node = screen();
+    if (!node || node.kind !== 'gallery' || node.slides.length < 2) return;
+    const delta = wheelPixels(event);
+    if (!delta) return;
+    event.preventDefault();
     stopAutoplay();
-    const step = () => {
-      showSlide(slide + (dir === 'right' ? 1 : -1));
+    if (scrollIdle) window.clearTimeout(scrollIdle);
+    scrollIdle = window.setTimeout(() => clearScrollFlip(true), SCROLL_IDLE_MS);
+    if (scrollCarry && Math.sign(scrollCarry) !== Math.sign(delta)) scrollCarry = 0;
+    scrollCarry += delta;
+    let steps = 0;
+    while (Math.abs(scrollCarry) >= SCROLL_SLIDE_PX && steps < SCROLL_MAX_STEPS) {
+      const dir = scrollCarry > 0 ? 1 : -1;
+      scrollCarry -= dir * SCROLL_SLIDE_PX;
+      showSlide(slide + dir);
       playSnick();
-    };
-    step();
-    // First repeat after 480ms, then each wait is 78% of the last, down to
-    // 80ms. That is the hold-to-speed-up on the gallery arrows. Capping
-    // every repeat to moveMs() (500ms) made them all the same speed.
-    const holdFast = 80;
-    let wait = 480;
-    const tick = () => {
-      if (!canFlip(dir)) {
-        stopHold(false);
-        return;
-      }
-      step();
-      wait = Math.max(holdFast, Math.round(wait * 0.78));
-      holdTimer = window.setTimeout(tick, wait);
-    };
-    flipping = true;
-    holdTimer = window.setTimeout(tick, wait);
-    return true;
+      steps += 1;
+    }
   };
 
   const setPressed = (el: HTMLElement | null, from: 'key' | 'pointer' | null, key = '') => {
@@ -1412,6 +1467,8 @@ export function initArrowNav(root: ParentNode = document) {
     event.target instanceof Element && !!event.target.closest('input, textarea, [contenteditable="true"]');
 
   const backKey = (key: string) => key === 'Escape' || key === 'Backspace';
+
+  window.addEventListener('wheel', onGalleryWheel, { passive: false });
 
   galleryEl().addEventListener('click', () => {
     if (introOn || screen()?.kind !== 'gallery') return;
