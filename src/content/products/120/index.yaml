@@ -24,7 +24,7 @@ overview:
     src: /src/content/products/120/overview/right/src.webp
     alt: Type-120 aluminium vase
     outline: false
-    gallery: shop
+    gallery: none
 detail:
   description: >-
     A single aluminium extrusion profile with a textured, architectural surface.
@@ -34,23 +34,23 @@ detail:
     - src: /src/content/products/120/detail/images/0/src.jpg
       alt: Type-120 aluminium vase with a textured extrusion surface
       outline: false
-      gallery: shop
+      gallery: none
     - src: /src/content/products/120/detail/images/1/src.jpg
       alt: Type-120 aluminium vase, front view
       outline: true
-      gallery: shop
+      gallery: none
     - src: /src/content/products/120/detail/images/2/src.jpg
       alt: Thistle in the Type-120 vase
       outline: false
-      gallery: shop
+      gallery: none
     - src: /src/content/products/120/detail/images/3/src.jpg
       alt: Type-120 vase packshot
       outline: false
-      gallery: shop
+      gallery: none
     - src: /src/content/products/120/detail/images/4/src.png
       alt: Technical drawing of the Type-120 vase
       outline: true
-      gallery: shop
+      gallery: none
   sections: []
   wild: []
   info:

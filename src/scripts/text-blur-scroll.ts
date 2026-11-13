@@ -25,8 +25,13 @@ export function wordRevealProgress(word: HTMLElement, vh: number) {
   return wordRevealState(word, vh).progress;
 }
 
+const lastReveal = new WeakMap<HTMLElement, string>();
+
 export function applyWordReveal(word: HTMLElement, t: number, leaving = false) {
   const p = clamp(t);
+  const key = `${p.toFixed(3)}:${leaving ? 1 : 0}`;
+  if (lastReveal.get(word) === key) return;
+  lastReveal.set(word, key);
   const blur = BLUR_PX * (1 - p);
   const lift = LIFT_PX * (1 - p);
   word.style.setProperty('--reveal', p.toFixed(3));
@@ -36,6 +41,7 @@ export function applyWordReveal(word: HTMLElement, t: number, leaving = false) {
 }
 
 export function clearWordReveal(word: HTMLElement) {
+  lastReveal.delete(word);
   word.style.removeProperty('--reveal');
   word.style.opacity = '';
   word.style.filter = '';
@@ -54,6 +60,19 @@ function collectWords(root: ParentNode = document) {
 
 let bound = false;
 let raf = 0;
+let cachedWords: HTMLElement[] = [];
+
+function invalidateWords() {
+  cachedWords = [];
+}
+
+function words(root: ParentNode) {
+  if (root === document || root === document.documentElement) {
+    if (!cachedWords.length) cachedWords = collectWords(root);
+    return cachedWords;
+  }
+  return collectWords(root);
+}
 
 function schedulePaint() {
   if (raf) return;
@@ -66,10 +85,9 @@ function schedulePaint() {
 export function paintScrollWords(root: ParentNode = document) {
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   const vh = document.documentElement.clientHeight || window.innerHeight;
-  for (const word of collectWords(root)) {
-    const { progress, leaving } = wordRevealState(word, vh);
-    applyWordReveal(word, progress, leaving);
-  }
+  const items = words(root);
+  const states = items.map((word) => wordRevealState(word, vh));
+  items.forEach((word, i) => applyWordReveal(word, states[i].progress, states[i].leaving));
 }
 
 /** Run once layout has had a frame to settle (intro, fonts, media unhide). */
@@ -86,7 +104,7 @@ export function initScrollWordBlur() {
   }
   bound = true;
   addEventListener('scroll', schedulePaint, { passive: true });
-  addEventListener('resize', schedulePaint);
+  addEventListener('resize', () => { invalidateWords(); schedulePaint(); });
   addEventListener('load', schedulePaint);
   addEventListener('pageshow', schedulePaint);
   document.addEventListener('intro-layout', schedulePaint);
@@ -95,7 +113,10 @@ export function initScrollWordBlur() {
   visualViewport?.addEventListener('scroll', schedulePaint);
 
   const root = document.documentElement;
-  new MutationObserver(schedulePaint).observe(root, {
+  new MutationObserver(() => {
+    invalidateWords();
+    schedulePaint();
+  }).observe(root, {
     attributes: true,
     attributeFilter: ['class'],
   });

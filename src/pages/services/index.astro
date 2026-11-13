@@ -4,14 +4,11 @@ export const prerender = true;
 import { getCollection } from 'astro:content';
 import HeroBlob from '../../components/HeroBlob.astro';
 import Base from '../../layouts/Base.astro';
+import { serviceButtonLabel as buttonLabel } from '../../lib/arrow-nav';
 import { absoluteUrl } from '../../lib/content';
 
 const services = (await getCollection('services')).sort((a, b) => a.data.order - b.data.order);
 const [left, right] = services;
-const buttonLabel = (title: string) => {
-  const lower = title.toLowerCase();
-  return lower.charAt(0).toUpperCase() + lower.slice(1);
-};
 const pageUrl = absoluteUrl(Astro.site, '/services/');
 const description = 'Physical Build and Digital Build. Retail store design, Framer websites and 3D renders from Humansize.';
 ---
@@ -29,7 +26,7 @@ const description = 'Physical Build and Digital Build. Retail store design, Fram
     description,
   }}
 >
-  <div class="arrow-nav services-hub is-controls" data-services-hub data-kind="branch">
+  <div class="arrow-nav services-hub is-controls" data-services-hub data-kind="branch" data-chrome-vt>
     <h1 class="sr-only">Services</h1>
     <div class="arrow-stage">
       <a class="arrow-back" href="/" data-services-back aria-label="Back">
@@ -42,7 +39,7 @@ const description = 'Physical Build and Digital Build. Retail store design, Fram
         <div class="arrow-face">
           <div class="arrow-face-scale">
             <span class="arrow-face-plate" aria-hidden="true"></span>
-            <HeroBlob home={false} mark filterId="services-face-texture" />
+            <HeroBlob home={false} mark settled filterId="services-face-texture" />
           </div>
         </div>
         {left && (
@@ -57,8 +54,12 @@ const description = 'Physical Build and Digital Build. Retail store design, Fram
 </Base>
 
 <script>
+  import { bindAppViewport } from '../../lib/viewport-layout';
+  import { bindRouteReturn } from '../../scripts/arrow-route';
   import { playSnick } from '../../scripts/ui-sound';
 
+  bindAppViewport();
+  bindRouteReturn();
   const root = document.querySelector<HTMLElement>('[data-services-hub]');
   const back = root?.querySelector<HTMLAnchorElement>('[data-services-back]');
   if (root && back) {

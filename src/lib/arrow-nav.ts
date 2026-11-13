@@ -1,4 +1,4 @@
-import { getEntry, type CollectionEntry } from 'astro:content';
+import { getCollection, getEntry, type CollectionEntry } from 'astro:content';
 import { getProjects, getSite, renderInline } from './content';
 import { galleryCategoryValues } from './gallery-categories';
 import { imageHasAlpha } from './image-alpha';
@@ -33,6 +33,8 @@ export type ArrowNode = {
   kind: 'branch' | 'gallery' | 'placeholder';
   slides: ArrowSlide[];
   paragraphs: string[];
+  /** A screen that is its own page. The controls fly to it in place, then the browser opens it. */
+  href?: string;
 };
 
 export type ArrowTree = {
@@ -154,6 +156,39 @@ async function shopSlides(): Promise<ArrowSlide[]> {
   return slides;
 }
 
+/** The services hub button label: the title in sentence case. */
+export function serviceButtonLabel(title: string) {
+  const lower = title.toLowerCase();
+  return lower.charAt(0).toUpperCase() + lower.slice(1);
+}
+
+/**
+ * The services hub as arrow screens under about. Pressing Services on about
+ * runs the same in-page flight as every other button, onto a screen laid out
+ * like /services/, and then opens /services/.
+ */
+async function serviceNodes(): Promise<ArrowNode[]> {
+  const services = (await getCollection('services')).sort((a, b) => a.data.order - b.data.order);
+  const [left, right] = services;
+  const base = { title: '', body: '', kind: 'branch' as const, slides: [], paragraphs: [] };
+  const hub: ArrowNode = { ...base, id: 'services', parent: 'about', dir: 'left', label: 'Services', href: '/services/' };
+  const pills = ([['left', left], ['right', right]] as const).flatMap(([dir, entry]) =>
+    entry
+      ? [
+          {
+            ...base,
+            id: `services-${entry.id}`,
+            parent: 'services',
+            dir,
+            label: serviceButtonLabel(entry.data.title),
+            href: `/services/${entry.id}/`,
+          } satisfies ArrowNode,
+        ]
+      : [],
+  );
+  return [hub, ...pills];
+}
+
 export async function getArrowNav(): Promise<ArrowTree> {
   const entry = await getEntry('arrowNav', 'arrow-nav');
   if (!entry) throw new Error('Missing src/content/site/arrow-nav.yaml');
@@ -192,6 +227,6 @@ export async function getArrowNav(): Promise<ArrowTree> {
           slides,
         };
       }),
-    ),
+    ).then(async (list) => [...list, ...(await serviceNodes())]),
   };
 }

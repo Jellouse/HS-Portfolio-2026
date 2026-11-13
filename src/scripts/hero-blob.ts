@@ -1,7 +1,7 @@
 
 
 import { siteIntroSeen } from '../lib/site-intro';
-import { setHeroBlobSourceCut } from './hero-blob-cut';
+import { getHeroBlobSourceCut, setHeroBlobSourceCut } from './hero-blob-cut';
 import { heroIntroScrolling } from './hero-blob-gl';
 
 let blobIntroStarted = false;
@@ -196,7 +196,12 @@ export function initHeroBlob(root: ParentNode = document) {
 
     curX += (tgtX - curX) * ease;
     curY += (tgtY - curY) * ease;
-    if (!heroIntroScrolling()) paint();
+    if (!offset.isConnected || !svg.querySelector('g[filter]')) {
+      frame = 0;
+      return;
+    }
+    // growBlob owns the frames while the source is still cutting in.
+    if (!heroIntroScrolling() && getHeroBlobSourceCut() < 0) paint();
     frame = onScreen && !document.hidden ? requestAnimationFrame(tick) : 0;
   };
   let onScreen = true;
@@ -283,7 +288,7 @@ async function initTouchLoop(svg: SVGSVGElement) {
 
   const tick = (t: number) => {
     now = t;
-    if (!heroIntroScrolling()) draw();
+    if (!heroIntroScrolling() && getHeroBlobSourceCut() < 0) draw();
     frame = visible && !document.hidden ? requestAnimationFrame(tick) : 0;
   };
   const wake = () => {

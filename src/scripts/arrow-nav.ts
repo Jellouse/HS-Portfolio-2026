@@ -1,5 +1,9 @@
 import { initHeroBlob } from './hero-blob';
+import { mountFaceGL, type FaceGL, type FaceMount } from './arrow-face-gl';
+import { introDebug, introDebugOn } from './intro-debug';
 import { playSnick } from './ui-sound';
+import { bindAppViewport, syncAppViewport } from '../lib/viewport-layout';
+import { isTraverse, leaveForRoute, takeRoute } from './arrow-route';
 import type { ArrowDir, ArrowTree } from '../lib/arrow-nav';
 
 type Dir = ArrowDir | 'up';
@@ -13,6 +17,9 @@ const DISP_FROM = 100;
 const DISP_REST = 0;
 const BLUR_FROM = 2.2;
 const BLUR_REST = 0;
+/** The intro holds its first frame until two frames in a row drop at most one vsync. */
+const HOLD_CALM_MS = 34;
+const HOLD_MAX_MS = 400;
 
 const easeInOut = bezier(0.77, 0, 0.175, 1);
 
@@ -55,7 +62,9 @@ function cssMs(name: string) {
 export function initArrowNav(root: ParentNode = document) {
   const nav = root.querySelector<HTMLElement>('[data-arrow-nav]');
   if (!nav || nav.dataset.ready === '1') return;
+  introDebug.script();
   nav.dataset.ready = '1';
+  syncAppViewport();
 
   const raw = nav.querySelector<HTMLScriptElement>('[data-nav-tree]')?.textContent;
   if (!raw) return;
@@ -66,10 +75,33 @@ export function initArrowNav(root: ParentNode = document) {
   const moveMs = () => cssMs('--dur-nav');
   const gap = 8;
 
+  const visibleRect = () => {
+    const vv = window.visualViewport;
+    if (document.documentElement.hasAttribute('data-app-inset') && vv) {
+      return {
+        left: Math.round(vv.offsetLeft),
+        top: Math.round(vv.offsetTop),
+        width: Math.round(vv.width),
+        height: Math.round(vv.height),
+        right: Math.round(vv.offsetLeft + vv.width),
+        bottom: Math.round(vv.offsetTop + vv.height),
+      };
+    }
+    return {
+      left: 0,
+      top: 0,
+      width: window.innerWidth,
+      height: window.innerHeight,
+      right: window.innerWidth,
+      bottom: window.innerHeight,
+    };
+  };
+
   let screenId = 'landing';
   let generation = 0;
   let introOn = true;
   let introPlaying = true;
+  let faceGL: FaceGL | null = null;
   let pressed: HTMLElement | null = null;
   let pressFrom: 'key' | 'pointer' | null = null;
   let pressKey = '';
@@ -266,6 +298,19 @@ export function initArrowNav(root: ParentNode = document) {
         });
       })
       .catch(() => {});
+  };
+
+  // A route screen one press away is fetched ahead, so its page is ready
+  // when the controls land.
+  const warmRoutes = (id: string) => {
+    tree.nodes.forEach((node) => {
+      if (node.parent !== id || !node.href || warmedPages.has(node.href)) return;
+      warmedPages.add(node.href);
+      const link = document.createElement('link');
+      link.rel = 'prefetch';
+      link.href = node.href;
+      document.head.append(link);
+    });
   };
 
   const warmGallery = (slides: { src: string; poster: string; kind: string; href?: string }[], index: number) => {
@@ -475,22 +520,31 @@ export function initArrowNav(root: ParentNode = document) {
       const clip = nav.querySelector<HTMLVideoElement>('[data-nav-video]');
       let t = 0;
       let done = false;
-      if (
-        item?.kind === 'video' &&
-        clip &&
-        clip.getAttribute('src') === item.src &&
+      const sameClip = (() => {
+        if (!clip || item?.kind !== 'video' || clip.getAttribute('src') !== item.src || !clip.currentSrc) return false;
+        try {
+          return new URL(clip.currentSrc, location.href).pathname === new URL(item.src, location.href).pathname;
+        } catch {
+          return clip.currentSrc.includes(item.src);
+        }
+      })();
+      const playing =
+        sameClip &&
         Number.isFinite(clip.duration) &&
-        clip.duration > 0
-      ) {
+        clip.duration > 0 &&
+        clip.readyState >= 1 &&
+        !clip.paused &&
+        !clip.error;
+      if (playing && clip) {
         const nearEnd = clip.currentTime >= clip.duration - 0.05;
         if (videoTime > clip.duration * 0.5 && clip.currentTime < 0.2) done = true;
         done = done || (nearEnd && videoTime > 0);
         videoTime = clip.currentTime;
         t = Math.min(1, clip.currentTime / clip.duration);
-      } else if (item?.kind === 'video' && clip?.error) {
-        t = Math.min(1, (now - progressStart) / SLIDE_MS);
-        done = t >= 1;
-      } else if (item?.kind !== 'video') {
+      } else {
+        // Stills, blocked autoplay, or a reused video element still showing a
+        // previous clip's currentTime all use the still timer so the gallery
+        // cannot skip a frame later.
         t = Math.min(1, (now - progressStart) / SLIDE_MS);
         done = t >= 1;
       }
@@ -595,18 +649,19 @@ export function initArrowNav(root: ParentNode = document) {
       return;
     }
     const edges = nav.classList.contains('is-full');
+    const view = visibleRect();
     const box = edges
-      ? { left: 0, top: 0, right: window.innerWidth, bottom: window.innerHeight, width: window.innerWidth, height: window.innerHeight }
+      ? view
       : frame
         ?? (nav.classList.contains('is-cover')
           ? restingFrame()
           : nav.querySelector<HTMLElement>('[data-nav-gallery]')!.getBoundingClientRect());
     const size = controlSize();
     const pad = phone() ? 20 : 48;
-    const y = edges ? Math.round((window.innerHeight - size) / 2) : Math.round(box.top + box.height / 2 - size / 2);
+    const y = edges ? Math.round(view.top + (view.height - size) / 2) : Math.round(box.top + box.height / 2 - size / 2);
     const spots: [HTMLElement, number][] = [
-      [left, edges ? pad : Math.round(box.left / 2 - size / 2)],
-      [right, edges ? Math.round(window.innerWidth - pad - size) : Math.round(box.right + (window.innerWidth - box.right) / 2 - size / 2)],
+      [left, edges ? view.left + pad : Math.round(view.left + (box.left - view.left) / 2 - size / 2)],
+      [right, edges ? Math.round(view.right - pad - size) : Math.round(box.right + (view.right - box.right) / 2 - size / 2)],
     ];
     for (const [el, x] of spots) {
       el.style.position = 'fixed';
@@ -621,10 +676,10 @@ export function initArrowNav(root: ParentNode = document) {
     }
     const above = Math.round((nav.clientHeight - box.height) / 4);
     back.style.position = edges ? 'fixed' : 'absolute';
-    back.style.left = edges ? `${Math.round((window.innerWidth - size) / 2)}px` : `${Math.round(nav.clientWidth / 2 - size / 2)}px`;
+    back.style.left = edges ? `${Math.round(view.left + (view.width - size) / 2)}px` : `${Math.round(nav.clientWidth / 2 - size / 2)}px`;
     back.style.right = 'auto';
     back.style.bottom = 'auto';
-    back.style.top = edges ? `${pad}px` : `${Math.round(above - size / 2)}px`;
+    back.style.top = edges ? `${view.top + pad}px` : `${Math.round(above - size / 2)}px`;
     back.style.width = `${size}px`;
     back.style.height = `${size}px`;
     back.style.transform = 'none';
@@ -705,8 +760,9 @@ export function initArrowNav(root: ParentNode = document) {
     nav.classList.add('is-zoom');
     if (!open) nav.classList.remove('is-cover');
     const ease = cssEase('--ease-nav');
+    const view = visibleRect();
     const target = open
-      ? { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight, borderRadius: '0px' }
+      ? { left: view.left, top: view.top, width: view.width, height: view.height, borderRadius: '0px' }
       : { left: rest.left, top: rest.top, width: rest.width, height: rest.height, borderRadius: radius };
     const anim = gallery.animate(
       [
@@ -764,10 +820,13 @@ export function initArrowNav(root: ParentNode = document) {
     });
   };
 
+  // Holds a control where it rests while it flies, in its own parent's
+  // coordinates, so no fixed-position containing block is involved.
   const pinAt = (el: HTMLElement, rect: DOMRect) => {
-    el.style.position = 'fixed';
-    el.style.left = `${Math.round(rect.left)}px`;
-    el.style.top = `${Math.round(rect.top)}px`;
+    const parent = (el.offsetParent as HTMLElement | null)?.getBoundingClientRect() ?? { left: 0, top: 0 };
+    el.style.position = 'absolute';
+    el.style.left = `${Math.round(rect.left - parent.left)}px`;
+    el.style.top = `${Math.round(rect.top - parent.top)}px`;
     el.style.right = 'auto';
     el.style.bottom = 'auto';
     el.style.margin = '0';
@@ -793,9 +852,12 @@ export function initArrowNav(root: ParentNode = document) {
       return;
     }
     copy.style.transform = '';
+    const origin = document.documentElement.hasAttribute('data-app-inset')
+      ? nav.getBoundingClientRect().top
+      : 0;
     const faceTop = faceEl().getBoundingClientRect().top;
     const limit = back.hidden ? faceTop : back.getBoundingClientRect().top;
-    copy.style.top = `${Math.round(limit / 2)}px`;
+    copy.style.top = `${Math.round((limit - origin) / 2)}px`;
   };
 
   const placeCaption = () => {
@@ -898,7 +960,7 @@ export function initArrowNav(root: ParentNode = document) {
   };
 
   const dropFlights = () => {
-    nav.querySelectorAll('.arrow-clip').forEach((el) => el.remove());
+    nav.querySelectorAll('.arrow-flight').forEach((el) => el.remove());
     document.querySelectorAll('.arrow-copy-ghost').forEach((el) => el.remove());
     flights().forEach((el) => {
       el.getAnimations().forEach((anim) => anim.cancel());
@@ -940,6 +1002,8 @@ export function initArrowNav(root: ParentNode = document) {
 
   let holdTimer = 0;
   let flipping = false;
+  let holdPointer = 0;
+  let holdTarget: HTMLElement | null = null;
   // Wheel delta accumulates into slide steps. Trackpad inertia keeps sending
   // shrinking deltas, so the flip rate slows with the OS scroll, not a fake ease.
   const SCROLL_SLIDE_PX = 80;
@@ -957,11 +1021,30 @@ export function initArrowNav(root: ParentNode = document) {
     if (resume) startAutoplay();
   };
 
+  const releasePointer = () => {
+    if (holdTarget && holdPointer) {
+      try {
+        holdTarget.releasePointerCapture(holdPointer);
+      } catch {
+        /* already released */
+      }
+    }
+    holdPointer = 0;
+    holdTarget = null;
+  };
+
   const stopHold = (resume: boolean) => {
     if (holdTimer) window.clearTimeout(holdTimer);
     holdTimer = 0;
     flipping = false;
     if (resume) startAutoplay();
+  };
+
+  const abandonHold = () => {
+    if (!pressFrom) return;
+    stopHold(false);
+    releasePointer();
+    setPressed(null, null);
   };
 
   const startHold = (dir: Dir) => {
@@ -973,6 +1056,9 @@ export function initArrowNav(root: ParentNode = document) {
       playSnick();
     };
     step();
+    // First repeat after 480ms, then each wait is 78% of the last, down to
+    // 80ms. That is the hold-to-speed-up on the gallery arrows. Capping
+    // every repeat to moveMs() (500ms) made them all the same speed.
     const holdFast = 80;
     let wait = 480;
     const tick = () => {
@@ -1010,8 +1096,9 @@ export function initArrowNav(root: ParentNode = document) {
     clearScrollFlip(false);
     stopHold(false);
     stopAutoplay();
-    const hub = hubPoint();
     const ease = cssEase('--ease-nav');
+    const slot = nav.querySelector<HTMLElement>('.arrow-slot')!;
+    const slotBefore = slot.getBoundingClientRect();
     const wasGallery = nav.dataset.kind === 'gallery';
     let fromScale: number | null = null;
     if (galleryEl().getAnimations().length) {
@@ -1026,6 +1113,14 @@ export function initArrowNav(root: ParentNode = document) {
         const shape = getComputedStyle(el);
         const opacity = Number(shape.opacity);
         clone.classList.add('arrow-flight');
+        // A clone is never mistaken for the live control it copies.
+        clone.removeAttribute('data-nav-flight');
+        clone.removeAttribute('data-dir');
+        clone.dataset.ghostDir = el.dataset.dir || '';
+        clone.removeAttribute('aria-pressed');
+        clone.setAttribute('aria-hidden', 'true');
+        clone.tabIndex = -1;
+        clone.inert = true;
         clone.style.boxSizing = 'border-box';
         clone.style.padding = shape.padding;
         clone.style.borderRadius = shape.borderRadius;
@@ -1049,6 +1144,7 @@ export function initArrowNav(root: ParentNode = document) {
     const wasLanding = screenId === 'landing';
     screenId = id;
     paintChrome(id);
+    warmRoutes(id);
     if (wasLanding !== (id === 'landing')) fadeHint(id === 'landing');
     window.scrollTo(0, 0);
     const enteringGallery = !wasGallery && nav.dataset.kind === 'gallery';
@@ -1070,14 +1166,36 @@ export function initArrowNav(root: ParentNode = document) {
     const nowGallery = nav.dataset.kind === 'gallery';
     if (!reduce && nowGallery !== wasGallery) growGallery(nowGallery, fromScale);
 
+    // A route screen (a node with an href) is its own page. The controls fly
+    // to it here like any other screen, then the browser opens the page, which
+    // shows the same screen. Its history entry is that page, not a hash.
+    const route = nodes.get(id)?.href;
+    const landed = () => {
+      if (gen !== generation || !route) return;
+      leaveForRoute(id, route);
+    };
+    if (route) push = false;
+
     if (reduce) {
       flights().forEach(clearPin);
       placeGalleryArrows();
       startAutoplay();
       if (push) history.pushState({ arrow: id }, '', id === 'landing' ? location.pathname + location.search : `#${id}`);
+      landed();
       return;
     }
 
+    // Everything below is measured after the new screen is laid out and the
+    // page is back at the top. Old rects move with the slot if it scrolled.
+    const slotNow = slot.getBoundingClientRect();
+    const shiftX = slotNow.left - slotBefore.left;
+    const shiftY = slotNow.top - slotBefore.top;
+    if (shiftX || shiftY) {
+      oldState.forEach((prev) => {
+        prev.rect = new DOMRect(prev.rect.left + shiftX, prev.rect.top + shiftY, prev.rect.width, prev.rect.height);
+      });
+    }
+    const hub = hubPoint();
     const shifted = (from: DOMRect, to: DOMRect) =>
       Math.abs(from.left + from.width / 2 - (to.left + to.width / 2)) > 4 ||
       Math.abs(from.top + from.height / 2 - (to.top + to.height / 2)) > 4;
@@ -1091,41 +1209,19 @@ export function initArrowNav(root: ParentNode = document) {
       const same = identity && !moved;
       return { el, rect, prev, same, moved };
     });
-    const slot = nav.querySelector<HTMLElement>('.arrow-slot')!;
-    const clips: HTMLElement[] = [];
     const verticalDir = (dir: string) => dir === 'up' || dir === 'down';
-    const clipFor = (dir: string) => {
-      const clip = document.createElement('div');
-      clip.className = 'arrow-clip';
-      clip.style.position = 'fixed';
-      clip.style.overflow = 'hidden';
-      clip.style.pointerEvents = 'none';
-      clip.style.zIndex = '2';
-      clip.style.transform = 'translateZ(0)';
-      const x = `${Math.round(hub.x)}px`;
-      const y = `${Math.round(hub.y)}px`;
-      if (dir === 'right') {
-        clip.style.left = x;
-        clip.style.top = '0';
-        clip.style.right = '0';
-        clip.style.bottom = '0';
-      } else if (dir === 'down') {
-        clip.style.left = '0';
-        clip.style.top = y;
-        clip.style.right = '0';
-        clip.style.bottom = '0';
-      } else if (dir === 'up') {
-        clip.style.left = '0';
-        clip.style.top = '0';
-        clip.style.right = '0';
-        clip.style.height = y;
-      } else {
-        clip.style.left = '0';
-        clip.style.top = '0';
-        clip.style.width = x;
-        clip.style.bottom = '0';
-      }
-      return clip;
+    // Each direction owns the half-plane on its side of the hub. Every control
+    // that flies is clipped to it, so it slides out of and into the face and
+    // never across it. The clip is drawn in the control's own box and moves
+    // against its translate, which keeps the edge still on the hub line.
+    const far = 10000;
+    const maskAt = (dir: string, rect: DOMRect, x: number, y: number) => {
+      const edgeX = (hub.x - rect.left - x).toFixed(2);
+      const edgeY = (hub.y - rect.top - y).toFixed(2);
+      if (dir === 'right') return `polygon(${edgeX}px ${-far}px, ${far}px ${-far}px, ${far}px ${far}px, ${edgeX}px ${far}px)`;
+      if (dir === 'left') return `polygon(${-far}px ${-far}px, ${edgeX}px ${-far}px, ${edgeX}px ${far}px, ${-far}px ${far}px)`;
+      if (dir === 'down') return `polygon(${-far}px ${edgeY}px, ${far}px ${edgeY}px, ${far}px ${far}px, ${-far}px ${far}px)`;
+      return `polygon(${-far}px ${-far}px, ${far}px ${-far}px, ${far}px ${edgeY}px, ${-far}px ${edgeY}px)`;
     };
     const horizontal = (dir: string) => dir === 'left' || dir === 'right';
     const pairMove = (dir: string, lead: DOMRect, dest: DOMRect) => {
@@ -1163,12 +1259,9 @@ export function initArrowNav(root: ParentNode = document) {
         if (stay) return;
         const arrival = placed.find((item) => item.el.dataset.dir === dir && !item.same && !item.moved);
         const clone = prev.clone;
-        const clip = clipFor(dir);
-        const originX = dir === 'right' ? hub.x : 0;
-        const originY = dir === 'down' ? hub.y : 0;
         clone.style.position = 'absolute';
-        clone.style.left = `${Math.round(prev.rect.left - originX)}px`;
-        clone.style.top = `${Math.round(prev.rect.top - originY)}px`;
+        clone.style.left = `${Math.round(prev.rect.left - slotNow.left)}px`;
+        clone.style.top = `${Math.round(prev.rect.top - slotNow.top)}px`;
         clone.style.right = 'auto';
         clone.style.bottom = 'auto';
         clone.style.margin = '0';
@@ -1176,12 +1269,15 @@ export function initArrowNav(root: ParentNode = document) {
         clone.style.height = `${Math.round(prev.rect.height)}px`;
         clone.style.transform = 'none';
         clone.style.opacity = String(prev.opacity);
-        clip.append(clone);
-        slot.append(clip);
-        clips.push(clip);
+        clone.style.zIndex = '';
+        clone.style.clipPath = '';
+        slot.append(clone);
         const move = departMove(dir, prev, arrival);
         const motion = clone.animate(
-          [{ transform: 'translate(0px, 0px)' }, { transform: `translate(${move.x}px, ${move.y}px)` }],
+          [
+            { transform: 'translate(0px, 0px)', clipPath: maskAt(dir, prev.rect, 0, 0) },
+            { transform: `translate(${move.x}px, ${move.y}px)`, clipPath: maskAt(dir, prev.rect, move.x, move.y) },
+          ],
           { duration: moveMs(), easing: ease, fill: 'both' },
         );
         clone.animate([{ opacity: prev.opacity }, { opacity: 0 }], {
@@ -1189,9 +1285,7 @@ export function initArrowNav(root: ParentNode = document) {
           easing: ease,
           fill: 'forwards',
         });
-        motion.finished.finally(() => {
-          if (gen === generation) clip.remove();
-        });
+        motion.finished.finally(() => clone.remove()).catch(() => {});
       });
     }
     const anims = placed.filter((item) => !item.same).map(({ el, rect, prev, moved }) => {
@@ -1218,8 +1312,8 @@ export function initArrowNav(root: ParentNode = document) {
       el.style.zIndex = '1';
       const anim = el.animate(
         [
-          { transform: `translate(${dx}px, ${dy}px)`, opacity: moved ? 1 : 0 },
-          { transform: 'translate(0px, 0px)', opacity: 1 },
+          { transform: `translate(${dx}px, ${dy}px)`, opacity: moved ? 1 : 0, clipPath: maskAt(dir, rect, dx, dy) },
+          { transform: 'translate(0px, 0px)', opacity: 1, clipPath: maskAt(dir, rect, 0, 0) },
         ],
         { duration: moveMs(), easing: ease, fill: 'both' },
       );
@@ -1236,10 +1330,10 @@ export function initArrowNav(root: ParentNode = document) {
     fadeLines(nav);
     Promise.all(anims).finally(() => {
       if (gen !== generation) return;
-      clips.forEach((clip) => clip.remove());
       if (nav.dataset.kind === 'gallery') faceEl().hidden = true;
       placeGalleryArrows();
       startAutoplay();
+      landed();
     });
 
     if (push) history.pushState({ arrow: id }, '', id === 'landing' ? location.pathname + location.search : `#${id}`);
@@ -1267,20 +1361,18 @@ export function initArrowNav(root: ParentNode = document) {
       travel(node.parent === 'landing' ? 'landing' : node.parent, true);
       return;
     }
-    if (screenId === 'about' && dir === 'left') {
-      const link = document.createElement('a');
-      link.href = '/services/';
-      document.body.append(link);
-      link.click();
-      link.remove();
-      return;
-    }
     if (screenId === 'about' && dir === 'right') {
       if (pressFrom === 'key') nav.querySelector<HTMLElement>('[data-dir="right"]')?.click();
       return;
     }
     const next = child(screenId, dir);
-    if (next) travel(next.id, true);
+    if (!next) return;
+    // A route leaf (a services pill on the services screen) is a plain link.
+    if (next.href && !tree.nodes.some((node) => node.parent === next.id)) {
+      location.assign(next.href);
+      return;
+    }
+    travel(next.id, true);
   };
 
   const onGalleryWheel = (event: WheelEvent) => {
@@ -1329,24 +1421,37 @@ export function initArrowNav(root: ParentNode = document) {
     const button = (event.target as Element).closest<HTMLElement>('[data-dir]');
     if (!button || button.hidden || introOn || !nav.contains(button)) return;
     setPressed(button, 'pointer', '');
+    try {
+      button.setPointerCapture(event.pointerId);
+      holdPointer = event.pointerId;
+      holdTarget = button;
+    } catch {
+      holdPointer = event.pointerId;
+      holdTarget = button;
+    }
     if (!startHold(button.dataset.dir as Dir)) playSnick();
   });
 
-  window.addEventListener('pointerup', (event) => {
+  const onPointerEnd = (event: PointerEvent, cancelled: boolean) => {
     if (pressFrom !== 'pointer' || !pressed) return;
+    if (holdPointer && event.pointerId !== holdPointer) return;
     const button = pressed;
     const dir = button.dataset.dir as Dir;
     const releasedOn = (event.target as Element | null)?.closest?.('[data-dir]') === button;
     const wasFlip = flipping;
-    stopHold(wasFlip);
-    if (!wasFlip && releasedOn) activate(dir);
+    stopHold(cancelled ? false : wasFlip);
     setPressed(null, null);
-  });
+    releasePointer();
+    if (!cancelled && !wasFlip && releasedOn) activate(dir);
+  };
 
-  window.addEventListener('pointercancel', () => {
-    if (pressFrom !== 'pointer') return;
-    stopHold(false);
-    setPressed(null, null);
+  window.addEventListener('pointerup', (event) => onPointerEnd(event, false));
+  window.addEventListener('pointercancel', (event) => onPointerEnd(event, true));
+  nav.addEventListener('lostpointercapture', (event) => onPointerEnd(event, true));
+  window.addEventListener('blur', abandonHold);
+  window.addEventListener('pagehide', abandonHold);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState !== 'visible') abandonHold();
   });
 
   const keyDir: Record<string, Dir> = {
@@ -1482,20 +1587,42 @@ export function initArrowNav(root: ParentNode = document) {
 
   function endIntro() {
     introPlaying = false;
+    introDebug.end();
+    // Whatever happened to the GPU canvas, the resting face is the plain SVG.
+    const dead = faceGL;
+    faceGL = null;
+    try {
+      dead?.destroy();
+    } catch {}
+    nav.classList.remove('is-face-gl', 'is-face-svg');
     const scaleEl = nav.querySelector<HTMLElement>('[data-nav-scale]');
     const blob = nav.querySelector<HTMLElement>('.arrow-face-blob');
     scaleEl?.getAnimations().forEach((anim) => anim.cancel());
-    if (scaleEl) {
-      scaleEl.style.transform = '';
-      scaleEl.style.width = '';
-      scaleEl.style.height = '';
-    }
-    if (blob) {
-      blob.style.width = '';
-      blob.style.height = '';
+    // Leave the intro from the size the face is drawn at now. Under the GPU
+    // face on a phone the SVG blob sat hidden at the intro size, and without
+    // this it eased down from there once it showed: the face pulsed up and
+    // back down just after the intro. Pin both to the drawn size, drop
+    // is-intro, then let go, so the face only moves if it was not yet at rest.
+    const parts = [scaleEl, blob].filter((el): el is HTMLElement => !!el);
+    const drawn = scaleEl ? getComputedStyle(scaleEl) : null;
+    if (scaleEl && drawn) {
+      const { width, height, transform } = drawn;
+      parts.forEach((el) => {
+        el.style.transition = 'none';
+        el.style.width = width;
+        el.style.height = height;
+      });
+      scaleEl.style.transform = transform;
     }
     settleFace();
     nav.classList.remove('is-intro');
+    parts.forEach((el) => el.getBoundingClientRect());
+    parts.forEach((el) => {
+      el.style.transition = '';
+      el.style.width = '';
+      el.style.height = '';
+    });
+    if (scaleEl) scaleEl.style.transform = '';
   }
 
   const settleFace = () => {
@@ -1513,41 +1640,70 @@ export function initArrowNav(root: ParentNode = document) {
       pulseHint();
       return;
     }
-    const started = performance.now();
     let revealed = false;
     // A CSS scale of the small filtered face paints a soft bitmap and drops
-    // the displacement. On a phone the face is laid out at the size it is
-    // drawn, and the stretch follows the screen.
+    // the displacement. The face is laid out at the size it is drawn, on
+    // every viewport, and the stretch follows the screen on a phone.
     const phone = matchMedia('(max-width: 759px)').matches;
-    const face = phone ? parseFloat(getComputedStyle(nav).getPropertyValue('--arrow-face')) : 0;
+    const face = parseFloat(getComputedStyle(nav).getPropertyValue('--arrow-face')) || (phone ? 48 : 64);
     const stretchFrom = phone ? nav.clientWidth / Math.max(1, nav.clientHeight) : INTRO_STRETCH;
-    const blob = phone ? nav.querySelector<HTMLElement>('.arrow-face-blob') : null;
-    if (phone) scaleEl.style.transform = 'none';
-    const frame = (now: number) => {
+    const blob = nav.querySelector<HTMLElement>('.arrow-face-blob');
+    scaleEl.style.transform = 'none';
+    let started = performance.now();
+    // The first frames after load are slow on a phone: fonts, the first GPU
+    // draw and its compositing layer all land there. The intro holds its first
+    // frame until two frames in a row arrive on time (or HOLD_MAX_MS), then the
+    // clock starts, so a late frame never lands while the face is moving.
+    let holding = true;
+    let holdFrom = 0;
+    let lastTick = 0;
+    let calm = 0;
+    const frame = (now: number, sync = false) => {
       if (!introPlaying) return;
+      const workFrom = introDebugOn ? performance.now() : 0;
+      if (holding) {
+        if (!sync) {
+          if (!holdFrom) holdFrom = now;
+          if (lastTick) introDebug.held(now - lastTick);
+          calm = lastTick && now - lastTick < HOLD_CALM_MS ? calm + 1 : 0;
+          lastTick = now;
+          if (calm >= 2 || now - holdFrom >= HOLD_MAX_MS) {
+            holding = false;
+            introDebug.start(now);
+          }
+        }
+        started = now;
+      }
       const t = Math.min(1, (now - started) / INTRO_MS);
       const eased = easeInOut(t);
       const zoom = INTRO_ZOOM + (1 - INTRO_ZOOM) * eased;
       const stretch = stretchFrom + (1 - stretchFrom) * eased;
-      if (phone) {
-        const w = Math.max(1, Math.round(face * zoom * stretch));
-        const h = Math.max(1, Math.round(face * zoom));
-        scaleEl.style.width = `${w}px`;
-        scaleEl.style.height = `${h}px`;
-        if (blob) {
-          blob.style.width = `${w}px`;
-          blob.style.height = `${h}px`;
-        }
-      } else {
-        scaleEl.style.transform = `scale(${zoom.toFixed(3)}) scaleX(${stretch.toFixed(3)})`;
-      }
-      disp?.setAttribute('scale', String(Math.round(DISP_FROM + (DISP_REST - DISP_FROM) * eased)));
+      const dispNow = Math.round(DISP_FROM + (DISP_REST - DISP_FROM) * eased);
       const soft = BLUR_FROM + (BLUR_REST - BLUR_FROM) * eased;
-      blur?.setAttribute('stdDeviation', soft.toFixed(2));
+      const w = Math.max(1, Math.round(face * zoom * stretch));
+      const h = Math.max(1, Math.round(face * zoom));
+      scaleEl.style.width = `${w}px`;
+      scaleEl.style.height = `${h}px`;
+      if (faceGL) {
+        try {
+          faceGL.draw({ w, h, disp: dispNow, blur: soft });
+        } catch (error) {
+          dropFaceGL(`draw: ${(error as Error)?.message || error}`);
+        }
+      }
+      if (!faceGL && blob) {
+        blob.style.width = `${w}px`;
+        blob.style.height = `${h}px`;
+      }
+      if (!faceGL) {
+        disp?.setAttribute('scale', String(dispNow));
+        blur?.setAttribute('stdDeviation', soft.toFixed(2));
+      }
       if (!revealed && now - started >= INTRO_REVEAL_MS) {
         revealed = true;
         revealIntro();
       }
+      if (introDebugOn) introDebug.frame(now, performance.now() - workFrom);
       if (t < 1) requestAnimationFrame(frame);
       else {
         endIntro();
@@ -1556,39 +1712,126 @@ export function initArrowNav(root: ParentNode = document) {
         if (hash && nodes.has(hash)) travel(hash, false);
       }
     };
-    requestAnimationFrame(frame);
+    // The GPU dropped the canvas (or a draw threw) mid-intro: finish on the
+    // SVG filter. After the intro, endIntro has already shown the plain face.
+    const dropFaceGL = (reason: string) => {
+      if (!faceGL) return;
+      const dead = faceGL;
+      faceGL = null;
+      try {
+        dead.destroy();
+      } catch {}
+      nav.classList.remove('is-face-gl');
+      if (!introPlaying) return;
+      nav.classList.add('is-face-svg');
+      const filterId = nav.querySelector('.arrow-face-blob filter')?.id;
+      if (filterId) nav.querySelector('.arrow-face-blob g')?.setAttribute('filter', `url(#${filterId})`);
+      introDebug.path('svg', reason);
+    };
+    const run = () => {
+      introDebug.hold(performance.now());
+      frame(performance.now(), true);
+    };
+    // The SVG filter would be re-rasterised every frame over a region several
+    // screens tall. The GPU face draws the same filter from numbers. Noise is
+    // built in short slices so the landing long task can yield, then the first
+    // frame is drawn and the SVG face stays hidden until then. Only when
+    // WebGL cannot run does the SVG filter come back, and ?introdebug says why.
+    void (async () => {
+      await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+      const svgFace = nav.querySelector<SVGSVGElement>('.arrow-face-blob');
+      const slot = scaleEl.closest<HTMLElement>('.arrow-slot');
+      let mount: FaceMount;
+      if (!svgFace || !slot) mount = { gl: null, reason: 'no-face' };
+      else {
+        const maxW = Math.max(1, Math.round(face * INTRO_ZOOM * stretchFrom));
+        const maxH = Math.max(1, Math.round(face * INTRO_ZOOM));
+        try {
+          mount = await mountFaceGL(svgFace, slot, maxW, maxH, DISP_FROM, BLUR_FROM);
+        } catch (error) {
+          mount = { gl: null, reason: `error: ${(error as Error)?.message || error}` };
+        }
+      }
+      if (!introPlaying) {
+        mount.gl?.destroy();
+        return;
+      }
+      if (mount.gl) {
+        faceGL = mount.gl;
+        faceGL.canvas.addEventListener('webglcontextlost', () => dropFaceGL('context-lost'));
+        nav.classList.add('is-face-gl');
+        settleFace();
+        introDebug.path('gl', '', mount.gl.setupMs, mount.gl.renderer);
+      } else {
+        nav.classList.add('is-face-svg');
+        introDebug.path('svg', mount.reason);
+      }
+      run();
+    })();
   };
 
   const hash = location.hash.replace('#', '');
-  const opened = hash && nodes.has(hash) ? hash : 'landing';
+  const opened = hash && nodes.has(hash) && !nodes.get(hash)?.href ? hash : 'landing';
   history.replaceState(
     { arrow: opened },
     '',
     opened === 'landing' ? location.pathname + location.search : `${location.pathname}${location.search}#${opened}`,
   );
-  screenId = opened;
-  paintChrome(opened);
+  // Back from a route page: open on its screen, which looks like the page
+  // just left, then fly the controls home with travel().
+  const routed = takeRoute();
+  const returning = routed && opened !== 'landing' && nodes.get(routed)?.href && nodes.get(routed)?.parent === opened && isTraverse() ? routed : null;
+  screenId = returning ?? opened;
+  if (screenId !== 'landing') applyCopy(screenId);
+  paintChrome(screenId);
+  warmRoutes(screenId);
   if (opened !== 'landing' && nodes.get(opened)?.kind === 'gallery') showSlide(0, false);
   placeCopy();
   placeCaption();
   placeGalleryArrows();
-  window.addEventListener('resize', () => {
+  const relayout = () => {
     const current = screen()?.kind === 'gallery' ? screen()?.slides[slide] : null;
     if (current && !full) fitGallery(current, false);
     placeCopy();
     placeCaption();
     placeGalleryArrows();
     fitProjectLink();
+  };
+
+  bindAppViewport(() => {
+    if (nav.dataset.screen !== 'about' && (scrollX || scrollY)) window.scrollTo(0, 0);
+    relayout();
   });
+  window.addEventListener('resize', relayout);
   if (opened === 'landing') runIntro();
   else {
     introPlaying = false;
     introOn = false;
+    // Opened on a screen: the face starts at its resting size rather than
+    // easing down from the intro size.
+    const still = [...nav.querySelectorAll<HTMLElement>('.arrow-face-scale, .arrow-face-blob')];
+    still.forEach((el) => (el.style.transition = 'none'));
     nav.classList.remove('is-intro');
+    still.forEach((el) => el.getBoundingClientRect());
+    requestAnimationFrame(() => still.forEach((el) => (el.style.transition = '')));
     nav.classList.add('is-controls');
     settleFace();
     const hint = nav.querySelector<HTMLElement>('[data-nav-hint]');
     if (hint) hint.hidden = true;
   }
+  const flyHome = (to: string) => {
+    requestAnimationFrame(() => requestAnimationFrame(() => travel(to, false)));
+  };
+  if (returning) flyHome(opened);
+  // Back from a route page out of the back/forward cache: the page is still
+  // on the route screen it left from.
+  window.addEventListener('pageshow', (event) => {
+    if (!event.persisted) return;
+    takeRoute();
+    const node = screen();
+    if (!node?.href) return;
+    const state = history.state && history.state.arrow;
+    flyHome(typeof state === 'string' && nodes.has(state) && !nodes.get(state)?.href ? state : node.parent);
+  });
   document.fonts?.ready.then(() => fitProjectLink());
 }

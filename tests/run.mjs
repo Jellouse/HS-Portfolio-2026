@@ -24,6 +24,8 @@ const SPECS = [
   ['link-underline', 'tests/link-underline.spec.mjs'],
   ['spin', 'tests/spin-mark.spec.mjs'],
   ['vt', 'tests/view-transition.spec.mjs'],
+  ['about-services', 'tests/about-services-flight.spec.mjs'],
+  ['landing-face', 'tests/landing-face-settle.spec.mjs'],
   ['hscroll', 'tests/no-hscroll.spec.mjs'],
   ['shop-grid', 'tests/shop-grid.spec.mjs'],
   ['canvas-pages', 'tests/canvas-pages.spec.mjs'],

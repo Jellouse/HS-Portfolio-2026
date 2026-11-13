@@ -54,7 +54,7 @@ blocks:
       alt: >-
         Rolling vitrine with aluminium frame, glass top and backlit milk glass,
         Analogue store Zeedijk
-      gallery: space
+      gallery: none
       frame: default
       flush: false
       outline: false
@@ -74,7 +74,7 @@ blocks:
       alt: >-
         Shop window with the Analogue logo and vitrines inside, Analogue store
         Zeedijk
-      gallery: space
+      gallery: none
       frame: default
       flush: false
       outline: false
@@ -145,7 +145,7 @@ blocks:
       alt: >-
         Side of a vitrine with glass panel and aluminium frame, Analogue store
         Zeedijk
-      gallery: space
+      gallery: none
       frame: default
       flush: false
       outline: false

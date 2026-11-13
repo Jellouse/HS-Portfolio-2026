@@ -25,9 +25,10 @@ if (typeof poster === 'string') {
 
 const ext = src.toLowerCase().split(/[?#]/)[0].split('.').pop();
 const type = ext === 'webm' ? 'video/webm' : ext === 'mov' ? 'video/quicktime' : 'video/mp4';
+const mediaRatio = poster && typeof poster !== 'string' ? poster.width / poster.height : undefined;
 ---
 
-<div class:list={['frame', 'is-video', { 'scroll-media': fade, 'is-plain': plain, 'is-flush': flush, 'is-outlined': outline }]}>
+<div class:list={['frame', 'is-video', { 'scroll-media': fade, 'is-plain': plain, 'is-flush': flush, 'is-outlined': outline }]} style={mediaRatio ? `--media-ratio:${mediaRatio}` : undefined}>
   <video
     muted
     loop

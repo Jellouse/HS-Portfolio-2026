@@ -119,6 +119,10 @@
   --dur-sheet: 400ms;
   --dur-nav: 500ms;
   --dur-sheet-out: 260ms;
+  --app-vt: 0px;
+  --app-vl: 0px;
+  --app-vw: 100%;
+  --app-vh: 100svh;
   --page-bg: var(--bg);
   color: var(--ink);
   background: var(--page-bg);
@@ -345,8 +349,7 @@ html[data-sky-ink='white'] body:has([data-sky]) {
 
 .contact-panel,
 .shop-buy-button,
-.services-landing .shop-button,
-.service-page-process-pill {
+.services-landing .shop-button {
   --ink: var(--ink-fixed);
   --ink-40: var(--ink-40-fixed);
   --muted: var(--ink-40-fixed);
@@ -694,7 +697,6 @@ html:has([data-sky]) body {
   height: var(--rest);
   overflow: visible;
   transform-origin: 0 50%;
-  will-change: transform;
   fill: #f8f8f8;
 }
 
@@ -1635,18 +1637,34 @@ html:active-view-transition-type(hs-shrink)::view-transition-new(hs-mark) {
   animation: vt-in 300ms var(--ease-out-quad) both;
 }
 
-.arrow-nav[data-screen='about'] .arrow-face-scale,
-.services-hub .arrow-face-scale {
+/* Shared chrome view-transition names. A new screen opts in with
+   data-chrome-vt on its .arrow-nav root. The homepage about screen is
+   the in-page equivalent. Icon-mode L/R pills stay unnamed so they are
+   not morphed into the text pills. */
+[data-chrome-vt] .arrow-face-scale,
+.arrow-nav[data-screen='about'] .arrow-face-scale {
   view-transition-name: services-face;
 }
 
-.arrow-nav[data-screen='about'] .arrow-back,
-.services-hub .arrow-back {
+[data-chrome-vt] .arrow-back,
+.arrow-nav[data-screen='about'] .arrow-back {
   view-transition-name: services-back;
+}
+
+[data-chrome-vt] .arrow-pill[data-dir='left']:not([data-mode='icon']),
+.arrow-nav[data-screen='about'] .arrow-pill[data-dir='left'] {
+  view-transition-name: arrow-pill-left;
+}
+
+[data-chrome-vt] .arrow-pill[data-dir='right']:not([data-mode='icon']),
+.arrow-nav[data-screen='about'] .arrow-pill[data-dir='right'] {
+  view-transition-name: arrow-pill-right;
 }
 
 ::view-transition-group(services-face),
 ::view-transition-group(services-back),
+::view-transition-group(arrow-pill-left),
+::view-transition-group(arrow-pill-right),
 ::view-transition-group(work-frame),
 ::view-transition-group(work-back) {
   animation-duration: var(--dur-nav);
@@ -1678,22 +1696,84 @@ html:active-view-transition-type(hs-shrink)::view-transition-new(hs-mark) {
   animation: vt-in var(--dur-nav) linear both;
 }
 
-::view-transition-image-pair(work-back),
-::view-transition-image-pair(services-back) {
+::view-transition-image-pair(work-back) {
   background: var(--page-bg);
 }
 
-::view-transition-old(services-face),
-::view-transition-old(services-back),
+::view-transition-image-pair(services-back),
+::view-transition-image-pair(services-face) {
+  isolation: auto;
+  overflow: hidden;
+  background: transparent;
+  border-radius: 50%;
+}
+
+::view-transition-image-pair(arrow-pill-left),
+::view-transition-image-pair(arrow-pill-right) {
+  isolation: auto;
+  overflow: hidden;
+  background: transparent;
+  border-radius: var(--radius);
+}
+
 ::view-transition-old(work-back) {
   display: none;
 }
 
+::view-transition-old(services-face),
 ::view-transition-new(services-face),
+::view-transition-old(services-back),
+::view-transition-new(services-back),
+::view-transition-old(arrow-pill-left),
+::view-transition-new(arrow-pill-left),
+::view-transition-old(arrow-pill-right),
+::view-transition-new(arrow-pill-right) {
+  mix-blend-mode: normal;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+}
+
+/* :only-child does not match these snapshot pseudos, so it cannot
+   turn off the UA fade or plus-lighter blend. Set animation explicitly. */
+::view-transition-old(services-back),
 ::view-transition-new(services-back) {
   animation: none;
-  mix-blend-mode: normal;
-  height: 100%;
+}
+
+::view-transition-old(services-face) {
+  animation: vt-out var(--dur-nav) var(--ease-nav) both;
+}
+
+::view-transition-new(services-face) {
+  animation: vt-in var(--dur-nav) var(--ease-nav) both;
+}
+
+html:active-view-transition-type(chrome-shrink)::view-transition-old(services-face),
+html:active-view-transition-type(chrome-shrink)::view-transition-new(services-face),
+html:active-view-transition-type(chrome-grow)::view-transition-old(services-face),
+html:active-view-transition-type(chrome-grow)::view-transition-new(services-face) {
+  animation: none;
+}
+
+html:active-view-transition-type(chrome-shrink)::view-transition-old(services-face),
+html:active-view-transition-type(chrome-grow)::view-transition-new(services-face) {
+  opacity: 1;
+}
+
+html:active-view-transition-type(chrome-shrink)::view-transition-new(services-face),
+html:active-view-transition-type(chrome-grow)::view-transition-old(services-face) {
+  opacity: 0;
+}
+
+::view-transition-old(arrow-pill-left),
+::view-transition-old(arrow-pill-right) {
+  animation: vt-out var(--dur-nav) var(--ease-nav) both;
+}
+
+::view-transition-new(arrow-pill-left),
+::view-transition-new(arrow-pill-right) {
+  animation: vt-in var(--dur-nav) var(--ease-nav) both;
 }
 
 ::view-transition-new(work-back) {
@@ -3352,320 +3432,6 @@ body.is-services-landing main#content {
   }
 }
 
-.service-page {
-  padding-top: 0;
-  padding-bottom: var(--space-xl);
-}
-
-.service-page > * {
-  grid-column: calc((var(--cols) - var(--content-span)) / 2 + 1) / span var(--content-span);
-  width: auto;
-  min-width: 0;
-}
-
-.service-page-mark {
-  grid-column: 1 / -1;
-  display: flex;
-  justify-content: center;
-  width: 100%;
-  margin: 0 0 var(--space-lg);
-  padding-top: var(--space-lg);
-  pointer-events: none;
-}
-
-.service-face {
-  color: var(--ink);
-}
-
-.service-page-mark .service-face {
-  display: block;
-  width: min(100%, var(--content-width));
-  height: auto;
-}
-
-.service-page-head {
-  text-align: center;
-  margin: 0 0 var(--space-lg);
-  width: 100%;
-  max-width: none;
-  overflow: visible;
-}
-
-.service-page-head h1 {
-  margin: 0 auto;
-  max-width: var(--content-width);
-  font-size: var(--text);
-  font-weight: 400;
-  line-height: var(--lh);
-}
-
-.service-page-subline {
-  margin: 0 auto;
-  max-width: var(--content-width);
-  color: var(--muted);
-  font-size: var(--text);
-  font-weight: 400;
-  line-height: var(--lh);
-}
-
-.service-page-inquire {
-  margin: var(--space-md) 0 0;
-}
-
-.service-page-text,
-.service-page-process-list,
-.service-page-section .service-page-text {
-  max-width: var(--content-width);
-  justify-self: center;
-  text-align: center;
-}
-
-.service-page > .service-page-text {
-  margin-bottom: 0;
-}
-
-.service-page-text p {
-  margin: 0 0 var(--lh);
-}
-
-.service-page-text p:last-child {
-  margin-bottom: 0;
-}
-
-.service-page-process,
-.service-page-section,
-.service-page-faq,
-.service-page-bottom {
-  margin-top: var(--space-2xl);
-  margin-bottom: 0;
-}
-
-.service-page-faq h2 {
-  text-align: center;
-}
-
-.service-page-faq-list {
-  max-width: var(--content-width);
-  justify-self: center;
-  width: 100%;
-}
-
-.service-page-process {
-  grid-column: 1 / -1;
-  display: grid;
-  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
-  column-gap: var(--gutter);
-}
-
-.service-page-section h2,
-.service-page-faq h2,
-.service-page-process h2 {
-  margin: 0 0 var(--space-lg);
-  font-size: var(--text);
-  font-weight: 400;
-  line-height: var(--lh);
-  text-align: center;
-  width: 100%;
-  max-width: none;
-  justify-self: stretch;
-}
-
-.service-page-process h2,
-.service-page-process-frame {
-  grid-column: 1 / -1;
-}
-
-.service-page-process-frame {
-  justify-self: center;
-  border: 1px solid var(--image-stroke);
-  border-radius: var(--radius);
-  corner-shape: squircle;
-  box-sizing: border-box;
-  width: max-content;
-  max-width: 100%;
-  padding: var(--space-xs);
-  margin: 0 0 var(--space-lg);
-}
-
-.service-page-process-flow {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: center;
-  gap: var(--space-2xs);
-}
-
-.service-page-process-pill {
-  display: inline-flex;
-  flex: 0 0 auto;
-  box-sizing: border-box;
-  width: auto;
-  min-width: var(--space-xl);
-  max-width: none;
-  height: 40px;
-  justify-content: center;
-  align-items: center;
-  padding: 0 var(--pad);
-  pointer-events: none;
-  font-size: var(--text);
-  line-height: 1;
-  background: var(--button-fill);
-  border: 0;
-  border-radius: var(--radius-sm);
-  corner-shape: squircle;
-  overflow: hidden;
-  white-space: nowrap;
-}
-
-.service-page-process-arrow {
-  color: var(--muted);
-  line-height: 1;
-  flex-shrink: 0;
-}
-
-.service-page-process-list {
-  grid-column: calc((var(--cols) - var(--content-span)) / 2 + 1) / span var(--content-span);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-xs);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  counter-reset: service-step;
-}
-
-.service-page-process-list li {
-  margin: 0;
-  padding: 0;
-  counter-increment: service-step;
-}
-
-.service-page-process-list li::before {
-  content: counter(service-step) '. ';
-}
-
-.service-page-section .service-page-text {
-  margin-bottom: var(--space-lg);
-}
-
-.service-page-images {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  gap: var(--space-md);
-  width: 100%;
-  max-width: var(--content-width);
-  justify-self: center;
-}
-
-@media (min-width: 760px) {
-  .service-page-images.is-pair {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    column-gap: var(--gutter);
-    row-gap: var(--space-md);
-    align-items: start;
-  }
-}
-
-.service-page-figure {
-  width: 100%;
-  margin: 0;
-}
-
-.service-page-figure .frame {
-  width: 100%;
-  height: auto;
-  border-radius: var(--radius-sm);
-  corner-shape: squircle;
-  overflow: hidden;
-}
-
-.service-page-figure .frame :is(img, picture, video) {
-  display: block;
-  width: 100%;
-  height: auto;
-  object-fit: contain;
-}
-
-.service-page-figure.is-video .frame {
-  aspect-ratio: 16 / 9;
-}
-
-.service-page-figure.is-video .frame video {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-
-.service-page-caption {
-  display: block;
-  margin: var(--space-sm) 0 0;
-  text-align: center;
-  color: var(--muted);
-  font-size: var(--text);
-  line-height: var(--lh);
-}
-
-.service-page-caption a {
-  color: inherit;
-  text-decoration-line: underline;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 3px;
-}
-
-.service-page-faq-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-}
-
-.service-page-faq-item {
-  border-top: 1px solid var(--line);
-  padding: 0;
-}
-
-.service-page-faq-item:not([open]) > :not(summary) {
-  display: none;
-}
-
-.service-page-faq-item summary {
-  display: block;
-  width: 100%;
-  box-sizing: border-box;
-  margin: 0;
-  padding: var(--space-xs) 0;
-  cursor: pointer;
-  line-height: var(--lh);
-  list-style: none;
-}
-
-.service-page-faq-item summary::-webkit-details-marker {
-  display: none;
-}
-
-.service-page-faq-item[open] summary {
-  margin-bottom: var(--space-xs);
-}
-
-.service-page-faq-item p {
-  margin: 0 0 var(--space-xs);
-  color: var(--muted);
-}
-
-.service-page-bottom {
-  text-align: center;
-  padding-bottom: 0;
-}
-
-.service-page-bottom p {
-  margin: 0 0 var(--space-md);
-}
-
-.service-page-bottom p:last-child {
-  margin-bottom: 0;
-}
-
 .content-placeholder {
   padding: 0 4px;
   background: rgb(255 230 130 / 55%);
@@ -3728,20 +3494,6 @@ body.is-services-landing main#content {
     margin-bottom: var(--space-xs);
   }
 
-  .service-page.page-grid {
-    display: block;
-    width: 100%;
-    box-sizing: border-box;
-    padding-inline: var(--margin);
-  }
-
-  .service-page-process {
-    display: block;
-  }
-
-  .service-page-process-frame {
-    max-width: 100%;
-  }
 }
 
 .frame.is-alpha {
@@ -3756,7 +3508,7 @@ body.is-services-landing main#content {
 }
 
 body:has(.arrow-nav) {
-  height: 100svh;
+  height: var(--app-vh);
   overflow: hidden;
 }
 
@@ -3766,10 +3518,37 @@ body:has(.arrow-nav) {
   --arrow-control: 64px;
   --arrow-fill: rgb(0 0 0 / 6%);
   position: relative;
-  height: 100svh;
+  height: var(--app-vh);
   overflow: hidden;
   color: var(--ink);
   text-align: center;
+}
+
+
+html[data-app-inset] .arrow-nav:not([data-screen='about']) {
+  position: fixed;
+  top: var(--app-vt);
+  left: var(--app-vl);
+  width: var(--app-vw);
+  height: var(--app-vh);
+}
+
+html[data-app-inset] .arrow-nav[data-screen='about'] {
+  position: fixed;
+  top: var(--app-vt);
+  left: var(--app-vl);
+  width: var(--app-vw);
+  height: var(--app-vh);
+  min-height: 0;
+  overflow: auto;
+}
+
+html[data-app-inset] body:has(.arrow-nav[data-screen='about']) {
+  overflow: hidden;
+}
+
+html[data-app-inset] body:has(.arrow-nav[data-screen='about']) main#content {
+  min-height: 0;
 }
 
 html[data-sky-ink='white'] body:has([data-sky]) .arrow-nav {
@@ -3871,11 +3650,15 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
 
 .arrow-nav:not(.is-intro) .arrow-face-scale,
 .arrow-nav:not(.is-intro) .arrow-face-blob {
-  transition: transform var(--dur-nav) var(--ease-nav);
+  transition:
+    transform var(--dur-nav) var(--ease-nav),
+    width var(--dur-nav) var(--ease-nav),
+    height var(--dur-nav) var(--ease-nav);
 }
 
 .arrow-nav[data-screen='about'] .arrow-face-scale {
-  transform: scale(calc(var(--arrow-about-face) / var(--arrow-face)));
+  width: var(--arrow-about-face);
+  height: var(--arrow-about-face);
 }
 
 .arrow-nav[data-screen='about'] .arrow-face-blob {
@@ -3902,9 +3685,9 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
 
 .arrow-nav[data-screen='about'] {
   height: auto;
-  min-height: 100svh;
+  min-height: var(--app-vh);
   overflow: visible;
-  padding-top: calc(50svh + var(--arrow-about-face) / 2 + var(--space-text-titled));
+  padding-top: calc(var(--app-vh) / 2 + var(--arrow-about-face) / 2 + var(--space-text-titled));
   padding-bottom: var(--space-lg);
 }
 
@@ -3913,7 +3696,7 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
   top: 0;
   right: 0;
   left: 0;
-  height: 100svh;
+  height: var(--app-vh);
   bottom: auto;
 }
 
@@ -3951,8 +3734,8 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
   position: relative;
   z-index: 1;
   display: block;
-  width: var(--arrow-face);
-  height: var(--arrow-face);
+  width: 100%;
+  height: 100%;
   color: var(--red);
   overflow: hidden;
 }
@@ -3961,6 +3744,48 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
 .arrow-nav.is-intro .arrow-face-blob {
   overflow: visible;
   border-radius: 0;
+}
+
+/* The GPU intro draws the face on a canvas sized to the face plus filter
+   reach, then centered in the slot — the same place as .arrow-face. Do not
+   use inset: 0 here. That pins a face-sized canvas to the top of the stage,
+   and an inset shorthand in JS would also wipe left/top. */
+.arrow-face-gl {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  right: auto;
+  bottom: auto;
+  transform: translate(-50%, -50%);
+  z-index: 4;
+  pointer-events: none;
+}
+
+/* Only while the intro plays: a class left behind must never hide the
+   resting face. */
+.arrow-nav.is-intro.is-face-gl .arrow-face-blob {
+  visibility: hidden;
+}
+
+/* ?introdebug readout of how the intro ran. */
+.intro-debug {
+  position: fixed;
+  bottom: var(--pad);
+  left: var(--pad);
+  right: var(--pad);
+  z-index: 100;
+  margin: 0;
+  padding: var(--space-2xs);
+  max-height: 40svh;
+  overflow: hidden;
+  font-size: var(--text-meta);
+  line-height: var(--lh-meta);
+  white-space: pre-wrap;
+  word-break: break-all;
+  color: var(--ink);
+  background: var(--page-bg);
+  border: 1px solid var(--ink);
+  pointer-events: none;
 }
 
 .arrow-pill,
@@ -3987,6 +3812,7 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
   padding: 0 var(--space-md);
   display: grid;
   place-items: center;
+  white-space: nowrap;
   transform: translateY(-50%);
 }
 
@@ -4029,17 +3855,18 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
 @media (hover: hover) and (pointer: fine) {
   .arrow-pill:hover:not(.is-pressed),
   .arrow-back:hover:not(.is-pressed),
-  .arrow-project:hover {
+  .arrow-project:hover,
+  .service-inquire:hover:not(.is-pressed) {
     background: color-mix(in srgb, var(--arrow-fill) 86%, var(--ink));
   }
 }
 
-.arrow-nav :is(.arrow-pill, .arrow-back, .arrow-project):focus-visible,
+.arrow-nav :is(.arrow-pill, .arrow-back, .arrow-project, .service-inquire):focus-visible,
 .project-back:focus-visible {
   outline: none;
 }
 
-.arrow-nav :is(.arrow-pill, .arrow-back, .arrow-project):focus-visible::after,
+.arrow-nav :is(.arrow-pill, .arrow-back, .arrow-project, .service-inquire):focus-visible::after,
 .project-back:focus-visible::after {
   content: '';
   position: absolute;
@@ -4055,7 +3882,8 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
 .arrow-pill.is-pressed,
 .arrow-back.is-pressed,
 .arrow-flight.is-pressed,
-.arrow-project.is-pressed {
+.arrow-project.is-pressed,
+.service-inquire.is-pressed {
   background: var(--red);
   color: var(--bg);
 }
@@ -4130,7 +3958,7 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
   border-radius: var(--gallery-radius);
   corner-shape: superellipse(1.436);
   overflow: visible;
-  background: var(--button-fill);
+  background: var(--arrow-fill);
   cursor: zoom-in;
   transition:
     width var(--dur-media) var(--ease-nav),
@@ -4255,12 +4083,12 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
 .arrow-nav.is-full .arrow-dot,
 .arrow-nav.is-cover .arrow-dot.is-on,
 .arrow-nav.is-full .arrow-dot.is-on {
-  background: color-mix(in srgb, var(--bg) 40%, transparent);
+  background: color-mix(in srgb, var(--bg) 60%, transparent);
 }
 
 .arrow-nav.is-cover .arrow-dot.is-on::before,
 .arrow-nav.is-full .arrow-dot.is-on::before {
-  background: var(--bg);
+  background: var(--ink);
 }
 
 .arrow-nav.is-cover .arrow-dot {
@@ -4350,8 +4178,21 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
   filter: none;
 }
 
-.js .arrow-nav.is-intro .arrow-face-scale {
-  transform: scale(7) scaleX(2.4);
+.js .arrow-nav.is-intro .arrow-face-scale,
+.js .arrow-nav.is-intro .arrow-face-blob {
+  width: calc(var(--arrow-face) * 7 * 2.4);
+  height: calc(var(--arrow-face) * 7);
+  transform: none;
+}
+
+/* The intro face is drawn on the GPU. Until that canvas is mounted, the
+   SVG stays hidden and unfiltered so no frame pays for the SVG filter. */
+.js .arrow-nav.is-intro:not(.is-face-svg) .arrow-face-blob {
+  visibility: hidden;
+}
+
+.js .arrow-nav.is-intro:not(.is-face-svg) .arrow-face-blob g {
+  filter: none;
 }
 
 .js .arrow-nav.is-intro:not(.is-controls) :is(.arrow-copy, .arrow-caption, .arrow-pill, .arrow-back, .arrow-hint) {
@@ -4430,7 +4271,7 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
 
   .js .arrow-nav.is-intro .arrow-face-scale,
   .js .arrow-nav.is-intro .arrow-face-blob {
-    width: calc(var(--arrow-face) * 7 * 100vw / 100svh);
+    width: calc(var(--arrow-face) * 7 * 100vw / var(--app-vh));
     height: calc(var(--arrow-face) * 7);
   }
 
@@ -4438,8 +4279,21 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
     transform: none;
   }
 
+  /* The phone intro face is drawn by the GPU (arrow-face-gl.ts). Until the
+     script has mounted it, the SVG face stays hidden and unfiltered, so no
+     frame pays for the SVG filter. The SVG only comes back as a fallback. */
+  .js .arrow-nav.is-intro:not(.is-face-svg) .arrow-face-blob {
+    visibility: hidden;
+  }
+
+  .js .arrow-nav.is-intro:not(.is-face-svg) .arrow-face-blob g {
+    filter: none;
+  }
+
   .arrow-nav[data-screen='about'] .arrow-face-scale,
   .arrow-nav[data-screen='about'] .arrow-face-blob {
+    width: var(--arrow-face);
+    height: var(--arrow-face);
     transform: none;
   }
 
@@ -4466,7 +4320,7 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
   }
 
   .arrow-nav[data-screen='about'] {
-    padding-top: calc(50svh + var(--arrow-face) / 2 + var(--space-text-titled));
+    padding-top: calc(var(--app-vh) / 2 + var(--arrow-face) / 2 + var(--space-text-titled));
   }
 
   .arrow-nav[data-screen='about'] .arrow-copy {
@@ -4501,3 +4355,223 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
     opacity: 1;
   }
 }
+
+.service-steps {
+  --arrow-edge: 48px;
+  --stage-clear: calc(var(--space-lg) + var(--arrow-control));
+  --media-inset: var(--space-sm);
+}
+
+.service-steps .arrow-pill {
+  width: var(--arrow-control);
+  height: var(--arrow-control);
+  padding: 0;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  z-index: 3;
+}
+
+.service-steps .arrow-pill[hidden] {
+  display: none;
+}
+
+.service-steps .arrow-pill[data-dir='left'] {
+  left: var(--arrow-edge);
+  right: auto;
+}
+
+.service-steps .arrow-pill[data-dir='right'] {
+  right: var(--arrow-edge);
+  left: auto;
+}
+
+.service-steps .arrow-back,
+.service-steps .service-inquire {
+  z-index: 3;
+}
+
+.service-steps .arrow-back {
+  top: var(--space-lg);
+  bottom: auto;
+}
+
+.service-step-stage {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 2;
+  width: min(var(--content-width), calc(100% - 2 * var(--arrow-control) - 2 * var(--arrow-edge)));
+  max-height: calc(100svh - 2 * var(--stage-clear));
+  overflow: auto;
+  transform: translate(-50%, -50%);
+}
+
+.service-step-stage:has(.service-step.is-media:not([hidden])) {
+  display: flex;
+  height: calc(100svh - 2 * var(--stage-clear) - 2 * var(--media-inset));
+}
+
+.service-step[hidden] {
+  display: none;
+}
+
+.service-step-title,
+.service-step-kicker,
+.service-step-body,
+.service-step-body p {
+  margin: 0;
+  font-size: var(--text);
+  font-weight: 400;
+  line-height: var(--lh);
+}
+
+.service-step-kicker {
+  color: var(--muted);
+}
+
+.service-step-kicker + .service-step-body,
+.service-step-title + .service-step-body,
+.service-step-body p + p,
+.service-faq + .service-faq {
+  margin-top: var(--lh);
+}
+
+.service-faq summary {
+  display: block;
+}
+
+.service-faq .service-step-kicker {
+  margin-top: var(--lh);
+}
+
+.service-step-images {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gutter);
+  margin-top: var(--space-sm);
+}
+
+.service-step.is-media:not([hidden]) {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+
+.service-step.is-media .service-step-images {
+  margin-top: 0;
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  height: 100%;
+  justify-content: center;
+  align-items: center;
+  container-type: size;
+}
+
+.service-step-figure {
+  margin: 0;
+}
+
+.service-step.is-media .service-step-figure {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: fit-content;
+  max-width: 100%;
+  max-height: 100%;
+  height: auto;
+  --caption-h: 0px;
+}
+
+.service-step.is-media .service-step-figure:has(.service-step-caption) {
+  --caption-h: calc(var(--space-sm) + 1lh);
+}
+
+.service-step-figure .frame {
+  width: 100%;
+  border-radius: var(--radius-sm);
+  corner-shape: squircle;
+}
+
+.service-step.is-media .frame {
+  flex: none;
+  width: auto;
+  height: min(calc(100cqh - var(--caption-h, 0px)), calc(100cqw / var(--media-ratio)));
+  max-width: 100cqw;
+  aspect-ratio: var(--media-ratio);
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+}
+
+.service-step-figure .frame.is-video {
+  aspect-ratio: 16 / 9;
+}
+
+.service-step.is-media .frame.is-video {
+  aspect-ratio: var(--media-ratio, 16 / 9);
+  height: min(calc(100cqh - var(--caption-h, 0px)), calc(100cqw / var(--media-ratio, 1.777777)));
+  width: auto;
+  max-width: 100cqw;
+}
+
+.service-step-figure .frame :is(img, picture, video) {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.service-step.is-media .frame img,
+.service-step.is-media .frame video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.service-step-figure .frame.is-video :is(video) {
+  height: 100%;
+  object-fit: contain;
+}
+
+.service-step-caption {
+  display: block;
+  margin-top: var(--space-sm);
+  color: var(--muted);
+}
+
+.service-step.is-media .service-step-caption {
+  flex: 0 0 auto;
+}
+
+.service-inquire {
+  position: absolute;
+  left: 50%;
+  bottom: var(--space-lg);
+  z-index: 2;
+  height: var(--arrow-control);
+  margin: 0;
+  padding: 0 var(--space-md);
+  border-radius: var(--radius);
+  background: var(--arrow-fill);
+  color: var(--ink);
+  transform: translateX(-50%);
+}
+
+@media (max-width: 759px) {
+  .service-steps {
+    --arrow-edge: 16px;
+  }
+
+  .service-step-stage {
+    width: calc(100% - 2 * var(--arrow-control) - 2 * var(--arrow-edge));
+    max-height: calc(var(--app-vh) - 2 * var(--stage-clear));
+  }
+
+  .service-step-stage:has(.service-step.is-media:not([hidden])) {
+    height: calc(var(--app-vh) - 2 * var(--stage-clear) - 2 * var(--media-inset));
+  }
+}
+

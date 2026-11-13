@@ -25,7 +25,7 @@ overview:
     src: /src/content/products/490/overview/right/src.jpg
     alt: Type-490 aluminium ring vase
     outline: false
-    gallery: shop
+    gallery: none
 detail:
   description: >-
     Four curved aluminium extrusion profiles, joined into a ring. 160 mm across,
@@ -35,19 +35,19 @@ detail:
     - src: /src/content/products/490/detail/images/0/src.webp
       alt: Type-490 aluminium ring vase from above
       outline: true
-      gallery: shop
+      gallery: none
     - src: /src/content/products/490/detail/images/1/src.jpg
       alt: Type-490 vase from the side
       outline: false
-      gallery: shop
+      gallery: none
     - src: /src/content/products/490/detail/images/2/src.jpg
       alt: Type-490 aluminium ring vase, front view
       outline: false
-      gallery: shop
+      gallery: none
     - src: /src/content/products/490/detail/images/3/src.png
       alt: Technical drawing of the Type-490 vase
       outline: true
-      gallery: shop
+      gallery: none
   sections: []
   wild: []
   info:

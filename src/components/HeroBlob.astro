@@ -4,11 +4,17 @@ interface Props {
   home?: boolean;
   /** Small resting face. Cursor turbulence stays on the SVG filter. */
   mark?: boolean;
+  /** The settled homepage mark: the same drawing, no turbulence. */
+  settled?: boolean;
 }
 
-const { filterId = 'hero-blob-texture', home = true, mark = false } = Astro.props;
+const { filterId = 'hero-blob-texture', home = true, mark = false, settled = false } = Astro.props;
 const fill = 'currentColor';
 const round = mark && !home;
+const texture = !settled;
+// The round face displaces by at most scale / 2 (50 units) plus three blur
+// sigmas (7 units) past its 70 unit box, so its filter region stops at 85%
+// out on each side. A larger region only adds pixels the browser filters.
 ---
 
 <svg
@@ -22,13 +28,14 @@ const round = mark && !home;
   overflow="visible"
   preserveAspectRatio={round ? 'none' : undefined}
 >
+  {texture && (
   <defs>
     <filter
       id={filterId}
-      x={round ? '-150%' : '-45%'}
-      y={round ? '-150%' : '-55%'}
-      width={round ? '400%' : '190%'}
-      height={round ? '400%' : '210%'}
+      x={round ? '-85%' : '-45%'}
+      y={round ? '-85%' : '-55%'}
+      width={round ? '270%' : '190%'}
+      height={round ? '270%' : '210%'}
       filterUnits="objectBoundingBox"
       color-interpolation-filters="sRGB"
     >
@@ -59,7 +66,8 @@ const round = mark && !home;
       </feMerge>
     </filter>
   </defs>
-  <g filter={`url(#${filterId})`}>
+  )}
+  <g filter={texture ? `url(#${filterId})` : undefined}>
     {round ? (
       <path
         fill-rule="evenodd"
