@@ -1,5 +1,5 @@
 import { initHeroBlob } from './hero-blob';
-import { mountFaceGL, type FaceGL, type FaceMount } from './arrow-face-gl';
+import { type FaceGL } from './arrow-face-gl';
 import { introDebug, introDebugOn } from './intro-debug';
 import { playSnick } from './ui-sound';
 import { bindAppViewport, syncAppViewport } from '../lib/viewport-layout';
@@ -1586,49 +1586,16 @@ export function initArrowNav(root: ParentNode = document) {
       introDebug.hold(performance.now());
       frame(performance.now(), true);
     };
-    // The SVG filter would be re-rasterised every frame over a region several
-    // screens tall. The GPU face draws the same filter from numbers. Noise is
-    // built in short slices so the landing long task can yield, then the first
-    // frame is drawn and the SVG face stays hidden until then. Only when
-    // WebGL cannot run does the SVG filter come back, and ?introdebug says why.
+    // Vector sketch: skip the GPU face and the SVG filter. The intro only
+    // scales and stretches the SVG, so the outline stays crisp at every size.
+    // The melt and grain are gone on purpose. Timing, ease, and the pill
+    // reveal stay the same.
     void (async () => {
       await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
-      const svgFace = nav.querySelector<SVGSVGElement>('.arrow-face-blob');
-      const slot = scaleEl.closest<HTMLElement>('.arrow-slot');
-      let mount: FaceMount;
-      if (!svgFace || !slot) mount = { gl: null, reason: 'no-face' };
-      else {
-        const maxW = Math.max(1, Math.round(face * INTRO_ZOOM * stretchFrom));
-        const maxH = Math.max(1, Math.round(face * INTRO_ZOOM));
-        try {
-          mount = await mountFaceGL(svgFace, slot, maxW, maxH, DISP_FROM, BLUR_FROM);
-        } catch (error) {
-          mount = { gl: null, reason: `error: ${(error as Error)?.message || error}` };
-        }
-      }
-      if (!introPlaying) {
-        mount.gl?.destroy();
-        return;
-      }
-      if (mount.gl) {
-        faceGL = mount.gl;
-        faceGL.canvas.addEventListener('webglcontextlost', () => {
-          if (!introPlaying || !faceGL) return;
-          // The GPU dropped the canvas mid-intro: finish on the SVG filter.
-          faceGL.destroy();
-          faceGL = null;
-          nav.classList.remove('is-face-gl');
-          nav.classList.add('is-face-svg');
-          nav.querySelector('.arrow-face-blob g')?.setAttribute('filter', `url(#${svgFace?.querySelector('filter')?.id ?? ''})`);
-          introDebug.path('svg', 'context-lost');
-        });
-        nav.classList.add('is-face-gl');
-        settleFace();
-        introDebug.path('gl', '', mount.gl.setupMs, mount.gl.renderer);
-      } else {
-        nav.classList.add('is-face-svg');
-        introDebug.path('svg', mount.reason);
-      }
+      if (!introPlaying) return;
+      settleFace();
+      nav.classList.add('is-face-svg');
+      introDebug.path('svg', 'vector-intro');
       run();
     })();
   };

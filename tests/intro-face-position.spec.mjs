@@ -1,4 +1,4 @@
-// During the landing intro the GPU face must sit in the large centered
+// During the landing intro the SVG face must sit in the large centered
 // placement, then scale in place into the small logo. It must not already
 // be parked at the top of the viewport as a header logo.
 //
@@ -97,7 +97,7 @@ const run = async (type, engine, size, label) => {
       failures.push(`${tag} ${sample.name}: intro already over`);
       continue;
     }
-    if (mid.path !== 'gl') failures.push(`${tag} ${sample.name}: expected GPU face, got ${mid.path || 'none'}`);
+    if (mid.path !== 'svg') failures.push(`${tag} ${sample.name}: expected SVG face, got ${mid.path || 'none'}`);
     if (mid.cx == null || mid.cy == null) {
       failures.push(`${tag} ${sample.name}: no visible face box`);
       continue;
