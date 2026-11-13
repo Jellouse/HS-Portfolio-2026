@@ -183,12 +183,18 @@ export async function mountFaceGL(svg: SVGSVGElement, host: HTMLElement, maxW: n
   const padCssY = (maxDisp / 2 + maxBlur * 3 + 2) * (maxH / vb.height);
   const boxW = Math.max(1, Math.ceil(maxW + 2 * padCssX));
   const boxH = Math.max(1, Math.ceil(maxH + 2 * padCssY));
-  // Keep the output sharp on phones; cap the desktop intro so a 7x-wide face
-  // does not run a multi-megapixel cut every frame.
+  // Keep the output at native sharpness on phones (up to 3x). Cap the desktop
+  // intro so a 7x-wide face does not run a multi-megapixel cut every frame.
+  // The previous shared budget also shrinks phone dpr, because the displacement
+  // pad makes the canvas about as large as the screen.
   const area = Math.max(1, boxW * boxH);
-  const budget = Math.max(1280 * 720, (window.innerWidth || boxW) * (window.innerHeight || boxH));
-  let dpr = Math.min(window.devicePixelRatio || 1, 2);
-  if (area * dpr * dpr > budget) dpr = Math.max(1, Math.sqrt(budget / area));
+  const phone = typeof matchMedia === 'function' && matchMedia('(max-width: 759px)').matches;
+  const native = window.devicePixelRatio || 1;
+  let dpr = Math.min(native, phone ? 3 : 2);
+  if (!phone) {
+    const budget = Math.max(1280 * 720, (window.innerWidth || boxW) * (window.innerHeight || boxH));
+    if (area * dpr * dpr > budget) dpr = Math.max(1, Math.sqrt(budget / area));
+  }
 
   // Source alpha at the largest device scale the intro shows.
   const maxTex = Math.min(4096, gl.getParameter(gl.MAX_TEXTURE_SIZE) as number);
