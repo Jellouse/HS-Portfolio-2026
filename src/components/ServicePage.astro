@@ -132,7 +132,7 @@ const stepCount =
           <h2 class="service-step-title">FAQ</h2>
           <div class="service-step-body">
             {d.faq.map((item) => (
-              <details class="service-faq">
+              <details class="service-faq" name="service-faq">
                 <summary>{item.question}</summary>
                 <p class="service-step-kicker" set:html={renderPlaceholders(item.answer)} />
               </details>

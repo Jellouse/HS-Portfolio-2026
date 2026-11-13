@@ -145,6 +145,20 @@ for (const view of views) {
           }
         }
       }
+      if (/^FAQ$/i.test(info.title || '')) {
+        const exclusive = await page.evaluate(() => {
+          const items = [...document.querySelectorAll('[data-service-steps] .service-step:not([hidden]) .service-faq')];
+          if (items.length < 2) return { ok: true, reason: 'fewer than two items' };
+          items[0].open = true;
+          items[1].open = true;
+          const open = items.filter((d) => d.open).length;
+          items.forEach((d) => { d.open = false; });
+          return { ok: open === 1, open };
+        });
+        if (!exclusive.ok) {
+          failures.push(`${label}: expected one open FAQ, got ${exclusive.open}`);
+        }
+      }
       const shotName = `${view.name}-${entry.id}-step-${String(i + 1).padStart(2, '0')}.png`;
       if (i === 0 || info.isMedia || /aluminium|3d print|framer|faq/i.test(info.title || '')) {
         await page.screenshot({ path: join(SHOTS, `service-fit-${shotName}`), scale: 'css' });
