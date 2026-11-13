@@ -24,7 +24,7 @@ overview:
     src: /src/content/products/120/overview/right/src.webp
     alt: Type-120 aluminium vase
     outline: false
-    gallery: shop
+    gallery: none
 detail:
   description: >-
     A single aluminium extrusion profile with a textured, architectural surface.
