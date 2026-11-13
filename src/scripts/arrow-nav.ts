@@ -80,6 +80,7 @@ export function initArrowNav(root: ParentNode = document) {
   let autoplay = false;
   let full = false;
   let fullGen = 0;
+  let mediaGen = 0;
 
   initHeroBlob(nav);
 
@@ -315,6 +316,25 @@ export function initArrowNav(root: ParentNode = document) {
     if (width() > max && full === 'View project') action.textContent = 'View';
   };
 
+  const clearGalleryMedia = () => {
+    mediaGen += 1;
+    const photo = nav.querySelector<HTMLImageElement>('[data-nav-photo]')!;
+    const clip = nav.querySelector<HTMLVideoElement>('[data-nav-video]')!;
+    photo.getAnimations().forEach((anim) => anim.cancel());
+    photo.removeAttribute('src');
+    photo.alt = '';
+    photo.style.opacity = '0';
+    photo.hidden = true;
+    clip.onloadedmetadata = null;
+    clip.onloadeddata = null;
+    clip.pause();
+    clip.removeAttribute('src');
+    clip.removeAttribute('poster');
+    clip.load();
+    clip.style.opacity = '0';
+    clip.hidden = true;
+  };
+
   const showSlide = (index: number, morph = true) => {
     const node = screen();
     if (!node || node.kind !== 'gallery' || !node.slides.length) return;
@@ -343,27 +363,65 @@ export function initArrowNav(root: ParentNode = document) {
     photo.classList.toggle('is-alpha', cutout);
     gallery.classList.toggle('is-alpha', cutout);
     photo.getAnimations().forEach((anim) => anim.cancel());
+    const gen = ++mediaGen;
+    const stillCurrent = () => gen === mediaGen && screen()?.slides[slide] === item;
     if (item.kind === 'video') {
+      photo.removeAttribute('src');
+      photo.alt = '';
+      photo.style.opacity = '0';
       photo.hidden = true;
+      const sameClip = clip.getAttribute('src') === item.src;
       clip.hidden = false;
+      clip.style.opacity = sameClip && clip.readyState >= 2 ? '' : '0';
       clip.poster = item.poster || '';
-      if (clip.getAttribute('src') !== item.src) clip.src = item.src;
+      if (!sameClip) {
+        clip.removeAttribute('src');
+        clip.load();
+        clip.src = item.src;
+      }
+      const revealClip = () => {
+        if (!stillCurrent()) return;
+        clip.style.opacity = '';
+      };
+      if (clip.readyState >= 2) revealClip();
+      else {
+        clip.onloadeddata = () => {
+          clip.onloadeddata = null;
+          revealClip();
+        };
+      }
       clip.play().catch(() => {});
+      clip.onloadedmetadata = () => {
+        if (!stillCurrent() || !clip.videoWidth) return;
+        fitGallery({ width: clip.videoWidth, height: clip.videoHeight }, true);
+      };
     } else {
+      clip.onloadedmetadata = null;
+      clip.onloadeddata = null;
       clip.pause();
       clip.hidden = true;
       clip.removeAttribute('src');
+      clip.removeAttribute('poster');
+      clip.load();
+      clip.style.opacity = '0';
+      const samePhoto = photo.getAttribute('src') === item.src && photo.complete && photo.naturalWidth > 0;
       photo.hidden = false;
       photo.fetchPriority = 'high';
-      photo.src = item.src;
       photo.alt = item.alt;
-    }
-    photo.style.opacity = '';
-    if (item.kind === 'video') {
-      clip.onloadedmetadata = () => {
-        if (screen()?.slides[slide] !== item || !clip.videoWidth) return;
-        fitGallery({ width: clip.videoWidth, height: clip.videoHeight }, true);
+      const revealPhoto = () => {
+        if (!stillCurrent()) return;
+        photo.style.opacity = '';
       };
+      if (!samePhoto) {
+        // Drop the previous bitmap before the next src paints, so another
+        // category's last frame never lingers in an empty gallery.
+        photo.style.opacity = '0';
+        photo.removeAttribute('src');
+        photo.addEventListener('load', revealPhoto, { once: true });
+        photo.addEventListener('error', revealPhoto, { once: true });
+        photo.src = item.src;
+      }
+      if (photo.complete && photo.naturalWidth > 0) revealPhoto();
     }
     fitGallery(item, morph && !full);
     title.textContent = item.title;
@@ -929,12 +987,17 @@ export function initArrowNav(root: ParentNode = document) {
     window.scrollTo(0, 0);
     const enteringGallery = !wasGallery && nav.dataset.kind === 'gallery';
     const outward = depthOf(id) > depthOf(fromId);
-    if (enteringGallery) {
-      galleryEl().hidden = false;
-      galleryEl().style.opacity = '1';
-      if (!reduce) faceEl().hidden = false;
+    if (screen()?.kind === 'gallery') {
+      // Empty before the stage shows / swaps, so the last category never
+      // flashes while the next slide loads.
+      clearGalleryMedia();
+      if (enteringGallery) {
+        galleryEl().hidden = false;
+        galleryEl().style.opacity = '1';
+        if (!reduce) faceEl().hidden = false;
+      }
+      showSlide(0, false);
     }
-    if (screen()?.kind === 'gallery') showSlide(0, false);
     placeGalleryArrows();
     placeCopy();
     placeCaption();
