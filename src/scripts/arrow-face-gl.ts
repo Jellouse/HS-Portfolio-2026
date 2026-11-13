@@ -45,12 +45,15 @@ void main(){
   gl_FragColor=vec4(s/w,0.,0.,1.);
 }`;
 
-// Alpha cut and flood, at device resolution.
-const CUT = `precision highp float;varying vec2 v;
+// Alpha cut and flood, at device resolution. The SVG table is a hard cut;
+// a 1-pixel ramp here keeps that threshold without stair-stepped edges.
+const CUT = `#extension GL_OES_standard_derivatives : enable
+precision highp float;varying vec2 v;
 uniform sampler2D tex;uniform vec4 roi;uniform vec2 size,cover;uniform vec3 colour;uniform float cut;
 void main(){
   vec2 d=vec2(v.x,1.-v.y)*size;
-  float a=step(cut,texture2D(tex,(d-roi.xy)/roi.zw*cover).r);
+  float s=texture2D(tex,(d-roi.xy)/roi.zw*cover).r;
+  float a=clamp((s-cut)/max(fwidth(s),1e-6)+.5,0.,1.);
   gl_FragColor=vec4(colour*a,a);
 }`;
 
@@ -161,6 +164,8 @@ export async function mountFaceGL(svg: SVGSVGElement, host: HTMLElement, maxW: n
   }
   if (!gl) return fail('no-webgl');
   if (gl.isContextLost()) return fail('context-lost');
+  // Needed for fwidth() in the cut shader, so the outline can be antialiased.
+  if (!gl.getExtension('OES_standard_derivatives')) return fail('no-derivatives');
 
   const offsetEl = svg.querySelector('feOffset');
   const off = [num(offsetEl, 'dx', 0), num(offsetEl, 'dy', 0)];
