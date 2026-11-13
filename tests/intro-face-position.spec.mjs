@@ -1,4 +1,4 @@
-// During the landing intro the SVG face must sit in the large centered
+// During the landing intro the GPU face must sit in the large centered
 // placement, then scale in place into the small logo. It must not already
 // be parked at the top of the viewport as a header logo.
 //
@@ -60,11 +60,9 @@ const probe = () => {
 // The intro holds up to 400ms, then runs 7200ms. Copy/pills fade in at 4400ms.
 // Sample once while the face is still large, and once after the landing is
 // visible, so a canvas pinned to the top cannot hide behind the early crop.
-// The SVG filter can spend the full hold and miss a tight 5200ms sample, so
-// the revealed check waits a little past that boundary.
 const SAMPLES = [
   { name: 'early', waitMs: 1600, wantControls: false },
-  { name: 'revealed', waitMs: 5800, wantControls: true },
+  { name: 'revealed', waitMs: 5200, wantControls: true },
 ];
 
 const run = async (type, engine, size, label) => {
@@ -99,7 +97,7 @@ const run = async (type, engine, size, label) => {
       failures.push(`${tag} ${sample.name}: intro already over`);
       continue;
     }
-    if (mid.path !== 'svg') failures.push(`${tag} ${sample.name}: expected SVG face, got ${mid.path || 'none'}`);
+    if (mid.path !== 'gl') failures.push(`${tag} ${sample.name}: expected GPU face, got ${mid.path || 'none'}`);
     if (mid.cx == null || mid.cy == null) {
       failures.push(`${tag} ${sample.name}: no visible face box`);
       continue;

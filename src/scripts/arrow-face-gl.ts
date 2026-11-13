@@ -37,7 +37,7 @@ uniform sampler2D tex;uniform vec2 dir,cover;uniform float sigma;
 void main(){
   vec2 c=v*cover;
   float r=ceil(sigma*3.),s=texture2D(tex,c).r,w=1.;
-  for(int j=0;j<16;j++){
+  for(int j=0;j<32;j++){
     float i=float(j)*2.+1.;if(i>r)break;
     float k1=exp(-i*i/(2.*sigma*sigma)),k2=exp(-(i+1.)*(i+1.)/(2.*sigma*sigma)),k=k1+k2,o=i+k2/k;
     s+=k*(texture2D(tex,c+dir*o).r+texture2D(tex,c-dir*o).r);w+=2.*k;
@@ -45,19 +45,26 @@ void main(){
   gl_FragColor=vec4(s/w,0.,0.,1.);
 }`;
 
-// Alpha cut and flood, at device resolution.
-const CUT = `precision highp float;varying vec2 v;
+// Alpha cut and flood, at device resolution. The SVG table is a hard cut;
+// a 1-pixel ramp here keeps that threshold without stair-stepped edges.
+const CUT = `#extension GL_OES_standard_derivatives : enable
+precision highp float;varying vec2 v;
 uniform sampler2D tex;uniform vec4 roi;uniform vec2 size,cover;uniform vec3 colour;uniform float cut;
 void main(){
   vec2 d=vec2(v.x,1.-v.y)*size;
-  float a=step(cut,texture2D(tex,(d-roi.xy)/roi.zw*cover).r);
+  float s=texture2D(tex,(d-roi.xy)/roi.zw*cover).r;
+  float a=clamp((s-cut)/max(fwidth(s),1e-6)+.5,0.,1.);
   gl_FragColor=vec4(colour*a,a);
 }`;
 
-/** Field pixels per sigma. Below this the blur runs at device resolution. */
-const FIELD_SIGMA = 4;
-/** Noise texels per viewBox unit. The noise is smooth at this scale. */
+/** Field pixels per sigma. Below this the blur runs at device resolution.
+ *  6 keeps the goo outline sharper than the cheap default of 4, without
+ *  dropping the intro under 50 fps. */
+const FIELD_SIGMA = 6;
+/** Default noise texels per viewBox unit. Raised at mount to match the
+ *  largest intro scale, so the grain stays as fine as the SVG filter. */
 const NOISE_RES = 2;
+const NOISE_RES_MAX = 8;
 const MASK_PAD = 2;
 
 export type FaceFrame = {
@@ -161,6 +168,8 @@ export async function mountFaceGL(svg: SVGSVGElement, host: HTMLElement, maxW: n
   }
   if (!gl) return fail('no-webgl');
   if (gl.isContextLost()) return fail('context-lost');
+  // Needed for fwidth() in the cut shader, so the outline can be antialiased.
+  if (!gl.getExtension('OES_standard_derivatives')) return fail('no-derivatives');
 
   const offsetEl = svg.querySelector('feOffset');
   const off = [num(offsetEl, 'dx', 0), num(offsetEl, 'dy', 0)];
@@ -171,19 +180,28 @@ export async function mountFaceGL(svg: SVGSVGElement, host: HTMLElement, maxW: n
   // Everything the displaced, blurred face can touch, in viewBox units.
   const reach = maxDisp / 2 + maxBlur * 3 + 2;
   const nreg = [vb.x - reach, vb.y - reach, vb.width + 2 * reach, vb.height + 2 * reach];
-  const noise = await turbulenceTextureAsync(turbulenceParams(turb), nreg, NOISE_RES);
+  const native = window.devicePixelRatio || 1;
+  const phone = typeof matchMedia === 'function' && matchMedia('(max-width: 759px)').matches;
+  const dprCap = Math.min(native, phone ? 3 : 2);
+  const unitGuess = Math.max(maxW / vb.width, maxH / vb.height) * dprCap;
+  const noiseRes = Math.max(NOISE_RES, Math.min(NOISE_RES_MAX, Math.round(unitGuess / 2)));
+  const noise = await turbulenceTextureAsync(turbulenceParams(turb), nreg, noiseRes);
   if (gl.isContextLost()) return fail('context-lost');
 
   const padCssX = (maxDisp / 2 + maxBlur * 3 + 2) * (maxW / vb.width);
   const padCssY = (maxDisp / 2 + maxBlur * 3 + 2) * (maxH / vb.height);
   const boxW = Math.max(1, Math.ceil(maxW + 2 * padCssX));
   const boxH = Math.max(1, Math.ceil(maxH + 2 * padCssY));
-  // Keep the output sharp on phones; cap the desktop intro so a 7x-wide face
-  // does not run a multi-megapixel cut every frame.
+  // Keep the output at native sharpness on phones (up to 3x). Cap the desktop
+  // intro so a 7x-wide face does not run a multi-megapixel cut every frame.
+  // The previous shared budget also shrinks phone dpr, because the displacement
+  // pad makes the canvas about as large as the screen.
   const area = Math.max(1, boxW * boxH);
-  const budget = Math.max(1280 * 720, (window.innerWidth || boxW) * (window.innerHeight || boxH));
-  let dpr = Math.min(window.devicePixelRatio || 1, 2);
-  if (area * dpr * dpr > budget) dpr = Math.max(1, Math.sqrt(budget / area));
+  let dpr = dprCap;
+  if (!phone) {
+    const budget = Math.max(1280 * 720, (window.innerWidth || boxW) * (window.innerHeight || boxH));
+    if (area * dpr * dpr > budget) dpr = Math.max(1, Math.sqrt(budget / area));
+  }
 
   // Source alpha at the largest device scale the intro shows.
   const maxTex = Math.min(4096, gl.getParameter(gl.MAX_TEXTURE_SIZE) as number);
@@ -305,6 +323,7 @@ export async function mountFaceGL(svg: SVGSVGElement, host: HTMLElement, maxW: n
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
   };
 
+  let prevClear: number[] | null = null;
   const draw = ({ w, h, disp, blur }: FaceFrame) => {
     if (!W) return;
     // Face box in device px. The face sits at the centre of the slot.
@@ -319,11 +338,31 @@ export async function mountFaceGL(svg: SVGSVGElement, host: HTMLElement, maxW: n
     const y1 = Math.min(H, Math.ceil(oy + (vb.y + vb.height + ext) * ay));
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     gl.viewport(0, 0, W, H);
-    gl.disable(gl.SCISSOR_TEST);
+    if (x1 <= x0 || y1 <= y0) {
+      if (prevClear) {
+        gl.enable(gl.SCISSOR_TEST);
+        gl.scissor(prevClear[0], prevClear[1], prevClear[2], prevClear[3]);
+        gl.clearColor(0, 0, 0, 0);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        prevClear = null;
+      }
+      return;
+    }
+    const roi = [x0, y0, x1 - x0, y1 - y0];
+    const clearY = H - y1;
+    const clear = prevClear
+      ? [
+          Math.min(prevClear[0], x0),
+          Math.min(prevClear[1], clearY),
+          Math.max(prevClear[0] + prevClear[2], x1) - Math.min(prevClear[0], x0),
+          Math.max(prevClear[1] + prevClear[3], H - y0) - Math.min(prevClear[1], clearY),
+        ]
+      : [x0, clearY, roi[2], roi[3]];
+    gl.enable(gl.SCISSOR_TEST);
+    gl.scissor(clear[0], clear[1], clear[2], clear[3]);
     gl.clearColor(0, 0, 0, 0);
     gl.clear(gl.COLOR_BUFFER_BIT);
-    if (x1 <= x0 || y1 <= y0) return;
-    const roi = [x0, y0, x1 - x0, y1 - y0];
+    prevClear = [x0, clearY, roi[2], roi[3]];
 
     // The blur is band-limited, so the field it blurs only needs FIELD_SIGMA
     // pixels per sigma. The cut below runs at device resolution.
