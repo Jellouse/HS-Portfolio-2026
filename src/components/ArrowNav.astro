@@ -7,7 +7,6 @@ interface Props {
 }
 
 const { tree } = Astro.props;
-const first = tree.nodes.find((node) => node.kind === 'gallery')?.slides[0];
 ---
 
 <script is:inline>
@@ -60,7 +59,7 @@ const first = tree.nodes.find((node) => node.kind === 'gallery')?.slides[0];
       </div>
       <div class="arrow-gallery" data-nav-gallery hidden>
         <div class="arrow-gallery-media">
-          <img src={first?.src} alt={first?.alt ?? ''} data-nav-photo />
+          <img alt="" data-nav-photo hidden />
           <video data-nav-video hidden muted loop playsinline preload="auto"></video>
         </div>
         <div class="arrow-dots" data-nav-dots></div>
