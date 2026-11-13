@@ -111,14 +111,15 @@ function compile(gl: WebGLRenderingContext, fs: string) {
   return p;
 }
 
-function texture(gl: WebGLRenderingContext, source: TexImageSource | null, w = 0, h = 0, data: ArrayBufferView | null = null) {
+function texture(gl: WebGLRenderingContext, source: TexImageSource | null, w = 0, h = 0, data: ArrayBufferView | null = null, mips = false) {
   const t = gl.createTexture()!;
   gl.bindTexture(gl.TEXTURE_2D, t);
   gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
   gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
   if (source) gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, source);
   else gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, w, h, 0, gl.RGBA, gl.UNSIGNED_BYTE, data);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  if (mips) gl.generateMipmap(gl.TEXTURE_2D);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, mips ? gl.LINEAR_MIPMAP_LINEAR : gl.LINEAR);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
@@ -197,23 +198,33 @@ export async function mountFaceGL(svg: SVGSVGElement, host: HTMLElement, maxW: n
   const padCssY = (maxDisp / 2 + maxBlur * 3 + 2) * (maxH / vb.height);
   const boxW = Math.max(1, Math.ceil(maxW + 2 * padCssX));
   const boxH = Math.max(1, Math.ceil(maxH + 2 * padCssY));
-  // Keep the output at native sharpness on phones (up to 3x). Cap the desktop
-  // intro so a 7x-wide face does not run a multi-megapixel cut every frame.
-  // The previous shared budget also shrinks phone dpr, because the displacement
-  // pad makes the canvas about as large as the screen.
-  const area = Math.max(1, boxW * boxH);
-  let dpr = dprCap;
-  if (!phone) {
-    const budget = Math.max(1280 * 720, (window.innerWidth || boxW) * (window.innerHeight || boxH));
-    if (area * dpr * dpr > budget) dpr = Math.max(1, Math.sqrt(budget / area));
-  }
+  // Device px per CSS px for a canvas of this CSS size. Phones stay at native
+  // sharpness (up to 3x). On desktop a canvas as large as the screen is capped
+  // to about one device px per screen px, so the 7x-wide face does not run a
+  // multi-megapixel cut every frame. The canvas shrinks with the face (see
+  // fit() below), so once the face is small it is drawn at native dpr again:
+  // a fixed 1x canvas showed the small face as pixels on a retina screen.
+  const budget = Math.max(1280 * 720, (window.innerWidth || boxW) * (window.innerHeight || boxH));
+  const dprFor = (w: number, h: number) => {
+    if (phone) return dprCap;
+    const area = Math.max(1, w * h);
+    return area * dprCap * dprCap > budget ? Math.min(dprCap, Math.max(1, Math.sqrt(budget / area))) : dprCap;
+  };
+  let dpr = dprFor(Math.min(boxW, (window.innerWidth || boxW) + 4), Math.min(boxH, (window.innerHeight || boxH) + 4));
 
   // Source alpha at the largest device scale the intro shows.
   const maxTex = Math.min(4096, gl.getParameter(gl.MAX_TEXTURE_SIZE) as number);
   const mreg = [vb.x - MASK_PAD, vb.y - MASK_PAD, vb.width + 2 * MASK_PAD, vb.height + 2 * MASK_PAD];
-  const unitPx = Math.max(maxW / vb.width, maxH / vb.height) * dpr;
-  const mw = Math.max(64, Math.min(maxTex, Math.ceil(mreg[2] * unitPx)));
-  const mh = Math.max(64, Math.min(maxTex, Math.ceil(mreg[3] * unitPx)));
+  // At half the intro size the canvas is small enough for native dpr, so the
+  // mask holds at least that much detail as well as the largest frame's.
+  const unitPx = Math.max(maxW / vb.width, maxH / vb.height) * Math.max(dpr, dprCap / 2);
+  // Power-of-two sides, so WebGL 1 can mipmap it. The mask is drawn at the
+  // largest intro scale; once the face is small it is sampled at a fraction of
+  // that, and without mips each tap lands on a hard 0 or 1 texel: the small
+  // face's outline came out in stair steps.
+  const pot = (n: number) => Math.min(maxTex, 2 ** Math.ceil(Math.log2(Math.max(64, n))));
+  const mw = pot(mreg[2] * unitPx);
+  const mh = pot(mreg[3] * unitPx);
   const mc = document.createElement('canvas');
   mc.width = mw;
   mc.height = mh;
@@ -243,9 +254,14 @@ export async function mountFaceGL(svg: SVGSVGElement, host: HTMLElement, maxW: n
     return fail(`shader: ${(error as Error)?.message || error}`);
   }
   let maskTex: WebGLTexture;
+  // The same mask, mipmapped. Only bound once the face is small enough that
+  // the mask is shrunk on screen; mipmapped reads cost more, and the large
+  // frames are where the budget is tight.
+  let maskMip: WebGLTexture;
   let noiseTex: WebGLTexture;
   try {
     maskTex = texture(gl, mc);
+    maskMip = texture(gl, mc, 0, 0, null, true);
     noiseTex = texture(gl, null, noise.w, noise.h, noise.data);
   } catch (error) {
     return fail(`texture: ${(error as Error)?.message || error}`);
@@ -276,14 +292,20 @@ export async function mountFaceGL(svg: SVGSVGElement, host: HTMLElement, maxW: n
   let fboH = 0;
   let a: Target | null = null;
   let b: Target | null = null;
-  const size = () => {
-    if (cssW === boxW && cssH === boxH && W) return;
-    cssW = boxW;
-    cssH = boxH;
+  let prevClear: number[] | null = null;
+  const size = (nextW: number, nextH: number) => {
+    if (cssW === nextW && cssH === nextH && W) return;
+    cssW = nextW;
+    cssH = nextH;
+    dpr = dprFor(cssW, cssH);
+    // Whole device px per CSS px where it can, so the canvas maps 1:1 onto
+    // the screen and is not resampled.
     W = Math.max(1, Math.round(cssW * dpr));
     H = Math.max(1, Math.round(cssH * dpr));
     canvas.width = W;
     canvas.height = H;
+    // A resized canvas starts transparent.
+    prevClear = null;
     // Pin every side as a longhand. `inset` is a shorthand for
     // top/right/bottom/left, so setting it after left/top would clear them
     // and leave the canvas at the top of the slot (the stylesheet used to
@@ -311,8 +333,27 @@ export async function mountFaceGL(svg: SVGSVGElement, host: HTMLElement, maxW: n
     a = target(fboW, fboH);
     b = target(fboW, fboH);
   };
+  // The canvas only needs to cover the face's current reach, and never more
+  // than the screen around the slot centre. It steps down as the face
+  // shrinks, so the few resizes are cheap and the dpr can climb back to native.
+  const even = (n: number) => Math.max(2, 2 * Math.ceil(n / 2));
+  const fit = (w: number, h: number, ext: number) => {
+    const r = host.getBoundingClientRect();
+    const vw = window.innerWidth || boxW;
+    const vh = window.innerHeight || boxH;
+    const cx = r.left + r.width / 2;
+    const cy = r.top + r.height / 2;
+    const capW = 2 * Math.max(cx, vw - cx) + 4;
+    const capH = 2 * Math.max(cy, vh - cy) + 4;
+    const needW = Math.min(boxW, capW, w * (1 + (2 * (ext + 1)) / vb.width));
+    const needH = Math.min(boxH, capH, h * (1 + (2 * (ext + 1)) / vb.height));
+    return [even(needW), even(needH)];
+  };
   host.appendChild(canvas);
-  size();
+  {
+    const [w0, h0] = fit(maxW, maxH, maxDisp / 2 + maxBlur * 3 + 1);
+    size(w0, h0);
+  }
 
   const uniforms = new Map<WebGLProgram, Map<string, WebGLUniformLocation | null>>();
   const u = (p: WebGLProgram, name: string) => {
@@ -328,9 +369,19 @@ export async function mountFaceGL(svg: SVGSVGElement, host: HTMLElement, maxW: n
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
   };
 
-  let prevClear: number[] | null = null;
   const draw = ({ w, h, disp, blur }: FaceFrame) => {
     if (!W) return;
+    // Step the canvas down once the face needs well under its current size
+    // (and up, should a frame ever need more).
+    {
+      const ext0 = disp / 2 + blur * 3 + 1;
+      const needW = w * (1 + (2 * ext0) / vb.width);
+      const needH = h * (1 + (2 * ext0) / vb.height);
+      if (needW > cssW || needH > cssH || (needW < cssW * 0.7 && needH < cssH * 0.7)) {
+        const [nw, nh] = fit(w, h, ext0);
+        size(nw, nh);
+      }
+    }
     // Face box in device px. The face sits at the centre of the slot.
     const ax = (w / vb.width) * dpr;
     const ay = (h / vb.height) * dpr;
@@ -393,7 +444,11 @@ export async function mountFaceGL(svg: SVGSVGElement, host: HTMLElement, maxW: n
     gl.bindFramebuffer(gl.FRAMEBUFFER, a.fb);
     gl.useProgram(pDisp);
     gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, maskTex);
+    // Device px per mask texel. Well below one, plain reads skip texels and
+    // the outline steps. While the field is coarser than the screen (a wide
+    // blur) the blur hides that, so only the sharp, small face needs mips.
+    const pxPerTexel = Math.min(ax * (mreg[2] / mw), ay * (mreg[3] / mh));
+    gl.bindTexture(gl.TEXTURE_2D, fx === 1 && fy === 1 && pxPerTexel < 0.75 ? maskMip : maskTex);
     gl.activeTexture(gl.TEXTURE1);
     gl.bindTexture(gl.TEXTURE_2D, noiseTex);
     gl.uniform1i(u(pDisp, 'mask'), 0);
@@ -450,6 +505,7 @@ export async function mountFaceGL(svg: SVGSVGElement, host: HTMLElement, maxW: n
     a = null;
     b = null;
     gl.deleteTexture(maskTex);
+    gl.deleteTexture(maskMip);
     gl.deleteTexture(noiseTex);
     gl.getExtension('WEBGL_lose_context')?.loseContext();
   };

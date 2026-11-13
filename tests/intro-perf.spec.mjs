@@ -1,5 +1,5 @@
 // Frame timings for the homepage intro on an emulated iPhone 12.
-// Usage: npm run build && node tests/intro-perf.spec.mjs [--throttle=4] [--browser=chromium|webkit] [--runs=3] [--min-fps=50]
+// Usage: npm run build && node tests/intro-perf.spec.mjs [--throttle=4] [--browser=chromium|webkit] [--runs=3] [--min-fps=50] [--desktop]
 import { chromium, webkit } from 'playwright';
 import { createServer } from 'node:http';
 import { readFileSync, existsSync, statSync } from 'node:fs';
@@ -15,6 +15,8 @@ const BROWSER = arg('browser', 'chromium');
 const RUNS = Number(arg('runs', '3'));
 const BUDGET = Number(arg('budget', '0'));
 const MIN_FPS = Number(arg('min-fps', '0'));
+// --desktop: a 1440x900 retina laptop window instead of the phone.
+const DESKTOP = process.argv.includes('--desktop');
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.jpg': 'image/jpeg', '.webp': 'image/webp', '.png': 'image/png', '.woff2': 'font/woff2', '.json': 'application/json' };
@@ -69,13 +71,17 @@ const stats = (frames, long, from, to) => {
 
 const results = [];
 for (let run = 0; run < RUNS; run++) {
-  const ctx = await browser.newContext({
-    viewport: { width: 390, height: 844 },
-    deviceScaleFactor: 3,
-    isMobile: BROWSER !== 'firefox',
-    hasTouch: true,
-    userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1',
-  });
+  const ctx = await browser.newContext(
+    DESKTOP
+      ? { viewport: { width: 1440, height: 900 }, deviceScaleFactor: 2 }
+      : {
+          viewport: { width: 390, height: 844 },
+          deviceScaleFactor: 3,
+          isMobile: BROWSER !== 'firefox',
+          hasTouch: true,
+          userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1',
+        },
+  );
   await ctx.addInitScript(collect);
   const page = await ctx.newPage();
   if (BROWSER === 'chromium' && THROTTLE > 1) {
