@@ -1531,9 +1531,13 @@ export function initArrowNav(root: ParentNode = document) {
   function endIntro() {
     introPlaying = false;
     introDebug.end();
-    faceGL?.destroy();
+    // Whatever happened to the GPU canvas, the resting face is the plain SVG.
+    const dead = faceGL;
     faceGL = null;
-    nav.classList.remove('is-face-gl');
+    try {
+      dead?.destroy();
+    } catch {}
+    nav.classList.remove('is-face-gl', 'is-face-svg');
     const scaleEl = nav.querySelector<HTMLElement>('[data-nav-scale]');
     const blob = nav.querySelector<HTMLElement>('.arrow-face-blob');
     scaleEl?.getAnimations().forEach((anim) => anim.cancel());
@@ -1623,8 +1627,14 @@ export function initArrowNav(root: ParentNode = document) {
       const h = Math.max(1, Math.round(face * zoom));
       scaleEl.style.width = `${w}px`;
       scaleEl.style.height = `${h}px`;
-      if (faceGL) faceGL.draw({ w, h, disp: dispNow, blur: soft });
-      else if (blob) {
+      if (faceGL) {
+        try {
+          faceGL.draw({ w, h, disp: dispNow, blur: soft });
+        } catch (error) {
+          dropFaceGL(`draw: ${(error as Error)?.message || error}`);
+        }
+      }
+      if (!faceGL && blob) {
         blob.style.width = `${w}px`;
         blob.style.height = `${h}px`;
       }
@@ -1644,6 +1654,22 @@ export function initArrowNav(root: ParentNode = document) {
         const hash = location.hash.replace('#', '');
         if (hash && nodes.has(hash)) travel(hash, false);
       }
+    };
+    // The GPU dropped the canvas (or a draw threw) mid-intro: finish on the
+    // SVG filter. After the intro, endIntro has already shown the plain face.
+    const dropFaceGL = (reason: string) => {
+      if (!faceGL) return;
+      const dead = faceGL;
+      faceGL = null;
+      try {
+        dead.destroy();
+      } catch {}
+      nav.classList.remove('is-face-gl');
+      if (!introPlaying) return;
+      nav.classList.add('is-face-svg');
+      const filterId = nav.querySelector('.arrow-face-blob filter')?.id;
+      if (filterId) nav.querySelector('.arrow-face-blob g')?.setAttribute('filter', `url(#${filterId})`);
+      introDebug.path('svg', reason);
     };
     const run = () => {
       introDebug.hold(performance.now());
@@ -1675,16 +1701,7 @@ export function initArrowNav(root: ParentNode = document) {
       }
       if (mount.gl) {
         faceGL = mount.gl;
-        faceGL.canvas.addEventListener('webglcontextlost', () => {
-          if (!introPlaying || !faceGL) return;
-          // The GPU dropped the canvas mid-intro: finish on the SVG filter.
-          faceGL.destroy();
-          faceGL = null;
-          nav.classList.remove('is-face-gl');
-          nav.classList.add('is-face-svg');
-          nav.querySelector('.arrow-face-blob g')?.setAttribute('filter', `url(#${svgFace?.querySelector('filter')?.id ?? ''})`);
-          introDebug.path('svg', 'context-lost');
-        });
+        faceGL.canvas.addEventListener('webglcontextlost', () => dropFaceGL('context-lost'));
         nav.classList.add('is-face-gl');
         settleFace();
         introDebug.path('gl', '', mount.gl.setupMs, mount.gl.renderer);

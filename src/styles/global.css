@@ -3761,7 +3761,9 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
   pointer-events: none;
 }
 
-.arrow-nav.is-face-gl .arrow-face-blob {
+/* Only while the intro plays: a class left behind must never hide the
+   resting face. */
+.arrow-nav.is-intro.is-face-gl .arrow-face-blob {
   visibility: hidden;
 }
 
