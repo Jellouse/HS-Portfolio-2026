@@ -221,8 +221,12 @@ const stageWide = await page.evaluate(() => {
   const stage = document.querySelector('.service-step-stage');
   if (!stage) return null;
   const width = stage.getBoundingClientRect().width;
-  const margin = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--margin')) || 20;
-  const control = parseFloat(getComputedStyle(stage).getPropertyValue('--arrow-control')) || 48;
+  const style = getComputedStyle(stage);
+  const edge = parseFloat(style.getPropertyValue('--arrow-edge'));
+  const margin = Number.isFinite(edge) && edge > 0
+    ? edge
+    : parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--margin')) || 20;
+  const control = parseFloat(style.getPropertyValue('--arrow-control')) || 48;
   return { width, margin, control, view: window.innerWidth };
 });
 if (!stageWide) failures.push('service detail has no text stage');

@@ -28,7 +28,18 @@ const sections = d.sections.map((section, sectionIndex) => ({
   ),
 }));
 const intro = paragraphs(d.intro);
-const stepCount = 1 + (d.processSteps.length ? 1 : 0) + (intro.length ? 1 : 0) + sections.length + (d.faq.length ? 1 : 0);
+const sectionSteps = sections.flatMap((section, sectionIndex) => [
+  { kind: 'text' as const, section, sectionIndex },
+  ...section.images.map((img, imageIndex) => ({
+    kind: 'image' as const,
+    section,
+    img,
+    sectionIndex,
+    imageIndex,
+  })),
+]);
+const stepCount =
+  1 + (d.processSteps.length ? 1 : 0) + (intro.length ? 1 : 0) + sectionSteps.length + (d.faq.length ? 1 : 0);
 ---
 
 <div class="arrow-nav service-steps is-controls" data-service-steps data-no-letter data-no-reveal data-chrome-vt>
@@ -84,37 +95,35 @@ const stepCount = 1 + (d.processSteps.length ? 1 : 0) + (intro.length ? 1 : 0) +
     }
 
     {
-      sections.map((section, sectionIndex) => (
-        <section class="service-step" data-step hidden>
-          <h2 class="service-step-title">{section.heading}</h2>
-          <div class="service-step-body">
-            {paragraphs(section.body).map((paragraph) =>
-              hasBracket(paragraph) ? <p set:html={renderPlaceholders(paragraph)} /> : <Prose paragraphs={[paragraph]} />,
-            )}
-          </div>
-          {section.images.length > 0 && (
-            <div class:list={['service-step-images', { 'is-pair': section.images.length === 2 }]}>
-              {section.images.map((img, imageIndex) => {
-                const poster = img.poster ? resolveImageSource(img.poster) : undefined;
-                return (
-                  <figure class="service-step-figure">
-                    {img.video ? (
-                      <VideoFrame src={img.src} poster={poster} label={img.alt} fade={false} priority={sectionIndex === 0 && imageIndex === 0} />
-                    ) : (
-                      <BlurImage src={resolveImageSource(img.src)} alt={img.alt} sizes={imageSizes} fade={false} priority={sectionIndex === 0 && imageIndex === 0} />
-                    )}
-                    {img.caption && (
-                      <figcaption class="service-step-caption">
-                        {img.href ? <a href={img.href} set:html={renderPlaceholders(img.caption)} /> : <span set:html={renderPlaceholders(img.caption)} />}
-                      </figcaption>
-                    )}
-                  </figure>
-                );
-              })}
+      sectionSteps.map((step) =>
+        step.kind === 'text' ? (
+          <section class="service-step" data-step hidden>
+            <h2 class="service-step-title">{step.section.heading}</h2>
+            <div class="service-step-body">
+              {paragraphs(step.section.body).map((paragraph) =>
+                hasBracket(paragraph) ? <p set:html={renderPlaceholders(paragraph)} /> : <Prose paragraphs={[paragraph]} />,
+              )}
             </div>
-          )}
-        </section>
-      ))
+          </section>
+        ) : (
+          <section class="service-step is-media" data-step hidden>
+            <div class="service-step-images">
+              <figure class="service-step-figure">
+                {step.img.video ? (
+                  <VideoFrame src={step.img.src} poster={step.img.poster ? resolveImageSource(step.img.poster) : undefined} label={step.img.alt} fade={false} priority={step.sectionIndex === 0 && step.imageIndex === 0} />
+                ) : (
+                  <BlurImage src={resolveImageSource(step.img.src)} alt={step.img.alt} sizes={imageSizes} fade={false} priority={step.sectionIndex === 0 && step.imageIndex === 0} />
+                )}
+                {step.img.caption && (
+                  <figcaption class="service-step-caption">
+                    {step.img.href ? <a href={step.img.href} set:html={renderPlaceholders(step.img.caption)} /> : <span set:html={renderPlaceholders(step.img.caption)} />}
+                  </figcaption>
+                )}
+              </figure>
+            </div>
+          </section>
+        ),
+      )
     }
 
     {
@@ -123,7 +132,7 @@ const stepCount = 1 + (d.processSteps.length ? 1 : 0) + (intro.length ? 1 : 0) +
           <h2 class="service-step-title">FAQ</h2>
           <div class="service-step-body">
             {d.faq.map((item) => (
-              <details class="service-faq">
+              <details class="service-faq" name="service-faq">
                 <summary>{item.question}</summary>
                 <p class="service-step-kicker" set:html={renderPlaceholders(item.answer)} />
               </details>
