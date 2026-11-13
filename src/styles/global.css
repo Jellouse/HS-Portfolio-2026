@@ -4466,6 +4466,7 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
   height: 100%;
   justify-content: center;
   align-items: center;
+  container-type: size;
 }
 
 .service-step-figure {
@@ -4475,9 +4476,16 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
 .service-step.is-media .service-step-figure {
   display: flex;
   flex-direction: column;
-  min-height: 0;
+  align-items: center;
+  width: fit-content;
+  max-width: 100%;
   max-height: 100%;
-  width: 100%;
+  height: auto;
+  --caption-h: 0px;
+}
+
+.service-step.is-media .service-step-figure:has(.service-step-caption) {
+  --caption-h: calc(var(--space-sm) + 1lh);
 }
 
 .service-step-figure .frame {
@@ -4487,13 +4495,13 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
 }
 
 .service-step.is-media .frame {
-  flex: 1 1 auto;
-  min-width: 0;
-  min-height: 0;
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  flex: none;
+  width: auto;
+  height: min(calc(100cqh - var(--caption-h, 0px)), calc(100cqw / var(--media-ratio)));
+  max-width: 100cqw;
+  aspect-ratio: var(--media-ratio);
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
 }
 
 .service-step-figure .frame.is-video {
@@ -4501,9 +4509,10 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
 }
 
 .service-step.is-media .frame.is-video {
-  width: 100%;
-  height: auto;
-  max-height: 100%;
+  aspect-ratio: var(--media-ratio, 16 / 9);
+  height: min(calc(100cqh - var(--caption-h, 0px)), calc(100cqw / var(--media-ratio, 1.777777)));
+  width: auto;
+  max-width: 100cqw;
 }
 
 .service-step-figure .frame :is(img, picture, video) {
@@ -4514,10 +4523,9 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
 
 .service-step.is-media .frame img,
 .service-step.is-media .frame video {
-  width: auto;
-  height: auto;
-  max-width: 100%;
-  max-height: 100%;
+  display: block;
+  width: 100%;
+  height: 100%;
   object-fit: contain;
 }
 

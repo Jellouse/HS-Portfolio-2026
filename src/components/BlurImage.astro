@@ -31,9 +31,13 @@ const placeholder =
         quality: 40,
       });
 const frameClass = ['frame', { 'scroll-media': fade, 'is-plain': plain, 'is-flush': flush, 'is-outlined': outline, 'is-alpha': alpha }];
+const styleBits = [
+  placeholder ? `background-image:url('${placeholder.src}')` : '',
+  !remote ? `--media-ratio:${src.width / src.height}` : '',
+].filter(Boolean);
 ---
 
-<div class:list={frameClass} style={placeholder ? `background-image:url('${placeholder.src}')` : undefined}>
+<div class:list={frameClass} style={styleBits.length ? styleBits.join(';') : undefined}>
   {
     remote ? (
       <img

@@ -56,6 +56,21 @@ const inspect = () => {
   const overflowX = stage.scrollWidth - stage.clientWidth;
   const style = getComputedStyle(stage);
   const title = (step.querySelector('.service-step-title, .service-step-kicker, .service-step-body')?.textContent || '').trim().split('\n')[0].slice(0, 40);
+  const frame = step.querySelector('.frame');
+  const media = step.querySelector('.frame img, .frame video');
+  let mediaRatio = null;
+  if (frame && media) {
+    const box = frame.getBoundingClientRect();
+    const natural = media.tagName === 'VIDEO'
+      ? { w: media.videoWidth, h: media.videoHeight }
+      : { w: media.naturalWidth, h: media.naturalHeight };
+    mediaRatio = {
+      frame: box.height > 1 ? box.width / box.height : 0,
+      natural: natural.h > 0 ? natural.w / natural.h : 0,
+      frameW: box.width,
+      frameH: box.height,
+    };
+  }
   return {
     title,
     isMedia: step.classList.contains('is-media'),
@@ -74,6 +89,7 @@ const inspect = () => {
     left: left ? left.getBoundingClientRect().left : null,
     right: right ? window.innerWidth - right.getBoundingClientRect().right : null,
     stepCount: root.querySelectorAll('[data-step]').length,
+    mediaRatio,
   };
 };
 
@@ -88,7 +104,17 @@ for (const view of views) {
     if (count < 2) failures.push(`${view.name} ${entry.id}: expected several steps, got ${count}`);
     for (let i = 0; i < count; i++) {
       if (i > 0) await page.click("[data-service-steps] .arrow-pill[data-dir='right']");
-      await page.waitForTimeout(80);
+      await page.waitForFunction(() => {
+        const step = document.querySelector('[data-service-steps] .service-step:not([hidden])');
+        if (!step) return false;
+        if (!step.classList.contains('is-media')) return true;
+        const frame = step.querySelector('.frame');
+        const media = step.querySelector('.frame img, .frame video');
+        if (!frame || !media) return false;
+        if (media.tagName === 'IMG' && media.naturalWidth < 2) return false;
+        const box = frame.getBoundingClientRect();
+        return box.width > 40 && box.height > 40;
+      }, { timeout: 10000 });
       const info = await page.evaluate(inspect);
       const label = `${view.name} ${entry.id} step ${i + 1}${info?.title ? ` (${info.title})` : ''}`;
       if (!info) {
@@ -108,6 +134,16 @@ for (const view of views) {
       }
       if (!info.isMedia && info.hasImages) {
         failures.push(`${label}: text step also includes an image`);
+      }
+      if (info.isMedia) {
+        if (!info.mediaRatio || info.mediaRatio.frameW < 40 || info.mediaRatio.frameH < 40) {
+          failures.push(`${label}: media frame is missing or collapsed (${info.mediaRatio?.frameW ?? 0}×${info.mediaRatio?.frameH ?? 0})`);
+        } else if (info.mediaRatio.natural > 0) {
+          const drift = Math.abs(info.mediaRatio.frame - info.mediaRatio.natural) / info.mediaRatio.natural;
+          if (drift > 0.03) {
+            failures.push(`${label}: frame ratio ${info.mediaRatio.frame.toFixed(3)} does not match image ${info.mediaRatio.natural.toFixed(3)}`);
+          }
+        }
       }
       const shotName = `${view.name}-${entry.id}-step-${String(i + 1).padStart(2, '0')}.png`;
       if (i === 0 || info.isMedia || /aluminium|3d print|framer|faq/i.test(info.title || '')) {
