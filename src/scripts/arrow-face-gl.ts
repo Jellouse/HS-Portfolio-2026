@@ -22,8 +22,13 @@ float at(vec2 d){
   float k=max(t.b,1./255.)*255.;
   vec2 n=floor(t.rg*k+.5)/k;
   vec2 uv=(p+disp*(n-.5)-mreg.xy)/mreg.zw;
-  if(uv.x<0.||uv.y<0.||uv.x>1.||uv.y>1.)return 0.;
-  return texture2D(mask,uv).a;
+  // No early return before the read: the mask is mipmapped, and a texture
+  // read after a branch some pixels of a 2x2 quad skipped has undefined
+  // derivatives. Apple GPUs then pick a coarse mip on the pixels next to
+  // uv = 0, and a faint 1px line showed beside the face. The mask edge is
+  // transparent (MASK_PAD) and clamped, so outside reads are 0 anyway.
+  vec2 inside=step(vec2(0.),uv)*step(uv,vec2(1.));
+  return texture2D(mask,uv).a*inside.x*inside.y;
 }
 void main(){
   vec2 d=roi.xy+v*roi.zw;
@@ -33,14 +38,16 @@ void main(){
 
 // Separable Gaussian with paired linear taps.
 const BLUR = `precision highp float;varying vec2 v;
-uniform sampler2D tex;uniform vec2 dir,cover;uniform float sigma;
+uniform sampler2D tex;uniform vec2 dir,cover,lim;uniform float sigma;
+// lim: the last written texel centre. The field targets are reused at their
+// largest size, so texels past it hold an earlier, larger frame.
 void main(){
   vec2 c=v*cover;
   float r=ceil(sigma*3.),s=texture2D(tex,c).r,w=1.;
   for(int j=0;j<32;j++){
     float i=float(j)*2.+1.;if(i>r)break;
     float k1=exp(-i*i/(2.*sigma*sigma)),k2=exp(-(i+1.)*(i+1.)/(2.*sigma*sigma)),k=k1+k2,o=i+k2/k;
-    s+=k*(texture2D(tex,c+dir*o).r+texture2D(tex,c-dir*o).r);w+=2.*k;
+    s+=k*(texture2D(tex,min(c+dir*o,lim)).r+texture2D(tex,c-dir*o).r);w+=2.*k;
   }
   gl_FragColor=vec4(s/w,0.,0.,1.);
 }`;
@@ -49,10 +56,10 @@ void main(){
 // a 1-pixel ramp here keeps that threshold without stair-stepped edges.
 const CUT = `#extension GL_OES_standard_derivatives : enable
 precision highp float;varying vec2 v;
-uniform sampler2D tex;uniform vec4 roi;uniform vec2 size,cover;uniform vec3 colour;uniform float cut;
+uniform sampler2D tex;uniform vec4 roi;uniform vec2 size,cover,lim;uniform vec3 colour;uniform float cut;
 void main(){
   vec2 d=vec2(v.x,1.-v.y)*size;
-  float s=texture2D(tex,(d-roi.xy)/roi.zw*cover).r;
+  float s=texture2D(tex,min((d-roi.xy)/roi.zw*cover,lim)).r;
   float a=clamp((s-cut)/max(fwidth(s),1e-6)+.5,0.,1.);
   gl_FragColor=vec4(colour*a,a);
 }`;
@@ -437,6 +444,7 @@ export async function mountFaceGL(svg: SVGSVGElement, host: HTMLElement, maxW: n
     ensureField(lw, lh);
     if (!a || !b) return;
     const cover = [lw / fboW, lh / fboH];
+    const lim = [(lw - 0.5) / fboW, (lh - 0.5) / fboH];
     const stepX = roi[2] / lw;
     const stepY = roi[3] / lh;
 
@@ -467,6 +475,7 @@ export async function mountFaceGL(svg: SVGSVGElement, host: HTMLElement, maxW: n
       gl.useProgram(pBlur);
       gl.uniform1i(u(pBlur, 'tex'), 0);
       gl.uniform2f(u(pBlur, 'cover'), cover[0], cover[1]);
+      gl.uniform2f(u(pBlur, 'lim'), lim[0], lim[1]);
       gl.activeTexture(gl.TEXTURE0);
       gl.bindFramebuffer(gl.FRAMEBUFFER, b.fb);
       gl.bindTexture(gl.TEXTURE_2D, a.t);
@@ -492,6 +501,7 @@ export async function mountFaceGL(svg: SVGSVGElement, host: HTMLElement, maxW: n
     gl.uniform4f(u(pCut, 'roi'), roi[0], roi[1], roi[2], roi[3]);
     gl.uniform2f(u(pCut, 'size'), W, H);
     gl.uniform2f(u(pCut, 'cover'), cover[0], cover[1]);
+    gl.uniform2f(u(pCut, 'lim'), lim[0], lim[1]);
     gl.uniform3f(u(pCut, 'colour'), rgb[0], rgb[1], rgb[2]);
     gl.uniform1f(u(pCut, 'cut'), cut);
     quad(pCut);

@@ -1,7 +1,9 @@
 // The intro face stays whole through the shrink and the small face is there
 // after it, on desktop and phone. Catches a face clipped by a hard edge (a
 // GPU pass drawing into a stale region) or a face that vanishes mid-intro.
-// Fake clock, screenshots, red pixels measured against the face slot.
+// Also catches stray pixels near the face that are not part of it (a
+// faint 1px line beside the face). Fake clock, screenshots, red pixels
+// measured against the face slot.
 // Usage: node tests/intro-face-whole.spec.mjs [--browser=chromium|webkit]
 import { chromium, webkit } from 'playwright';
 import { createServer } from 'node:http';
@@ -29,7 +31,7 @@ const SIZES = [
   { label: 'desktop-1x', width: 1440, height: 900, dpr: 1 },
   { label: 'phone', width: 390, height: 844, dpr: 3 },
 ];
-const TIMES = [300, 900, 1500, 2100, 2700, 3300, 3900, 4500, 5100, 5700, 6300, 8200];
+const TIMES = [300, 900, 1500, 2100, 2700, 3300, 3900, 4500, 5100, 5400, 5700, 6000, 6300, 6600, 6900, 8200];
 
 // Red face pixels, in CSS px.
 const measure = async (buf, dpr) => {
@@ -47,8 +49,53 @@ const measure = async (buf, dpr) => {
       }
     }
   }
-  return n ? { n, x0: x0 / dpr, x1: x1 / dpr, y0: y0 / dpr, y1: y1 / dpr } : { n: 0 };
+  if (!n) return { n: 0 };
+  // Stray ink: anything off the white page within STRAY_PAD CSS px of the
+  // face that does not touch the face. The rest of the UI is hidden.
+  const pad = STRAY_PAD * dpr;
+  const X0 = Math.max(0, x0 - pad), X1 = Math.min(info.width - 1, x1 + pad);
+  const Y0 = Math.max(0, y0 - pad), Y1 = Math.min(info.height - 1, y1 + pad);
+  const rw = X1 - X0 + 1, rh = Y1 - Y0 + 1;
+  const ink = new Uint8Array(rw * rh);
+  const stack = [];
+  for (let y = Y0; y <= Y1; y++) {
+    for (let x = X0; x <= X1; x++) {
+      const i = (y * info.width + x) * info.channels;
+      const off = Math.max(255 - data[i], 255 - data[i + 1], 255 - data[i + 2]);
+      if (off <= 4) continue;
+      const k = (y - Y0) * rw + (x - X0);
+      ink[k] = 1;
+      if (data[i] > 120 && data[i + 1] < 90 && data[i + 2] < 90) {
+        ink[k] = 2;
+        stack.push(k);
+      }
+    }
+  }
+  while (stack.length) {
+    const k = stack.pop();
+    const x = k % rw, y = (k / rw) | 0;
+    for (let dy = -1; dy <= 1; dy++) {
+      for (let dx = -1; dx <= 1; dx++) {
+        const nx = x + dx, ny = y + dy;
+        if (nx < 0 || ny < 0 || nx >= rw || ny >= rh) continue;
+        const j = ny * rw + nx;
+        if (ink[j] === 1) {
+          ink[j] = 2;
+          stack.push(j);
+        }
+      }
+    }
+  }
+  let stray = 0, sx = -1, sy = -1;
+  for (let k = 0; k < ink.length; k++) {
+    if (ink[k] !== 1) continue;
+    stray++;
+    if (sx < 0) { sx = (k % rw) + X0; sy = ((k / rw) | 0) + Y0; }
+  }
+  return { n, x0: x0 / dpr, x1: x1 / dpr, y0: y0 / dpr, y1: y1 / dpr, stray, strayAt: stray ? [Math.round(sx / dpr), Math.round(sy / dpr)] : null };
 };
+const STRAY_PAD = 24;
+const HIDE_UI = `.arrow-copy, .arrow-caption, .arrow-pill, .arrow-back, .arrow-hint, .arrow-project, .intro-debug { visibility: hidden !important; }`;
 
 const failures = [];
 for (const name of BROWSERS) {
@@ -62,6 +109,22 @@ for (const name of BROWSERS) {
     await page.clock.pauseAt(new Date('2026-11-11T13:00:01+09:00'));
     await page.goto('http://127.0.0.1:4337/?t=12:00', { waitUntil: 'load' });
     await page.evaluate(() => document.fonts.ready);
+    await page.addStyleTag({ content: HIDE_UI });
+    // SELFTEST=1: draw a faint 1px line 3px left of the face slot, which the
+    // stray check must catch.
+    if (process.env.SELFTEST) {
+      await page.evaluate(() => {
+        const el = document.createElement('div');
+        el.style.cssText = 'position:fixed;width:1px;background:rgba(183,6,6,.35);z-index:9;pointer-events:none';
+        document.body.append(el);
+        const tick = () => {
+          const r = document.querySelector('.arrow-face-scale')?.getBoundingClientRect();
+          if (r) Object.assign(el.style, { left: `${r.left - 3}px`, top: `${r.top}px`, height: `${r.height}px` });
+          requestAnimationFrame(tick);
+        };
+        tick();
+      });
+    }
     let at = 0;
     const rows = [];
     for (const t of TIMES) {
@@ -78,6 +141,7 @@ for (const name of BROWSERS) {
       const tag = `${name} ${size.label} t=${t}`;
       if (!slot) { failures.push(`${tag}: no face slot`); continue; }
       if (!m.n) { failures.push(`${tag}: no face on screen`); continue; }
+      if (m.stray) failures.push(`${tag}: ${m.stray} stray device px near the face (first at ${m.strayAt.join(',')} CSS px)`);
       // Face drawn wider than the screen is clipped by the viewport, not by us.
       const left = m.x0 > 1 ? slot.cx - m.x0 : null;
       const right = m.x1 < size.width - 2 ? m.x1 - slot.cx : null;
