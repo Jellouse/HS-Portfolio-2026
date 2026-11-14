@@ -50,7 +50,7 @@ These were already shared. Pages and other components keep using them.
 | Info | `src/components/Info.astro` | `items` | `/work/:slug`, `/shop/:slug` |
 | Header | `src/components/Header.astro` | `site` | `/` |
 | Footer | `src/components/Footer.astro` | `site` | every page, through Base |
-| Seo | `src/components/Seo.astro` | `title`, `description`, `image?`, `type?`, `jsonLd?`, `noindex?` | every page, through Base |
+| Seo | `src/components/Seo.astro` | `title`, `description`, `type?`, `jsonLd?`, `noindex?` | every page, through Base |
 | ContactSheet | `src/components/ContactSheet.astro` | `email` | every page, through Base |
 | ContactDrawer | `src/components/ContactDrawer.tsx` | `email` | every page, through ContactSheet |
 | Peeps | `src/components/Peeps.astro` | `maxH?` | every page, through Footer |

@@ -158,7 +158,7 @@ export const existing = [
   { name: 'ProjectCard', file: 'src/components/ProjectCard.astro', props: ['project: ProjectEntry', 'priority?: boolean'], pages: ['/'] },
   { name: 'ProjectFeed', file: 'src/components/ProjectFeed.astro', props: ['projects: ProjectEntry[]', 'about: string[]'], pages: ['/'] },
   { name: 'ProjectHero', file: 'src/components/ProjectHero.astro', props: ['title: string', 'years?: string', 'summary?: string'], pages: ['/work/:slug'] },
-  { name: 'Seo', file: 'src/components/Seo.astro', props: ['title', 'description', 'image?', 'type?', 'jsonLd?', 'noindex?'], pages: ['every page, through Base'] },
+  { name: 'Seo', file: 'src/components/Seo.astro', props: ['title', 'description', 'type?', 'jsonLd?', 'noindex?'], pages: ['every page, through Base'] },
   { name: 'SmallMenu', file: 'src/components/SmallMenu.astro', props: [], pages: [] },
   { name: 'TextBlock', file: 'src/components/TextBlock.astro', props: ['text: string', 'heading?: string', 'year?: string'], pages: ['/work/:slug'] },
   { name: 'VideoBlock', file: 'src/components/VideoBlock.astro', props: ['src', 'poster?', 'label?', 'frame?', 'flush?', 'outline?'], pages: ['/work/:slug'] },

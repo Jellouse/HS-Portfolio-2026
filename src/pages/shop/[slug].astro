@@ -36,9 +36,6 @@ const info = [
   { label: 'Shipping', value: SHIPPING },
 ];
 
-const packshot = images.find((i) => /packshot/i.test(i.alt)) ?? images[0];
-const packshotSrc = packshot ? resolveImageSource(packshot.src) : undefined;
-const ogImage = packshotSrc && typeof packshotSrc !== 'string' ? packshotSrc : undefined;
 const site = Astro.site!;
 const imageUrls = await Promise.all(
   images.map(async (i) => {
@@ -62,7 +59,6 @@ const half = '(min-width: 760px) 272px, calc((100vw - 48px) / 2)';
 <Base
   title={d.seo.title || `${d.name} · Industrial Bloom · Humansize`}
   description={d.seo.description || d.description}
-  image={ogImage}
   jsonLd={jsonLd}
 >
   <article class="shop-detail page-grid" data-slug={product.id}>

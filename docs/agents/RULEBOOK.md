@@ -140,7 +140,7 @@ Update `docs/agents/known-drift.json` only when Johann has accepted a deviation,
 
 The pages keep these. Changing them would move the picture. They are listed so a later edit does not copy them.
 
-- Raw hex outside the `:root` tokens. The mark and peep SVGs repeat `#b70606` and `#f8f8f8`. Tool pages (canvas, admin, the upload screen, Keystatic fields) use their own greys (`#111`, `#8a8a8a`, `#1a1a1a`, and several near-whites). The contact sheet paints `#fff` again. `#ffffff` on the OG image is the same white as `--bg`.
+- Raw hex outside the `:root` tokens. The mark and peep SVGs repeat `#b70606` and `#f8f8f8`. Tool pages (canvas, admin, the upload screen, Keystatic fields) use their own greys (`#111`, `#8a8a8a`, `#1a1a1a`, and several near-whites). The contact sheet paints `#fff` again.
 - Spacing and radius pixels off the scale above. Shop and project sections use one-off distances such as 24, 32, 56, 60, 72, 86, 90, 116, 120, 128, and 136. Tool chrome uses 2px, 10px radius, and 14px padding in places. The full list is the `space` and `radius` rows in `known-drift.json`.
 - `max-width: 720px` in `src/scripts/site-scroll-motion.ts`. The layout break everywhere else is 759 / 760.
 - Durations outside the table: 350ms on the first-paint reveal, 550ms on the blur-in, 120ms on the upload progress bar, 500ms and 600ms on the mark view transitions, 60ms and 90ms on the menu delay, and the spin and wordmark timings in `src/scripts/spin-mark.ts` and `src/scripts/wordmark-intro.ts`.

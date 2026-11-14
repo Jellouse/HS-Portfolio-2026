@@ -5,7 +5,6 @@ export const prerender = true;
 import ProjectArticle from '../../components/ProjectArticle.astro';
 import Base from '../../layouts/Base.astro';
 import { absoluteUrl, getProjects, plainText, type ProjectEntry } from '../../lib/content';
-import { resolveImage } from '../../lib/images';
 import { projectJsonLd } from '../../lib/seo';
 
 export async function getStaticPaths() {
@@ -22,7 +21,6 @@ interface Props {
 
 const { project } = Astro.props;
 const summary = project.data.seoDescription?.trim() || plainText(project.data.summary);
-const image = project.data.cover ? resolveImage(project.data.cover) : undefined;
 const pageUrl = absoluteUrl(Astro.site, `/work/${project.id}/`);
 const title = `${project.data.seoTitle?.trim() || projectLabel(project.data)} · Humansize`;
 ---
@@ -30,7 +28,6 @@ const title = `${project.data.seoTitle?.trim() || projectLabel(project.data)} ·
 <Base
   title={title}
   description={summary}
-  image={image}
   type="article"
   jsonLd={projectJsonLd(project, pageUrl)}
 >
