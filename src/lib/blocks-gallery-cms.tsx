@@ -109,6 +109,41 @@ function Thumb({
   );
 }
 
+function VideoThumb({
+  src,
+  poster,
+  style,
+}: {
+  src: unknown;
+  poster?: Asset | null | undefined;
+  style?: CSSProperties;
+}) {
+  const posterUrl = useAssetUrl(poster);
+  const url = typeof src === 'string' && src.trim() ? src.trim() : null;
+
+  if (!url) {
+    return <Thumb asset={poster} style={style} />;
+  }
+
+  return (
+    <video
+      src={url}
+      poster={posterUrl || undefined}
+      muted
+      loop
+      autoPlay
+      playsInline
+      preload="metadata"
+      draggable={false}
+      style={{
+        ...thumbImg,
+        pointerEvents: 'none',
+        ...style,
+      }}
+    />
+  );
+}
+
 function blockKindLabel(props: any, discriminant: string) {
   const options = props.schema?.element?.discriminant?.options as
     | { label: string; value: string }[]
@@ -138,7 +173,7 @@ function BlockPreview({
   if (kind === 'video') {
     return (
       <div style={tileMedia}>
-        <Thumb asset={fields?.poster?.value} />
+        <VideoThumb src={fields?.src?.value} poster={fields?.poster?.value} />
         <span style={tileBadge}>{kindLabel}</span>
       </div>
     );
