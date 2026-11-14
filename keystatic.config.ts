@@ -1,6 +1,7 @@
 import { withUpload } from './src/lib/VideoUrlInput';
 import { galleryCategories } from './src/lib/gallery-categories';
 import { withImageCms } from './src/lib/image-field-cms';
+import { withBlocksGallery } from './src/lib/blocks-gallery-cms';
 import { config, fields, collection, singleton } from '@keystatic/core';
 
 const repo = 'Jellouse/HS-Portfolio-2026';
@@ -192,118 +193,120 @@ export default config({
           description:
             'Show every image in this project\'s process/ folder, sorted by file name. Upload many at once at /keystatic-upload. If the folder is empty, the Process photos below are used.',
         }),
-        blocks: fields.blocks(
-          {
-            text: {
-              label: 'Text',
-              schema: fields.object({
-                heading: fields.text({
-                  label: 'Title',
-                  description: 'Optional. Shown centred above the text, like the case title. With a title the text is set larger.',
-                }),
-                text: fields.text({
-                  label: 'Text',
-                  multiline: true,
-                  description: 'A link is [label](https://...).',
-                  validation: { isRequired: true, length: { min: 1 } },
-                }),
-              }),
-            },
-            image: {
-              label: 'Image',
-              schema: fields.object({
-                src: imageField('Image', { required: true }),
-                alt: fields.text({
-                  label: 'Alt text',
-                  description: 'Optional. Empty is allowed; fill it when the image needs a description.',
-                }),
-                gallery: gallerySelect(),
-                frame,
-                flush: fields.checkbox({
-                  label: 'Flush',
-                  defaultValue: false,
-                  description:
-                    'White or transparent edges. No rounded corners and no padding.',
-                }),
-                outline,
-              }),
-            },
-            video: {
-              label: 'Video',
-              schema: fields.object({
-                src: videoField('Video', 'mp4 or webm. Plays muted on a loop. Keep it short; H.264 MP4 plays everywhere.'),
-                poster: imageField('Poster'),
-                alt: fields.text({ label: 'Label', description: 'Optional description of the video.' }),
-                gallery: gallerySelect(),
-                frame,
-                flush: fields.checkbox({
-                  label: 'Flush',
-                  defaultValue: false,
-                  description:
-                    'White or transparent edges. No rounded corners and no padding.',
-                }),
-                outline,
-              }),
-            },
-            pair: {
-              label: 'Image pair',
-              schema: fields.object({
-                layout: fields.select({
-                  label: 'Layout',
-                  description:
-                    'Stacked shows each photo as a normal full-width image block (same look and spacing as separate Image blocks). Keystatic cannot replace one block with two in the list, so this is the supported way to un-pair.',
-                  options: [
-                    { label: 'Side by side', value: 'pair' },
-                    { label: 'Stacked like two image blocks', value: 'stack' },
-                  ],
-                  defaultValue: 'pair',
-                }),
-                left: imageField('Left image', { required: true }),
-                leftAlt: fields.text({
-                  label: 'Left alt text',
-                  description: 'Optional.',
-                }),
-                leftGallery: gallerySelect(),
-                right: imageField('Right image', { required: true }),
-                rightAlt: fields.text({
-                  label: 'Right alt text',
-                  description: 'Optional.',
-                }),
-                rightGallery: gallerySelect(),
-                frame,
-                outline,
-              }),
-            },
-            process: {
-              label: 'Process',
-              schema: fields.object({
-                images: fields.array(
-                  fields.object({
-                    src: imageField('Image', { required: true }),
-                    alt: fields.text({
-                      label: 'Alt text',
-                      description: 'Optional.',
-                    }),
-                    gallery: gallerySelect(),
-                    flush: fields.checkbox({
-                      label: 'Flush',
-                      defaultValue: false,
-                      description:
-                        'White or transparent edges. No rounded corners and no padding.',
-                    }),
-                    outline,
+        blocks: withBlocksGallery(
+          fields.blocks(
+            {
+              text: {
+                label: 'Text',
+                schema: fields.object({
+                  heading: fields.text({
+                    label: 'Title',
+                    description: 'Optional. Shown centred above the text, like the case title. With a title the text is set larger.',
                   }),
-                  {
-                    label: 'Photos',
+                  text: fields.text({
+                    label: 'Text',
+                    multiline: true,
+                    description: 'A link is [label](https://...).',
+                    validation: { isRequired: true, length: { min: 1 } },
+                  }),
+                }),
+              },
+              image: {
+                label: 'Image',
+                schema: fields.object({
+                  src: imageField('Image', { required: true }),
+                  alt: fields.text({
+                    label: 'Alt text',
+                    description: 'Optional. Empty is allowed; fill it when the image needs a description.',
+                  }),
+                  gallery: gallerySelect(),
+                  frame,
+                  flush: fields.checkbox({
+                    label: 'Flush',
+                    defaultValue: false,
                     description:
-                      'When the process folder is on, the page uses that folder. A Gallery choice here still includes the photo.',
-                    itemLabel: (props) => props.fields.alt.value || 'Photo',
-                  },
-                ),
-              }),
+                      'White or transparent edges. No rounded corners and no padding.',
+                  }),
+                  outline,
+                }),
+              },
+              video: {
+                label: 'Video',
+                schema: fields.object({
+                  src: videoField('Video', 'mp4 or webm. Plays muted on a loop. Keep it short; H.264 MP4 plays everywhere.'),
+                  poster: imageField('Poster'),
+                  alt: fields.text({ label: 'Label', description: 'Optional description of the video.' }),
+                  gallery: gallerySelect(),
+                  frame,
+                  flush: fields.checkbox({
+                    label: 'Flush',
+                    defaultValue: false,
+                    description:
+                      'White or transparent edges. No rounded corners and no padding.',
+                  }),
+                  outline,
+                }),
+              },
+              pair: {
+                label: 'Image pair',
+                schema: fields.object({
+                  layout: fields.select({
+                    label: 'Layout',
+                    description:
+                      'Stacked shows each photo as a normal full-width image block (same look and spacing as separate Image blocks). Keystatic cannot replace one block with two in the list, so this is the supported way to un-pair.',
+                    options: [
+                      { label: 'Side by side', value: 'pair' },
+                      { label: 'Stacked like two image blocks', value: 'stack' },
+                    ],
+                    defaultValue: 'pair',
+                  }),
+                  left: imageField('Left image', { required: true }),
+                  leftAlt: fields.text({
+                    label: 'Left alt text',
+                    description: 'Optional.',
+                  }),
+                  leftGallery: gallerySelect(),
+                  right: imageField('Right image', { required: true }),
+                  rightAlt: fields.text({
+                    label: 'Right alt text',
+                    description: 'Optional.',
+                  }),
+                  rightGallery: gallerySelect(),
+                  frame,
+                  outline,
+                }),
+              },
+              process: {
+                label: 'Process',
+                schema: fields.object({
+                  images: fields.array(
+                    fields.object({
+                      src: imageField('Image', { required: true }),
+                      alt: fields.text({
+                        label: 'Alt text',
+                        description: 'Optional.',
+                      }),
+                      gallery: gallerySelect(),
+                      flush: fields.checkbox({
+                        label: 'Flush',
+                        defaultValue: false,
+                        description:
+                          'White or transparent edges. No rounded corners and no padding.',
+                      }),
+                      outline,
+                    }),
+                    {
+                      label: 'Photos',
+                      description:
+                        'When the process folder is on, the page uses that folder. A Gallery choice here still includes the photo.',
+                      itemLabel: (props) => props.fields.alt.value || 'Photo',
+                    },
+                  ),
+                }),
+              },
             },
-          },
-          { label: 'Blocks' },
+            { label: 'Blocks' },
+          ),
         ),
       },
     }),
