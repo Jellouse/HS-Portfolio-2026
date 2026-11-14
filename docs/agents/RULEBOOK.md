@@ -89,6 +89,7 @@ The common pair is `var(--dur-hover)` with `var(--ease-out)`. Opacity on menus o
 | `--ease-in-out-expo` | `cubic-bezier(0.65, 0, 0.15, 1)` |
 | `--ease-drawer` | `cubic-bezier(0.32, 0.72, 0, 1)` |
 | `--ease-nav` | `cubic-bezier(0.53, 0, 0.12, 0.99)` |
+| `--ease-glance` | `cubic-bezier(0.82, 0, 0.12, 1)` (landing face glance) |
 | `--dur-fast` | 150ms |
 | `--dur-hover` | 160ms |
 | `--dur-ui` | 200ms |
@@ -101,6 +102,8 @@ The common pair is `var(--dur-hover)` with `var(--ease-out)`. Opacity on menus o
 `linear` is the timing on the delayed visibility handoff (`0s linear`). `30ms` is the reveal stagger already used on text lines. `transition: none` is the reduced-motion stop.
 
 New motion uses these tokens. A new duration or a new cubic-bezier waits for Johann.
+
+On centred marks (landing, about, services hub), the eyes glance L / R / U / D with the cursor (X diagonals), and stare forward when the pointer is on the face. The mouth stays put. Motion uses `--ease-glance` and `--dur-ui` (`src/scripts/face-glance.ts`). The resting glance layer only appears after the intro.
 
 The face, back control, and left/right text pills share view-transition names so they morph the same way on every screen: `services-face`, `services-back`, `arrow-pill-left`, and `arrow-pill-right`. A new screen opts in with `data-chrome-vt` on its `.arrow-nav` root, using those same element classes. The homepage about screen is already opted in by `[data-screen='about']`. Do not put the pill names on icon-mode L/R controls (`[data-mode='icon']`). Those are a different shape. Paired faces interpolate size and position with no fade (`chrome-shrink` / `chrome-grow`). Pill labels crossfade inside the morphing control, with no plus-lighter blend, so two labels never sit on top of each other.
 

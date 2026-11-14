@@ -26,6 +26,7 @@ const SPECS = [
   ['vt', 'tests/view-transition.spec.mjs'],
   ['about-services', 'tests/about-services-flight.spec.mjs'],
   ['landing-face', 'tests/landing-face-settle.spec.mjs'],
+  ['face-glance', 'tests/face-glance.spec.mjs'],
   ['hscroll', 'tests/no-hscroll.spec.mjs'],
   ['shop-grid', 'tests/shop-grid.spec.mjs'],
   ['canvas-pages', 'tests/canvas-pages.spec.mjs'],

@@ -111,6 +111,10 @@
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
   --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
   --ease-nav: cubic-bezier(0.53, 0, 0.12, 0.99);
+  /* Face glance: 82% ease-in, 88% ease-out. */
+  --ease-glance: cubic-bezier(0.82, 0, 0.12, 1);
+  --face-glance-rest: 4px;
+  --face-glance: var(--face-glance-rest);
   --dur-hover: 160ms;
   --dur-fast: 150ms;
   --dur-ui: 200ms;
@@ -3661,6 +3665,13 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
   height: var(--arrow-about-face);
 }
 
+.arrow-nav[data-screen='about'] {
+  /* Glance translates in SVG space, so it grows with the mark. Undo that so
+     about keeps roughly the same screen travel as the small resting face
+     (and the 1.18 blob scale on this screen). */
+  --face-glance: calc(var(--face-glance-rest) * var(--arrow-face) / var(--arrow-about-face) / 1.18);
+}
+
 .arrow-nav[data-screen='about'] .arrow-face-blob {
   transform: scale(1.18) translateY(-1px);
 }
@@ -3738,6 +3749,52 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
   height: 100%;
   color: var(--red);
   overflow: hidden;
+}
+
+/* Intro keeps the evenodd goo source. Resting mark swaps to the glance layer. */
+.arrow-face-blob:not(.is-face-settled) [data-face-glance-layer] {
+  display: none;
+}
+
+.arrow-face-blob.is-face-settled [data-face-source] {
+  display: none;
+}
+
+.arrow-face-blob [data-face-mouth],
+.arrow-face-blob [data-face-features] {
+  fill: var(--page-bg);
+}
+
+/* Eyes only shift toward the cursor quadrant. Mouth stays put. */
+.arrow-face-blob [data-face-features] {
+  transform: translate(0, 0);
+  transition: transform var(--dur-ui) var(--ease-glance);
+}
+
+.arrow-face-blob[data-glance='left'] [data-face-features] {
+  transform: translate(calc(var(--face-glance) * -1), 0);
+}
+
+.arrow-face-blob[data-glance='right'] [data-face-features] {
+  transform: translate(var(--face-glance), 0);
+}
+
+.arrow-face-blob[data-glance='up'] [data-face-features] {
+  transform: translate(0, calc(var(--face-glance) * -1));
+}
+
+.arrow-face-blob[data-glance='down'] [data-face-features] {
+  transform: translate(0, var(--face-glance));
+}
+
+.arrow-face-blob.is-glance-reduce [data-face-features] {
+  transition: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .arrow-face-blob [data-face-features] {
+    transition: none;
+  }
 }
 
 .arrow-nav.is-intro .arrow-face-scale,

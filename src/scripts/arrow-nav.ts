@@ -1,5 +1,6 @@
 import { initHeroBlob } from './hero-blob';
 import { mountFaceGL, type FaceGL, type FaceMount } from './arrow-face-gl';
+import { mountFaceGlance, type FaceGlance } from './face-glance';
 import { introDebug, introDebugOn } from './intro-debug';
 import { playSnick } from './ui-sound';
 import { bindAppViewport, syncAppViewport } from '../lib/viewport-layout';
@@ -102,6 +103,7 @@ export function initArrowNav(root: ParentNode = document) {
   let introOn = true;
   let introPlaying = true;
   let faceGL: FaceGL | null = null;
+  const faceGlance: FaceGlance = mountFaceGlance(nav);
   let pressed: HTMLElement | null = null;
   let pressFrom: 'key' | 'pointer' | null = null;
   let pressKey = '';
@@ -156,6 +158,13 @@ export function initArrowNav(root: ParentNode = document) {
         return line;
       }),
     );
+  };
+
+  const syncGlance = () => {
+    // Any centred mark screen (landing, about, service branch). Galleries hide the face.
+    const face = nav.querySelector<HTMLElement>('[data-nav-face]');
+    const faceOut = !face || face.hidden;
+    faceGlance.setEnabled(!faceOut && !introPlaying && !nav.classList.contains('is-intro'));
   };
 
   const paintChrome = (id: string) => {
@@ -231,6 +240,7 @@ export function initArrowNav(root: ParentNode = document) {
       }
       button.removeAttribute('aria-label');
     }
+    syncGlance();
   };
 
   const warmImages = new Map<string, HTMLImageElement>();
@@ -1685,10 +1695,23 @@ export function initArrowNav(root: ParentNode = document) {
       el.style.height = '';
     });
     if (scaleEl) scaleEl.style.transform = '';
+    syncGlance();
   }
 
-  const settleFace = () => {
+  // Drop the SVG filter once the GPU face owns the intro (or at rest).
+  const dropFaceFilter = () => {
     nav.querySelector('.arrow-face-blob g')?.removeAttribute('filter');
+  };
+
+  // Swap the intro evenodd source for the resting glance layer. Only after
+  // the intro, so the goo path stays the one GL / SVG filter animate.
+  const showRestingFace = () => {
+    dropFaceFilter();
+    nav.querySelector('.arrow-face-blob')?.classList.add('is-face-settled');
+  };
+
+  const settleFace = () => {
+    showRestingFace();
   };
 
   const runIntro = () => {
@@ -1699,7 +1722,9 @@ export function initArrowNav(root: ParentNode = document) {
       settleFace();
       nav.classList.remove('is-intro');
       introOn = false;
+      introPlaying = false;
       pulseHint();
+      syncGlance();
       return;
     }
     let revealed = false;
@@ -1822,7 +1847,9 @@ export function initArrowNav(root: ParentNode = document) {
         faceGL = mount.gl;
         faceGL.canvas.addEventListener('webglcontextlost', () => dropFaceGL('context-lost'));
         nav.classList.add('is-face-gl');
-        settleFace();
+        // Keep the evenodd intro source until endIntro. Only drop the unused
+        // SVG filter so it is not rasterised behind the canvas.
+        dropFaceFilter();
         introDebug.path('gl', '', mount.gl.setupMs, mount.gl.renderer);
       } else {
         nav.classList.add('is-face-svg');

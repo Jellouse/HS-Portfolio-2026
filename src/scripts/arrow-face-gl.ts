@@ -239,7 +239,11 @@ export async function mountFaceGL(svg: SVGSVGElement, host: HTMLElement, maxW: n
   if (!ctx) return fail('no-2d-canvas');
   ctx.setTransform(mw / mreg[2], 0, 0, mh / mreg[3], (-mreg[0] * mw) / mreg[2], (-mreg[1] * mh) / mreg[3]);
   ctx.fillStyle = 'black';
-  group.querySelectorAll('path, ellipse, circle').forEach((el) => {
+  // Prefer the intro evenodd source (holes baked in). The resting glance
+  // layer is a sibling outside this filtered group and is ignored here.
+  const source = group.querySelector('[data-face-source]') || null;
+  const shapes = source ? [source] : [...group.querySelectorAll('path, ellipse, circle')];
+  shapes.forEach((el) => {
     if (el instanceof SVGPathElement) {
       ctx.fill(new Path2D(el.getAttribute('d') || ''), (el.getAttribute('fill-rule') as CanvasFillRule) || 'nonzero');
     } else {
