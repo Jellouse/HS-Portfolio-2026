@@ -1,10 +1,15 @@
 import type { ImageMetadata } from 'astro';
-import { contentPathFromSrc } from './github-content';
 
 const images = import.meta.glob<ImageMetadata>(
-  '/src/content/{projects,products,services,nodes}/**/*.{jpg,jpeg,png,webp,avif}',
+  '/src/content/{projects,products,services}/**/*.{jpg,jpeg,png,webp,avif}',
   { eager: true, import: 'default' },
 );
+
+function contentPathFromSrc(src: string): string {
+  const cleaned = src.replace(/^\.\//, '').replace(/^\//, '');
+  if (cleaned.startsWith('src/content/')) return cleaned;
+  return `src/content/projects/${cleaned}`;
+}
 
 const folderAlts = import.meta.glob<Record<string, string>>('/src/content/projects/*/process/alts.json', {
   eager: true,
