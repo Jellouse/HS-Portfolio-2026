@@ -56,12 +56,14 @@ const description = 'Physical Build and Digital Build. Retail store design, Fram
 <script>
   import { bindAppViewport } from '../../lib/viewport-layout';
   import { bindRouteReturn } from '../../scripts/arrow-route';
+  import { mountFaceGlance } from '../../scripts/face-glance';
   import { playSnick } from '../../scripts/ui-sound';
 
   bindAppViewport();
   bindRouteReturn();
   const root = document.querySelector<HTMLElement>('[data-services-hub]');
   const back = root?.querySelector<HTMLAnchorElement>('[data-services-back]');
+  if (root) mountFaceGlance(root).setEnabled(true);
   if (root && back) {
     const control = (dir: string) => root.querySelector<HTMLAnchorElement>(`[data-dir="${dir}"]`);
     const typing = (event: Event) =>

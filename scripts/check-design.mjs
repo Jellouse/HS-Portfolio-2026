@@ -19,6 +19,7 @@ const EASINGS = new Set([
   '0.77,0,0.175,1',
   '0.32,0.72,0,1',
   '0.53,0,0.12,0.99',
+  '0.82,0,0.12,1',
 ]);
 
 const SPACE_PROPS = 'margin|padding|gap|row-gap|column-gap|inset|top|right|bottom|left|outline|outline-offset|text-underline-offset|text-decoration-thickness';
