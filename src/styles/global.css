@@ -3972,6 +3972,8 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
   overflow: hidden;
   border-radius: inherit;
   corner-shape: inherit;
+  background-size: cover;
+  background-position: center;
 }
 
 .arrow-gallery::after {
