@@ -1,3 +1,5 @@
+import { getImage } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
 import { getCollection, getEntry, type CollectionEntry } from 'astro:content';
 import { getProjects, getSite, renderInline } from './content';
 import { galleryCategoryValues } from './gallery-categories';
@@ -10,6 +12,8 @@ export type ArrowDir = 'left' | 'right' | 'up' | 'down';
 export type ArrowSlide = {
   src: string;
   poster: string;
+  /** Tiny webp for blur-up. Empty for alpha cutouts. */
+  blur: string;
   alt: string;
   title: string;
   caption: string;
@@ -22,6 +26,27 @@ export type ArrowSlide = {
   href: string;
   action: string;
 };
+
+const GALLERY_MAX = 2000;
+
+async function galleryStill(file: ImageMetadata, alpha: boolean) {
+  const display = await getImage({
+    src: file,
+    width: Math.min(GALLERY_MAX, file.width),
+    format: alpha ? 'png' : 'webp',
+  });
+  const blur = alpha
+    ? ''
+    : (
+        await getImage({
+          src: file,
+          width: 24,
+          format: 'webp',
+          quality: 40,
+        })
+      ).src;
+  return { src: display.src, blur };
+}
 
 export type ArrowNode = {
   id: string;
@@ -85,9 +110,11 @@ function projectPieces(data: CollectionEntry<'projects'>['data']): Piece[] {
 async function imageSlide(piece: Piece, title: string, caption: string, slug: string, href: string, action: string): Promise<ArrowSlide> {
   if (piece.video) {
     const poster = piece.poster ? resolveImage(piece.poster) : null;
+    const still = poster ? await galleryStill(poster, false) : { src: '', blur: '' };
     return {
       src: piece.video,
-      poster: poster?.src || '',
+      poster: still.src,
+      blur: still.blur,
       alt: piece.alt,
       title,
       caption,
@@ -102,14 +129,17 @@ async function imageSlide(piece: Piece, title: string, caption: string, slug: st
     };
   }
   const file = resolveImage(piece.src);
+  const alpha = await imageHasAlpha(file);
+  const still = await galleryStill(file, alpha);
   return {
-    src: file.src,
+    src: still.src,
     poster: '',
+    blur: still.blur,
     alt: piece.alt,
     title,
     caption,
     product: '',
-    alpha: await imageHasAlpha(file),
+    alpha,
     kind: 'image',
     width: file.width,
     height: file.height,
@@ -136,14 +166,17 @@ async function shopSlides(): Promise<ArrowSlide[]> {
       if (!image?.src || image.gallery !== 'shop' || seen.has(image.src)) continue;
       seen.add(image.src);
       const file = resolveImage(image.src);
+      const alpha = await imageHasAlpha(file);
+      const still = await galleryStill(file, alpha);
       slides.push({
-        src: file.src,
+        src: still.src,
         poster: '',
+        blur: still.blur,
         alt: image.alt || product.data.name,
         title: product.data.name,
         caption: '',
         product: '',
-        alpha: await imageHasAlpha(file),
+        alpha,
         kind: 'image',
         width: file.width,
         height: file.height,

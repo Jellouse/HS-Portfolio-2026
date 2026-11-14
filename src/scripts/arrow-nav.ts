@@ -235,17 +235,26 @@ export function initArrowNav(root: ParentNode = document) {
 
   const warmImages = new Map<string, HTMLImageElement>();
   const warmVideos = new Map<string, HTMLVideoElement>();
+  let warmIdle = 0;
+  let warmGen = 0;
 
-  const warmSlide = (item: { src: string; poster: string; kind: string } | undefined, priority: 'high' | 'low' | 'auto') => {
+  type WarmItem = { src: string; poster: string; blur?: string; kind: string; href?: string };
+
+  const warmUrl = (src: string | undefined, priority: 'high' | 'low' | 'auto') => {
+    if (!src || warmImages.has(src)) return;
+    const img = new Image();
+    img.decoding = 'async';
+    img.fetchPriority = priority;
+    img.src = src;
+    img.decode().catch(() => {});
+    warmImages.set(src, img);
+  };
+
+  const warmSlide = (item: WarmItem | undefined, priority: 'high' | 'low' | 'auto') => {
     if (!item?.src) return;
+    if (item.blur) warmUrl(item.blur, priority === 'low' ? 'low' : 'auto');
     if (item.kind === 'video') {
-      if (item.poster && !warmImages.has(item.poster)) {
-        const poster = new Image();
-        poster.decoding = 'async';
-        poster.fetchPriority = priority;
-        poster.src = item.poster;
-        warmImages.set(item.poster, poster);
-      }
+      if (item.poster) warmUrl(item.poster, priority);
       if (!warmVideos.has(item.src)) {
         const clip = document.createElement('video');
         clip.preload = 'auto';
@@ -256,13 +265,7 @@ export function initArrowNav(root: ParentNode = document) {
       }
       return;
     }
-    if (warmImages.has(item.src)) return;
-    const img = new Image();
-    img.decoding = 'async';
-    img.fetchPriority = priority;
-    img.src = item.src;
-    img.decode().catch(() => {});
-    warmImages.set(item.src, img);
+    warmUrl(item.src, priority);
   };
 
   const warmedPages = new Set<string>();
@@ -301,28 +304,80 @@ export function initArrowNav(root: ParentNode = document) {
   };
 
   // A route screen one press away is fetched ahead, so its page is ready
-  // when the controls land.
+  // when the controls land. Child galleries warm their first slide too.
   const warmRoutes = (id: string) => {
     tree.nodes.forEach((node) => {
-      if (node.parent !== id || !node.href || warmedPages.has(node.href)) return;
-      warmedPages.add(node.href);
-      const link = document.createElement('link');
-      link.rel = 'prefetch';
-      link.href = node.href;
-      document.head.append(link);
+      if (node.parent !== id) return;
+      if (node.href && !warmedPages.has(node.href)) {
+        warmedPages.add(node.href);
+        const link = document.createElement('link');
+        link.rel = 'prefetch';
+        link.href = node.href;
+        document.head.append(link);
+      }
+      if (node.kind === 'gallery' && node.slides[0]) {
+        warmSlide(node.slides[0], 'high');
+        warmDestination(node.slides[0].href);
+      }
     });
   };
 
-  const warmGallery = (slides: { src: string; poster: string; kind: string; href?: string }[], index: number) => {
+  const cancelWarmIdle = () => {
+    warmGen += 1;
+    if (!warmIdle) return;
+    if (typeof cancelIdleCallback === 'function') cancelIdleCallback(warmIdle);
+    else clearTimeout(warmIdle);
+    warmIdle = 0;
+  };
+
+  const scheduleWarmIdle = (fn: () => void) => {
+    if (typeof requestIdleCallback === 'function') {
+      warmIdle = requestIdleCallback(fn, { timeout: 1500 });
+    } else {
+      warmIdle = window.setTimeout(fn, 120) as unknown as number;
+    }
+  };
+
+  const warmGallery = (slides: WarmItem[], index: number) => {
+    cancelWarmIdle();
     const count = slides.length;
-    const next = (index + 1) % count;
-    const prev = (index - 1 + count) % count;
-    warmSlide(slides[index], 'high');
-    warmDestination(slides[index]?.href);
+    if (!count) return;
+    const near = new Set<number>();
+    const mark = (i: number, priority: 'high' | 'low' | 'auto') => {
+      const at = (i + count) % count;
+      near.add(at);
+      warmSlide(slides[at], priority);
+      warmDestination(slides[at]?.href);
+    };
+    mark(index, 'high');
     if (count < 2) return;
-    warmSlide(slides[next], 'high');
-    warmDestination(slides[next]?.href);
-    if (prev !== next) warmSlide(slides[prev], 'auto');
+    mark(index + 1, 'high');
+    mark(index - 1, 'auto');
+    if (count > 3) {
+      mark(index + 2, 'auto');
+      mark(index - 2, 'low');
+    }
+    const rest = slides.map((_, i) => i).filter((i) => !near.has(i));
+    if (!rest.length) return;
+    const gen = warmGen;
+    let cursor = 0;
+    const step = () => {
+      if (gen !== warmGen) return;
+      warmIdle = 0;
+      const at = rest[cursor++];
+      if (at == null) return;
+      warmSlide(slides[at], 'low');
+      if (cursor < rest.length) scheduleWarmIdle(step);
+    };
+    scheduleWarmIdle(step);
+  };
+
+  const galleryMedia = () => nav.querySelector<HTMLElement>('.arrow-gallery-media')!;
+
+  const paintBlur = (blur: string | undefined) => {
+    const frame = galleryMedia();
+    if (blur) frame.style.setProperty('--gallery-lqip', `url('${blur}')`);
+    else frame.style.removeProperty('--gallery-lqip');
   };
 
   const packDots = (dots: HTMLElement[]) => {
@@ -363,6 +418,8 @@ export function initArrowNav(root: ParentNode = document) {
 
   const clearGalleryMedia = () => {
     mediaGen += 1;
+    cancelWarmIdle();
+    paintBlur('');
     const photo = nav.querySelector<HTMLImageElement>('[data-nav-photo]')!;
     const clip = nav.querySelector<HTMLVideoElement>('[data-nav-video]')!;
     photo.getAnimations().forEach((anim) => anim.cancel());
@@ -407,6 +464,7 @@ export function initArrowNav(root: ParentNode = document) {
     const cutout = !!item.alpha;
     photo.classList.toggle('is-alpha', cutout);
     gallery.classList.toggle('is-alpha', cutout);
+    paintBlur(item.blur);
     photo.getAnimations().forEach((anim) => anim.cancel());
     const gen = ++mediaGen;
     const stillCurrent = () => gen === mediaGen && screen()?.slides[slide] === item;
@@ -416,8 +474,11 @@ export function initArrowNav(root: ParentNode = document) {
       photo.style.opacity = '0';
       photo.hidden = true;
       const sameClip = clip.getAttribute('src') === item.src;
+      const ready = sameClip && clip.readyState >= 2;
+      // Poster (and the LQIP under it) stay visible while the clip buffers.
+      const hold = !!(item.poster || item.blur);
       clip.hidden = false;
-      clip.style.opacity = sameClip && clip.readyState >= 2 ? '' : '0';
+      clip.style.opacity = ready || hold ? '' : '0';
       clip.poster = item.poster || '';
       if (!sameClip) {
         clip.removeAttribute('src');
@@ -459,7 +520,8 @@ export function initArrowNav(root: ParentNode = document) {
       };
       if (!samePhoto) {
         // Drop the previous bitmap before the next src paints, so another
-        // category's last frame never lingers in an empty gallery.
+        // category's last frame never lingers in an empty gallery. The LQIP
+        // on the frame stays until this reveal.
         photo.style.opacity = '0';
         photo.removeAttribute('src');
         photo.addEventListener('load', revealPhoto, { once: true });

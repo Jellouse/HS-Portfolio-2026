@@ -3974,6 +3974,22 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
   corner-shape: inherit;
 }
 
+.arrow-gallery-media::before {
+  content: '';
+  position: absolute;
+  inset: -20px;
+  background-image: var(--gallery-lqip, none);
+  background-size: cover;
+  background-position: center;
+  filter: blur(20px);
+  pointer-events: none;
+}
+
+.arrow-gallery-media > :is(img, video) {
+  position: relative;
+  z-index: 1;
+}
+
 .arrow-gallery::after {
   content: '';
   position: absolute;
