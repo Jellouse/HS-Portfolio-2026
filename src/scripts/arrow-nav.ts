@@ -1083,6 +1083,8 @@ export function initArrowNav(root: ParentNode = document) {
   const SCROLL_MAX_STEPS = 8;
   let scrollCarry = 0;
   let scrollIdle = 0;
+  let scrubbing = false;
+  let scrubPointer = 0;
 
   const canFlip = (dir: Dir) => screen()?.kind === 'gallery' && (dir === 'left' || dir === 'right');
 
@@ -1091,6 +1093,55 @@ export function initArrowNav(root: ParentNode = document) {
     if (scrollIdle) window.clearTimeout(scrollIdle);
     scrollIdle = 0;
     if (resume) startAutoplay();
+  };
+
+  const scrubEl = () => nav.querySelector<HTMLElement>('[data-nav-scrub]');
+  const dotsEl = () => nav.querySelector<HTMLElement>('[data-nav-dots]')!;
+
+  const paintScrubHud = () => {
+    const hud = scrubEl();
+    if (!hud) return;
+    const count = screen()?.slides.length ?? 0;
+    const current = slide + 1;
+    const prev = hud.querySelector<HTMLElement>('[data-nav-scrub-prev]')!;
+    const mid = hud.querySelector<HTMLElement>('[data-nav-scrub-current]')!;
+    const next = hud.querySelector<HTMLElement>('[data-nav-scrub-next]')!;
+    prev.textContent = current > 1 ? String(current - 1) : '';
+    mid.textContent = count ? String(current) : '';
+    next.textContent = current < count ? String(current + 1) : '';
+    prev.hidden = !prev.textContent;
+    next.hidden = !next.textContent;
+  };
+
+  const indexFromScrubX = (clientX: number) => {
+    const node = screen();
+    const count = node?.slides.length ?? 0;
+    if (!node || node.kind !== 'gallery' || count < 2) return slide;
+    const box = dotsEl().getBoundingClientRect();
+    if (box.width <= 0) return slide;
+    const t = Math.min(1, Math.max(0, (clientX - box.left) / box.width));
+    return Math.min(count - 1, Math.max(0, Math.round(t * (count - 1))));
+  };
+
+  const endScrub = (resume: boolean) => {
+    if (!scrubbing) return;
+    scrubbing = false;
+    scrubPointer = 0;
+    nav.classList.remove('is-scrubbing');
+    const hud = scrubEl();
+    if (hud) hud.hidden = true;
+    if (resume) startAutoplay();
+  };
+
+  const scrubTo = (clientX: number) => {
+    const next = indexFromScrubX(clientX);
+    if (next === slide) {
+      paintScrubHud();
+      return;
+    }
+    showSlide(next);
+    playSnick();
+    paintScrubHud();
   };
 
   const releasePointer = () => {
@@ -1113,6 +1164,7 @@ export function initArrowNav(root: ParentNode = document) {
   };
 
   const abandonHold = () => {
+    endScrub(false);
     if (!pressFrom) return;
     stopHold(false);
     releasePointer();
@@ -1167,6 +1219,7 @@ export function initArrowNav(root: ParentNode = document) {
     const gen = ++generation;
     clearScrollFlip(false);
     stopHold(false);
+    endScrub(false);
     stopAutoplay();
     const ease = cssEase('--ease-nav');
     const slot = nav.querySelector<HTMLElement>('.arrow-slot')!;
@@ -1542,9 +1595,60 @@ export function initArrowNav(root: ParentNode = document) {
 
   window.addEventListener('wheel', onGalleryWheel, { passive: false });
 
-  galleryEl().addEventListener('click', () => {
+  galleryEl().addEventListener('click', (event) => {
     if (introOn || screen()?.kind !== 'gallery') return;
+    if (scrubbing) return;
+    const target = event.target as Element | null;
+    if (target?.closest?.('[data-nav-dots], [data-nav-scrub]')) return;
     setFull(!full);
+  });
+
+  dotsEl().addEventListener('pointerdown', (event) => {
+    if (event.button !== 0) return;
+    if (introOn || scrubbing || pressFrom) return;
+    if (!phone()) return;
+    const node = screen();
+    if (!node || node.kind !== 'gallery' || node.slides.length < 2) return;
+    event.preventDefault();
+    event.stopPropagation();
+    clearScrollFlip(false);
+    stopHold(false);
+    stopAutoplay();
+    scrubbing = true;
+    scrubPointer = event.pointerId;
+    nav.classList.add('is-scrubbing');
+    const hud = scrubEl();
+    if (hud) hud.hidden = false;
+    try {
+      dotsEl().setPointerCapture(event.pointerId);
+    } catch {
+      /* capture optional */
+    }
+    scrubTo(event.clientX);
+  });
+
+  const onScrubMove = (event: PointerEvent) => {
+    if (!scrubbing || event.pointerId !== scrubPointer) return;
+    event.preventDefault();
+    scrubTo(event.clientX);
+  };
+
+  const onScrubEnd = (event: PointerEvent) => {
+    if (!scrubbing || event.pointerId !== scrubPointer) return;
+    try {
+      if (dotsEl().hasPointerCapture(event.pointerId)) dotsEl().releasePointerCapture(event.pointerId);
+    } catch {
+      /* already released */
+    }
+    endScrub(true);
+  };
+
+  dotsEl().addEventListener('pointermove', onScrubMove);
+  dotsEl().addEventListener('pointerup', onScrubEnd);
+  dotsEl().addEventListener('pointercancel', onScrubEnd);
+  dotsEl().addEventListener('lostpointercapture', (event) => {
+    if (!scrubbing || event.pointerId !== scrubPointer) return;
+    endScrub(true);
   });
 
   window.addEventListener('keydown', (event) => {

@@ -62,6 +62,11 @@ const { tree } = Astro.props;
           <img alt="" data-nav-photo hidden />
           <video data-nav-video hidden muted loop playsinline preload="auto"></video>
         </div>
+        <div class="arrow-scrub" data-nav-scrub hidden aria-hidden="true">
+          <span data-nav-scrub-prev></span>
+          <span data-nav-scrub-current></span>
+          <span data-nav-scrub-next></span>
+        </div>
         <div class="arrow-dots" data-nav-dots></div>
       </div>
       <button type="button" class="arrow-pill" data-nav-flight data-dir="left">
