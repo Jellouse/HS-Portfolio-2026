@@ -376,8 +376,8 @@ export function initArrowNav(root: ParentNode = document) {
 
   const paintBlur = (blur: string | undefined) => {
     const frame = galleryMedia();
-    if (blur) frame.style.backgroundImage = `url('${blur}')`;
-    else frame.style.backgroundImage = '';
+    if (blur) frame.style.setProperty('--gallery-lqip', `url('${blur}')`);
+    else frame.style.removeProperty('--gallery-lqip');
   };
 
   const packDots = (dots: HTMLElement[]) => {
