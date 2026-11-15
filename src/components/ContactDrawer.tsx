@@ -252,7 +252,7 @@ export default function ContactDrawer({ email: address }: { email: string }) {
   useLayoutEffect(() => {
     const root = document.documentElement;
     const body = document.body;
-    root.classList.toggle('is-contact-open', open);
+    // Keep scroll lock in sync; visibility / is-contact-open stay on syncPanel.
     if (open) {
       const gap = Math.max(0, window.innerWidth - root.clientWidth);
       if (gap > 0) {
@@ -262,7 +262,6 @@ export default function ContactDrawer({ email: address }: { email: string }) {
     } else {
       root.style.removeProperty('--scroll-lock');
       body.style.removeProperty('padding-right');
-      muteAboutChrome(false);
     }
   }, [open]);
 
@@ -566,10 +565,19 @@ export default function ContactDrawer({ email: address }: { email: string }) {
   const downLabel = showStep === 1 ? 'Other' : showStep === 2 ? 'Confirm' : 'Send';
   const downDisabled = showStep === 2 ? !project.trim() : showStep === 3 ? !email.trim() : false;
 
+  // is-closed is owned by syncPanel only. React className must not toggle it —
+  // flushSync on this lazy createRoot often fails, and a later render would
+  // slam the panel shut mid view-transition.
   return createPortal(
     <div
-      ref={panel}
-      className={`contact-panel${open ? '' : ' is-closed'}`}
+      ref={(el) => {
+        panel.current = el;
+        if (el && !el.hasAttribute('data-contact-ready')) {
+          el.setAttribute('data-contact-ready', '');
+          syncPanel(el, false, 1);
+        }
+      }}
+      className="contact-panel"
       data-contact=""
       data-state={open ? 'open' : 'closed'}
       data-step={stepAttr}
@@ -606,21 +614,16 @@ export default function ContactDrawer({ email: address }: { email: string }) {
                 {BACK_SVG}
               </button>
               <div className="arrow-slot">
-                {/* Persistent slots: syncStep toggles [hidden] inside the VT update. */}
+                {/* Persistent slots: syncStep owns [hidden]. Do not bind it in React
+                    or a stale step render undoes the VT new snapshot. */}
                 <div className="contact-center" data-contact-center="">
-                  <div className="arrow-face" data-nav-face="" data-contact-step="1" hidden={showStep !== 1}>
+                  <div className="arrow-face" data-nav-face="" data-contact-step="1">
                     <div className="arrow-face-scale">
                       <span className="arrow-face-plate" aria-hidden="true" />
                       <ContactFace />
                     </div>
                   </div>
-                  <div
-                    className="contact-field"
-                    data-contact-field=""
-                    data-contact-step="2"
-                    ref={field}
-                    hidden={showStep !== 2}
-                  >
+                  <div className="contact-field" data-contact-field="" data-contact-step="2" ref={field}>
                     <label className="sr-only" htmlFor="contact-project">
                       Describe your project
                     </label>
@@ -635,7 +638,7 @@ export default function ContactDrawer({ email: address }: { email: string }) {
                       onInput={(e) => setProject(e.currentTarget.value)}
                     />
                   </div>
-                  <div className="contact-field" data-contact-step="3" hidden={showStep !== 3}>
+                  <div className="contact-field" data-contact-step="3">
                     <label className="sr-only" htmlFor="contact-email">
                       Add your email
                     </label>
@@ -660,7 +663,6 @@ export default function ContactDrawer({ email: address }: { email: string }) {
                     data-dir={s.dir}
                     data-service={s.value}
                     data-contact-step="1"
-                    hidden={showStep !== 1}
                     onClick={() => pickService(s.value)}
                   >
                     {s.label}
