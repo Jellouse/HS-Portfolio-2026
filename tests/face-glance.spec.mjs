@@ -1,5 +1,6 @@
 
-// Landing face glances L/R/U/D with the cursor, and stares forward over the mark.
+// Landing face glances L/R/U/D with the cursor, stares forward over the mark,
+// and returns to centre after 1s of still pointer.
 import { chromium } from 'playwright';
 import { createServer } from 'node:http';
 import { readFileSync, existsSync, statSync } from 'node:fs';
@@ -79,6 +80,26 @@ else {
     if (expect === 'left' && !(tx < -1)) failures.push(`${name}: transform ${transform}`);
     if (expect === 'up' && !(ty < -1)) failures.push(`${name}: transform ${transform}`);
     if (expect === 'down' && !(ty > 1)) failures.push(`${name}: transform ${transform}`);
+  }
+
+  // Hold still off the mark: after IDLE_MS the eyes come home.
+  const idleX = cx + face.width * 2;
+  const idleY = cy;
+  await page.mouse.move(idleX, idleY);
+  await page.waitForTimeout(280);
+  const glancing = await page.locator('.arrow-face-blob').getAttribute('data-glance');
+  if (glancing !== 'right') failures.push(`idle setup: glance=${glancing} expected right`);
+  await page.waitForTimeout(1000);
+  await page.waitForTimeout(280);
+  const idleGlance = await page.locator('.arrow-face-blob').getAttribute('data-glance');
+  if (idleGlance !== null) failures.push(`idle: glance=${idleGlance} expected null (centre)`);
+  const idleTransform = await page.locator('[data-face-features]').evaluate((el) => getComputedStyle(el).transform);
+  const idleM = idleTransform.match(/matrix\(([^)]+)\)/);
+  const idleParts = idleM ? idleM[1].split(',').map((n) => Number(n.trim())) : null;
+  const idleTx = idleParts ? idleParts[4] : 0;
+  const idleTy = idleParts ? idleParts[5] : 0;
+  if (Math.abs(idleTx) > 0.5 || Math.abs(idleTy) > 0.5) {
+    failures.push(`idle: transform ${idleTransform}`);
   }
 }
 
