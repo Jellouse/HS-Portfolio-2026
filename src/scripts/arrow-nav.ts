@@ -115,6 +115,9 @@ export function initArrowNav(root: ParentNode = document) {
   let full = false;
   let fullGen = 0;
   let mediaGen = 0;
+  // While scrubbing, the gallery frame keeps the size it had on press so
+  // mixed-ratio slides do not resize under the finger.
+  let scrubLock = false;
 
   initHeroBlob(nav);
 
@@ -685,7 +688,7 @@ export function initArrowNav(root: ParentNode = document) {
 
   let frameWatch = 0;
   const fitGallery = (item: { width: number; height: number }, morph: boolean) => {
-    if (full) return;
+    if (full || scrubLock) return;
     const gallery = galleryEl();
     const box = frameFor(item.width, item.height);
     const jump = !morph || reduce || full;
@@ -1127,9 +1130,16 @@ export function initArrowNav(root: ParentNode = document) {
     if (!scrubbing) return;
     scrubbing = false;
     scrubPointer = 0;
+    scrubLock = false;
     nav.classList.remove('is-scrubbing');
     const hud = scrubEl();
     if (hud) hud.hidden = true;
+    const item = screen()?.slides[slide];
+    if (item && !full) {
+      fitGallery(item, true);
+      placeGalleryArrows();
+      placeCaption();
+    }
     if (resume) startAutoplay();
   };
 
@@ -1616,6 +1626,7 @@ export function initArrowNav(root: ParentNode = document) {
     stopAutoplay();
     scrubbing = true;
     scrubPointer = event.pointerId;
+    scrubLock = true;
     nav.classList.add('is-scrubbing');
     const hud = scrubEl();
     if (hud) hud.hidden = false;

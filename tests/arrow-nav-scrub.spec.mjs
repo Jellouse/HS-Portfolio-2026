@@ -30,6 +30,8 @@ const scrubState = () => {
   const nav = document.querySelector('[data-arrow-nav]');
   const hud = document.querySelector('[data-nav-scrub]');
   const current = document.querySelector('[data-nav-scrub-current]');
+  const gallery = document.querySelector('[data-nav-gallery]');
+  const box = gallery?.getBoundingClientRect();
   return {
     index: [...document.querySelectorAll('.arrow-dot')].findIndex((el) => el.classList.contains('is-on')),
     count: document.querySelectorAll('.arrow-dot').length,
@@ -37,6 +39,8 @@ const scrubState = () => {
     hudHidden: !!hud?.hidden,
     current: (current?.textContent || '').trim(),
     full: !!nav?.classList.contains('is-full') || !!nav?.classList.contains('is-cover'),
+    width: box ? Math.round(box.width) : 0,
+    height: box ? Math.round(box.height) : 0,
   };
 };
 
@@ -64,6 +68,11 @@ else {
   const midY = dots.y;
   const fromX = dots.x + 4;
   const toX = dots.x + dots.w - 4;
+  const locked = await page.evaluate(() => {
+    const gallery = document.querySelector('[data-nav-gallery]');
+    const box = gallery?.getBoundingClientRect();
+    return { width: box ? Math.round(box.width) : 0, height: box ? Math.round(box.height) : 0 };
+  });
   await page.mouse.move(fromX, midY);
   await page.mouse.down();
   await page.waitForTimeout(40);
@@ -71,6 +80,9 @@ else {
   if (!down.scrubbing) failures.push('is-scrubbing was not set on pointerdown');
   if (down.hudHidden) failures.push('scrub HUD stayed hidden during drag');
   if (down.current !== String(down.index + 1)) failures.push(`HUD current ${down.current} did not match index ${down.index}`);
+  if (down.width !== locked.width || down.height !== locked.height) {
+    failures.push(`frame resized on scrub press (${locked.width}x${locked.height} -> ${down.width}x${down.height})`);
+  }
 
   await page.mouse.move(toX, midY, { steps: 12 });
   await page.waitForTimeout(40);
@@ -80,6 +92,9 @@ else {
   if (dragged.hudHidden) failures.push('scrub HUD hid mid-drag');
   if (dragged.current !== String(dragged.index + 1)) failures.push(`HUD current ${dragged.current} did not match index ${dragged.index} after drag`);
   if (dragged.full) failures.push('scrub opened fullscreen');
+  if (dragged.width !== locked.width || dragged.height !== locked.height) {
+    failures.push(`frame resized mid-scrub (${locked.width}x${locked.height} -> ${dragged.width}x${dragged.height})`);
+  }
 
   await page.mouse.up();
   await page.waitForTimeout(40);
