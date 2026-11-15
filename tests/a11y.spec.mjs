@@ -50,7 +50,7 @@ await p.keyboard.press('Tab');
 check(await p.evaluate(() => document.activeElement.matches('[data-project-back]')), 'Tab lands on Back');
 check(await p.evaluate(() => !document.querySelector('.project-menu')), 'project page has no old menu');
 
-await p.goto(B + '/', { waitUntil: 'load' });
+await p.goto(B + '/shop/', { waitUntil: 'load' });
 await p.waitForTimeout(400);
 await p.focus('.site-menu [data-contact-open]');
 await p.keyboard.press('Enter');
@@ -58,7 +58,7 @@ await p.waitForSelector('[data-contact]', { timeout: 8000 });
 await p.waitForTimeout(300);
 check(await p.evaluate(() => document.activeElement.matches('[data-service]')), 'dialog: initial focus on the first option');
 for (let i = 0; i < 8; i++) await p.keyboard.press('Tab');
-check(await p.evaluate(() => !!document.activeElement.closest('.contact-panel')), 'dialog: Tab stays inside');
+check(await p.evaluate(() => !!document.activeElement.closest('[data-contact]')), 'dialog: Tab stays inside');
 const y0 = await p.evaluate(() => scrollY);
 await p.mouse.move(720, 200);
 await p.mouse.wheel(0, 600);
@@ -71,7 +71,7 @@ check(await p.evaluate(() => document.activeElement.matches('.site-menu [data-co
 for (const [label, opt] of [['desktop', { viewport: { width: 1440, height: 900 } }], ['mobile', { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true }]]) {
   const ctx = await browser.newContext(opt);
   const q = await ctx.newPage();
-  await q.goto(B + '/', { waitUntil: 'load' });
+  await q.goto(B + '/shop/', { waitUntil: 'load' });
   await q.waitForTimeout(400);
   await q.evaluate(() => document.querySelector('.site-menu [data-contact-open]').click());
   await q.waitForSelector('[data-contact]', { timeout: 8000 });

@@ -35,17 +35,7 @@ export async function getProjects(): Promise<ProjectEntry[]> {
   const all = await getCollection('projects');
   const published = all.filter((project) => project.data.published);
   const order = await getProjectOrderSlugs();
-  const sorted = sortProjectsByOrder(published, order);
-
-  for (const project of sorted) {
-    if (!project.data.coverVideo && (!project.data.cover || !project.data.coverAlt)) {
-      throw new Error(
-        `${project.id} is published and needs cover and coverAlt, or a cover video.`,
-      );
-    }
-  }
-
-  return sorted;
+  return sortProjectsByOrder(published, order);
 }
 
 export async function getAllProjectsOrdered(): Promise<ProjectEntry[]> {

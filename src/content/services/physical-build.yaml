@@ -42,6 +42,7 @@ sections:
       - discriminant: project
         value:
           project: analogue-counters
+          src: /src/content/services/images/analogue-counters.jpg
           alt: Analogue store on Zeedijk in Amsterdam, aluminium extrusion vitrines
           caption: Analogue Store Zeedijk
           href: /work/analogue-counters/

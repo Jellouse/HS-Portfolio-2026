@@ -2,10 +2,6 @@ title: Noapé
 published: false
 summary: Noapé is a small startup that stands at the intersection between a traditional
   rosé and a modern art gallery.
-cover: /src/content/projects/noape/cover.jpg
-coverAlt: Noapé rosé bottle with a colourful label on a black background
-coverFrame: wide
-coverFlush: false
 rounded: true
 info:
 - label: Client

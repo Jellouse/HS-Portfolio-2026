@@ -7,13 +7,6 @@ summary: >-
   Identity refresh and web design for atomic.com, made with Analogue. It grew
   out of the Boot Hub and became a visual language for the whole site, built
   around tension and ski nets.
-cover: /src/content/projects/atomic-ski/cover.png
-coverGallery: none
-coverVideoGallery: none
-coverAlt: Atomic Ski
-coverFrame: default
-coverFlush: true
-coverOutline: false
 rounded: true
 info:
   - label: Design

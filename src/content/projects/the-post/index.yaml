@@ -2,10 +2,6 @@ title: The Post
 published: false
 summary: A Dutch ad agency looking for a super-simple down to earth branding. But
   simplicity is often easier said than done.
-cover: /src/content/projects/the-post/cover.jpg
-coverAlt: White The Post sign on a textured wall
-coverFrame: wide
-coverFlush: false
 rounded: true
 info:
 - label: Client

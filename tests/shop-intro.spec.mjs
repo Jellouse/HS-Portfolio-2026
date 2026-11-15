@@ -152,6 +152,8 @@ for (const [lab, o] of [['desktop', { viewport: { width: 1440, height: 900 } }],
   }
   await q.close();
 }
+await p.goto(B + '/shop/', { waitUntil: 'load' });
+await p.waitForTimeout(500);
 await p.click('.site-menu [data-contact-open]');
 await p.waitForTimeout(700);
 await p.click('[data-service="Other"]');
@@ -160,7 +162,7 @@ const st = () => p.evaluate(() => { const t = document.querySelector('#contact-p
 await p.type('#contact-project', 'Short');
 await p.waitForTimeout(400);
 const s1 = await st();
-check(await p.evaluate(() => getComputedStyle(document.querySelector('#contact-project')).letterSpacing === getComputedStyle(document.querySelector('.brand')).letterSpacing), 'contact text uses the site tracking');
+check(await p.evaluate(() => getComputedStyle(document.querySelector('#contact-project')).letterSpacing === getComputedStyle(document.querySelector('.shop-head-title')).letterSpacing), 'contact text uses the site tracking');
 await p.type('#contact-project', ' words');
 await p.waitForTimeout(400);
 const s1b = await st();
@@ -175,10 +177,7 @@ await p.waitForFunction((top) => {
 }, s1.top);
 const s2 = await st();
 check(s2.align === 'left' && s2.h === 58 && s2.top < s1.top, `two lines: left, grew, re-centred (${s2.align}, h ${s2.h}, top ${s2.top})`);
-const hover = await p.evaluate(() => { const r = document.querySelector('.contact-dots').getBoundingClientRect(); return [r.left - 100, r.top + 2]; });
-await p.mouse.move(hover[0], hover[1]);
-await p.waitForTimeout(400);
-check(await p.evaluate(() => getComputedStyle(document.querySelector('.contact-back')).opacity === '1'), 'Back shows with the pointer 100px left of the dots');
+check(await p.evaluate(() => !!document.querySelector('[data-contact-back]')?.offsetParent), 'Back control shows on the project step');
 await browser.close();
 server.close();
 if (failures.length) { console.error('shop-intro FAIL'); process.exit(1); }

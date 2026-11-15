@@ -25,15 +25,15 @@ File names are kebab-case. A module that both pages use lives in `src/lib/` or `
 - Homepage screens: `src/content/site/arrow-nav.yaml`, edited in Keystatic as Homepage. Web, 3D, Product, and Space galleries come from the Gallery field on each project image or video. The project title and summary are the headline and caption. Shop uses the product images whose Gallery field is Shop, with the product name and Learn more. The About screen reads the About paragraphs from `site.yaml`.
 - One folder per project: `src/content/projects/<slug>/index.yaml` plus images in that folder
 - Products: `src/content/products/<slug>/index.yaml`
-- Image paths in YAML are absolute from the repo, like `/src/content/projects/atomic-ski/cover.jpg`
-- Services: `src/content/services/<slug>.yaml`. A project cover stores the project slug and the page reads that project's `cover`. Other photos are files in `src/content/services/images/`.
+- Image paths in YAML are absolute from the repo, like `/src/content/projects/atomic-ski/blocks/0/value/src.jpg`
+- Services: `src/content/services/<slug>.yaml`. A project image stores the project slug plus its own file in `src/content/services/images/`. Other photos are files there too.
 
 ## Add a project
 
 1. `npm run dev` and open `/keystatic`, or duplicate a project folder.
-2. Set title, caption (`Name, Year`), order, summary (two or three sentences), cover, alt text, info lines (`Key: Value`, optional link on the value), and blocks. Leave out unknown info lines.
-3. Blocks are `text`, `image`, `pair`, `video`, or `process`. `process` is an optional centred Process label and a two-column grid of photos. The project page ends with a centred Info label and the info list, aligned to the image column. Gallery on a cover, image, video, or pair side puts that piece in Web, 3D, Product, or Space.
-4. Leave `published` off until the cover image and alt text exist.
+2. Set title, caption (`Name, Year`), order, summary (two or three sentences), info lines (`Key: Value`, optional link on the value), and blocks. Leave out unknown info lines.
+3. Blocks are `text`, `image`, `pair`, `video`, or `process`. `process` is an optional centred Process label and a two-column grid of photos. The project page ends with a centred Info label and the info list, aligned to the image column. Gallery on an image, video, or pair side puts that piece in Web, 3D, Product, or Space.
+4. Leave `published` off until the project has the images and alt text it needs.
 5. Put unknowns in `todo`. Those notes are not rendered.
 6. Update `src/pages/llms.txt.ts` only if you want a line the generator does not already build. It reads the collection.
 

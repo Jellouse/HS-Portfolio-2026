@@ -7,12 +7,6 @@ summary: >-
   centered around an interactive questionnaire helping you to find your perfect
   office chair. A concept which since has been adopted by various other
   industries.
-cover: /src/content/projects/vitra-chairfinder/cover.jpg
-coverAlt: >-
-  Vitra Office Chair Finder welcome screen and chair overview in two browser
-  windows
-coverFrame: wide
-coverFlush: false
 rounded: true
 info:
   - label: Client

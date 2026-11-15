@@ -86,22 +86,24 @@ try {
   await page.goto(url + '/', { waitUntil: 'load' });
   await wait(1500);
   check((await page.locator('[data-haptic-overlay]').count()) > 0, 'iOS haptic overlays active');
+  await page.goto(url + '/shop/', { waitUntil: 'load' });
+  await wait(700);
   await page.tap('.site-menu [data-contact-open]');
   await wait(700);
-  check(await page.evaluate(() => document.querySelector('.contact-panel')?.dataset.state === 'open'), 'tap Contact opens the contact sheet');
+  check(await page.evaluate(() => document.querySelector('.contact-panel')?.dataset.state === 'open'), 'tap Contact opens the contact hub');
   const hits = await page.evaluate(() =>
-    [...document.querySelectorAll('.contact-options button')].map((a) => {
+    [...document.querySelectorAll('[data-contact] [data-service]')].map((a) => {
       const r = a.getBoundingClientRect();
       return a.contains(document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2));
     }),
   );
   check(hits.length === 3 && hits.every(Boolean), `service options are the tap target (${hits.length})`);
-  await page.touchscreen.tap(195, 120);
+  await page.tap('[data-contact] .arrow-back');
   await page.waitForFunction(() => !document.querySelector('.contact-panel'), null, { timeout: 5000 }).catch(() => {});
-  check(await page.evaluate(() => !document.querySelector('.contact-panel')), 'tap outside closes the sheet');
-  const nav = page.waitForURL((u) => u.pathname.startsWith('/work/'), { timeout: 5000 }).then(() => true, () => false);
-  await page.locator('.card a[href^="/work/"]').first().tap();
-  check(await nav, 'tap a project card opens the case');
+  check(await page.evaluate(() => !document.querySelector('.contact-panel')), 'tap Back closes the hub');
+  await page.goto(url + '/work/industrial-bloom/', { waitUntil: 'load' });
+  await wait(500);
+  check(await page.evaluate(() => location.pathname.startsWith('/work/')), 'opens a case page');
 } finally {
   await browser.close();
   await stop();

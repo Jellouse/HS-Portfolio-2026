@@ -5,10 +5,6 @@ summary: Conway & Co is a consultancy firm specialised in helping businesses cre
   this in the branding as well as the website using simple shapes and strong colours,
   as well as Helvetica as a typeface. These elements combined make for a visually
   pleasing identity while also communicating Conway & Co's essential values.
-cover: /src/content/projects/conway-and-co/cover.jpg
-coverAlt: Brushed metal Conway & Co sign on a white wall
-coverFrame: wide
-coverFlush: false
 rounded: true
 info:
 - label: Client

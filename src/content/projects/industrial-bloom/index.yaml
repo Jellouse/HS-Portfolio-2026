@@ -5,13 +5,6 @@ summary: >-
   Industrial Bloom is a series of aluminium vases, handmade by Johann Schnettker
   in Germany with laser cutting, 3D printing and embossing. Available in the
   [Humansize shop](/shop/).
-cover: /src/content/projects/industrial-bloom/cover.png
-coverGallery: none
-coverVideoGallery: none
-coverAlt: Industrial Bloom
-coverFrame: default
-coverFlush: true
-coverOutline: false
 rounded: true
 info:
   - label: Design

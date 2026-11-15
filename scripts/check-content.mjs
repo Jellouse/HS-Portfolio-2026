@@ -28,13 +28,6 @@ function projectSlugs(root) {
   );
 }
 
-function coverOf(root, slug) {
-  const file = join(root, 'src/content/projects', slug, 'index.yaml');
-  if (!existsSync(file)) return '';
-  const data = parse(readFileSync(file, 'utf8'));
-  return typeof data?.cover === 'string' ? data.cover.trim() : '';
-}
-
 function fileExists(root, src) {
   return IMAGE.test(src) && existsSync(join(root, src.replace(/^\//, '')));
 }
@@ -58,7 +51,6 @@ export function checkContent(root) {
   if (!existsSync(contentDir)) return [`${relative(root, contentDir) || 'src/content'}: missing content directory`];
 
   const slugs = projectSlugs(root);
-  const covers = new Map([...slugs].map((slug) => [slug, coverOf(root, slug)]));
 
   for (const file of walkFiles(contentDir)) {
     const rel = relative(root, file).replaceAll('\\', '/');
@@ -84,12 +76,16 @@ export function checkContent(root) {
       if (value && typeof value === 'object' && !Array.isArray(value) && value.discriminant === 'project') {
         const field = `${path}.value.project`;
         const slug = typeof value.value?.project === 'string' ? value.value.project.trim() : '';
+        const src = typeof value.value?.src === 'string' ? value.value.src.trim() : '';
         if (!slug) {
           errors.push(`${rel} ${field}: missing project`);
         } else if (!slugs.has(slug)) {
           errors.push(`${rel} ${field}: unknown project ${slug}`);
-        } else if (!fileExists(root, covers.get(slug) || '')) {
-          errors.push(`${rel} ${field}: project ${slug} has no cover`);
+        }
+        if (!src) {
+          errors.push(`${rel} ${path}.value.src: missing image`);
+        } else if (!fileExists(root, src)) {
+          errors.push(`${rel} ${path}.value.src: missing image ${src}`);
         }
       }
 

@@ -141,6 +141,7 @@ export const existing = [
   { name: 'Blocks', file: 'src/components/Blocks.astro', props: ['blocks', 'slug?', 'processFromFolder?', 'processFolderSrcs?', 'info?'], pages: ['/work/:slug', '/preview/:slug'] },
   { name: 'BlurImage', file: 'src/components/BlurImage.astro', props: ['src', 'alt', 'sizes', 'priority?', 'plain?', 'flush?', 'outline?', 'fade? = true'], pages: ['/', '/shop/', '/shop/:slug', '/work/:slug'] },
   { name: 'ContactDrawer', file: 'src/components/ContactDrawer.tsx', props: ['email: string'], pages: ['every page, through ContactSheet'] },
+  { name: 'ContactFace', file: 'src/components/ContactFace.tsx', props: ['filterId?'], pages: ['ContactDrawer service step'] },
   { name: 'ContactSheet', file: 'src/components/ContactSheet.astro', props: ['email: string'], pages: ['every page, through Base'] },
   { name: 'Footer', file: 'src/components/Footer.astro', props: ['site: SiteData'], pages: ['every page, through Base'] },
   { name: 'Header', file: 'src/components/Header.astro', props: ['site: SiteData'], pages: ['/'] },
