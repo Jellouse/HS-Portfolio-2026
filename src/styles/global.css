@@ -4167,7 +4167,7 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
 }
 
 .arrow-scrub-window {
-  width: calc(var(--scrub-slot) * 3);
+  width: 96px;
   overflow: hidden;
   mask-image: linear-gradient(to right, transparent, #000 28%, #000 72%, transparent);
   -webkit-mask-image: linear-gradient(to right, transparent, #000 28%, #000 72%, transparent);
