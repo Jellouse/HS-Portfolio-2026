@@ -7,7 +7,7 @@ function text(value) {
   return typeof value === 'string' ? value.trim() : '';
 }
 
-/** Project slug from a service image: explicit project cover, or /work/<slug>/ link. */
+/** Project slug from a service image: linked project, or /work/<slug>/ link. */
 export function projectSlugForServiceImage(image) {
   if (image?.discriminant === 'project') return text(image.value?.project);
   const match = text(image?.value?.href).match(WORK_HREF);
@@ -25,16 +25,15 @@ function captionFor(image, project) {
 export function resolveServiceImage(image, project, where) {
   if (image?.discriminant === 'project') {
     const slug = text(image.value?.project);
-    const cover = text(project?.cover);
-    if (!slug || !cover) {
-      throw new Error(`${where}: project ${slug || '(empty)'} has no cover`);
-    }
+    const still = text(image.value?.src);
+    if (!slug) throw new Error(`${where}: missing project`);
+    if (!still) throw new Error(`${where}: project ${slug} is missing an image`);
     const video = text(image.value?.video);
     return {
-      src: video || cover,
-      poster: video ? cover : '',
+      src: video || still,
+      poster: video ? still : '',
       video: Boolean(video),
-      alt: text(image.value?.alt) || text(project?.coverAlt),
+      alt: text(image.value?.alt) || text(project?.title),
       caption: captionFor(image, project),
       href: image.value?.href || '',
     };

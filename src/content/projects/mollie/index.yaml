@@ -6,10 +6,6 @@ summary: This is when I first heard the word "unicorn" and what it meant in a bu
   building and was then looking for someone to help them with the wayfinding. This
   project went from concept to final production and taught me a lot. How many times
   do you check print files? One more time.
-cover: /src/content/projects/mollie/cover.jpg
-coverAlt: Mollie office stickers with space themes next to a black notebook
-coverFrame: wide
-coverFlush: false
 rounded: true
 info:
 - label: Client

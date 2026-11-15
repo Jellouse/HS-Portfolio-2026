@@ -83,15 +83,6 @@ function projectPieces(data: CollectionEntry<'projects'>['data']): Piece[] {
     if (!isGallery(gallery) || !piece.src) return;
     pieces.push({ gallery, ...piece });
   };
-  if (data.cover) add(data.coverGallery, { src: data.cover, alt: data.coverAlt || data.title });
-  if (data.coverVideo) {
-    add(data.coverVideoGallery, {
-      src: data.coverVideo,
-      alt: data.coverAlt || data.title,
-      video: data.coverVideo,
-      poster: data.cover || '',
-    });
-  }
   for (const block of data.blocks) {
     const value = block.value;
     if (block.discriminant === 'image') add(value.gallery, { src: value.src, alt: value.alt });

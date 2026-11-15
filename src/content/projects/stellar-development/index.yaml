@@ -4,10 +4,6 @@ summary: Stellar Development is renting out a sustainably interconnected system 
   warehouses and logistic centers. The company is focussed on sustainable practices
   as well as efficiency. The brand identity was based on flocks of birds and fish
   building a system greater than the sum of its parts.
-cover: /src/content/projects/stellar-development/cover.jpg
-coverAlt: Stellar Development logo inside a cloud of white dots
-coverFrame: wide
-coverFlush: false
 rounded: true
 info:
 - label: Client

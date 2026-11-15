@@ -7,13 +7,6 @@ summary: >-
   There's so much to cover in this field I didn't even know existed! We took a
   step back and thought about how to visualise a dynamic and delightful
   conversation.
-cover: /src/content/projects/conversation-design-institute/cover.jpg
-coverGallery: none
-coverVideoGallery: none
-coverAlt: Tablet showing the Conversation Designer course page with dotted circles
-coverFrame: wide
-coverFlush: false
-coverOutline: false
 rounded: true
 info:
   - label: Client

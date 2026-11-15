@@ -133,34 +133,6 @@ export default config({
           description: 'Two or three sentences shown under the title on the project page. A link is [label](https://...).',
           validation: { isRequired: true, length: { min: 1 } },
         }),
-        cover: imageField('Cover', {
-          required: true,
-          description:
-            'Required for the homepage card. Also used as the poster when a cover video is set. (The build allows cover video alone, but Keystatic cannot express that OR rule.)',
-        }),
-        coverGallery: gallerySelect(),
-        coverVideo: videoField(
-          'Cover video',
-          'Optional mp4 or webm. Plays muted on a loop instead of the cover image, which becomes the poster. Keep it short; H.264 MP4 plays everywhere.',
-        ),
-        coverVideoGallery: gallerySelect(),
-        coverAlt: fields.text({
-          label: 'Cover alt text',
-          description: 'Required. Alt for the cover image, or the accessible label for a cover video.',
-          validation: { isRequired: true, length: { min: 1 } },
-        }),
-        coverFrame: frame,
-        coverFlush: fields.checkbox({
-          label: 'Flush cover',
-          defaultValue: false,
-          description:
-            'White or transparent edges. The homepage image has no rounded corners and no padding.',
-        }),
-        coverOutline: fields.checkbox({
-          label: 'Outline cover',
-          defaultValue: false,
-          description: '1px light grey line inside the cover image edge. Does not change the size.',
-        }),
         rounded: fields.checkbox({
           label: 'Rounded image',
           defaultValue: true,
@@ -408,21 +380,27 @@ export default config({
             images: fields.blocks(
               {
                 project: {
-                  label: 'Project cover',
-                  itemLabel: (props) => props.fields.project.value || props.fields.caption.value || 'Project cover',
+                  label: 'Project image',
+                  itemLabel: (props) => props.fields.project.value || props.fields.caption.value || 'Project image',
                   schema: fields.object({
                     project: fields.relationship({
                       label: 'Project',
                       collection: 'projects',
                       validation: { isRequired: true },
                     }),
+                    src: imageField('Image', {
+                      required: true,
+                      directory: serviceImageDirectory,
+                      publicPath: serviceImagePublicPath,
+                      description: 'Stored with this service. Used as the poster when a video is set.',
+                    }),
                     alt: fields.text({
                       label: 'Alt text',
-                      description: 'Empty uses the project cover alt.',
+                      description: 'Empty uses the project title.',
                     }),
                     caption: fields.text({ label: 'Caption' }),
                     href: fields.text({ label: 'Link' }),
-                    video: videoField('Video', 'Optional. The project cover is the poster.'),
+                    video: videoField('Video', 'Optional. Plays muted on a loop; the image is the poster.'),
                     tbd: fields.checkbox({ label: 'Flag TBD', defaultValue: false }),
                   }),
                 },
@@ -446,7 +424,7 @@ export default config({
               {
                 label: 'Images',
                 description:
-                  'A project cover uses the cover from that project. An image is a file stored with this service.',
+                  'A project image links a project for the caption. An image is a file stored with this service.',
               },
             ),
           }),

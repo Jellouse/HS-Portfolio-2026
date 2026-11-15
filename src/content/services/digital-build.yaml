@@ -27,12 +27,14 @@ sections:
       - discriminant: project
         value:
           project: atomic-ski
+          src: /src/content/services/images/atomic-ski.png
           alt: Atomic Ski website hero with a skier mid jump
           caption: ''
           href: /work/atomic-ski/
       - discriminant: project
         value:
           project: analogue-af1
+          src: /src/content/services/images/analogue-af1.png
           alt: Analogue AF1 product page
           caption: ''
           href: /work/analogue-af1/

@@ -3,10 +3,6 @@ published: false
 summary: Right in the middle of the emergence of crypto currency, Maven 11, a new
   hedgefund emerged and was looking for an exciting brand identity and website that
   reflects their tech-forward stance and attention to detail.
-cover: /src/content/projects/maven-11/cover.jpg
-coverAlt: Phone showing a Maven 11 page that reads Keep updated
-coverFrame: wide
-coverFlush: false
 rounded: true
 info:
 - label: Client

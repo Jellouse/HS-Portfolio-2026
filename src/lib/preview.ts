@@ -44,11 +44,6 @@ export function toProjectEntry(slug: string, data: Record<string, unknown>): Pro
       yearEnd: typeof data.yearEnd === 'number' ? data.yearEnd : undefined,
       published: data.published !== false,
       summary: String(data.summary ?? ''),
-      cover: typeof data.cover === 'string' ? data.cover : undefined,
-      coverVideo: typeof data.coverVideo === 'string' ? data.coverVideo : undefined,
-      coverAlt: typeof data.coverAlt === 'string' ? data.coverAlt : undefined,
-      coverFrame: (data.coverFrame === 'wide' ? 'wide' : 'default') as 'default' | 'wide',
-      coverFlush: Boolean(data.coverFlush),
       rounded: data.rounded !== false,
       info: info.map((item: { label?: string; value?: string; href?: string }) => ({
         label: String(item.label ?? ''),

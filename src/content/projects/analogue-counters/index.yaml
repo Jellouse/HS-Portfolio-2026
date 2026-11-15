@@ -5,15 +5,6 @@ seoTitle: Analogue Store Zeedijk, Amsterdam, 2026
 summary: >-
   A new store for Analogue Amsterdam on the Zeedijk, built by Humansize in
   aluminium extrusion with 3D printed displays.
-cover: /src/content/projects/analogue-counters/cover.jpg
-coverGallery: space
-coverVideo: >-
-  https://humansize-media.schnettker-johann.workers.dev/projects/analogue-couters/cover-mvaoawdg.mp4
-coverVideoGallery: none
-coverAlt: Analogue store on Zeedijk in Amsterdam
-coverFrame: wide
-coverFlush: false
-coverOutline: false
 rounded: true
 info:
   - label: Built by

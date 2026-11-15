@@ -10,36 +10,69 @@ interface Props {
 }
 
 const { project, priority = false } = Astro.props;
-const { cover, coverAlt, coverVideo, coverFrame, coverFlush, coverOutline, rounded } = project.data;
-if (!coverVideo && (!cover || !coverAlt)) throw new Error(`${project.id} is missing a cover`);
 const { title, years } = projectTitleParts(project.data);
-const image = cover ? resolveImageSource(cover) : undefined;
+const { rounded } = project.data;
+
+type Media =
+  | { kind: 'image'; src: string; alt: string; frame: 'default' | 'wide'; flush: boolean; outline: boolean }
+  | { kind: 'video'; src: string; poster?: string; alt: string; flush: boolean; outline: boolean; frame: 'default' | 'wide' };
+
+const media = ((): Media | null => {
+  for (const block of project.data.blocks) {
+    if (block.discriminant === 'image') {
+      return {
+        kind: 'image',
+        src: block.value.src,
+        alt: block.value.alt,
+        frame: block.value.frame,
+        flush: block.value.flush,
+        outline: block.value.outline,
+      };
+    }
+    if (block.discriminant === 'video' && block.value.src) {
+      return {
+        kind: 'video',
+        src: block.value.src,
+        poster: block.value.poster || undefined,
+        alt: block.value.alt || '',
+        frame: block.value.frame,
+        flush: block.value.flush,
+        outline: block.value.outline,
+      };
+    }
+  }
+  return null;
+})();
+
+if (!media) throw new Error(`${project.id} needs an image or video block for the card`);
+
 const sizes = {
   wide: '(min-width: 1440px) 893px, (min-width: 760px) 70vw, 100vw',
   default: '(min-width: 1440px) 666px, (min-width: 760px) 55vw, 100vw',
-}[coverFrame];
+}[media.frame];
 ---
 
-<article class:list={['card', 'fade-in', { 'is-plain': rounded === false }]} data-frame={coverFrame}>
+<article class:list={['card', 'fade-in', { 'is-plain': rounded === false }]} data-frame={media.frame}>
   <a href={`/work/${project.id}/`}>
-    {coverVideo ? (
+    {media.kind === 'video' ? (
       <VideoFrame
-        src={coverVideo}
-        poster={image}
-        label={coverAlt}
+        src={media.src}
+        poster={media.poster ? resolveImageSource(media.poster) : undefined}
+        label={media.alt}
         plain={rounded === false}
-        flush={coverFlush === true}
+        flush={media.flush}
+        outline={media.outline}
         priority={priority}
       />
     ) : (
       <BlurImage
-        src={image!}
-        alt={coverAlt ?? ''}
+        src={resolveImageSource(media.src)}
+        alt={media.alt}
         sizes={sizes}
         priority={priority}
         plain={rounded === false}
-        flush={coverFlush === true}
-        outline={coverOutline === true}
+        flush={media.flush}
+        outline={media.outline}
       />
     )}
   </a>
