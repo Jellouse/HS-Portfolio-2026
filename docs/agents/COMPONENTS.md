@@ -52,7 +52,8 @@ These were already shared. Pages and other components keep using them.
 | Footer | `src/components/Footer.astro` | `site` | every page, through Base |
 | Seo | `src/components/Seo.astro` | `title`, `description`, `image?`, `type?`, `jsonLd?`, `noindex?` | every page, through Base |
 | ContactSheet | `src/components/ContactSheet.astro` | `email` | every page, through Base |
-| ContactDrawer | `src/components/ContactDrawer.tsx` | `email` | every page, through ContactSheet |
+| ContactDrawer | `src/components/ContactDrawer.tsx` | `email` | every page, through ContactSheet. Full-viewport hub reusing arrow face / pill / back chrome. Step hops and About open/close go through `runChromeVt` (`src/lib/chrome-vt.ts`). |
+| ContactFace | `src/components/ContactFace.tsx` | `filterId?` | ContactDrawer service step |
 | Peeps | `src/components/Peeps.astro` | `maxH?` | every page, through Footer |
 | PeepsStatic | `src/components/PeepsStatic.astro` | none | every page, through Peeps |
 | HeroBlob | `src/components/HeroBlob.astro` | none | `/` |
@@ -73,5 +74,5 @@ These look related and stay separate. Folding them into one component would pick
 | Photo grid | `process-grid` and `shop-wild-grid` | Process uses `--gutter`. The wild grid uses `12px 8px`. |
 | Text section | `about`, `shop-intro`, `text-block`, `project-summary` | `Prose` is the shared paragraphs. The shells use `--space-text`, `--space-text-titled`, and the shop intro offset. |
 | Media frame | `image-block` and `shop-detail-image` | Project images use the content span. Shop figures use their own bottom margin. |
-| Services landing | `services-hub` | Back, the face, and Physical Build / Digital Build. Same controls as the homepage. |
+| Services landing | `services-hub` | Back, the face, and Physical Build / Digital Build. Same controls as the homepage. Contact reuses this chrome in `ContactDrawer`. |
 | Services detail | `service-page` | Grey face, process chart, and FAQ. `Prose`, `BlurImage`, and `VideoFrame` are the shared pieces inside it. |

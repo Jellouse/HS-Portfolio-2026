@@ -232,8 +232,7 @@ a:hover:has(video),
 .site-header a:hover,
 .site-header button:hover,
 .site-menu > a:hover,
-.site-menu > button:hover,
-.contact-options > button:hover {
+.site-menu > button:hover {
   opacity: 1;
 }
 
@@ -351,7 +350,6 @@ html[data-sky-ink='white'] body:has([data-sky]) {
   color: var(--bg);
 }
 
-.contact-panel,
 .shop-buy-button,
 .services-landing .shop-button {
   --ink: var(--ink-fixed);
@@ -1641,6 +1639,20 @@ html:active-view-transition-type(hs-shrink)::view-transition-new(hs-mark) {
   animation: vt-in 300ms var(--ease-out-quad) both;
 }
 
+/* Same-document chrome morphs (About ↔ contact, contact steps). The named
+   face / back / pills own the motion. Freezing root stops a second fade
+   fighting those groups. data-chrome-vt-run is the html flag from
+   runChromeVt — not data-chrome-vt, which opts in an .arrow-nav root. */
+html[data-chrome-vt-run] ::view-transition-old(root) {
+  animation: none;
+  opacity: 0;
+}
+
+html[data-chrome-vt-run] ::view-transition-new(root) {
+  animation: none;
+  opacity: 1;
+}
+
 /* Shared chrome view-transition names. A new screen opts in with
    data-chrome-vt on its .arrow-nav root. The homepage about screen is
    the in-page equivalent. Icon-mode L/R pills stay unnamed so they are
@@ -1669,6 +1681,7 @@ html:active-view-transition-type(hs-shrink)::view-transition-new(hs-mark) {
 ::view-transition-group(services-back),
 ::view-transition-group(arrow-pill-left),
 ::view-transition-group(arrow-pill-right),
+::view-transition-group(contact-pill-down),
 ::view-transition-group(work-frame),
 ::view-transition-group(work-back) {
   animation-duration: var(--dur-nav);
@@ -1713,7 +1726,8 @@ html:active-view-transition-type(hs-shrink)::view-transition-new(hs-mark) {
 }
 
 ::view-transition-image-pair(arrow-pill-left),
-::view-transition-image-pair(arrow-pill-right) {
+::view-transition-image-pair(arrow-pill-right),
+::view-transition-image-pair(contact-pill-down) {
   isolation: auto;
   overflow: hidden;
   background: transparent;
@@ -1724,6 +1738,8 @@ html:active-view-transition-type(hs-shrink)::view-transition-new(hs-mark) {
   display: none;
 }
 
+/* :only-child does not match these snapshot pseudos, so it cannot
+   turn off the UA fade or plus-lighter blend. Set animation explicitly. */
 ::view-transition-old(services-face),
 ::view-transition-new(services-face),
 ::view-transition-old(services-back),
@@ -1731,15 +1747,15 @@ html:active-view-transition-type(hs-shrink)::view-transition-new(hs-mark) {
 ::view-transition-old(arrow-pill-left),
 ::view-transition-new(arrow-pill-left),
 ::view-transition-old(arrow-pill-right),
-::view-transition-new(arrow-pill-right) {
+::view-transition-new(arrow-pill-right),
+::view-transition-old(contact-pill-down),
+::view-transition-new(contact-pill-down) {
   mix-blend-mode: normal;
   width: 100%;
   height: 100%;
   object-fit: fill;
 }
 
-/* :only-child does not match these snapshot pseudos, so it cannot
-   turn off the UA fade or plus-lighter blend. Set animation explicitly. */
 ::view-transition-old(services-back),
 ::view-transition-new(services-back) {
   animation: none;
@@ -1770,13 +1786,44 @@ html:active-view-transition-type(chrome-grow)::view-transition-old(services-face
   opacity: 0;
 }
 
+/*
+  Contact step hops morph face ↔ field (different shapes). Soft crossfade
+  with object-fit: none so the snapshots keep their natural size inside the
+  morphing group instead of stretching like chrome-grow does for faces.
+*/
+html[data-chrome-vt-run='contact'] ::view-transition-image-pair(services-face) {
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: transparent;
+}
+
+html[data-chrome-vt-run='contact'] ::view-transition-old(services-face),
+html[data-chrome-vt-run='contact'] ::view-transition-new(services-face) {
+  width: 100%;
+  height: 100%;
+  object-fit: none;
+  object-position: center;
+  mix-blend-mode: normal;
+  animation: none;
+}
+
+html[data-chrome-vt-run='contact'] ::view-transition-old(services-face) {
+  animation: vt-out var(--dur-nav) var(--ease-nav) both;
+}
+
+html[data-chrome-vt-run='contact'] ::view-transition-new(services-face) {
+  animation: vt-in var(--dur-nav) var(--ease-nav) both;
+}
+
 ::view-transition-old(arrow-pill-left),
-::view-transition-old(arrow-pill-right) {
+::view-transition-old(arrow-pill-right),
+::view-transition-old(contact-pill-down) {
   animation: vt-out var(--dur-nav) var(--ease-nav) both;
 }
 
 ::view-transition-new(arrow-pill-left),
-::view-transition-new(arrow-pill-right) {
+::view-transition-new(arrow-pill-right),
+::view-transition-new(contact-pill-down) {
   animation: vt-in var(--dur-nav) var(--ease-nav) both;
 }
 
@@ -2598,214 +2645,209 @@ html.is-contact-open body {
   overscroll-behavior: none;
 }
 
-.contact-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 100;
-  background: rgb(0 0 0 / 20%);
-}
-
+/* Full-viewport contact hub. Reuses .arrow-nav face / pill / back chrome.
+   Stays mounted when closed so About → contact can morph into it. */
 .contact-panel {
   position: fixed;
-  right: 0;
-  bottom: 0;
-  left: 0;
+  inset: 0;
   z-index: 101;
-  height: 435px;
-  padding: 49px 20px 0;
-  text-align: center;
-  background: #fff;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  overscroll-behavior: contain;
+  background: var(--page-bg);
+  color: var(--ink);
   outline: none;
 }
 
-.contact-panel::after {
-  content: "";
-  position: absolute;
-  top: 100%;
-  right: 0;
-  left: 0;
-  height: 200px;
-  background: #fff;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  [data-vaul-drawer].contact-panel {
-    transition: none;
-  }
-}
-
-.contact-step[hidden] {
+.contact-panel.is-closed {
   display: none;
 }
 
-.contact-q,
-.contact-done {
-  display: block;
-  margin: 0;
-  font-size: var(--text);
-  line-height: var(--lh);
-  color: var(--ink);
-  transition: color var(--dur-hover) var(--ease-out);
+@media (prefers-reduced-motion: no-preference) {
+  .contact-panel {
+    animation: contact-in var(--dur-sheet) var(--ease-out) both;
+  }
+
+  /* About morph owns the entrance. is-entered locks the fade so clearing
+     data-contact-vt after a step hop does not replay contact-in. */
+  html[data-contact-vt] .contact-panel,
+  .contact-panel.is-entered {
+    animation: none;
+  }
 }
 
-.contact-q.is-muted {
-  color: var(--muted);
+@keyframes contact-in {
+  from {
+    opacity: 0;
+  }
 }
 
-.contact-done {
-  padding-top: 116px;
+.contact-hub {
+  height: 100%;
+  color: inherit;
 }
 
-.contact-options {
+/* About chrome yields its VT names to the contact hub during the morph. */
+.arrow-nav.is-contact-covered :is(.arrow-face-scale, .arrow-back, .arrow-pill[data-dir='left'], .arrow-pill[data-dir='right']) {
+  view-transition-name: none;
+}
+
+.contact-hub .arrow-face {
+  pointer-events: none;
+}
+
+/*
+  Contact chrome slots. Face scale and the visible field share services-face.
+  Only :not([hidden]) so persistent step slots do not double-name. Down uses
+  contact-pill-down. Back already gets services-back from [data-chrome-vt].
+*/
+.contact-hub[data-chrome-vt] .arrow-face[hidden] .arrow-face-scale {
+  view-transition-name: none;
+}
+
+.contact-hub[data-chrome-vt] .contact-field:not([hidden]) {
+  view-transition-name: services-face;
+}
+
+.contact-hub[data-chrome-vt] .arrow-pill[data-contact-step][hidden] {
+  view-transition-name: none;
+}
+
+/* Size changes go through the VT group, not the CSS width transition. */
+.contact-hub .arrow-face-scale,
+.contact-hub .arrow-face-blob {
+  transition: none;
+}
+
+.contact-hub[data-chrome-vt] .arrow-pill[data-dir='down'] {
+  view-transition-name: contact-pill-down;
+}
+
+/*
+  About → contact only. Size morph + face crossfade together. About's blob
+  is zoomed 1.18; contact is resting. Blending them over --dur-nav keeps
+  eyes and mouth in sync with the scale. To-about keeps chrome-grow.
+*/
+html[data-chrome-vt-run='about-contact-in'] ::view-transition-old(services-face) {
+  animation: vt-out var(--dur-nav) var(--ease-nav) both;
+}
+
+html[data-chrome-vt-run='about-contact-in'] ::view-transition-new(services-face) {
+  animation: vt-in var(--dur-nav) var(--ease-nav) both;
+}
+
+/* Full-stage flex centre so the field's % width resolves against the hub,
+   not a shrink-wrapped wrapper (that collapsed it to ~80×264). */
+.contact-center {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
   display: flex;
-  flex-wrap: wrap;
+  align-items: center;
   justify-content: center;
-  gap: 8px 24px;
-  margin-top: 142px;
+  pointer-events: none;
 }
 
-.contact-options button,
-.contact-nav button {
-  padding: 0;
-  font: inherit;
-  font-size: var(--text);
-  line-height: var(--lh);
-  color: var(--ink);
-  background: none;
-  border: 0;
-  cursor: pointer;
-  transition: color var(--dur-hover) var(--ease-out);
+.contact-center .arrow-face,
+.contact-center .contact-field {
+  position: relative;
+  left: auto;
+  top: auto;
+  transform: none;
+  pointer-events: auto;
 }
 
-.contact-options:has(> :hover) > :not(:hover) {
-  color: var(--muted);
+.contact-field {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  width: min(24em, calc(100% - 2 * var(--margin)));
+  min-height: var(--arrow-control);
+  max-height: calc(var(--lh) * 8 + 16px + 16px);
+  padding: 16px var(--space-md);
+  background: var(--arrow-fill);
+  border-radius: var(--radius);
 }
 
-.contact-panel textarea,
-.contact-panel input {
+.contact-field textarea,
+.contact-field input {
   display: block;
-  width: min(664px, 100%);
-  margin: 56px auto 0;
+  width: 100%;
+  margin: 0;
   padding: 0;
   font: inherit;
   font-size: var(--text);
   line-height: var(--lh);
+  letter-spacing: var(--track);
   color: var(--ink);
-  text-align: left;
+  text-align: center;
   background: none;
   border: 0;
   outline: none;
   resize: none;
 }
 
-.contact-panel textarea {
-  height: 174px;
+.contact-field textarea {
+  height: var(--lh);
+  max-height: 100%;
+  overflow: hidden;
 }
 
-.contact-panel textarea:placeholder-shown {
-  padding-top: 86px;
-  text-align: center;
+.contact-field.is-multi textarea {
+  text-align: left;
 }
 
-.contact-panel input {
-  margin-top: 142px;
-  text-align: center;
+.contact-field.is-full textarea {
+  overflow-y: auto;
 }
 
-.contact-panel ::placeholder {
+.contact-field ::placeholder {
   color: var(--muted);
   opacity: 1;
 }
 
-.contact-nav {
-  position: absolute;
-  bottom: calc(30px + env(safe-area-inset-bottom, 0px));
-  left: 50%;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  height: var(--lh);
-  transform: translateX(-50%);
+.contact-field :is(textarea, input):focus-visible {
+  outline: none;
 }
 
-.contact-dots {
-  display: flex;
-  gap: 6px;
-  transition: gap var(--dur-ui) var(--ease-out);
-}
-
-.contact-dots i {
-  width: 4px;
-  height: 4px;
-  background: var(--muted);
-  border-radius: 50%;
-  transition: background var(--dur-hover) var(--ease-out);
-}
-
-.contact-dots i.is-on {
-  background: var(--ink);
-}
-
-.contact-back,
-.contact-next {
-  opacity: 0;
-  pointer-events: none;
-  transition:
-    opacity var(--dur-ui) var(--ease-out),
-    transform var(--dur-ui) var(--ease-out),
-    color var(--dur-hover) var(--ease-out);
-}
-
-.contact-back {
-  transform: translateX(16px);
-}
-
-.contact-next {
-  transform: translateX(-16px);
-}
-
-.contact-nav button:disabled {
-  color: rgb(0 0 0 / 15%);
+.contact-hub .arrow-pill:disabled {
+  color: var(--muted);
   cursor: default;
 }
 
-.contact-nav.has-controls:hover .contact-dots,
-.contact-nav.has-controls:focus-within .contact-dots {
-  gap: 0;
-}
-
-.contact-nav.has-controls:hover .contact-dots i:not(.is-on),
-.contact-nav.has-controls:focus-within .contact-dots i:not(.is-on) {
-  width: 0;
-}
-
-.contact-nav.has-controls:hover :is(.contact-back, .contact-next),
-.contact-nav.has-controls:focus-within :is(.contact-back, .contact-next) {
-  opacity: 1;
-  pointer-events: auto;
-  transform: none;
-}
-
-@media (hover: none) {
-  .contact-nav.has-controls :is(.contact-back, .contact-next) {
-    opacity: 1;
-    pointer-events: auto;
-    transform: none;
-  }
-}
-
-.contact-back,
-.contact-next {
+.contact-done-stack {
   position: absolute;
-  top: 0;
+  left: 50%;
+  top: 50%;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-md);
+  width: min(24em, calc(100% - 2 * var(--margin)));
+  transform: translate(-50%, -50%);
 }
 
-.contact-back {
-  right: calc(100% + 16px);
+.contact-done {
+  margin: 0;
+  font-size: var(--text);
+  line-height: var(--lh);
+  letter-spacing: var(--track);
+  color: var(--ink);
+  text-align: center;
 }
 
-.contact-next {
-  left: calc(100% + 16px);
+
+/* Done leaves the chrome set; a short blur-in is enough. Skip during chrome VT. */
+@media (prefers-reduced-motion: no-preference) {
+  .contact-done-stack {
+    animation: text-blur-in 550ms var(--ease-out-expo) both;
+  }
+
+  html[data-contact-vt] .contact-done-stack {
+    animation: none;
+  }
 }
 
 .project-menu > a,
@@ -2893,96 +2935,6 @@ html.is-contact-open body {
   }
 }
 
-.contact-step[data-step="done"] {
-  position: absolute;
-  top: 220px;
-  right: 20px;
-  left: 20px;
-}
-
-.contact-done {
-  padding-top: 0;
-}
-
-.contact-panel[data-step="done"] .contact-nav {
-  visibility: hidden;
-}
-
-.contact-nav::before {
-  content: "";
-  position: absolute;
-  inset: -32px -136px;
-}
-
-.contact-field {
-  position: relative;
-  width: min(664px, 100%);
-  height: 232px;
-  margin: 33px auto 0;
-}
-
-.contact-panel .contact-field textarea {
-  position: absolute;
-  top: 50%;
-  left: 0;
-  width: 100%;
-  height: calc(var(--lines, 1) * var(--lh));
-  max-height: 100%;
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
-  text-align: center;
-  transform: translateY(-50%);
-  transition: height var(--dur-menu) var(--ease-out);
-}
-
-.contact-panel .contact-field textarea:placeholder-shown {
-  padding-top: 0;
-}
-
-.contact-field.is-multi textarea {
-  text-align: left;
-}
-
-.contact-field.is-full textarea {
-  overflow-y: auto;
-}
-
-.contact-mirror {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  font-size: var(--text);
-  line-height: var(--lh);
-  white-space: pre-wrap;
-  overflow-wrap: break-word;
-  visibility: hidden;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .contact-step:not([hidden]) :is(.contact-q, .contact-options > button, textarea, input, .contact-done) {
-    animation: text-in 400ms var(--ease-out-expo) both;
-  }
-
-  .contact-options > :nth-child(2) {
-    animation-delay: 30ms;
-  }
-
-  .contact-options > :nth-child(3) {
-    animation-delay: 60ms;
-  }
-
-  .contact-options > :nth-child(4),
-  .contact-step:not([hidden]) :is(textarea, input) {
-    animation-delay: 90ms;
-  }
-}
-
-.contact-dots {
-  position: relative;
-}
 
 :root {
   --small-menu-top: 70px;
@@ -3004,62 +2956,12 @@ html.is-contact-open body {
   border-radius: 2px;
 }
 
-.contact-panel :is(textarea, input):focus-visible {
-  outline: none;
-}
-
 [tabindex="-1"]:focus {
   outline: none;
 }
 
 .shop-menu {
   margin-top: 0;
-}
-
-.contact-panel {
-  padding-top: 40px;
-}
-
-.contact-panel::after {
-
-  content: "";
-  position: absolute;
-  top: 100%;
-  right: 0;
-  left: 0;
-  height: 100lvh;
-  background: #fff;
-}
-
-.contact-nav {
-  bottom: 40px;
-}
-
-.contact-options {
-  margin-top: 134px;
-}
-
-.contact-panel input {
-  margin-top: 134px;
-}
-
-.contact-step[data-step="done"] {
-  top: 203px;
-}
-
-.contact-field {
-  display: flex;
-  align-items: center;
-  height: 229px;
-  margin-top: 34px;
-}
-
-.contact-panel .contact-field textarea {
-  position: static;
-  height: var(--lh);
-  max-height: 100%;
-  transform: none;
-  transition: none;
 }
 
 @keyframes text-blur-in {
@@ -3069,20 +2971,11 @@ html.is-contact-open body {
   }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .contact-step:not([hidden]) :is(.contact-q, .contact-options > button, textarea, input, .contact-done) {
-    animation: text-blur-in 550ms var(--ease-out-expo) both;
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .contact-panel,
-  .contact-backdrop,
   .project-menu > a,
-  .project-menu > button,
-  .contact-dots,
-  .contact-back,
-  .contact-next {
+  .project-menu > button {
+    animation: none;
     transition: none;
   }
 }
@@ -3093,13 +2986,7 @@ html.is-contact-open body {
   }
 }
 
-.contact-root { overscroll-behavior: contain; }
-
 .js .hero[data-intro]:not([data-intro-ready]) .mark-blob { visibility: hidden; }
-
-.contact-panel textarea {
-  letter-spacing: var(--track);
-}
 
 .brand-toggle {
   padding: 0;
@@ -3511,7 +3398,7 @@ body.is-services-landing main#content {
   }
 }
 
-body:has(.arrow-nav) {
+body:has(.arrow-nav:not(.contact-hub)) {
   height: var(--app-vh);
   overflow: hidden;
 }
@@ -3529,7 +3416,7 @@ body:has(.arrow-nav) {
 }
 
 
-html[data-app-inset] .arrow-nav:not([data-screen='about']) {
+html[data-app-inset] .arrow-nav:not([data-screen='about']):not(.contact-hub) {
   position: fixed;
   top: var(--app-vt);
   left: var(--app-vl);
@@ -3871,6 +3758,13 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
   place-items: center;
   white-space: nowrap;
   transform: translateY(-50%);
+}
+
+.contact-done-stack .contact-home {
+  position: static;
+  top: auto;
+  left: auto;
+  transform: none;
 }
 
 .arrow-pill[data-dir='left'] {
