@@ -36,6 +36,7 @@
     "test:menu-fade": "node tests/menu-scroll-fade.spec.mjs",
     "test:arrow-motion": "node tests/arrow-nav-motion.spec.mjs",
     "test:arrow-hold": "node tests/arrow-nav-hold.spec.mjs",
+    "test:arrow-scrub": "node tests/arrow-nav-scrub.spec.mjs",
     "test:arrow-viewport": "node tests/arrow-nav-viewport.spec.mjs",
     "test:viewport-layout": "node tests/viewport-layout.spec.mjs",
     "test:services-face": "node tests/services-hub-face.spec.mjs",

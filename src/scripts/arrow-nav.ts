@@ -115,6 +115,9 @@ export function initArrowNav(root: ParentNode = document) {
   let full = false;
   let fullGen = 0;
   let mediaGen = 0;
+  // While scrubbing, the gallery frame keeps the size it had on press so
+  // mixed-ratio slides do not resize under the finger.
+  let scrubLock = false;
 
   initHeroBlob(nav);
 
@@ -685,7 +688,7 @@ export function initArrowNav(root: ParentNode = document) {
 
   let frameWatch = 0;
   const fitGallery = (item: { width: number; height: number }, morph: boolean) => {
-    if (full) return;
+    if (full || scrubLock) return;
     const gallery = galleryEl();
     const box = frameFor(item.width, item.height);
     const jump = !morph || reduce || full;
@@ -1083,6 +1086,8 @@ export function initArrowNav(root: ParentNode = document) {
   const SCROLL_MAX_STEPS = 8;
   let scrollCarry = 0;
   let scrollIdle = 0;
+  let scrubbing = false;
+  let scrubPointer = 0;
 
   const canFlip = (dir: Dir) => screen()?.kind === 'gallery' && (dir === 'left' || dir === 'right');
 
@@ -1091,6 +1096,94 @@ export function initArrowNav(root: ParentNode = document) {
     if (scrollIdle) window.clearTimeout(scrollIdle);
     scrollIdle = 0;
     if (resume) startAutoplay();
+  };
+
+  const scrubEl = () => nav.querySelector<HTMLElement>('[data-nav-scrub]');
+  const dotsEl = () => nav.querySelector<HTMLElement>('[data-nav-dots]')!;
+  let scrubTrackCount = 0;
+
+  const scrubProgress = (clientX: number) => {
+    const node = screen();
+    const count = node?.slides.length ?? 0;
+    if (!node || node.kind !== 'gallery' || count < 2) return { count: 0, t: 0, index: slide, indexF: slide };
+    const box = dotsEl().getBoundingClientRect();
+    if (box.width <= 0) return { count, t: 0, index: slide, indexF: slide };
+    const t = Math.min(1, Math.max(0, (clientX - box.left) / box.width));
+    const indexF = t * (count - 1);
+    const index = Math.min(count - 1, Math.max(0, Math.round(indexF)));
+    return { count, t, index, indexF };
+  };
+
+  const ensureScrubTrack = (count: number) => {
+    const track = scrubEl()?.querySelector<HTMLElement>('[data-nav-scrub-track]');
+    if (!track) return null;
+    if (scrubTrackCount === count && track.childElementCount === count) return track;
+    scrubTrackCount = count;
+    track.replaceChildren(
+      ...Array.from({ length: count }, (_, i) => {
+        const el = document.createElement('span');
+        el.className = 'arrow-scrub-num';
+        el.textContent = String(i + 1);
+        return el;
+      }),
+    );
+    return track;
+  };
+
+  const paintScrubHud = (clientX: number) => {
+    const hud = scrubEl();
+    if (!hud) return;
+    const { count, index, indexF } = scrubProgress(clientX);
+    if (count < 1) return;
+    const track = ensureScrubTrack(count);
+    if (!track) return;
+    const gallery = galleryEl().getBoundingClientRect();
+    const hudW = hud.offsetWidth || 120;
+    const localX = Math.min(gallery.width - hudW / 2, Math.max(hudW / 2, clientX - gallery.left));
+    hud.style.left = `${Math.round(localX)}px`;
+    const slot =
+      track.firstElementChild instanceof HTMLElement
+        ? track.firstElementChild.offsetWidth
+        : 40;
+    const windowEl = hud.querySelector<HTMLElement>('.arrow-scrub-window');
+    const winW = windowEl?.clientWidth || slot * 3;
+    const tx = Math.round(winW / 2 - (indexF * slot + slot / 2));
+    track.style.transform = `translate3d(${tx}px, 0, 0)`;
+    track.querySelectorAll<HTMLElement>('.arrow-scrub-num').forEach((el, i) => {
+      el.classList.toggle('is-on', i === index);
+    });
+  };
+
+  const indexFromScrubX = (clientX: number) => scrubProgress(clientX).index;
+
+  const endScrub = (resume: boolean) => {
+    if (!scrubbing) return;
+    scrubbing = false;
+    scrubPointer = 0;
+    scrubLock = false;
+    nav.classList.remove('is-scrubbing');
+    const hud = scrubEl();
+    if (hud) {
+      hud.hidden = true;
+      hud.style.left = '';
+      const track = hud.querySelector<HTMLElement>('[data-nav-scrub-track]');
+      if (track) track.style.transform = '';
+    }
+    const item = screen()?.slides[slide];
+    if (item && !full) {
+      fitGallery(item, true);
+      placeGalleryArrows();
+      placeCaption();
+    }
+    if (resume) startAutoplay();
+  };
+
+  const scrubTo = (clientX: number) => {
+    paintScrubHud(clientX);
+    const next = indexFromScrubX(clientX);
+    if (next === slide) return;
+    showSlide(next);
+    playSnick();
   };
 
   const releasePointer = () => {
@@ -1113,6 +1206,7 @@ export function initArrowNav(root: ParentNode = document) {
   };
 
   const abandonHold = () => {
+    endScrub(false);
     if (!pressFrom) return;
     stopHold(false);
     releasePointer();
@@ -1167,6 +1261,7 @@ export function initArrowNav(root: ParentNode = document) {
     const gen = ++generation;
     clearScrollFlip(false);
     stopHold(false);
+    endScrub(false);
     stopAutoplay();
     const ease = cssEase('--ease-nav');
     const slot = nav.querySelector<HTMLElement>('.arrow-slot')!;
@@ -1542,9 +1637,61 @@ export function initArrowNav(root: ParentNode = document) {
 
   window.addEventListener('wheel', onGalleryWheel, { passive: false });
 
-  galleryEl().addEventListener('click', () => {
+  galleryEl().addEventListener('click', (event) => {
     if (introOn || screen()?.kind !== 'gallery') return;
+    if (scrubbing) return;
+    const target = event.target as Element | null;
+    if (target?.closest?.('[data-nav-dots], [data-nav-scrub]')) return;
     setFull(!full);
+  });
+
+  dotsEl().addEventListener('pointerdown', (event) => {
+    if (event.button !== 0) return;
+    if (introOn || scrubbing || pressFrom) return;
+    if (!phone()) return;
+    const node = screen();
+    if (!node || node.kind !== 'gallery' || node.slides.length < 2) return;
+    event.preventDefault();
+    event.stopPropagation();
+    clearScrollFlip(false);
+    stopHold(false);
+    stopAutoplay();
+    scrubbing = true;
+    scrubPointer = event.pointerId;
+    scrubLock = true;
+    nav.classList.add('is-scrubbing');
+    const hud = scrubEl();
+    if (hud) hud.hidden = false;
+    try {
+      dotsEl().setPointerCapture(event.pointerId);
+    } catch {
+      /* capture optional */
+    }
+    scrubTo(event.clientX);
+  });
+
+  const onScrubMove = (event: PointerEvent) => {
+    if (!scrubbing || event.pointerId !== scrubPointer) return;
+    event.preventDefault();
+    scrubTo(event.clientX);
+  };
+
+  const onScrubEnd = (event: PointerEvent) => {
+    if (!scrubbing || event.pointerId !== scrubPointer) return;
+    try {
+      if (dotsEl().hasPointerCapture(event.pointerId)) dotsEl().releasePointerCapture(event.pointerId);
+    } catch {
+      /* already released */
+    }
+    endScrub(true);
+  };
+
+  dotsEl().addEventListener('pointermove', onScrubMove);
+  dotsEl().addEventListener('pointerup', onScrubEnd);
+  dotsEl().addEventListener('pointercancel', onScrubEnd);
+  dotsEl().addEventListener('lostpointercapture', (event) => {
+    if (!scrubbing || event.pointerId !== scrubPointer) return;
+    endScrub(true);
   });
 
   window.addEventListener('keydown', (event) => {
