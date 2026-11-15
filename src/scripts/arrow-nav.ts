@@ -1034,6 +1034,18 @@ export function initArrowNav(root: ParentNode = document) {
     ghost.animate([{ opacity: 1 }, { opacity: 0 }], { duration: moveMs(), easing: cssEase('--ease-out'), fill: 'forwards' }).finished.finally(() => ghost.remove());
   };
 
+  // 0 = face-sized window, 1 = full gallery. Open grows the mask; close shrinks it.
+  // The media stays at full size inside, so the frame reveals rather than scales.
+  let galleryMaskOpen: boolean | null = null;
+
+  const clearGalleryMask = (gallery: HTMLElement) => {
+    gallery.style.transition = 'none';
+    gallery.style.opacity = '';
+    gallery.style.clipPath = '';
+    gallery.getBoundingClientRect();
+    gallery.style.transition = '';
+  };
+
   const dropFlights = () => {
     nav.querySelectorAll('.arrow-flight').forEach((el) => el.remove());
     document.querySelectorAll('.arrow-copy-ghost').forEach((el) => el.remove());
@@ -1044,22 +1056,37 @@ export function initArrowNav(root: ParentNode = document) {
       el.style.zIndex = '';
     });
     galleryEl().getAnimations().forEach((anim) => anim.cancel());
+    clearGalleryMask(galleryEl());
+    galleryMaskOpen = null;
   };
 
-  const growGallery = (open: boolean, fromScale: number | null) => {
+  const growGallery = (open: boolean, fromT: number | null) => {
     const gallery = galleryEl();
     const genAt = generation;
     gallery.hidden = false;
-    gallery.style.opacity = '1';
+    clearGalleryMask(gallery);
     const faceW = faceEl().getBoundingClientRect().width || controlSize();
-    const small = Math.max(0.12, faceW / (gallery.offsetWidth || 1));
-    const from = fromScale == null ? (open ? small : 1) : Math.min(1, Math.max(small, fromScale));
-    const rest = 'translate(-50%, -50%) scale(1)';
-    const at = (scale: number) => `translate(-50%, -50%) scale(${scale.toFixed(3)})`;
+    const gw = gallery.offsetWidth || 1;
+    const gh = gallery.offsetHeight || 1;
+    const insetX = Math.max(0, (gw - faceW) / 2);
+    const insetY = Math.max(0, (gh - faceW) / 2);
+    const faceR = faceW / 2;
+    const fullR = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--gallery-radius')) || 48;
+    const maskAt = (t: number) => {
+      const u = Math.min(1, Math.max(0, t));
+      const x = Math.round(insetX * (1 - u));
+      const y = Math.round(insetY * (1 - u));
+      const r = Math.round(faceR + (fullR - faceR) * u);
+      return `inset(${y}px ${x}px ${y}px ${x}px round ${r}px)`;
+    };
+    const start = fromT == null ? (open ? 0 : 1) : Math.min(1, Math.max(0, fromT));
+    const end = open ? 1 : 0;
+    galleryMaskOpen = open;
     const anim = gallery.animate(
-      open
-        ? [{ transform: at(from), opacity: 1 }, { transform: rest, opacity: 1 }]
-        : [{ transform: at(from), opacity: 1 }, { transform: at(small), opacity: 0 }],
+      [
+        { clipPath: maskAt(start), opacity: 1 },
+        { clipPath: maskAt(end), opacity: open ? 1 : 0 },
+      ],
       {
         duration: moveMs(),
         easing: cssEase('--ease-nav'),
@@ -1069,7 +1096,8 @@ export function initArrowNav(root: ParentNode = document) {
     anim.finished.finally(() => {
       if (genAt !== generation) return;
       anim.cancel();
-      gallery.style.opacity = '';
+      clearGalleryMask(gallery);
+      galleryMaskOpen = null;
       if (!open && nav.dataset.kind !== 'gallery') gallery.hidden = true;
       else if (open) gallery.hidden = false;
     });
@@ -1267,10 +1295,13 @@ export function initArrowNav(root: ParentNode = document) {
     const slot = nav.querySelector<HTMLElement>('.arrow-slot')!;
     const slotBefore = slot.getBoundingClientRect();
     const wasGallery = nav.dataset.kind === 'gallery';
-    let fromScale: number | null = null;
-    if (galleryEl().getAnimations().length) {
-      const scale = Math.abs(new DOMMatrix(getComputedStyle(galleryEl()).transform).a);
-      if (Number.isFinite(scale)) fromScale = scale;
+    let fromMask: number | null = null;
+    const maskAnim = galleryEl().getAnimations()[0];
+    if (maskAnim && galleryMaskOpen != null) {
+      const progress = maskAnim.effect?.getComputedTiming().progress;
+      if (progress != null && Number.isFinite(progress)) {
+        fromMask = galleryMaskOpen ? progress : 1 - progress;
+      }
     }
     const oldState = new Map<string, { rect: DOMRect; label: string; mode: string; clone: HTMLElement; opacity: number }>();
     flights()
@@ -1331,7 +1362,7 @@ export function initArrowNav(root: ParentNode = document) {
     placeCopy();
     placeCaption();
     const nowGallery = nav.dataset.kind === 'gallery';
-    if (!reduce && nowGallery !== wasGallery) growGallery(nowGallery, fromScale);
+    if (!reduce && nowGallery !== wasGallery) growGallery(nowGallery, fromMask);
 
     // A route screen (a node with an href) is its own page. The controls fly
     // to it here like any other screen, then the browser opens the page, which
