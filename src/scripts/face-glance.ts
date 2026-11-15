@@ -5,6 +5,8 @@ export type GlanceDir = 'center' | 'left' | 'right' | 'up' | 'down';
 
 const FINE = '(hover: hover) and (pointer: fine)';
 const REDUCE = '(prefers-reduced-motion: reduce)';
+/** Still pointer for this long → eyes return to centre. */
+const IDLE_MS = 1000;
 
 function dirFor(x: number, y: number, face: DOMRect): GlanceDir {
   const cx = face.left + face.width / 2;
@@ -40,12 +42,28 @@ export function mountFaceGlance(nav: HTMLElement): FaceGlance {
   let current: GlanceDir = 'center';
   let faceBox: DOMRect | null = null;
   let ro: ResizeObserver | null = null;
+  let idleTimer: ReturnType<typeof setTimeout> | null = null;
 
   const paint = (next: GlanceDir) => {
     if (next === current) return;
     current = next;
     if (next === 'center') svg.removeAttribute('data-glance');
     else svg.setAttribute('data-glance', next);
+  };
+
+  const clearIdle = () => {
+    if (idleTimer === null) return;
+    clearTimeout(idleTimer);
+    idleTimer = null;
+  };
+
+  const armIdle = () => {
+    clearIdle();
+    if (!enabled || !fine.matches) return;
+    idleTimer = setTimeout(() => {
+      idleTimer = null;
+      paint('center');
+    }, IDLE_MS);
   };
 
   const measure = () => {
@@ -59,10 +77,12 @@ export function mountFaceGlance(nav: HTMLElement): FaceGlance {
     const box = faceBox;
     if (!box || box.width < 1 || box.height < 1) return;
     paint(dirFor(event.clientX, event.clientY, box));
+    armIdle();
   };
 
   const onLeave = () => {
     if (!enabled) return;
+    clearIdle();
     paint('center');
   };
 
@@ -71,7 +91,10 @@ export function mountFaceGlance(nav: HTMLElement): FaceGlance {
   };
 
   const onFine = () => {
-    if (!fine.matches) paint('center');
+    if (!fine.matches) {
+      clearIdle();
+      paint('center');
+    }
   };
 
   syncMotion();
@@ -87,11 +110,14 @@ export function mountFaceGlance(nav: HTMLElement): FaceGlance {
   return {
     setEnabled(on: boolean) {
       enabled = on && fine.matches;
-      if (!enabled) paint('center');
-      else faceBox = null;
+      if (!enabled) {
+        clearIdle();
+        paint('center');
+      } else faceBox = null;
     },
     destroy() {
       enabled = false;
+      clearIdle();
       paint('center');
       fine.removeEventListener('change', onFine);
       reduce.removeEventListener('change', syncMotion);
