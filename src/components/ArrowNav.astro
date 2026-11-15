@@ -63,9 +63,9 @@ const { tree } = Astro.props;
           <video data-nav-video hidden muted loop playsinline preload="auto"></video>
         </div>
         <div class="arrow-scrub" data-nav-scrub hidden aria-hidden="true">
-          <span data-nav-scrub-prev></span>
-          <span data-nav-scrub-current></span>
-          <span data-nav-scrub-next></span>
+          <div class="arrow-scrub-window">
+            <div class="arrow-scrub-track" data-nav-scrub-track></div>
+          </div>
         </div>
         <div class="arrow-dots" data-nav-dots></div>
       </div>

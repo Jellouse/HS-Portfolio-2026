@@ -29,9 +29,10 @@ const browser = await chromium.launch();
 const scrubState = () => {
   const nav = document.querySelector('[data-arrow-nav]');
   const hud = document.querySelector('[data-nav-scrub]');
-  const current = document.querySelector('[data-nav-scrub-current]');
+  const current = document.querySelector('.arrow-scrub-num.is-on');
   const gallery = document.querySelector('[data-nav-gallery]');
   const box = gallery?.getBoundingClientRect();
+  const hudBox = hud?.getBoundingClientRect();
   return {
     index: [...document.querySelectorAll('.arrow-dot')].findIndex((el) => el.classList.contains('is-on')),
     count: document.querySelectorAll('.arrow-dot').length,
@@ -41,6 +42,7 @@ const scrubState = () => {
     full: !!nav?.classList.contains('is-full') || !!nav?.classList.contains('is-cover'),
     width: box ? Math.round(box.width) : 0,
     height: box ? Math.round(box.height) : 0,
+    hudLeft: hudBox ? Math.round(hudBox.left + hudBox.width / 2) : 0,
   };
 };
 
@@ -84,7 +86,15 @@ else {
     failures.push(`frame resized on scrub press (${locked.width}x${locked.height} -> ${down.width}x${down.height})`);
   }
 
-  await page.mouse.move(toX, midY, { steps: 12 });
+  const midX = Math.round(dots.x + dots.w * 0.65);
+  await page.mouse.move(midX, midY, { steps: 8 });
+  await page.waitForTimeout(40);
+  const mid = await page.evaluate(scrubState);
+  if (Math.abs(mid.hudLeft - midX) > 12) {
+    failures.push(`HUD did not follow thumb mid-drag (hud ${mid.hudLeft}, thumb ${midX})`);
+  }
+
+  await page.mouse.move(toX, midY, { steps: 8 });
   await page.waitForTimeout(40);
   const dragged = await page.evaluate(scrubState);
   if (dragged.index <= start.index) failures.push(`scrub did not advance (start ${start.index}, end ${dragged.index})`);
@@ -94,6 +104,9 @@ else {
   if (dragged.full) failures.push('scrub opened fullscreen');
   if (dragged.width !== locked.width || dragged.height !== locked.height) {
     failures.push(`frame resized mid-scrub (${locked.width}x${locked.height} -> ${dragged.width}x${dragged.height})`);
+  }
+  if (dragged.hudLeft <= mid.hudLeft) {
+    failures.push(`HUD did not keep moving with the thumb (${mid.hudLeft} -> ${dragged.hudLeft})`);
   }
 
   await page.mouse.up();

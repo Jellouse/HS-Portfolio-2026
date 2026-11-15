@@ -4148,15 +4148,12 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
 }
 
 .arrow-scrub {
+  --scrub-slot: 40px;
   position: absolute;
   left: 50%;
-  bottom: var(--space-md);
+  bottom: var(--space-xs);
   z-index: 1;
-  display: flex;
-  align-items: baseline;
-  justify-content: center;
-  gap: var(--space-2xs);
-  padding: var(--space-2xs) var(--space-sm);
+  padding: var(--space-2xs) 0;
   border-radius: var(--radius);
   background: var(--ink-40);
   color: var(--bg);
@@ -4164,19 +4161,47 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
   transform: translateX(-50%);
   pointer-events: none;
   user-select: none;
+  -webkit-user-select: none;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
-.arrow-scrub [data-nav-scrub-prev],
-.arrow-scrub [data-nav-scrub-next] {
-  font-size: var(--text-ui);
-  line-height: var(--lh-ui);
-  color: color-mix(in srgb, var(--bg) 55%, transparent);
+.arrow-scrub-window {
+  width: calc(var(--scrub-slot) * 3);
+  overflow: hidden;
+  mask-image: linear-gradient(to right, transparent, #000 28%, #000 72%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 28%, #000 72%, transparent);
 }
 
-.arrow-scrub [data-nav-scrub-current] {
+.arrow-scrub-track {
+  display: flex;
+  align-items: center;
+  will-change: transform;
+}
+
+.arrow-scrub-num {
+  flex: 0 0 var(--scrub-slot);
+  width: var(--scrub-slot);
   font-size: var(--text-lead);
   line-height: var(--lh-lead);
+  text-align: center;
+  color: color-mix(in srgb, var(--bg) 55%, transparent);
+  transform: scale(0.72);
+  transform-origin: center;
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
+}
+
+.arrow-scrub-num.is-on {
   color: var(--bg);
+  transform: scale(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .arrow-scrub-num {
+    transition: none;
+  }
 }
 
 .arrow-nav.is-cover .arrow-dots,
@@ -4209,7 +4234,7 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
 
 .arrow-nav.is-cover .arrow-scrub,
 .arrow-nav.is-full .arrow-scrub {
-  bottom: calc(48px + var(--space-sm));
+  bottom: calc(48px + var(--space-2xs));
 }
 
 .arrow-caption {
@@ -4460,7 +4485,7 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
 
   .arrow-nav.is-cover .arrow-scrub,
   .arrow-nav.is-full .arrow-scrub {
-    bottom: calc(var(--margin) + var(--space-sm));
+    bottom: calc(var(--margin) + var(--space-2xs));
   }
 }
 

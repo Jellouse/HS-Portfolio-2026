@@ -1100,31 +1100,61 @@ export function initArrowNav(root: ParentNode = document) {
 
   const scrubEl = () => nav.querySelector<HTMLElement>('[data-nav-scrub]');
   const dotsEl = () => nav.querySelector<HTMLElement>('[data-nav-dots]')!;
+  let scrubTrackCount = 0;
 
-  const paintScrubHud = () => {
-    const hud = scrubEl();
-    if (!hud) return;
-    const count = screen()?.slides.length ?? 0;
-    const current = slide + 1;
-    const prev = hud.querySelector<HTMLElement>('[data-nav-scrub-prev]')!;
-    const mid = hud.querySelector<HTMLElement>('[data-nav-scrub-current]')!;
-    const next = hud.querySelector<HTMLElement>('[data-nav-scrub-next]')!;
-    prev.textContent = current > 1 ? String(current - 1) : '';
-    mid.textContent = count ? String(current) : '';
-    next.textContent = current < count ? String(current + 1) : '';
-    prev.hidden = !prev.textContent;
-    next.hidden = !next.textContent;
-  };
-
-  const indexFromScrubX = (clientX: number) => {
+  const scrubProgress = (clientX: number) => {
     const node = screen();
     const count = node?.slides.length ?? 0;
-    if (!node || node.kind !== 'gallery' || count < 2) return slide;
+    if (!node || node.kind !== 'gallery' || count < 2) return { count: 0, t: 0, index: slide, indexF: slide };
     const box = dotsEl().getBoundingClientRect();
-    if (box.width <= 0) return slide;
+    if (box.width <= 0) return { count, t: 0, index: slide, indexF: slide };
     const t = Math.min(1, Math.max(0, (clientX - box.left) / box.width));
-    return Math.min(count - 1, Math.max(0, Math.round(t * (count - 1))));
+    const indexF = t * (count - 1);
+    const index = Math.min(count - 1, Math.max(0, Math.round(indexF)));
+    return { count, t, index, indexF };
   };
+
+  const ensureScrubTrack = (count: number) => {
+    const track = scrubEl()?.querySelector<HTMLElement>('[data-nav-scrub-track]');
+    if (!track) return null;
+    if (scrubTrackCount === count && track.childElementCount === count) return track;
+    scrubTrackCount = count;
+    track.replaceChildren(
+      ...Array.from({ length: count }, (_, i) => {
+        const el = document.createElement('span');
+        el.className = 'arrow-scrub-num';
+        el.textContent = String(i + 1);
+        return el;
+      }),
+    );
+    return track;
+  };
+
+  const paintScrubHud = (clientX: number) => {
+    const hud = scrubEl();
+    if (!hud) return;
+    const { count, index, indexF } = scrubProgress(clientX);
+    if (count < 1) return;
+    const track = ensureScrubTrack(count);
+    if (!track) return;
+    const gallery = galleryEl().getBoundingClientRect();
+    const hudW = hud.offsetWidth || 120;
+    const localX = Math.min(gallery.width - hudW / 2, Math.max(hudW / 2, clientX - gallery.left));
+    hud.style.left = `${Math.round(localX)}px`;
+    const slot =
+      track.firstElementChild instanceof HTMLElement
+        ? track.firstElementChild.offsetWidth
+        : 40;
+    const windowEl = hud.querySelector<HTMLElement>('.arrow-scrub-window');
+    const winW = windowEl?.clientWidth || slot * 3;
+    const tx = Math.round(winW / 2 - (indexF * slot + slot / 2));
+    track.style.transform = `translate3d(${tx}px, 0, 0)`;
+    track.querySelectorAll<HTMLElement>('.arrow-scrub-num').forEach((el, i) => {
+      el.classList.toggle('is-on', i === index);
+    });
+  };
+
+  const indexFromScrubX = (clientX: number) => scrubProgress(clientX).index;
 
   const endScrub = (resume: boolean) => {
     if (!scrubbing) return;
@@ -1133,7 +1163,12 @@ export function initArrowNav(root: ParentNode = document) {
     scrubLock = false;
     nav.classList.remove('is-scrubbing');
     const hud = scrubEl();
-    if (hud) hud.hidden = true;
+    if (hud) {
+      hud.hidden = true;
+      hud.style.left = '';
+      const track = hud.querySelector<HTMLElement>('[data-nav-scrub-track]');
+      if (track) track.style.transform = '';
+    }
     const item = screen()?.slides[slide];
     if (item && !full) {
       fitGallery(item, true);
@@ -1144,14 +1179,11 @@ export function initArrowNav(root: ParentNode = document) {
   };
 
   const scrubTo = (clientX: number) => {
+    paintScrubHud(clientX);
     const next = indexFromScrubX(clientX);
-    if (next === slide) {
-      paintScrubHud();
-      return;
-    }
+    if (next === slide) return;
     showSlide(next);
     playSnick();
-    paintScrubHud();
   };
 
   const releasePointer = () => {
