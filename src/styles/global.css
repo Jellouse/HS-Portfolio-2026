@@ -4215,12 +4215,10 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
   transform: none;
 }
 
-/* The intro face is drawn on the GPU. Until that canvas is mounted, the
-   SVG stays hidden and unfiltered so no frame pays for the SVG filter. */
-.js .arrow-nav.is-intro:not(.is-face-svg) .arrow-face-blob {
-  visibility: hidden;
-}
-
+/* Keep the SVG filter off until the intro commits to the SVG path.
+   Do not hide the face while WebGL mounts: a blank page reads as broken
+   when the module is slow, blocked, or never runs. is-face-gl still hides
+   the SVG once the canvas owns the intro. */
 .js .arrow-nav.is-intro:not(.is-face-svg) .arrow-face-blob g {
   filter: none;
 }
@@ -4324,13 +4322,7 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
     transform: none;
   }
 
-  /* The phone intro face is drawn by the GPU (arrow-face-gl.ts). Until the
-     script has mounted it, the SVG face stays hidden and unfiltered, so no
-     frame pays for the SVG filter. The SVG only comes back as a fallback. */
-  .js .arrow-nav.is-intro:not(.is-face-svg) .arrow-face-blob {
-    visibility: hidden;
-  }
-
+  /* Same as desktop: filter off until is-face-svg, face stays visible. */
   .js .arrow-nav.is-intro:not(.is-face-svg) .arrow-face-blob g {
     filter: none;
   }
