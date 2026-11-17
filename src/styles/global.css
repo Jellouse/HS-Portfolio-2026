@@ -3913,8 +3913,7 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
   cursor: zoom-in;
   transition:
     width var(--dur-media) var(--ease-nav),
-    height var(--dur-media) var(--ease-nav),
-    clip-path var(--dur-media) var(--ease-nav);
+    height var(--dur-media) var(--ease-nav);
 }
 
 .arrow-gallery-media {
