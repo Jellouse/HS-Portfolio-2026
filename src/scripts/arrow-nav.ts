@@ -123,7 +123,33 @@ export function initArrowNav(root: ParentNode = document) {
 
   const screen = () => (screenId === 'landing' ? null : nodes.get(screenId) ?? null);
 
-  const flights = () => [...nav.querySelectorAll<HTMLElement>('[data-nav-flight]')];
+  // Live controls can sit in a fixed clip plane during a flight. Include those
+  // so interrupt / drop always finds them and can put them home.
+  const flightHomes = new WeakMap<HTMLElement, { parent: Node; next: ChildNode | null }>();
+  const flights = () => {
+    const seen = new Set<HTMLElement>();
+    const out: HTMLElement[] = [];
+    for (const el of [
+      ...nav.querySelectorAll<HTMLElement>('[data-nav-flight]'),
+      ...document.querySelectorAll<HTMLElement>('.arrow-clip-plane [data-nav-flight]'),
+    ]) {
+      if (seen.has(el)) continue;
+      seen.add(el);
+      out.push(el);
+    }
+    return out;
+  };
+  const restoreFlightHome = (el: HTMLElement) => {
+    el.getAnimations().forEach((anim) => anim.cancel());
+    clearPin(el);
+    el.style.opacity = '';
+    el.style.zIndex = '';
+    el.style.willChange = '';
+    el.style.clipPath = '';
+    const home = flightHomes.get(el);
+    if (home?.parent.isConnected) home.parent.insertBefore(el, home.next);
+    flightHomes.delete(el);
+  };
 
   const child = (id: string, dir: ArrowDir) =>
     tree.nodes.find((node) => node.parent === id && node.dir === dir);
@@ -1049,12 +1075,8 @@ export function initArrowNav(root: ParentNode = document) {
   const dropFlights = () => {
     nav.querySelectorAll('.arrow-flight').forEach((el) => el.remove());
     document.querySelectorAll('.arrow-copy-ghost').forEach((el) => el.remove());
-    flights().forEach((el) => {
-      el.getAnimations().forEach((anim) => anim.cancel());
-      clearPin(el);
-      el.style.opacity = '';
-      el.style.zIndex = '';
-    });
+    flights().forEach((el) => restoreFlightHome(el));
+    nav.querySelectorAll('.arrow-clip-plane').forEach((el) => el.remove());
     galleryEl().getAnimations().forEach((anim) => anim.cancel());
     clearGalleryMask(galleryEl());
     galleryMaskOpen = null;
@@ -1347,21 +1369,28 @@ export function initArrowNav(root: ParentNode = document) {
     window.scrollTo(0, 0);
     const enteringGallery = !wasGallery && nav.dataset.kind === 'gallery';
     const outward = depthOf(id) > depthOf(fromId);
-    if (screen()?.kind === 'gallery') {
-      // Empty before the stage shows / swaps, so the last category never
-      // flashes while the next slide loads.
-      clearGalleryMedia();
+    const nowGallery = nav.dataset.kind === 'gallery';
+    // Gallery → gallery: keep the current frame through the flight and swap
+    // after the controls land. Clearing mid-flight decodes the next image on
+    // the same frames as the flight; Chrome drops those hard.
+    let pendingGallerySlide = false;
+    if (nowGallery) {
       if (enteringGallery) {
+        clearGalleryMedia();
         galleryEl().hidden = false;
         galleryEl().style.opacity = '1';
         if (!reduce) faceEl().hidden = false;
+        showSlide(0, false);
+      } else if (wasGallery) {
+        pendingGallerySlide = true;
+      } else {
+        clearGalleryMedia();
+        showSlide(0, false);
       }
-      showSlide(0, false);
     }
     placeGalleryArrows();
     placeCopy();
     placeCaption();
-    const nowGallery = nav.dataset.kind === 'gallery';
     if (!reduce && nowGallery !== wasGallery) growGallery(nowGallery, fromMask);
 
     // A route screen (a node with an href) is its own page. The controls fly
@@ -1375,7 +1404,11 @@ export function initArrowNav(root: ParentNode = document) {
     if (route) push = false;
 
     if (reduce) {
-      flights().forEach(clearPin);
+      if (pendingGallerySlide) {
+        clearGalleryMedia();
+        showSlide(0, false);
+      }
+      flights().forEach((el) => restoreFlightHome(el));
       placeGalleryArrows();
       startAutoplay();
       if (push) history.pushState({ arrow: id }, '', id === 'landing' ? location.pathname + location.search : `#${id}`);
@@ -1408,18 +1441,63 @@ export function initArrowNav(root: ParentNode = document) {
       return { el, rect, prev, same, moved };
     });
     const verticalDir = (dir: string) => dir === 'up' || dir === 'down';
-    // Each direction owns the half-plane on its side of the hub. Every control
-    // that flies is clipped to it, so it slides out of and into the face and
-    // never across it. The clip is drawn in the control's own box and moves
-    // against its translate, which keeps the edge still on the hub line.
-    const far = 10000;
-    const maskAt = (dir: string, rect: DOMRect, x: number, y: number) => {
-      const edgeX = (hub.x - rect.left - x).toFixed(2);
-      const edgeY = (hub.y - rect.top - y).toFixed(2);
-      if (dir === 'right') return `polygon(${edgeX}px ${-far}px, ${far}px ${-far}px, ${far}px ${far}px, ${edgeX}px ${far}px)`;
-      if (dir === 'left') return `polygon(${-far}px ${-far}px, ${edgeX}px ${-far}px, ${edgeX}px ${far}px, ${-far}px ${far}px)`;
-      if (dir === 'down') return `polygon(${-far}px ${edgeY}px, ${far}px ${edgeY}px, ${far}px ${far}px, ${-far}px ${far}px)`;
-      return `polygon(${-far}px ${-far}px, ${far}px ${-far}px, ${far}px ${edgeY}px, ${-far}px ${edgeY}px)`;
+    // Each direction owns an overflow half-plane on its side of the hub.
+    // Planes live under the slot so --arrow-control and pill styles still apply
+    // (body orphans blew the chevrons up to the SVG default size). Controls fly
+    // with transform only, so Chrome never paints animated clip-path on them.
+    const far = Math.max(window.innerWidth, window.innerHeight) * 2;
+    const planes = new Map<string, HTMLElement>();
+    const planeFor = (dir: string) => {
+      let plane = planes.get(dir);
+      if (plane) return plane;
+      plane = document.createElement('div');
+      plane.className = 'arrow-clip-plane';
+      plane.setAttribute('aria-hidden', 'true');
+      plane.style.position = 'absolute';
+      plane.style.overflow = 'hidden';
+      plane.style.pointerEvents = 'none';
+      plane.style.zIndex = '6';
+      plane.style.margin = '0';
+      if (dir === 'right') {
+        plane.style.left = `${Math.round(hub.x - slotNow.left)}px`;
+        plane.style.top = `${Math.round(hub.y - far - slotNow.top)}px`;
+        plane.style.width = `${Math.round(far)}px`;
+        plane.style.height = `${Math.round(far * 2)}px`;
+      } else if (dir === 'left') {
+        plane.style.left = `${Math.round(hub.x - far - slotNow.left)}px`;
+        plane.style.top = `${Math.round(hub.y - far - slotNow.top)}px`;
+        plane.style.width = `${Math.round(far)}px`;
+        plane.style.height = `${Math.round(far * 2)}px`;
+      } else if (dir === 'down') {
+        plane.style.left = `${Math.round(hub.x - far - slotNow.left)}px`;
+        plane.style.top = `${Math.round(hub.y - slotNow.top)}px`;
+        plane.style.width = `${Math.round(far * 2)}px`;
+        plane.style.height = `${Math.round(far)}px`;
+      } else {
+        plane.style.left = `${Math.round(hub.x - far - slotNow.left)}px`;
+        plane.style.top = `${Math.round(hub.y - far - slotNow.top)}px`;
+        plane.style.width = `${Math.round(far * 2)}px`;
+        plane.style.height = `${Math.round(far)}px`;
+      }
+      slot.append(plane);
+      planes.set(dir, plane);
+      return plane;
+    };
+    const pinInPlane = (el: HTMLElement, rect: DOMRect, plane: HTMLElement) => {
+      if (el.hasAttribute('data-nav-flight') && !flightHomes.has(el) && el.parentNode) {
+        flightHomes.set(el, { parent: el.parentNode, next: el.nextSibling });
+      }
+      const origin = plane.getBoundingClientRect();
+      el.style.position = 'absolute';
+      el.style.left = `${Math.round(rect.left - origin.left)}px`;
+      el.style.top = `${Math.round(rect.top - origin.top)}px`;
+      el.style.right = 'auto';
+      el.style.bottom = 'auto';
+      el.style.margin = '0';
+      el.style.width = `${Math.round(rect.width)}px`;
+      el.style.height = `${Math.round(rect.height)}px`;
+      el.style.transform = 'none';
+      plane.append(el);
     };
     const horizontal = (dir: string) => dir === 'left' || dir === 'right';
     const pairMove = (dir: string, lead: DOMRect, dest: DOMRect) => {
@@ -1451,31 +1529,21 @@ export function initArrowNav(root: ParentNode = document) {
       const arrive = pairMove(dir, prev.rect, arrival.rect);
       return outward ? arrive : further(hideMove(dir, prev.rect), arrive);
     };
+    const flightDone: Promise<unknown>[] = [];
     if (!reduce) {
       oldState.forEach((prev, dir) => {
         const stay = placed.find((item) => item.el.dataset.dir === dir && (item.same || item.moved));
         if (stay) return;
         const arrival = placed.find((item) => item.el.dataset.dir === dir && !item.same && !item.moved);
         const clone = prev.clone;
-        clone.style.position = 'absolute';
-        clone.style.left = `${Math.round(prev.rect.left - slotNow.left)}px`;
-        clone.style.top = `${Math.round(prev.rect.top - slotNow.top)}px`;
-        clone.style.right = 'auto';
-        clone.style.bottom = 'auto';
-        clone.style.margin = '0';
-        clone.style.width = `${Math.round(prev.rect.width)}px`;
-        clone.style.height = `${Math.round(prev.rect.height)}px`;
-        clone.style.transform = 'none';
         clone.style.opacity = String(prev.opacity);
         clone.style.zIndex = '';
         clone.style.clipPath = '';
-        slot.append(clone);
+        pinInPlane(clone, prev.rect, planeFor(dir));
         const move = departMove(dir, prev, arrival);
+        clone.style.willChange = 'transform, opacity';
         const motion = clone.animate(
-          [
-            { transform: 'translate(0px, 0px)', clipPath: maskAt(dir, prev.rect, 0, 0) },
-            { transform: `translate(${move.x}px, ${move.y}px)`, clipPath: maskAt(dir, prev.rect, move.x, move.y) },
-          ],
+          [{ transform: 'translate(0px, 0px)' }, { transform: `translate(${move.x}px, ${move.y}px)` }],
           { duration: moveMs(), easing: ease, fill: 'both' },
         );
         clone.animate([{ opacity: prev.opacity }, { opacity: 0 }], {
@@ -1483,7 +1551,11 @@ export function initArrowNav(root: ParentNode = document) {
           easing: ease,
           fill: 'forwards',
         });
-        motion.finished.finally(() => clone.remove()).catch(() => {});
+        flightDone.push(
+          motion.finished
+            .finally(() => clone.remove())
+            .catch(() => {}),
+        );
       });
     }
     const anims = placed.filter((item) => !item.same).map(({ el, rect, prev, moved }) => {
@@ -1506,28 +1578,32 @@ export function initArrowNav(root: ParentNode = document) {
         dx = Math.round((vertical ? destCx : hub.x) - destCx);
         dy = Math.round((vertical ? hub.y : destCy) - destCy);
       }
-      pinAt(el, rect);
+      pinInPlane(el, rect, planeFor(dir));
       el.style.zIndex = '1';
+      el.style.willChange = 'transform, opacity';
       const anim = el.animate(
         [
-          { transform: `translate(${dx}px, ${dy}px)`, opacity: moved ? 1 : 0, clipPath: maskAt(dir, rect, dx, dy) },
-          { transform: 'translate(0px, 0px)', opacity: 1, clipPath: maskAt(dir, rect, 0, 0) },
+          { transform: `translate(${dx}px, ${dy}px)`, opacity: moved ? 1 : 0 },
+          { transform: 'translate(0px, 0px)', opacity: 1 },
         ],
         { duration: moveMs(), easing: ease, fill: 'both' },
       );
-      anim.finished.finally(() => {
+      const done = anim.finished.finally(() => {
         if (gen !== generation) return;
-        anim.cancel();
-        el.style.opacity = '';
-        el.style.zIndex = '';
-        clearPin(el);
+        restoreFlightHome(el);
       });
-      return anim.finished.catch(() => {});
+      flightDone.push(done.catch(() => {}));
+      return done.catch(() => {});
     });
 
     fadeLines(nav);
-    Promise.all(anims).finally(() => {
+    Promise.all(flightDone.length ? flightDone : anims).finally(() => {
       if (gen !== generation) return;
+      planes.forEach((plane) => plane.remove());
+      if (pendingGallerySlide) {
+        clearGalleryMedia();
+        showSlide(0, false);
+      }
       if (nav.dataset.kind === 'gallery') faceEl().hidden = true;
       placeGalleryArrows();
       startAutoplay();
