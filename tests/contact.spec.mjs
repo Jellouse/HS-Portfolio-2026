@@ -45,11 +45,13 @@ const panel = await page.evaluate(() => {
 check(panel.top === 0 && panel.height === 900, `hub fills the viewport (y=${panel.top}, h=${panel.height})`);
 check(panel.face && panel.pills === 3, `service step shows the face and three pills (${panel.face}, ${panel.pills})`);
 await page.click('[data-service="Physical Build"]');
+await page.waitForFunction(() => !document.documentElement.hasAttribute('data-chrome-vt-run'), null, { timeout: 2000 }).catch(() => {});
 check(await page.isVisible('#contact-project'), 'picking a service goes to step 2');
 check(await page.isDisabled('[data-contact-next]'), 'Confirm is off while the project is empty');
 check(await page.isVisible('[data-contact-back]'), 'Back control is visible on step 2');
 await page.fill('#contact-project', 'A shop fit-out');
 await page.keyboard.press('Enter');
+await page.waitForFunction(() => !document.documentElement.hasAttribute('data-chrome-vt-run'), null, { timeout: 2000 }).catch(() => {});
 check(await page.isVisible('#contact-email'), 'Enter goes to step 3');
 await page.fill('#contact-email', 'a@b.co');
 await page.keyboard.press('Enter');

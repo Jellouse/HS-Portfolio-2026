@@ -164,11 +164,12 @@ export default function ContactDrawer({ email: address }: { email: string }) {
       if (next >= 1 && next <= 3) announce(`Step ${next} of 3: ${TITLES[next]}`);
       return;
     }
-    // Face ↔ field are different shapes: soft crossfade (no chrome-grow stretch).
-    // Purpose: spatial continuity between service face and the field pill.
+    // Face ↔ field: soft crossfade on separate VT names (contact-face).
+    // Field ↔ field: shared contact-field with a pill radius (no ellipse).
     panel.current?.classList.add('is-entered');
     moving.current = true;
-    void runChromeVt(run, { flag: 'contact' }).finally(() => {
+    const faceHop = from === 1 || next === 1;
+    void runChromeVt(run, { flag: faceHop ? 'contact-face' : 'contact' }).finally(() => {
       moving.current = false;
       if (next >= 1 && next <= 3) announce(`Step ${next} of 3: ${TITLES[next]}`);
     });
