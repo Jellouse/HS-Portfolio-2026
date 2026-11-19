@@ -18,7 +18,6 @@ const DISP_FROM = 100;
 const DISP_REST = 0;
 const BLUR_FROM = 2.2;
 const BLUR_REST = 0;
-/** The intro holds its first frame until two frames in a row drop at most one vsync. */
 const HOLD_CALM_MS = 34;
 const HOLD_MAX_MS = 400;
 
@@ -115,16 +114,12 @@ export function initArrowNav(root: ParentNode = document) {
   let full = false;
   let fullGen = 0;
   let mediaGen = 0;
-  // While scrubbing, the gallery frame keeps the size it had on press so
-  // mixed-ratio slides do not resize under the finger.
   let scrubLock = false;
 
   initHeroBlob(nav);
 
   const screen = () => (screenId === 'landing' ? null : nodes.get(screenId) ?? null);
 
-  // Live controls can sit in a fixed clip plane during a flight. Include those
-  // so interrupt / drop always finds them and can put them home.
   const flightHomes = new WeakMap<HTMLElement, { parent: Node; next: ChildNode | null }>();
   const flights = () => {
     const seen = new Set<HTMLElement>();
@@ -190,7 +185,6 @@ export function initArrowNav(root: ParentNode = document) {
   };
 
   const syncGlance = () => {
-    // Any centred mark screen (landing, about, service branch). Galleries hide the face.
     const face = nav.querySelector<HTMLElement>('[data-nav-face]');
     const faceOut = !face || face.hidden;
     faceGlance.setEnabled(!faceOut && !introPlaying && !nav.classList.contains('is-intro'));
@@ -342,8 +336,6 @@ export function initArrowNav(root: ParentNode = document) {
       .catch(() => {});
   };
 
-  // A route screen one press away is fetched ahead, so its page is ready
-  // when the controls land. Child galleries warm their first slide too.
   const warmRoutes = (id: string) => {
     tree.nodes.forEach((node) => {
       if (node.parent !== id) return;
@@ -514,7 +506,6 @@ export function initArrowNav(root: ParentNode = document) {
       photo.hidden = true;
       const sameClip = clip.getAttribute('src') === item.src;
       const ready = sameClip && clip.readyState >= 2;
-      // Poster (and the LQIP under it) stay visible while the clip buffers.
       const hold = !!(item.poster || item.blur);
       clip.hidden = false;
       clip.style.opacity = ready || hold ? '' : '0';
@@ -558,9 +549,6 @@ export function initArrowNav(root: ParentNode = document) {
         photo.style.opacity = '';
       };
       if (!samePhoto) {
-        // Drop the previous bitmap before the next src paints, so another
-        // category's last frame never lingers in an empty gallery. The LQIP
-        // on the frame stays until this reveal.
         photo.style.opacity = '0';
         photo.removeAttribute('src');
         photo.addEventListener('load', revealPhoto, { once: true });
@@ -643,9 +631,6 @@ export function initArrowNav(root: ParentNode = document) {
         videoTime = clip.currentTime;
         t = Math.min(1, clip.currentTime / clip.duration);
       } else {
-        // Stills, blocked autoplay, or a reused video element still showing a
-        // previous clip's currentTime all use the still timer so the gallery
-        // cannot skip a frame later.
         t = Math.min(1, (now - progressStart) / SLIDE_MS);
         done = t >= 1;
       }
@@ -713,13 +698,9 @@ export function initArrowNav(root: ParentNode = document) {
   };
 
   let frameWatch = 0;
-  // True while travel() flight WAAPI is running. Video metadata must not remorph
-  // the frame or re-pin arrows mid-flight — that dragged the back control down.
   let flightLock = false;
   const fitGallery = (item: { width: number; height: number }, morph: boolean) => {
     if (full || scrubLock) return;
-    // Video metadata remorphs mid-flight dragged the pinned back control.
-    // Jump fits (YAML size on open) still apply so growGallery has a box.
     if (flightLock && morph) return;
     const gallery = galleryEl();
     const box = frameFor(item.width, item.height);
@@ -758,8 +739,6 @@ export function initArrowNav(root: ParentNode = document) {
       clearPin(back);
       return;
     }
-    // Mid-flight pins are owned by travel(). Overwriting top/left here while
-    // transform is animating makes the back control drift downward.
     if (flightLock && !force) return;
     const edges = nav.classList.contains('is-full');
     const view = visibleRect();
@@ -933,8 +912,6 @@ export function initArrowNav(root: ParentNode = document) {
     });
   };
 
-  // Holds a control where it rests while it flies, in its own parent's
-  // coordinates, so no fixed-position containing block is involved.
   const pinAt = (el: HTMLElement, rect: DOMRect) => {
     const parent = (el.offsetParent as HTMLElement | null)?.getBoundingClientRect() ?? { left: 0, top: 0 };
     el.style.position = 'absolute';
@@ -1072,10 +1049,7 @@ export function initArrowNav(root: ParentNode = document) {
     ghost.animate([{ opacity: 1 }, { opacity: 0 }], { duration: moveMs(), easing: cssEase('--ease-out'), fill: 'forwards' }).finished.finally(() => ghost.remove());
   };
 
-  // 0 = face-sized window, 1 = full gallery. Open grows the mask; close shrinks it.
-  // Media stays at full size inside. Resting corners use the same circular round as
-  // the mask (no corner-shape on .arrow-gallery), so clearing the clip does not jump.
-  let galleryMaskOpen: boolean | null = null;
+let galleryMaskOpen: boolean | null = null;
 
   const clearGalleryMask = (gallery: HTMLElement) => {
     gallery.style.transition = 'none';
@@ -1112,8 +1086,6 @@ export function initArrowNav(root: ParentNode = document) {
         (Number.isFinite(faceVar) ? faceVar : 0) ||
         controlSize(),
     );
-    // Prefer the size captured before paintChrome hid the frame. After unhide,
-    // CSS aspect-ratio: 16/10 can win for a frame if inline fit sizes were lost.
     const gw = Math.max(1, Math.round(locked?.width || gallery.offsetWidth || 1));
     const gh = Math.max(1, Math.round(locked?.height || gallery.offsetHeight || 1));
     gallery.style.width = `${gw}px`;
@@ -1146,8 +1118,6 @@ export function initArrowNav(root: ParentNode = document) {
     );
     anim.finished.finally(() => {
       if (genAt !== generation) return;
-      // Close finishes at opacity 0 with a face-sized mask. Cancel/clear would
-      // restore the full frame for a frame — hide first so the aspect cannot jump.
       if (!open && nav.dataset.kind !== 'gallery') gallery.hidden = true;
       anim.cancel();
       clearGalleryMask(gallery);
@@ -1165,8 +1135,6 @@ export function initArrowNav(root: ParentNode = document) {
   let flipping = false;
   let holdPointer = 0;
   let holdTarget: HTMLElement | null = null;
-  // Wheel delta accumulates into slide steps. Trackpad inertia keeps sending
-  // shrinking deltas, so the flip rate slows with the OS scroll, not a fake ease.
   const SCROLL_SLIDE_PX = 80;
   const SCROLL_IDLE_MS = 480;
   const SCROLL_MAX_STEPS = 8;
@@ -1277,7 +1245,6 @@ export function initArrowNav(root: ParentNode = document) {
       try {
         holdTarget.releasePointerCapture(holdPointer);
       } catch {
-        /* already released */
       }
     }
     holdPointer = 0;
@@ -1308,9 +1275,6 @@ export function initArrowNav(root: ParentNode = document) {
       playSnick();
     };
     step();
-    // First repeat after 480ms, then each wait is 78% of the last, down to
-    // 80ms. That is the hold-to-speed-up on the gallery arrows. Capping
-    // every repeat to moveMs() (500ms) made them all the same speed.
     const holdFast = 80;
     let wait = 480;
     const tick = () => {
@@ -1353,9 +1317,6 @@ export function initArrowNav(root: ParentNode = document) {
     const slot = nav.querySelector<HTMLElement>('.arrow-slot')!;
     const slotBefore = slot.getBoundingClientRect();
     const wasGallery = nav.dataset.kind === 'gallery';
-    // Snapshot the fitted frame before paintChrome hides it on the way out.
-    // Closing unhides for the mask shrink; without this the CSS 16/10 fallback
-    // can replace a portrait/landscape fit for a frame.
     const closeBox = wasGallery
       ? {
           width: galleryEl().offsetWidth,
@@ -1378,7 +1339,6 @@ export function initArrowNav(root: ParentNode = document) {
         const shape = getComputedStyle(el);
         const opacity = Number(shape.opacity);
         clone.classList.add('arrow-flight');
-        // A clone is never mistaken for the live control it copies.
         clone.removeAttribute('data-nav-flight');
         clone.removeAttribute('data-dir');
         clone.dataset.ghostDir = el.dataset.dir || '';
@@ -1415,12 +1375,7 @@ export function initArrowNav(root: ParentNode = document) {
     const enteringGallery = !wasGallery && nav.dataset.kind === 'gallery';
     const outward = depthOf(id) > depthOf(fromId);
     const nowGallery = nav.dataset.kind === 'gallery';
-    // Gallery → gallery: keep the current frame through the flight and swap
-    // after the controls land. Clearing mid-flight decodes the next image on
-    // the same frames as the flight; Chrome drops those hard.
     let pendingGallerySlide = false;
-    // Lock before showSlide so video onloadedmetadata cannot remorph the
-    // frame or re-pin arrows while travel is measuring and flying.
     if (!reduce) flightLock = true;
     if (nowGallery) {
       if (enteringGallery) {
@@ -1443,9 +1398,6 @@ export function initArrowNav(root: ParentNode = document) {
       growGallery(nowGallery, fromMask, nowGallery ? null : closeBox);
     }
 
-    // A route screen (a node with an href) is its own page. The controls fly
-    // to it here like any other screen, then the browser opens the page, which
-    // shows the same screen. Its history entry is that page, not a hash.
     const route = nodes.get(id)?.href;
     const landed = () => {
       if (gen !== generation || !route) return;
@@ -1467,8 +1419,6 @@ export function initArrowNav(root: ParentNode = document) {
       return;
     }
 
-    // Everything below is measured after the new screen is laid out and the
-    // page is back at the top. Old rects move with the slot if it scrolled.
     const slotNow = slot.getBoundingClientRect();
     const shiftX = slotNow.left - slotBefore.left;
     const shiftY = slotNow.top - slotBefore.top;
@@ -1492,10 +1442,6 @@ export function initArrowNav(root: ParentNode = document) {
       return { el, rect, prev, same, moved };
     });
     const verticalDir = (dir: string) => dir === 'up' || dir === 'down';
-    // Each direction owns an overflow half-plane on its side of the hub.
-    // Planes live under the slot so --arrow-control and pill styles still apply
-    // (body orphans blew the chevrons up to the SVG default size). Controls fly
-    // with transform only, so Chrome never paints animated clip-path on them.
     const far = Math.max(window.innerWidth, window.innerHeight) * 2;
     const planes = new Map<string, HTMLElement>();
     const planeFor = (dir: string) => {
@@ -1630,12 +1576,8 @@ export function initArrowNav(root: ParentNode = document) {
         dy = Math.round((vertical ? hub.y : destCy) - destCy);
       }
       pinInPlane(el, rect, planeFor(dir));
-      // Gallery paints above the default control stack. Keep the back control
-      // above the growing frame so it does not vanish mid-flight.
       el.style.zIndex = dir === 'up' ? '6' : '1';
       el.style.willChange = 'transform, opacity';
-      // Invert immediately so the dest pin cannot paint for a frame before
-      // WAAPI fill:both applies (back would flash high, then jump down).
       el.style.transform = `translate(${dx}px, ${dy}px)`;
       el.style.opacity = moved ? '1' : '0';
       const anim = el.animate(
@@ -1647,8 +1589,6 @@ export function initArrowNav(root: ParentNode = document) {
       );
       const done = anim.finished.finally(() => {
         if (gen !== generation) return;
-        // Keep gallery pins until placeGalleryArrows below — restoreFlightHome
-        // clearPin would drop the back onto the face-adjacent CSS slot for a frame.
         if (nav.dataset.kind === 'gallery') {
           anim.cancel();
           el.style.opacity = '';
@@ -1672,7 +1612,6 @@ export function initArrowNav(root: ParentNode = document) {
         clearGalleryMedia();
         showSlide(0, false);
       }
-      // Gallery flights stayed pinned above; restore them into the stage now.
       if (nav.dataset.kind === 'gallery') {
         flights().forEach((el) => {
           const home = flightHomes.get(el);
@@ -1682,8 +1621,6 @@ export function initArrowNav(root: ParentNode = document) {
         });
       }
       if (nav.dataset.kind === 'gallery') faceEl().hidden = true;
-      // Settle pins on the open-travel box first, then morph to the real
-      // video size so the back control eases instead of snapping down.
       placeGalleryArrows();
       if (nav.dataset.kind === 'gallery') {
         const current = screen()?.slides[slide];
@@ -1729,7 +1666,6 @@ export function initArrowNav(root: ParentNode = document) {
     }
     const next = child(screenId, dir);
     if (!next) return;
-    // A route leaf (a services pill on the services screen) is a plain link.
     if (next.href && !tree.nodes.some((node) => node.parent === next.id)) {
       location.assign(next.href);
       return;
@@ -1860,7 +1796,6 @@ export function initArrowNav(root: ParentNode = document) {
     try {
       dotsEl().setPointerCapture(event.pointerId);
     } catch {
-      /* capture optional */
     }
     scrubTo(event.clientX);
   });
@@ -1876,7 +1811,6 @@ export function initArrowNav(root: ParentNode = document) {
     try {
       if (dotsEl().hasPointerCapture(event.pointerId)) dotsEl().releasePointerCapture(event.pointerId);
     } catch {
-      /* already released */
     }
     endScrub(true);
   };
@@ -2002,7 +1936,6 @@ export function initArrowNav(root: ParentNode = document) {
   function endIntro() {
     introPlaying = false;
     introDebug.end();
-    // Whatever happened to the GPU canvas, the resting face is the plain SVG.
     const dead = faceGL;
     faceGL = null;
     try {
@@ -2012,11 +1945,6 @@ export function initArrowNav(root: ParentNode = document) {
     const scaleEl = nav.querySelector<HTMLElement>('[data-nav-scale]');
     const blob = nav.querySelector<HTMLElement>('.arrow-face-blob');
     scaleEl?.getAnimations().forEach((anim) => anim.cancel());
-    // Leave the intro from the size the face is drawn at now. Under the GPU
-    // face on a phone the SVG blob sat hidden at the intro size, and without
-    // this it eased down from there once it showed: the face pulsed up and
-    // back down just after the intro. Pin both to the drawn size, drop
-    // is-intro, then let go, so the face only moves if it was not yet at rest.
     const parts = [scaleEl, blob].filter((el): el is HTMLElement => !!el);
     const drawn = scaleEl ? getComputedStyle(scaleEl) : null;
     if (scaleEl && drawn) {
@@ -2040,13 +1968,10 @@ export function initArrowNav(root: ParentNode = document) {
     syncGlance();
   }
 
-  // Drop the SVG filter once the GPU face owns the intro (or at rest).
   const dropFaceFilter = () => {
     nav.querySelector('.arrow-face-blob g')?.removeAttribute('filter');
   };
 
-  // Swap the intro evenodd source for the resting glance layer. Only after
-  // the intro, so the goo path stays the one GL / SVG filter animate.
   const showRestingFace = () => {
     dropFaceFilter();
     nav.querySelector('.arrow-face-blob')?.classList.add('is-face-settled');
@@ -2070,19 +1995,12 @@ export function initArrowNav(root: ParentNode = document) {
       return;
     }
     let revealed = false;
-    // A CSS scale of the small filtered face paints a soft bitmap and drops
-    // the displacement. The face is laid out at the size it is drawn, on
-    // every viewport, and the stretch follows the screen on a phone.
     const phone = matchMedia('(max-width: 759px)').matches;
     const face = parseFloat(getComputedStyle(nav).getPropertyValue('--arrow-face')) || (phone ? 48 : 64);
     const stretchFrom = phone ? nav.clientWidth / Math.max(1, nav.clientHeight) : INTRO_STRETCH;
     const blob = nav.querySelector<HTMLElement>('.arrow-face-blob');
     scaleEl.style.transform = 'none';
     let started = performance.now();
-    // The first frames after load are slow on a phone: fonts, the first GPU
-    // draw and its compositing layer all land there. The intro holds its first
-    // frame until two frames in a row arrive on time (or HOLD_MAX_MS), then the
-    // clock starts, so a late frame never lands while the face is moving.
     let holding = true;
     let holdFrom = 0;
     let lastTick = 0;
@@ -2141,8 +2059,6 @@ export function initArrowNav(root: ParentNode = document) {
         if (hash && nodes.has(hash)) travel(hash, false);
       }
     };
-    // The GPU dropped the canvas (or a draw threw) mid-intro: finish on the
-    // SVG filter. After the intro, endIntro has already shown the plain face.
     const dropFaceGL = (reason: string) => {
       if (!faceGL) return;
       const dead = faceGL;
@@ -2161,11 +2077,6 @@ export function initArrowNav(root: ParentNode = document) {
       introDebug.hold(performance.now());
       frame(performance.now(), true);
     };
-    // The SVG filter would be re-rasterised every frame over a region several
-    // screens tall. The GPU face draws the same filter from numbers. Noise is
-    // built in short slices so the landing long task can yield, then the first
-    // frame is drawn and the SVG face stays hidden until then. Only when
-    // WebGL cannot run does the SVG filter come back, and ?introdebug says why.
     void (async () => {
       await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
       const svgFace = nav.querySelector<SVGSVGElement>('.arrow-face-blob');
@@ -2189,8 +2100,6 @@ export function initArrowNav(root: ParentNode = document) {
         faceGL = mount.gl;
         faceGL.canvas.addEventListener('webglcontextlost', () => dropFaceGL('context-lost'));
         nav.classList.add('is-face-gl');
-        // Keep the evenodd intro source until endIntro. Only drop the unused
-        // SVG filter so it is not rasterised behind the canvas.
         dropFaceFilter();
         introDebug.path('gl', '', mount.gl.setupMs, mount.gl.renderer);
       } else {
@@ -2208,8 +2117,6 @@ export function initArrowNav(root: ParentNode = document) {
     '',
     opened === 'landing' ? location.pathname + location.search : `${location.pathname}${location.search}#${opened}`,
   );
-  // Back from a route page: open on its screen, which looks like the page
-  // just left, then fly the controls home with travel().
   const routed = takeRoute();
   const returning = routed && opened !== 'landing' && nodes.get(routed)?.href && nodes.get(routed)?.parent === opened && isTraverse() ? routed : null;
   screenId = returning ?? opened;
@@ -2238,8 +2145,6 @@ export function initArrowNav(root: ParentNode = document) {
   else {
     introPlaying = false;
     introOn = false;
-    // Opened on a screen: the face starts at its resting size rather than
-    // easing down from the intro size.
     const still = [...nav.querySelectorAll<HTMLElement>('.arrow-face-scale, .arrow-face-blob')];
     still.forEach((el) => (el.style.transition = 'none'));
     nav.classList.remove('is-intro');
@@ -2254,8 +2159,6 @@ export function initArrowNav(root: ParentNode = document) {
     requestAnimationFrame(() => requestAnimationFrame(() => travel(to, false)));
   };
   if (returning) flyHome(opened);
-  // Back from a route page out of the back/forward cache: the page is still
-  // on the route screen it left from.
   window.addEventListener('pageshow', (event) => {
     if (!event.persisted) return;
     takeRoute();

@@ -1,7 +1,3 @@
-// Mobile scrub on the gallery indicator: drag maps X to slide index and
-// shows the number HUD only while the pointer is down.
-//
-// npm run build && npm run test:arrow-scrub
 import { chromium } from 'playwright';
 import { createServer } from 'node:http';
 import { readFileSync, existsSync, statSync } from 'node:fs';

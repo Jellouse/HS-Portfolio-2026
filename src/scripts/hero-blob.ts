@@ -7,7 +7,6 @@ import { heroIntroScrolling } from './hero-blob-gl';
 let blobIntroStarted = false;
 const blobIntroWaiters: (() => void)[] = [];
 
-/** Homepage blob grow passed the text gate, or the mark fell back to SVG. */
 export function signalHeroBlobIntroStarted() {
   if (blobIntroStarted) return;
   blobIntroStarted = true;
@@ -39,7 +38,6 @@ export const heroBlobDrift: HeroBlobDrift = {
   idleSpeed: 0.00028,
 };
 
-/** Coarser fractal noise below 760 so the large hero goo reads at phone scale. */
 function tuneBlobTurbulence(svg: SVGSVGElement) {
   if (!svg.hasAttribute('data-hero-blob')) return;
   if (!matchMedia('(max-width: 759px)').matches) return;
@@ -73,11 +71,9 @@ function easeInOut(t: number) {
   return sampleY(u);
 }
 
-/** Thickness of the source, then the existing turbulence. Starts empty. */
 function growBlob(canvas: HTMLCanvasElement, draw: () => void) {
   const hidden = 1.05;
   const duration = 4800;
-  /** Letter intro starts once the mark grow reaches this fraction. */
   const textAt = 0.4;
   setHeroBlobSourceCut(hidden);
   let origin = 0;
@@ -124,8 +120,6 @@ export function initHeroBlob(root: ParentNode = document) {
       initTouchLoop(svg);
       return;
     }
-    // The arrow face has no cursor to follow. A live filter loop repaints every
-    // frame and, under the intro scale, keeps the face from painting.
     if (svg.hasAttribute('data-mark-face')) return;
   }
 
@@ -200,7 +194,6 @@ export function initHeroBlob(root: ParentNode = document) {
       frame = 0;
       return;
     }
-    // growBlob owns the frames while the source is still cutting in.
     if (!heroIntroScrolling() && getHeroBlobSourceCut() < 0) paint();
     frame = onScreen && !document.hidden ? requestAnimationFrame(tick) : 0;
   };

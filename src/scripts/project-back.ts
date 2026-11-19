@@ -1,6 +1,5 @@
 import { playSnick } from './ui-sound';
 
-/** Circular back control on a project or a shop product. */
 export function initProjectBack() {
   const back = document.querySelector<HTMLAnchorElement>('[data-project-back]');
   if (!back || back.dataset.bound) return;

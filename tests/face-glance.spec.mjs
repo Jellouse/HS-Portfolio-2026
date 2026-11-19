@@ -1,6 +1,4 @@
 
-// Landing face glances L/R/U/D with the cursor, stares forward over the mark,
-// and returns to centre after 1s of still pointer.
 import { chromium } from 'playwright';
 import { createServer } from 'node:http';
 import { readFileSync, existsSync, statSync } from 'node:fs';
@@ -64,7 +62,6 @@ else {
   ];
   for (const [name, x, y, expect] of cases) {
     await page.mouse.move(x, y);
-    // Ease-glance is heavy up front (82% in); wait out the 200ms transition.
     await page.waitForTimeout(280);
     const glance = await page.locator('.arrow-face-blob').getAttribute('data-glance');
     if (glance !== expect) failures.push(`${name}: glance=${glance} expected ${expect}`);
@@ -82,7 +79,6 @@ else {
     if (expect === 'down' && !(ty > 1)) failures.push(`${name}: transform ${transform}`);
   }
 
-  // Hold still off the mark: after IDLE_MS the eyes come home.
   const idleX = cx + face.width * 2;
   const idleY = cy;
   await page.mouse.move(idleX, idleY);

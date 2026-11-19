@@ -1,6 +1,3 @@
-// ?introdebug: a small readout of how the homepage intro ran on this device.
-// Which face path ran (gl or svg), why it fell back, setup cost, and the frame
-// times for the first 3 s of the intro. Off unless the flag is in the URL.
 
 const WINDOW_MS = 3000;
 
@@ -75,7 +72,6 @@ export const introDebug = {
     s.startAt = now;
     s.last = now;
   },
-  /** One intro frame at rAF time `now`, with `workMs` of script in it. */
   frame(now: number, workMs: number) {
     if (!introDebugOn || s.done || !s.startAt) return;
     if (now > s.last) s.deltas.push(now - s.last);

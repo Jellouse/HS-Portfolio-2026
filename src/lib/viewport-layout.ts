@@ -34,18 +34,8 @@ type ViewBox = {
   height: number;
 };
 
-/** How much the visual viewport may differ from the small viewport before we treat it as an inset. */
 const VIEW_SLACK = 1;
 
-/**
- * The visible area the arrow-nav stage should fill.
- *
- * When an overlay (the X in-app tweet sheet, the compact URL bar) makes the
- * visual viewport shorter than 100svh, use that visible height so the stage
- * is not centred in a taller box and left sitting too low. When the visual
- * viewport is taller than 100svh (mobile Safari hiding its URL bar), keep
- * 100svh so the designed layout does not jump.
- */
 export function visibleAppView(
   view: ViewBox | null | undefined,
   svh: number,

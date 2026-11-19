@@ -1,4 +1,3 @@
-/** Load the contact drawer when it is first opened, not on every page boot. */
 
 export function bootContact() {
   const root = document.querySelector<HTMLElement>('[data-contact-root]');
@@ -46,7 +45,5 @@ export function bootContact() {
     if ('requestIdleCallback' in window) window.requestIdleCallback(prefetch, { timeout: 4000 });
     else setTimeout(prefetch, 4000);
   };
-  // After the landing intro and Lighthouse's TTI window, so React is ready
-  // for a later click without paying for it on first paint.
   setTimeout(schedule, 8000);
 }

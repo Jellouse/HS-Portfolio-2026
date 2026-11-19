@@ -12,7 +12,6 @@ export type ArrowDir = 'left' | 'right' | 'up' | 'down';
 export type ArrowSlide = {
   src: string;
   poster: string;
-  /** Tiny webp for blur-up. Empty for alpha cutouts. */
   blur: string;
   alt: string;
   title: string;
@@ -58,7 +57,6 @@ export type ArrowNode = {
   kind: 'branch' | 'gallery' | 'placeholder';
   slides: ArrowSlide[];
   paragraphs: string[];
-  /** A screen that is its own page. The controls fly to it in place, then the browser opens it. */
   href?: string;
 };
 
@@ -180,17 +178,11 @@ async function shopSlides(): Promise<ArrowSlide[]> {
   return slides;
 }
 
-/** The services hub button label: the title in sentence case. */
 export function serviceButtonLabel(title: string) {
   const lower = title.toLowerCase();
   return lower.charAt(0).toUpperCase() + lower.slice(1);
 }
 
-/**
- * The services hub as arrow screens under about. Pressing Services on about
- * runs the same in-page flight as every other button, onto a screen laid out
- * like /services/, and then opens /services/.
- */
 async function serviceNodes(): Promise<ArrowNode[]> {
   const services = (await getCollection('services')).sort((a, b) => a.data.order - b.data.order);
   const [left, right] = services;

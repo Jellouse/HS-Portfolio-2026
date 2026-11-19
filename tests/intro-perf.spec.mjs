@@ -1,5 +1,3 @@
-// Frame timings for the homepage intro on an emulated iPhone 12.
-// Usage: npm run build && node tests/intro-perf.spec.mjs [--throttle=4] [--browser=chromium|webkit] [--runs=3] [--min-fps=50] [--desktop]
 import { chromium, webkit } from 'playwright';
 import { createServer } from 'node:http';
 import { readFileSync, existsSync, statSync } from 'node:fs';
@@ -15,7 +13,6 @@ const BROWSER = arg('browser', 'chromium');
 const RUNS = Number(arg('runs', '3'));
 const BUDGET = Number(arg('budget', '0'));
 const MIN_FPS = Number(arg('min-fps', '0'));
-// --desktop: a 1440x900 retina laptop window instead of the phone.
 const DESKTOP = process.argv.includes('--desktop');
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));

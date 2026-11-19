@@ -1,7 +1,3 @@
-// feTurbulence, as the SVG 1.1 / Filter Effects spec defines it (the reference
-// code in the spec, which WebKit, Blink and Gecko all follow). Used to build the
-// phone intro's noise in JS, so the GPU face never depends on the browser
-// rasterising an SVG filter into a canvas.
 
 const BSize = 0x100;
 const BM = 0xff;
@@ -37,7 +33,6 @@ function random(seed: number) {
 }
 
 function tables(rawSeed: number): Tables {
-  // The spec rounds the seed attribute to the nearest integer.
   const key = Math.round(rawSeed);
   const hit = tableCache.get(key);
   if (hit) return hit;
@@ -110,7 +105,6 @@ function noise2(t: Tables, channel: number, x: number, y: number) {
   return a + sy * (b - a);
 }
 
-/** One channel (0 R, 1 G, 2 B, 3 A) at a user-space point, as a 0..255 byte. */
 export function turbulenceByte(p: TurbulenceParams, channel: number, x: number, y: number) {
   const t = tables(p.seed);
   let sum = 0;
@@ -131,11 +125,6 @@ export function turbulenceByte(p: TurbulenceParams, channel: number, x: number, 
 const toByte = (sum: number, fractal: boolean) =>
   Math.max(0, Math.min(255, Math.round(fractal ? (sum * 255 + 255) / 2 : sum * 255)));
 
-/**
- * RGBA bytes over `region` (user units, [x, y, w, h]) at `res` texels per unit,
- * sampled at texel centres. Red and green are the noise's colour channels
- * (unpremultiplied). Blue carries the noise alpha. Alpha is opaque.
- */
 const yieldToMain = () => {
   const sched = (globalThis as typeof globalThis & { scheduler?: { yield?: () => Promise<void> } }).scheduler;
   return typeof sched?.yield === 'function' ? sched.yield() : new Promise<void>((resolve) => setTimeout(resolve, 0));
@@ -221,11 +210,6 @@ function fillTurbulenceRows(
   }
 }
 
-/**
- * RGBA bytes over `region` (user units, [x, y, w, h]) at `res` texels per unit,
- * sampled at texel centres. Red and green are the noise's colour channels
- * (unpremultiplied). Blue carries the noise alpha. Alpha is opaque.
- */
 export function turbulenceTexture(p: TurbulenceParams, region: number[], res: number) {
   const w = Math.max(1, Math.round(region[2] * res));
   const h = Math.max(1, Math.round(region[3] * res));
@@ -234,7 +218,6 @@ export function turbulenceTexture(p: TurbulenceParams, region: number[], res: nu
   return { data, w, h };
 }
 
-/** Same texture, built in short slices so the landing long task can yield. */
 export async function turbulenceTextureAsync(p: TurbulenceParams, region: number[], res: number, budget = 8) {
   const w = Math.max(1, Math.round(region[2] * res));
   const h = Math.max(1, Math.round(region[3] * res));
@@ -254,7 +237,6 @@ export async function turbulenceTextureAsync(p: TurbulenceParams, region: number
   return { data, w, h };
 }
 
-/** Read feTurbulence attributes the way the spec parses them. */
 export function turbulenceParams(el: Element): TurbulenceParams {
   const freq = (el.getAttribute('baseFrequency') || '0').trim().split(/[\s,]+/).map(Number);
   const fx = Number.isFinite(freq[0]) ? Math.max(0, freq[0]) : 0;

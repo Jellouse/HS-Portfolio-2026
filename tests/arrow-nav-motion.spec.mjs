@@ -1,11 +1,3 @@
-// Drives the homepage arrow nav through its transitions, freezes each one at
-// several points mid-flight, and checks that no moving control paints on the
-// wrong side of the hub. Each direction owns the half-plane on its side of
-// the hub centre. A control that leaves or arrives has to stay inside it, so it
-// slides out of and into the face instead of across open page background.
-//
-// npm run build && npm run test:arrow-motion
-// ARROW_SHOTS=dir saves one mid-flight frame per step for review.
 import { chromium, devices } from 'playwright';
 import sharp from 'sharp';
 import { createServer } from 'node:http';
@@ -32,11 +24,8 @@ const SHOTS = process.env.ARROW_SHOTS || '';
 if (SHOTS) mkdirSync(SHOTS, { recursive: true });
 const SAMPLES = [30, 60, 120, 200, 300, 420];
 const SHOT_AT = Number(process.env.ARROW_SHOT_AT || 200);
-// A pixel counts as painted by a control when a channel moves this much.
 const INK = 24;
-// Antialiasing on the hub line is allowed to spill this far.
 const EDGE = 1;
-// Stray pixels tolerated per direction and frame.
 const STRAY = 3;
 
 const failures = [];
@@ -44,7 +33,6 @@ const browser = await chromium.launch();
 
 const allTargets = [
   { name: 'desktop', options: { viewport: { width: 1440, height: 900 } }, touch: false },
-  // The size of the browser window in the bug recording.
   { name: 'laptop', options: { viewport: { width: 920, height: 574 }, deviceScaleFactor: 2 }, touch: false },
   { name: 'iphone', options: { ...devices['iPhone 13'], viewport: { width: 390, height: 844 } }, touch: true },
 ];
@@ -67,7 +55,6 @@ for (const target of targets) {
   const fresh = () => page.waitForFunction(() => document.getAnimations().some((a) => !window.__pre.has(a)), null, { timeout: 3000 });
 
   const freeze = (at) => page.evaluate(async (at) => {
-    // Let pending style changes (the pressed colour fading out) start first.
     await new Promise((r) => requestAnimationFrame(() => r()));
     getComputedStyle(document.body).color;
     const all = document.getAnimations();
@@ -88,14 +75,12 @@ for (const target of targets) {
     if (target.touch) await page.touchscreen.tap(box.x, box.y);
     else {
       await page.mouse.click(box.x, box.y);
-      // Park the pointer so hover colour does not change between captures.
       await page.mouse.move(1, 1);
     }
   };
 
   const back = () => page.evaluate(() => history.back());
 
-  // Everything moving, grouped by the direction that owns it.
   const moving = () => page.evaluate(() => {
     const nav = document.querySelector('[data-arrow-nav]');
     const slot = nav.querySelector('.arrow-slot').getBoundingClientRect();
@@ -135,13 +120,10 @@ for (const target of targets) {
   const checkMask = async (label) => {
     const { hub, disc, dirs } = await moving();
     if (!dirs.length) return null;
-    // Touch every group once so the frozen frame is painted the same way
-    // (main thread, not compositor) in every capture below.
     for (const dir of dirs) await setHidden(dir, true);
     await raw();
     for (const dir of dirs) await setHidden(dir, false);
     const full = await raw();
-    // A second plain frame marks pixels that change on their own (the face).
     const again = await raw();
     for (const dir of dirs) {
       await setHidden(dir, true);
@@ -156,7 +138,6 @@ for (const target of targets) {
           if (d < INK || !outside(dir, x, y, hub)) continue;
           const noise = Math.max(Math.abs(full.data[i] - again.data[i]), Math.abs(full.data[i + 1] - again.data[i + 1]), Math.abs(full.data[i + 2] - again.data[i + 2]));
           if (noise >= INK) continue;
-          // The face sits on top of every control, so nothing under it is visible.
           if (disc && Math.hypot(x + 0.5 - disc.x, y + 0.5 - disc.y) < disc.r - EDGE) continue;
           stray += 1;
           box = box ? { l: Math.min(box.l, x), t: Math.min(box.t, y), r: Math.max(box.r, x), b: Math.max(box.b, y) } : { l: x, t: y, r: x, b: y };
@@ -214,8 +195,6 @@ for (const target of targets) {
   await step('physical-browser-back', back, 'landing');
   await step('landing-to-about', () => press('down'), 'about');
   await step('about-to-landing', () => press('up'), 'landing');
-  // Leaving the about screen after reading down the page: the page jumps
-  // back to the top in the same frame the controls start to move.
   await step('landing-to-about-2', () => press('down'), 'about');
   await page.evaluate(() => window.scrollTo(0, 400));
   await page.waitForTimeout(200);
@@ -225,7 +204,6 @@ for (const target of targets) {
   await step('landing-to-shop', () => press('up'), 'shop');
   await step('shop-to-landing', () => press('up'), 'landing');
 
-  // Rapid taps: each one lands while the last transition is still moving.
   const rapid = [
     ['right', 140],
     ['up', 110],

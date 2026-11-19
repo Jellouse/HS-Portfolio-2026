@@ -4,7 +4,6 @@ export function hasBracket(text: string): boolean {
   return /\[([^\]]+)\]/.test(text);
 }
 
-/** Visible highlight for unfilled CMS values like [year] or [x to y]. */
 export function renderPlaceholders(text: string): string {
   return text.replace(BRACKET, '<span class="content-placeholder">[$1]</span>');
 }

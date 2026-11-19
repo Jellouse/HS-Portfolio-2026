@@ -20,7 +20,6 @@ function hexFromCss(color: string) {
   return `#${bytes.join('')}`;
 }
 
-/** Paint the canvas, the page, and the browser chrome from the color already in use. */
 export function syncThemeColor() {
   const hex = hexFromCss(getComputedStyle(document.documentElement).backgroundColor);
   if (!hex) return;

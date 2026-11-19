@@ -67,7 +67,6 @@ let applyFrame: (frame: HeroFrame) => void = (frame) => {
 };
 let introScrolling = false;
 
-/** True while the homepage intro is actively scrubbing scroll scale. */
 export function setHeroIntroScrolling(on: boolean) {
   introScrolling = on;
 }
@@ -82,7 +81,6 @@ const snapFrame = (frame: HeroFrame): HeroFrame => ({
   stretch: Math.round(frame.stretch * 400) / 400,
 });
 
-/** Live scroll scale. Uniforms only: the mask and noise stay uploaded. */
 export function pushHeroFrame(frame: HeroFrame) {
   const next = snapFrame(frame);
   if (

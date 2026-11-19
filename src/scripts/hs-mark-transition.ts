@@ -1,4 +1,3 @@
-/** Home ↔ project shared-element transition: SVG on both sides, like shop ib-mark. */
 
 export function handoffHeroMarkToSvg(root: ParentNode = document) {
   const hero = root.querySelector('[data-hero-root]');
