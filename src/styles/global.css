@@ -111,7 +111,6 @@
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
   --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
   --ease-nav: cubic-bezier(0.53, 0, 0.12, 0.99);
-  /* Face glance: 82% ease-in, 88% ease-out. */
   --ease-glance: cubic-bezier(0.82, 0, 0.12, 1);
   --face-glance-rest: 4px;
   --face-glance: var(--face-glance-rest);
@@ -1639,10 +1638,6 @@ html:active-view-transition-type(hs-shrink)::view-transition-new(hs-mark) {
   animation: vt-in 300ms var(--ease-out-quad) both;
 }
 
-/* Same-document chrome morphs (About ↔ contact, contact steps). The named
-   face / back / pills own the motion. Freezing root stops a second fade
-   fighting those groups. data-chrome-vt-run is the html flag from
-   runChromeVt — not data-chrome-vt, which opts in an .arrow-nav root. */
 html[data-chrome-vt-run] ::view-transition-old(root) {
   animation: none;
   opacity: 0;
@@ -1653,10 +1648,6 @@ html[data-chrome-vt-run] ::view-transition-new(root) {
   opacity: 1;
 }
 
-/* Shared chrome view-transition names. A new screen opts in with
-   data-chrome-vt on its .arrow-nav root. The homepage about screen is
-   the in-page equivalent. Icon-mode L/R pills stay unnamed so they are
-   not morphed into the text pills. */
 [data-chrome-vt] .arrow-face-scale,
 .arrow-nav[data-screen='about'] .arrow-face-scale {
   view-transition-name: services-face;
@@ -1739,8 +1730,6 @@ html[data-chrome-vt-run] ::view-transition-new(root) {
   display: none;
 }
 
-/* :only-child does not match these snapshot pseudos, so it cannot
-   turn off the UA fade or plus-lighter blend. Set animation explicitly. */
 ::view-transition-old(services-face),
 ::view-transition-new(services-face),
 ::view-transition-old(services-back),
@@ -1787,12 +1776,6 @@ html:active-view-transition-type(chrome-grow)::view-transition-old(services-face
   opacity: 0;
 }
 
-/*
-  Contact step hops. Face ↔ field use different VT names (services-face vs
-  contact-field), so each side fades on its own box — no circle→pill stretch.
-  Field ↔ field shares contact-field and keeps a pill radius in px so a height
-  change cannot turn the pair into an ellipse via border-radius: 50%.
-*/
 ::view-transition-image-pair(contact-field) {
   isolation: auto;
   overflow: hidden;
@@ -1908,7 +1891,6 @@ html:active-view-transition-type(work)::view-transition-new(root) {
   text-decoration: inherit;
 }
 
-/* Link underlines follow scroll blur and letter color (text-decoration does not). */
 .is-split
   :is(main, .site-footer)
   a.reveal-word:not(:where(.site-header *, .project-mark *, .project-menu *, .shop-menu *)) {
@@ -2678,8 +2660,6 @@ html.is-contact-open body {
   overscroll-behavior: none;
 }
 
-/* Full-viewport contact hub. Reuses .arrow-nav face / pill / back chrome.
-   Stays mounted when closed so About → contact can morph into it. */
 .contact-panel {
   position: fixed;
   inset: 0;
@@ -2702,8 +2682,6 @@ html.is-contact-open body {
     animation: contact-in var(--dur-sheet) var(--ease-out) both;
   }
 
-  /* About morph owns the entrance. is-entered locks the fade so clearing
-     data-contact-vt after a step hop does not replay contact-in. */
   html[data-contact-vt] .contact-panel,
   .contact-panel.is-entered {
     animation: none;
@@ -2721,7 +2699,6 @@ html.is-contact-open body {
   color: inherit;
 }
 
-/* About chrome yields its VT names to the contact hub during the morph. */
 .arrow-nav.is-contact-covered :is(.arrow-face-scale, .arrow-back, .arrow-pill[data-dir='left'], .arrow-pill[data-dir='right']) {
   view-transition-name: none;
 }
@@ -2730,12 +2707,6 @@ html.is-contact-open body {
   pointer-events: none;
 }
 
-/*
-  Contact chrome slots. Face keeps services-face. The visible field uses
-  contact-field so face ↔ field cannot size-morph a circle into a pill.
-  Only :not([hidden]) so persistent step slots do not double-name. Down uses
-  contact-pill-down. Back already gets services-back from [data-chrome-vt].
-*/
 .contact-hub[data-chrome-vt] .arrow-face[hidden] .arrow-face-scale {
   view-transition-name: none;
 }
@@ -2748,7 +2719,6 @@ html.is-contact-open body {
   view-transition-name: none;
 }
 
-/* Size changes go through the VT group, not the CSS width transition. */
 .contact-hub .arrow-face-scale,
 .contact-hub .arrow-face-blob {
   transition: none;
@@ -2758,11 +2728,6 @@ html.is-contact-open body {
   view-transition-name: contact-pill-down;
 }
 
-/*
-  About → contact only. Size morph + face crossfade together. About's blob
-  is zoomed 1.18; contact is resting. Blending them over --dur-nav keeps
-  eyes and mouth in sync with the scale. To-about keeps chrome-grow.
-*/
 html[data-chrome-vt-run='about-contact-in'] ::view-transition-old(services-face) {
   animation: vt-out var(--dur-nav) var(--ease-nav) both;
 }
@@ -2771,8 +2736,6 @@ html[data-chrome-vt-run='about-contact-in'] ::view-transition-new(services-face)
   animation: vt-in var(--dur-nav) var(--ease-nav) both;
 }
 
-/* Full-stage flex centre so the field's % width resolves against the hub,
-   not a shrink-wrapped wrapper (that collapsed it to ~80×264). */
 .contact-center {
   position: absolute;
   inset: 0;
@@ -2873,7 +2836,6 @@ html[data-chrome-vt-run='about-contact-in'] ::view-transition-new(services-face)
 }
 
 
-/* Done leaves the chrome set; a short blur-in is enough. Skip during chrome VT. */
 @media (prefers-reduced-motion: no-preference) {
   .contact-done-stack {
     animation: text-blur-in 550ms var(--ease-out-expo) both;
@@ -3587,9 +3549,6 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
 }
 
 .arrow-nav[data-screen='about'] {
-  /* Glance translates in SVG space, so it grows with the mark. Undo that so
-     about keeps roughly the same screen travel as the small resting face
-     (and the 1.18 blob scale on this screen). */
   --face-glance: calc(var(--face-glance-rest) * var(--arrow-face) / var(--arrow-about-face) / 1.18);
 }
 
@@ -3672,7 +3631,6 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
   overflow: hidden;
 }
 
-/* Intro keeps the evenodd goo source. Resting mark swaps to the glance layer. */
 .arrow-face-blob:not(.is-face-settled) [data-face-glance-layer] {
   display: none;
 }
@@ -3686,7 +3644,6 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
   fill: var(--page-bg);
 }
 
-/* Eyes only shift toward the cursor quadrant. Mouth stays put. */
 .arrow-face-blob [data-face-features] {
   transform: translate(0, 0);
   transition: transform var(--dur-ui) var(--ease-glance);
@@ -3724,10 +3681,6 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
   border-radius: 0;
 }
 
-/* The GPU intro draws the face on a canvas sized to the face plus filter
-   reach, then centered in the slot — the same place as .arrow-face. Do not
-   use inset: 0 here. That pins a face-sized canvas to the top of the stage,
-   and an inset shorthand in JS would also wipe left/top. */
 .arrow-face-gl {
   position: absolute;
   top: 50%;
@@ -3739,13 +3692,10 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
   pointer-events: none;
 }
 
-/* Only while the intro plays: a class left behind must never hide the
-   resting face. */
 .arrow-nav.is-intro.is-face-gl .arrow-face-blob {
   visibility: hidden;
 }
 
-/* ?introdebug readout of how the intro ran. */
 .intro-debug {
   position: fixed;
   bottom: var(--pad);
@@ -3940,8 +3890,6 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
 .arrow-gallery {
   width: min(720px, 62vw);
   aspect-ratio: 16 / 10;
-  /* Circular round only — matches the growGallery clip-path mask. Superellipse
-     here made the resting frame jump when the mask cleared. */
   border-radius: var(--gallery-radius);
   overflow: visible;
   background: var(--arrow-fill);
@@ -4245,8 +4193,6 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
   transform: none;
 }
 
-/* The intro face is drawn on the GPU. Until that canvas is mounted, the
-   SVG stays hidden and unfiltered so no frame pays for the SVG filter. */
 .js .arrow-nav.is-intro:not(.is-face-svg) .arrow-face-blob {
   visibility: hidden;
 }
@@ -4354,9 +4300,6 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
     transform: none;
   }
 
-  /* The phone intro face is drawn by the GPU (arrow-face-gl.ts). Until the
-     script has mounted it, the SVG face stays hidden and unfiltered, so no
-     frame pays for the SVG filter. The SVG only comes back as a fallback. */
   .js .arrow-nav.is-intro:not(.is-face-svg) .arrow-face-blob {
     visibility: hidden;
   }

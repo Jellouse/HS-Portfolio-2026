@@ -25,7 +25,6 @@ function apply() {
   });
 }
 
-/** `progress` is 0 at rest and 1 when the illustration has finished moving into the header. */
 export function setIntroCopy(next: number, on: boolean) {
   progress = next;
   enabled = on;

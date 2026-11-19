@@ -32,28 +32,23 @@ function focusables(root: HTMLElement) {
   );
 }
 
-/** Contact opened while the About arrow screen is showing. */
 function openerFromAbout(el: HTMLElement | null) {
   if (!el?.hasAttribute('data-contact-open')) return false;
   return !!document.querySelector('.arrow-nav[data-screen="about"]');
 }
 
-/** Drop about chrome names so the new VT snapshot only keeps the contact hub. */
 function muteAboutChrome(mute: boolean) {
   document.querySelectorAll<HTMLElement>('.arrow-nav:not(.contact-hub)').forEach((nav) => {
     nav.classList.toggle('is-contact-covered', mute);
   });
 }
 
-/** Centre the about glance so eyes are not mid-shift in the VT snapshot. */
 function resetAboutGlance() {
   document
     .querySelectorAll<HTMLElement>('.arrow-nav[data-screen="about"] .arrow-face-blob[data-glance]')
     .forEach((el) => el.removeAttribute('data-glance'));
 }
 
-/** Show/hide must be sync inside a view-transition update. React flushSync alone
- *  does not always commit the portal in time for the new snapshot. */
 function syncPanel(el: HTMLElement | null, open: boolean, step: number) {
   if (!el) return;
   el.classList.toggle('is-closed', !open);
@@ -65,11 +60,6 @@ function syncPanel(el: HTMLElement | null, open: boolean, step: number) {
   syncStep(el, step, { project: '', email: '' });
 }
 
-/**
- * Persist step slots in the DOM and toggle them here. flushSync often does not
- * remount portal children before the VT new snapshot, so step hops were finishing
- * with identical old/new chrome (no face morph, no pill motion).
- */
 function syncStep(
   el: HTMLElement | null,
   step: number,
@@ -152,20 +142,14 @@ export default function ContactDrawer({ email: address }: { email: string }) {
     const filled = { project: projectRef.current, email: emailRefValue.current };
     const run = () => {
       stepRef.current = next;
-      // Commit React step first when possible, then re-assert slots. flushSync on
-      // this createRoot is unreliable alone; syncStep is what the VT snapshot sees.
-      // Do not setLive here — a stale step render would undo [hidden].
       flushSync(() => setStep(next));
       syncStep(panel.current, next, filled);
     };
-    // Done leaves the chrome set; a plain fade is enough.
     if (next === 4 || from === 4 || !canChromeVt()) {
       run();
       if (next >= 1 && next <= 3) announce(`Step ${next} of 3: ${TITLES[next]}`);
       return;
     }
-    // Face ↔ field: soft crossfade on separate VT names (contact-face).
-    // Field ↔ field: shared contact-field with a pill radius (no ellipse).
     panel.current?.classList.add('is-entered');
     moving.current = true;
     const faceHop = from === 1 || next === 1;
@@ -215,7 +199,6 @@ export default function ContactDrawer({ email: address }: { email: string }) {
       const nextService =
         preset && SERVICES.some((s) => s.value === preset) ? preset : '';
       serviceRef.current = nextService;
-      // Flush form reset before open so a late render cannot re-close the panel.
       flushSync(() => {
         setProject('');
         setEmail('');
@@ -229,14 +212,10 @@ export default function ContactDrawer({ email: address }: { email: string }) {
           setStep(next);
           setOpen(true);
         });
-        // Imperative show so the VT new snapshot includes face + pills.
         syncPanel(panel.current, true, next);
         if (fromAbout.current) panel.current?.classList.add('is-entered');
       };
       if (fromAbout.current && next === 1) {
-        // Soft crossfade (no chrome-shrink): about's 1.18 zoom and the resting
-        // contact face blend in the same --dur-nav window as the size morph,
-        // so eyes/mouth move with the scale — same feel as to-about.
         resetAboutGlance();
         void runChromeVt(openHub, { flag: 'about-contact-in' }).finally(() => {
           announce(`Contact. Step ${next} of 3: ${TITLES[next]}`);
@@ -267,8 +246,6 @@ export default function ContactDrawer({ email: address }: { email: string }) {
     }
   }, [open]);
 
-  // contact-in only on first open. Lock it before a step VT finishes, or the
-  // panel fades again when data-contact-vt is cleared.
   useEffect(() => {
     if (!open) return;
     const el = panel.current;
@@ -433,7 +410,6 @@ export default function ContactDrawer({ email: address }: { email: string }) {
   const pickService = (value: string) => {
     if (moving.current) return;
     serviceRef.current = value;
-    // flushSync so the service write cannot re-render step 1 mid VT update.
     flushSync(() => setService(value));
     setStepChrome(2);
   };
@@ -517,11 +493,8 @@ export default function ContactDrawer({ email: address }: { email: string }) {
       const dir = map[e.key];
       if (!dir) return;
       if (s === 1 && (dir === 'left' || dir === 'right' || dir === 'down' || dir === 'up')) {
-        /* ok */
       } else if ((s === 2 || s === 3) && (dir === 'up' || dir === 'down')) {
-        /* ok */
       } else if (s === 4 && (dir === 'down' || dir === 'home' || dir === 'up')) {
-        /* ok */
       } else return;
 
       e.preventDefault();
@@ -561,7 +534,6 @@ export default function ContactDrawer({ email: address }: { email: string }) {
   }, [open, close]);
 
   const stepAttr = step === 4 ? 'done' : String(step);
-  // Keep step-1 chrome in the closed DOM so About → contact can morph into it.
   const showStep = open ? step : 1;
   const chrome = showStep >= 1 && showStep <= 3;
   const downLabel = showStep === 1 ? 'Other' : showStep === 2 ? 'Confirm' : 'Send';
@@ -607,7 +579,6 @@ export default function ContactDrawer({ email: address }: { email: string }) {
                 {BACK_SVG}
               </button>
               <div className="arrow-slot">
-                {/* Persistent slots: syncStep toggles [hidden] inside the VT update. */}
                 <div className="contact-center" data-contact-center="">
                   <div className="arrow-face" data-nav-face="" data-contact-step="1" hidden={showStep !== 1}>
                     <div className="arrow-face-scale">

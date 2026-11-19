@@ -1,4 +1,3 @@
-// Snick, the button click from bencho.dev/sounds. Synthesised, same notes pdepablo.com uses.
 
 type Note = {
   hz: number;

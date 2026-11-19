@@ -55,9 +55,6 @@ const site = await getSite();
         }
         return null;
       }
-      // arrow-route-swap (src/scripts/arrow-route.ts): the arrow page already
-      // flew its controls live, and both pages show the same screen, so the
-      // document swap skips its view transition.
       function routeSwap(clear) {
         try {
           var on = sessionStorage.getItem('arrow-route-swap');

@@ -1,8 +1,3 @@
-// Simulate an X in-app visualViewport (tweet sheet, then dismissed chrome)
-// and check that the arrow-nav stage follows the visible area.
-//
-// npm run build && npm run test:arrow-viewport
-// ARROW_SHOTS=dir saves frames for review.
 import { chromium, devices } from 'playwright';
 import { createServer } from 'node:http';
 import { readFileSync, existsSync, statSync, mkdirSync } from 'node:fs';
@@ -129,7 +124,6 @@ const check = (label, m, height) => {
   }
 };
 
-// Gallery first so we do not wait on the intro.
 await page.goto(`${BASE}#space`, { waitUntil: 'load' });
 await page.waitForFunction(() => {
   const nav = document.querySelector('[data-arrow-nav]');

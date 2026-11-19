@@ -1,9 +1,7 @@
-/** Flat gray sky. White while the sun is up, black after twilight, mid gray around local sunset and sunrise. */
 
 export const SKY_DAY = 255;
 export const SKY_NIGHT = 0;
 
-/** Sun this far above the horizon is full day. The same amount below is full night. */
 const SUN_BAND = 12;
 
 export type SkyInk = 'white' | 'black';
@@ -25,7 +23,6 @@ function places(): Map<string, SkyPlace> {
   return placeMap;
 }
 
-/** Minutes after midnight, or null when the query does not lock a time. */
 export function skyLock(search: string): number | null {
   const raw = new URLSearchParams(search).get('t');
   if (!raw) return null;
@@ -88,7 +85,6 @@ function smooth(t: number) {
   return t * t * (3 - 2 * t);
 }
 
-/** 0 at night, 1 in the day, 0.5 when the sun is on the horizon. */
 export function skyBlendAt(minutes: number, when: Date, place: SkyPlace, utcOffsetMin: number) {
   const { decl, eqTime } = sunPath(when);
   const noonAlt = altitude(720 - (eqTime + 4 * place.lon - utcOffsetMin), place, decl, eqTime, utcOffsetMin);

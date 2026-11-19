@@ -8,10 +8,6 @@ function clamp(v: number, lo = 0, hi = 1) {
   return Math.min(hi, Math.max(lo, v));
 }
 
-/**
- * Enter across the bottom 15vh, the old `animation-range: cover 0px cover 15vh`.
- * Leave across the top 15vh: the same blur, fade, and 4px shift, aimed up.
- */
 export function wordRevealState(word: HTMLElement, vh: number) {
   const top = word.getBoundingClientRect().top;
   const band = vh * RANGE;
@@ -90,7 +86,6 @@ export function paintScrollWords(root: ParentNode = document) {
   items.forEach((word, i) => applyWordReveal(word, states[i].progress, states[i].leaving));
 }
 
-/** Run once layout has had a frame to settle (intro, fonts, media unhide). */
 export function flushScrollWordBlur() {
   paintScrollWords();
   requestAnimationFrame(() => paintScrollWords());

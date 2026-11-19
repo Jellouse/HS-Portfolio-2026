@@ -2,9 +2,7 @@
 interface Props {
   filterId?: string;
   home?: boolean;
-  /** Small resting face. Cursor turbulence stays on the SVG filter. */
   mark?: boolean;
-  /** The settled homepage mark: the same drawing, no turbulence. */
   settled?: boolean;
 }
 
@@ -12,9 +10,6 @@ const { filterId = 'hero-blob-texture', home = true, mark = false, settled = fal
 const fill = 'currentColor';
 const round = mark && !home;
 const texture = !settled;
-// The round face displaces by at most scale / 2 (50 units) plus three blur
-// sigmas (7 units) past its 70 unit box, so its filter region stops at 85%
-// out on each side. A larger region only adds pixels the browser filters.
 const faceHead =
   'M34.6953 0C53.8571 0 69.3916 15.5855 69.3916 34.8105C69.3914 54.0354 53.857 69.6201 34.6953 69.6201C15.5338 69.6199 0.000238371 54.0353 0 34.8105C0 15.5856 15.5337 0.000210079 34.6953 0Z';
 const faceMouth =
@@ -85,13 +80,11 @@ const faceEvenodd = `${faceHead}${faceMouth}${faceEyeL}${faceEyeR}`;
   )}
   {round ? (
     <>
-      {/* Intro / GL source: evenodd holes. Hidden once the resting glance layer takes over. */}
       {!settled && (
         <g filter={texture ? `url(#${filterId})` : undefined}>
           <path fill-rule="evenodd" data-face-source d={faceEvenodd} fill={fill}></path>
         </g>
       )}
-      {/* Resting face: solid head, fixed mouth, eyes that CSS can translate. */}
       <g data-face-glance-layer>
         <path d={faceHead} fill={fill}></path>
         <path data-face-mouth d={faceMouth}></path>

@@ -1,7 +1,3 @@
-// Every service step should fit between the back and Inquire buttons
-// on phone and desktop, with no scrolling.
-//
-// npm run build && npm run test:service-steps
 import { chromium } from 'playwright';
 import { createServer } from 'node:http';
 import { readFileSync, existsSync, statSync, mkdirSync } from 'node:fs';

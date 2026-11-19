@@ -1,7 +1,3 @@
-// Hold-to-repeat on the arrow gallery: holding left/right speeds up through
-// images, and a lost pointer cannot keep firing.
-//
-// npm run build && npm run test:arrow-hold
 import { chromium } from 'playwright';
 import { createServer } from 'node:http';
 import { readFileSync, existsSync, statSync } from 'node:fs';
@@ -89,12 +85,10 @@ const moveMs = async (page) => page.evaluate(() => {
     const first = gaps[0];
     const later = gaps.slice(-3);
     const laterAvg = later.reduce((a, b) => a + b, 0) / later.length;
-    // First repeat is 480ms; later ones ramp toward 80ms.
     if (first < 350 || first > 650) failures.push(`first hold interval ${Math.round(first)}ms, expected about 480ms (gaps ${shown})`);
     if (laterAvg > first * 0.55) failures.push(`hold did not accelerate (first ${Math.round(first)}ms, later ~${Math.round(laterAvg)}ms; gaps ${shown})`);
     if (laterAvg < 40) failures.push(`hold later interval ${Math.round(laterAvg)}ms dropped below the 80ms floor (gaps ${shown})`);
   }
-  // A lost pointer (blur, hidden tab, lost capture) must stop the repeat.
   await page.evaluate(() => {
     Object.defineProperty(document, 'visibilityState', { configurable: true, value: 'hidden' });
     document.dispatchEvent(new Event('visibilitychange'));

@@ -1,5 +1,3 @@
-// Deterministic stills of the phone intro at fixed times (fake clock), for before/after comparison.
-// Usage: node tests/intro-frames.mjs --out=/tmp/frames-before
 import { chromium, webkit } from 'playwright';
 import { createServer } from 'node:http';
 import { readFileSync, existsSync, statSync, mkdirSync } from 'node:fs';

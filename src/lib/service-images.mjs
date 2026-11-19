@@ -7,7 +7,6 @@ function text(value) {
   return typeof value === 'string' ? value.trim() : '';
 }
 
-/** Project slug from a service image: linked project, or /work/<slug>/ link. */
 export function projectSlugForServiceImage(image) {
   if (image?.discriminant === 'project') return text(image.value?.project);
   const match = text(image?.value?.href).match(WORK_HREF);

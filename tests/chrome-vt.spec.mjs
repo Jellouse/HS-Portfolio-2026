@@ -1,7 +1,3 @@
-// Shared chrome view-transition names: about text pills, services hub
-// text pills, and service-steps icon pills stay on the same contract.
-//
-// npm run build && npm run test:chrome-vt
 import { chromium } from 'playwright';
 import { createServer } from 'node:http';
 import { readFileSync, existsSync, statSync } from 'node:fs';

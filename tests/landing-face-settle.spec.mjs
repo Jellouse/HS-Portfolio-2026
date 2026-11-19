@@ -1,10 +1,3 @@
-// The landing face must settle once. After the intro brings it down to its
-// resting size it may not grow again and shrink back (the face pulse Johann
-// saw on iPhone shortly after load). Loads the landing, never taps, and
-// samples the face box every frame until well after the intro ends.
-//
-// npm run build && npm run test:landing-face
-// EVIDENCE=/some/dir also saves frames around the end of the intro.
 import { chromium, webkit } from 'playwright';
 import { createServer } from 'node:http';
 import { readFileSync, existsSync, statSync, mkdirSync } from 'node:fs';
@@ -39,13 +32,9 @@ const BASE = 'http://127.0.0.1:4351';
 const probe = () => {
   window.__faces = [];
   const sample = () => {
-    // The visible face is the GPU drawing during the phone intro and the SVG
-    // blob otherwise. The blob can be larger than its clipping circle, so its
-    // own box is measured, not the circle.
     const nav = document.querySelector('[data-arrow-nav]');
     const scale = nav?.querySelector('.arrow-face-scale');
     if (scale) {
-      // The GPU canvas covers the slot but draws the face at the circle's size.
       const gl = nav.classList.contains('is-face-gl') && nav.querySelector('.arrow-face-gl');
       const blob = nav.querySelector('.arrow-face-blob');
       const shown = blob && getComputedStyle(blob).visibility !== 'hidden' && getComputedStyle(blob).display !== 'none';
@@ -76,7 +65,6 @@ const run = async (type, engine, size, label) => {
   const page = await context.newPage();
   await page.addInitScript(probe);
   await page.goto(`${BASE}/`, { waitUntil: 'load' });
-  // The intro runs 7.2s. Wait past its end and any transition after it.
   await page.waitForFunction(() => !document.querySelector('[data-arrow-nav]')?.classList.contains('is-intro'), null, { timeout: 15000 });
   await page.waitForTimeout(1500);
   const faces = (await page.evaluate(() => window.__faces)).filter((f) => f.w && f.h);
@@ -84,7 +72,6 @@ const run = async (type, engine, size, label) => {
   const rest = faces[faces.length - 1];
   const big = (f) => Math.max(f.w, f.h);
   const restSize = big(rest);
-  // First frame the face is down at its resting size.
   const settled = faces.findIndex((f) => big(f) <= restSize * 1.05);
   let worst = null;
   for (let i = settled; i >= 0 && i < faces.length; i++) {

@@ -1,9 +1,3 @@
-// During the landing intro the GPU face must sit in the large centered
-// placement, then scale in place into the small logo. It must not already
-// be parked at the top of the viewport as a header logo.
-//
-// npm run build && npm run test:intro-face-pos
-// EVIDENCE=/some/dir also saves mid-intro frames.
 import { chromium, webkit } from 'playwright';
 import { createServer } from 'node:http';
 import { readFileSync, existsSync, statSync, mkdirSync } from 'node:fs';
@@ -57,9 +51,6 @@ const probe = () => {
   };
 };
 
-// The intro holds up to 400ms, then runs 7200ms. Copy/pills fade in at 4400ms.
-// Sample once while the face is still large, and once after the landing is
-// visible, so a canvas pinned to the top cannot hide behind the early crop.
 const SAMPLES = [
   { name: 'early', waitMs: 1600, wantControls: false },
   { name: 'revealed', waitMs: 5200, wantControls: true },
@@ -104,9 +95,6 @@ const run = async (type, engine, size, label) => {
     }
     const xOff = Math.abs(mid.cx / mid.vw - 0.5);
     const yOff = Math.abs(mid.cy / mid.vh - 0.5);
-    // The canvas is the face plus filter reach, centered on the stage. A
-    // miss by more than 8% means it has been pinned to an edge (the bug
-    // parked the centre on the top edge, yOff ≈ 0.5).
     if (xOff > 0.08) failures.push(`${tag} ${sample.name}: face centre x ${mid.cx.toFixed(1)} / ${mid.vw} (off ${xOff.toFixed(3)})`);
     if (yOff > 0.08) failures.push(`${tag} ${sample.name}: face centre y ${mid.cy.toFixed(1)} / ${mid.vh} (off ${yOff.toFixed(3)})`);
     if (sample.wantControls && !mid.controls) {

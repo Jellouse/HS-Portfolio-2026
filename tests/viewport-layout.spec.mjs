@@ -29,14 +29,12 @@ eq(
   'subpixel slack is not an inset',
 );
 
-// Mobile Safari hides its URL bar: visual viewport grows past 100svh.
 eq(
   visibleAppView({ offsetTop: 0, offsetLeft: 0, width: 390, height: 920 }, svh, layout),
   { top: 0, left: 0, width: 390, height: 844, inset: false },
   'taller visual viewport keeps 100svh',
 );
 
-// X in-app tweet sheet (or remaining URL chrome) eats the bottom of the webview.
 const tweet = visibleAppView({ offsetTop: 0, offsetLeft: 0, width: 390, height: 520 }, svh, layout);
 eq(tweet, { top: 0, left: 0, width: 390, height: 520, inset: true }, 'tweet sheet shortens the stage');
 

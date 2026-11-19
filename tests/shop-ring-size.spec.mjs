@@ -1,7 +1,3 @@
-/**
- * Playwright check: shop hero ring is min(100vw, 50vh), square, centred on the viewport top edge.
- * Run after `npm run build`: node tests/shop-ring-size.spec.mjs
- */
 import { chromium } from 'playwright';
 import { createServer } from 'node:http';
 import { readFileSync, existsSync, statSync } from 'node:fs';

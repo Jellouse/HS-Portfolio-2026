@@ -1,11 +1,9 @@
 
-/** Cursor glance for centred marks: L / R / U / D, or centre over the face. */
 
 export type GlanceDir = 'center' | 'left' | 'right' | 'up' | 'down';
 
 const FINE = '(hover: hover) and (pointer: fine)';
 const REDUCE = '(prefers-reduced-motion: reduce)';
-/** Still pointer for this long → eyes return to centre. */
 const IDLE_MS = 1000;
 
 function dirFor(x: number, y: number, face: DOMRect): GlanceDir {
@@ -15,11 +13,9 @@ function dirFor(x: number, y: number, face: DOMRect): GlanceDir {
   const dy = y - cy;
   const rx = face.width / 2;
   const ry = face.height / 2;
-  // Circular hit on the mark. Inside = forward stare.
   if (rx > 0 && ry > 0 && (dx * dx) / (rx * rx) + (dy * dy) / (ry * ry) <= 1) {
     return 'center';
   }
-  // X diagonals: the four triangular quadrants from the reference.
   if (Math.abs(dx) > Math.abs(dy)) return dx < 0 ? 'left' : 'right';
   return dy < 0 ? 'up' : 'down';
 }

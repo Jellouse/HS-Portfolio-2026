@@ -1,10 +1,3 @@
-// The intro face stays whole through the shrink and the small face is there
-// after it, on desktop and phone. Catches a face clipped by a hard edge (a
-// GPU pass drawing into a stale region) or a face that vanishes mid-intro.
-// Also catches stray pixels near the face that are not part of it (a
-// faint 1px line beside the face). Fake clock, screenshots, red pixels
-// measured against the face slot.
-// Usage: node tests/intro-face-whole.spec.mjs [--browser=chromium|webkit]
 import { chromium, webkit } from 'playwright';
 import { createServer } from 'node:http';
 import { readFileSync, existsSync, statSync } from 'node:fs';
@@ -33,7 +26,6 @@ const SIZES = [
 ];
 const TIMES = [300, 900, 1500, 2100, 2700, 3300, 3900, 4500, 5100, 5400, 5700, 6000, 6300, 6600, 6900, 8200];
 
-// Red face pixels, in CSS px.
 const measure = async (buf, dpr) => {
   const { data, info } = await sharp(buf).raw().toBuffer({ resolveWithObject: true });
   let n = 0, x0 = Infinity, x1 = -1, y0 = Infinity, y1 = -1;
@@ -50,8 +42,6 @@ const measure = async (buf, dpr) => {
     }
   }
   if (!n) return { n: 0 };
-  // Stray ink: anything off the white page within STRAY_PAD CSS px of the
-  // face that does not touch the face. The rest of the UI is hidden.
   const pad = STRAY_PAD * dpr;
   const X0 = Math.max(0, x0 - pad), X1 = Math.min(info.width - 1, x1 + pad);
   const Y0 = Math.max(0, y0 - pad), Y1 = Math.min(info.height - 1, y1 + pad);
@@ -110,8 +100,6 @@ for (const name of BROWSERS) {
     await page.goto('http://127.0.0.1:4337/?t=12:00', { waitUntil: 'load' });
     await page.evaluate(() => document.fonts.ready);
     await page.addStyleTag({ content: HIDE_UI });
-    // SELFTEST=1: draw a faint 1px line 3px left of the face slot, which the
-    // stray check must catch.
     if (process.env.SELFTEST) {
       await page.evaluate(() => {
         const el = document.createElement('div');
@@ -142,11 +130,8 @@ for (const name of BROWSERS) {
       if (!slot) { failures.push(`${tag}: no face slot`); continue; }
       if (!m.n) { failures.push(`${tag}: no face on screen`); continue; }
       if (m.stray) failures.push(`${tag}: ${m.stray} stray device px near the face (first at ${m.strayAt.join(',')} CSS px)`);
-      // Face drawn wider than the screen is clipped by the viewport, not by us.
       const left = m.x0 > 1 ? slot.cx - m.x0 : null;
       const right = m.x1 < size.width - 2 ? m.x1 - slot.cx : null;
-      // The displaced face reaches about 0.7x as far left of the slot centre
-      // as right of it (the filter offset). A clipped side drops well below.
       if (left !== null && right !== null && slot.intro) {
         const ratio = left / Math.max(1, right);
         if (ratio < 0.6 || ratio > 1.6) failures.push(`${tag}: face lopsided on its slot (left ${left.toFixed(0)}px, right ${right.toFixed(0)}px), clipped?`);

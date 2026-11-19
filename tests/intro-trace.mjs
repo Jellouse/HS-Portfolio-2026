@@ -1,7 +1,3 @@
-// Trace the first 8s of the homepage on an emulated iPhone 12 and sum main and raster work.
-// Usage: npm run build && node tests/intro-trace.mjs [--throttle=4] [--max-raster=400] [--out=trace.json]
-// --max-raster fails the run when raster work during the intro goes over that many ms.
-// The SVG filter intro rastered about 3500ms here; the GPU face rasters about 50ms.
 import { chromium } from 'playwright';
 import { createServer } from 'node:http';
 import { readFileSync, existsSync, statSync, writeFileSync } from 'node:fs';

@@ -20,7 +20,6 @@ function layoutTop(frame: HTMLElement) {
   return frame.getBoundingClientRect().top - (applied.get(frame) ?? 0);
 }
 
-/** Title (and the shop details under it) that should travel with this image. */
 function motionMates(frame: HTMLElement) {
   const card = frame.closest('.feed .card');
   if (card) return [...card.children].filter((el): el is HTMLElement => el.classList.contains('caption'));
@@ -36,7 +35,6 @@ function motionMates(frame: HTMLElement) {
 function paintMates(frame: HTMLElement, y: number) {
   const shift = y === 0 ? '' : `translate3d(0, ${y}px, 0)`;
   for (const mate of motionMates(frame)) {
-    // The title's own hover transition would ease this and leave it behind the image.
     mate.style.transition = y === 0 ? '' : 'none';
     mate.style.transform = shift;
   }
@@ -49,12 +47,6 @@ export function clearStackMates(frame: HTMLElement) {
   }
 }
 
-/**
- * The row covering the middle of the screen stays put.
- * Above that, the lead grows with t² until the row has left, so it keeps
- * speeding up the whole way out. Below that, the same curve runs backwards:
- * it comes in fast and settles as it reaches the middle.
- */
 function rowShift(top: number, height: number, mid: number) {
   const bottom = top + height;
   if (top <= mid && bottom >= mid) return 0;
@@ -62,8 +54,6 @@ function rowShift(top: number, height: number, mid: number) {
     const t = (mid - bottom) / mid;
     return -SHIFT * t * t;
   }
-  // Hold the full lead once the image has left. Releasing it puts the title
-  // back on screen, just under the top edge.
   if (bottom <= 0) return -SHIFT;
   if (top > mid) {
     const t = Math.min(1, (top - mid) / mid);
@@ -97,11 +87,6 @@ function compute(vh: number) {
   return next;
 }
 
-/**
- * Project pages, the home project list, and shop products. Layout gaps stay put.
- * The row in the middle scrolls with the page. A row leaving the top speeds
- * up until it is gone. A row entering from the bottom is that motion in reverse.
- */
 export function paintProjectMedia(frame: HTMLElement, vh: number) {
   if (cachedScroll !== scrollY || cachedVh !== vh) {
     cachedScroll = scrollY;

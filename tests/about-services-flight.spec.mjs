@@ -1,10 +1,3 @@
-// About <-> services must fly the pills with travel(), the same live
-// animation every other arrow button uses, and never overlay two document
-// view-transition snapshots of a pill (the iOS Safari stacked-label bug).
-//
-// Runs in WebKit and Chromium at a phone and a desktop size.
-// npm run build && npm run test:about-services
-// EVIDENCE=/some/dir also saves mid-flight screenshots.
 import { chromium, webkit } from 'playwright';
 import { createServer } from 'node:http';
 import { readFileSync, existsSync, statSync, mkdirSync } from 'node:fs';
@@ -39,8 +32,6 @@ const server = createServer((req, res) => {
 await new Promise((r) => server.listen(4349, '127.0.0.1', r));
 const BASE = 'http://127.0.0.1:4349';
 
-// Records every frame: each visible pill or flying clone, its label, opacity
-// and box. Also records whether a document view transition actually ran.
 const probe = () => {
   window.__vt = [];
   addEventListener('pagereveal', (e) => {
@@ -50,7 +41,6 @@ const probe = () => {
   });
   window.__frames = [];
   window.__sampling = false;
-  // Frames from the page just left survive the document swap.
   window.__prevFrames = JSON.parse(sessionStorage.getItem('__frames') || '[]');
   sessionStorage.removeItem('__frames');
   addEventListener('pagehide', () => {
@@ -72,7 +62,6 @@ const probe = () => {
     const face = document.querySelector('.arrow-nav .arrow-face-scale')?.getBoundingClientRect();
     const hubX = face ? face.left + face.width / 2 : innerWidth / 2;
     const hubY = face ? face.top + face.height / 2 : innerHeight / 2;
-    // travel() clips each control to the half-plane on its side of the face.
     const clip = (side, r) => {
       const b = { l: r.left, t: r.top, r: r.right, b: r.bottom };
       if (side === 'left') b.r = Math.min(b.r, hubX);
@@ -142,7 +131,6 @@ const chromeRects = (page) =>
 const overlap = (a, b) =>
   a.r <= a.l || a.b <= a.t || b.r <= b.l || b.b <= b.t ? 0 : Math.max(0, Math.min(a.r, b.r) - Math.max(a.l, b.l)) * Math.max(0, Math.min(a.b, b.b) - Math.max(a.t, b.t));
 
-// Two different labels, both visible, on top of each other is the bug.
 const checkFrames = (frames, tag) => {
   must(frames.length > 5, `${tag}: only ${frames.length} frames sampled`);
   let worst = null;
@@ -196,7 +184,6 @@ const run = async (type, engine, size, label) => {
   const about = await chromeRects(page);
   must(about.left?.text === 'Services' && about.right?.text === 'Contact', `${tag}: about pills read ${about.left?.text} / ${about.right?.text}`);
 
-  // About to services.
   await page.evaluate(() => window.__startSampling());
   const left = '[data-arrow-nav] .arrow-pill[data-dir="left"]';
   const t0 = Date.now();
@@ -220,9 +207,6 @@ const run = async (type, engine, size, label) => {
   const hub = await chromeRects(page);
   must(!!hub.left?.text && !!hub.right?.text, `${tag}: a hub pill is missing`);
 
-  // Back to about.
-  // A back step either restores the page from the bfcache or reloads it.
-  // Either way the home page starts sampling as soon as it shows.
   await page.evaluate(() => sessionStorage.setItem('__autoSample', '1'));
   const back = page.waitForURL(/\/#about$/, { timeout: 8000 });
   await tap(page, '[data-services-hub] .arrow-back');
@@ -243,9 +227,6 @@ const run = async (type, engine, size, label) => {
   must(after.left?.text === 'Services' && after.right?.text === 'Contact', `${tag}: after back the pills read ${after.left?.text} / ${after.right?.text}`);
   checkFrames(backFrames, `${tag} services->about`);
 
-  // The home page's services screen is laid out like /services/, so the
-  // document swap shows no jump. The last frame before the swap is the
-  // home page at rest on that screen.
   const homeHub = frames[frames.length - 1]?.chrome || {};
   must(frames[frames.length - 1]?.screen === 'services', `${tag}: the home page left on ${frames[frames.length - 1]?.screen}, not its services screen`);
   for (const key of ['face', 'back', 'left', 'right']) {

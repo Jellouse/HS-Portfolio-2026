@@ -114,7 +114,6 @@ export function splitLetterText(
   return { letters, color };
 }
 
-/** Header nav uses letter intro only. Clear stray blur/opacity from legacy CSS animations. */
 export function finalizeHeaderChrome() {
   document
     .querySelectorAll<HTMLElement>(
@@ -295,7 +294,6 @@ export async function playLetterIntro() {
       if (!root || root === el) el.setAttribute('data-no-reveal', '');
     });
   } catch {
-    /* fold prep is best-effort */
   }
 
   const segments: { letters: HTMLElement[]; color: string }[] = [];

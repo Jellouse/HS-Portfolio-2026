@@ -1,7 +1,3 @@
-// The /services/ hub face should be the same settled mark as the homepage,
-// not the turbulence-displaced intro goo.
-//
-// npm run build && npm run test:services-face
 import { chromium, devices } from 'playwright';
 import { createServer } from 'node:http';
 import { readFileSync, existsSync, statSync, mkdirSync } from 'node:fs';
