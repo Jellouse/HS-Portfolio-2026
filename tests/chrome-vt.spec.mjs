@@ -39,7 +39,7 @@ must(
 must(css.includes("view-transition-name: arrow-pill-left"), 'arrow-pill-left name is missing');
 must(css.includes("view-transition-name: arrow-pill-right"), 'arrow-pill-right name is missing');
 must(
-  /::view-transition-image-pair\(arrow-pill-left\),\s*::view-transition-image-pair\(arrow-pill-right\) \{[^}]*background: transparent;/.test(css),
+  /::view-transition-image-pair\(arrow-pill-left\),\s*::view-transition-image-pair\(arrow-pill-right\),\s*::view-transition-image-pair\(contact-pill-down\) \{[^}]*background: transparent;/.test(css),
   'pill image-pairs are not transparent',
 );
 must(
@@ -49,11 +49,11 @@ must(
 must(!/::view-transition-image-pair\(arrow-pill-(?:left|right)\) \{[^}]*var\(--page-bg\)/.test(css), 'pill image-pairs use page-bg');
 must(
   css.includes('::view-transition-old(arrow-pill-left)') &&
-    /::view-transition-old\(arrow-pill-left\),\s*::view-transition-old\(arrow-pill-right\) \{\s*animation: vt-out var\(--dur-nav\) var\(--ease-nav\) both;/.test(css),
+    /::view-transition-old\(arrow-pill-left\),\s*::view-transition-old\(arrow-pill-right\),\s*::view-transition-old\(contact-pill-down\) \{\s*animation: vt-out var\(--dur-nav\) var\(--ease-nav\) both;/.test(css),
   'pill old snapshots do not crossfade with vt-out',
 );
 must(
-  /::view-transition-new\(arrow-pill-left\),\s*::view-transition-new\(arrow-pill-right\) \{\s*animation: vt-in var\(--dur-nav\) var\(--ease-nav\) both;/.test(css),
+  /::view-transition-new\(arrow-pill-left\),\s*::view-transition-new\(arrow-pill-right\),\s*::view-transition-new\(contact-pill-down\) \{\s*animation: vt-in var\(--dur-nav\) var\(--ease-nav\) both;/.test(css),
   'pill new snapshots do not crossfade with vt-in',
 );
 must(css.includes('active-view-transition-type(chrome-shrink)'), 'chrome-shrink face morph type is missing');

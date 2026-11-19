@@ -713,11 +713,17 @@ export function initArrowNav(root: ParentNode = document) {
   };
 
   let frameWatch = 0;
+  // True while travel() flight WAAPI is running. Video metadata must not remorph
+  // the frame or re-pin arrows mid-flight — that dragged the back control down.
+  let flightLock = false;
   const fitGallery = (item: { width: number; height: number }, morph: boolean) => {
     if (full || scrubLock) return;
+    // Video metadata remorphs mid-flight dragged the pinned back control.
+    // Jump fits (YAML size on open) still apply so growGallery has a box.
+    if (flightLock && morph) return;
     const gallery = galleryEl();
     const box = frameFor(item.width, item.height);
-    const jump = !morph || reduce || full;
+    const jump = !morph || reduce || full || flightLock;
     if (jump) gallery.style.transition = 'none';
     gallery.style.width = `${box.width}px`;
     gallery.style.height = `${box.height}px`;
@@ -730,7 +736,7 @@ export function initArrowNav(root: ParentNode = document) {
       const start = performance.now();
       const tick = () => {
         frameWatch = 0;
-        if (nav.dataset.kind !== 'gallery' || full) return;
+        if (nav.dataset.kind !== 'gallery' || full || flightLock) return;
         placeGalleryArrows();
         placeCaption();
         if (performance.now() - start < moveMs() + 50) frameWatch = requestAnimationFrame(tick);
@@ -739,7 +745,10 @@ export function initArrowNav(root: ParentNode = document) {
     }
   };
 
-  const placeGalleryArrows = (frame: { left: number; top: number; right: number; bottom: number; width: number; height: number } | null = null) => {
+  const placeGalleryArrows = (
+    frame: { left: number; top: number; right: number; bottom: number; width: number; height: number } | null = null,
+    force = false,
+  ) => {
     const left = nav.querySelector<HTMLElement>('[data-dir="left"]')!;
     const right = nav.querySelector<HTMLElement>('[data-dir="right"]')!;
     const back = nav.querySelector<HTMLElement>('[data-dir="up"]')!;
@@ -749,6 +758,9 @@ export function initArrowNav(root: ParentNode = document) {
       clearPin(back);
       return;
     }
+    // Mid-flight pins are owned by travel(). Overwriting top/left here while
+    // transform is animating makes the back control drift downward.
+    if (flightLock && !force) return;
     const edges = nav.classList.contains('is-full');
     const view = visibleRect();
     const box = edges
@@ -1061,7 +1073,8 @@ export function initArrowNav(root: ParentNode = document) {
   };
 
   // 0 = face-sized window, 1 = full gallery. Open grows the mask; close shrinks it.
-  // The media stays at full size inside, so the frame reveals rather than scales.
+  // Media stays at full size inside. Resting corners use the same circular round as
+  // the mask (no corner-shape on .arrow-gallery), so clearing the clip does not jump.
   let galleryMaskOpen: boolean | null = null;
 
   const clearGalleryMask = (gallery: HTMLElement) => {
@@ -1082,14 +1095,30 @@ export function initArrowNav(root: ParentNode = document) {
     galleryMaskOpen = null;
   };
 
-  const growGallery = (open: boolean, fromT: number | null) => {
+  const growGallery = (
+    open: boolean,
+    fromT: number | null,
+    locked?: { width: number; height: number } | null,
+  ) => {
     const gallery = galleryEl();
     const genAt = generation;
     gallery.hidden = false;
     clearGalleryMask(gallery);
-    const faceW = faceEl().getBoundingClientRect().width || controlSize();
-    const gw = gallery.offsetWidth || 1;
-    const gh = gallery.offsetHeight || 1;
+    const faceScale = faceEl().querySelector<HTMLElement>('.arrow-face-scale');
+    const faceVar = parseFloat(getComputedStyle(nav).getPropertyValue('--arrow-face'));
+    const faceW = Math.round(
+      faceScale?.getBoundingClientRect().width ||
+        faceEl().getBoundingClientRect().width ||
+        (Number.isFinite(faceVar) ? faceVar : 0) ||
+        controlSize(),
+    );
+    // Prefer the size captured before paintChrome hid the frame. After unhide,
+    // CSS aspect-ratio: 16/10 can win for a frame if inline fit sizes were lost.
+    const gw = Math.max(1, Math.round(locked?.width || gallery.offsetWidth || 1));
+    const gh = Math.max(1, Math.round(locked?.height || gallery.offsetHeight || 1));
+    gallery.style.width = `${gw}px`;
+    gallery.style.height = `${gh}px`;
+    gallery.style.aspectRatio = 'auto';
     const insetX = Math.max(0, (gw - faceW) / 2);
     const insetY = Math.max(0, (gh - faceW) / 2);
     const faceR = faceW / 2;
@@ -1117,11 +1146,18 @@ export function initArrowNav(root: ParentNode = document) {
     );
     anim.finished.finally(() => {
       if (genAt !== generation) return;
+      // Close finishes at opacity 0 with a face-sized mask. Cancel/clear would
+      // restore the full frame for a frame — hide first so the aspect cannot jump.
+      if (!open && nav.dataset.kind !== 'gallery') gallery.hidden = true;
       anim.cancel();
       clearGalleryMask(gallery);
+      if (!open) {
+        gallery.style.width = '';
+        gallery.style.height = '';
+        gallery.style.aspectRatio = '';
+      }
       galleryMaskOpen = null;
-      if (!open && nav.dataset.kind !== 'gallery') gallery.hidden = true;
-      else if (open) gallery.hidden = false;
+      if (open) gallery.hidden = false;
     });
   };
 
@@ -1317,6 +1353,15 @@ export function initArrowNav(root: ParentNode = document) {
     const slot = nav.querySelector<HTMLElement>('.arrow-slot')!;
     const slotBefore = slot.getBoundingClientRect();
     const wasGallery = nav.dataset.kind === 'gallery';
+    // Snapshot the fitted frame before paintChrome hides it on the way out.
+    // Closing unhides for the mask shrink; without this the CSS 16/10 fallback
+    // can replace a portrait/landscape fit for a frame.
+    const closeBox = wasGallery
+      ? {
+          width: galleryEl().offsetWidth,
+          height: galleryEl().offsetHeight,
+        }
+      : null;
     let fromMask: number | null = null;
     const maskAnim = galleryEl().getAnimations()[0];
     if (maskAnim && galleryMaskOpen != null) {
@@ -1374,6 +1419,9 @@ export function initArrowNav(root: ParentNode = document) {
     // after the controls land. Clearing mid-flight decodes the next image on
     // the same frames as the flight; Chrome drops those hard.
     let pendingGallerySlide = false;
+    // Lock before showSlide so video onloadedmetadata cannot remorph the
+    // frame or re-pin arrows while travel is measuring and flying.
+    if (!reduce) flightLock = true;
     if (nowGallery) {
       if (enteringGallery) {
         clearGalleryMedia();
@@ -1388,10 +1436,12 @@ export function initArrowNav(root: ParentNode = document) {
         showSlide(0, false);
       }
     }
-    placeGalleryArrows();
+    placeGalleryArrows(null, true);
     placeCopy();
     placeCaption();
-    if (!reduce && nowGallery !== wasGallery) growGallery(nowGallery, fromMask);
+    if (!reduce && nowGallery !== wasGallery) {
+      growGallery(nowGallery, fromMask, nowGallery ? null : closeBox);
+    }
 
     // A route screen (a node with an href) is its own page. The controls fly
     // to it here like any other screen, then the browser opens the page, which
@@ -1404,6 +1454,7 @@ export function initArrowNav(root: ParentNode = document) {
     if (route) push = false;
 
     if (reduce) {
+      flightLock = false;
       if (pendingGallerySlide) {
         clearGalleryMedia();
         showSlide(0, false);
@@ -1579,8 +1630,14 @@ export function initArrowNav(root: ParentNode = document) {
         dy = Math.round((vertical ? hub.y : destCy) - destCy);
       }
       pinInPlane(el, rect, planeFor(dir));
-      el.style.zIndex = '1';
+      // Gallery paints above the default control stack. Keep the back control
+      // above the growing frame so it does not vanish mid-flight.
+      el.style.zIndex = dir === 'up' ? '6' : '1';
       el.style.willChange = 'transform, opacity';
+      // Invert immediately so the dest pin cannot paint for a frame before
+      // WAAPI fill:both applies (back would flash high, then jump down).
+      el.style.transform = `translate(${dx}px, ${dy}px)`;
+      el.style.opacity = moved ? '1' : '0';
       const anim = el.animate(
         [
           { transform: `translate(${dx}px, ${dy}px)`, opacity: moved ? 1 : 0 },
@@ -1590,7 +1647,17 @@ export function initArrowNav(root: ParentNode = document) {
       );
       const done = anim.finished.finally(() => {
         if (gen !== generation) return;
-        restoreFlightHome(el);
+        // Keep gallery pins until placeGalleryArrows below — restoreFlightHome
+        // clearPin would drop the back onto the face-adjacent CSS slot for a frame.
+        if (nav.dataset.kind === 'gallery') {
+          anim.cancel();
+          el.style.opacity = '';
+          el.style.zIndex = '';
+          el.style.willChange = '';
+          el.style.transform = '';
+        } else {
+          restoreFlightHome(el);
+        }
       });
       flightDone.push(done.catch(() => {}));
       return done.catch(() => {});
@@ -1600,12 +1667,33 @@ export function initArrowNav(root: ParentNode = document) {
     Promise.all(flightDone.length ? flightDone : anims).finally(() => {
       if (gen !== generation) return;
       planes.forEach((plane) => plane.remove());
+      flightLock = false;
       if (pendingGallerySlide) {
         clearGalleryMedia();
         showSlide(0, false);
       }
+      // Gallery flights stayed pinned above; restore them into the stage now.
+      if (nav.dataset.kind === 'gallery') {
+        flights().forEach((el) => {
+          const home = flightHomes.get(el);
+          if (home?.parent.isConnected) home.parent.insertBefore(el, home.next);
+          flightHomes.delete(el);
+          el.style.willChange = '';
+        });
+      }
       if (nav.dataset.kind === 'gallery') faceEl().hidden = true;
+      // Settle pins on the open-travel box first, then morph to the real
+      // video size so the back control eases instead of snapping down.
       placeGalleryArrows();
+      if (nav.dataset.kind === 'gallery') {
+        const current = screen()?.slides[slide];
+        const clip = galleryEl().querySelector('video');
+        const sized =
+          clip && !clip.hidden && clip.videoWidth
+            ? { width: clip.videoWidth, height: clip.videoHeight }
+            : current;
+        if (sized) fitGallery(sized, true);
+      }
       startAutoplay();
       landed();
     });

@@ -12,7 +12,12 @@
  *
  * Types:
  * - `chrome-shrink` / `chrome-grow` — paired faces of the same shape, size only
- * - (none) — crossfade for labels, fields, and shape changes (face ↔ field)
+ * - (none) — crossfade for labels and fields
+ *
+ * Flags:
+ * - `contact-face` — face ↔ field (separate VT names, soft crossfade)
+ * - `contact` — field ↔ field
+ * - `about-contact-in` / `about-contact-out` — About ↔ contact hub
  */
 import { flushSync } from 'react-dom';
 
@@ -41,7 +46,9 @@ export function runChromeVt(update: () => void, opts: ChromeVtOptions = {}): Pro
   const flag = opts.flag ?? '';
   root.dataset.chromeVtRun = flag;
   // Contact panel entrance suppress while chrome owns the morph.
-  if (flag === 'contact' || flag.startsWith('about-contact')) root.dataset.contactVt = '';
+  if (flag === 'contact' || flag === 'contact-face' || flag.startsWith('about-contact')) {
+    root.dataset.contactVt = '';
+  }
 
   const finish = () => {
     delete root.dataset.chromeVtRun;

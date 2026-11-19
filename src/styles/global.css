@@ -1682,6 +1682,7 @@ html[data-chrome-vt-run] ::view-transition-new(root) {
 ::view-transition-group(arrow-pill-left),
 ::view-transition-group(arrow-pill-right),
 ::view-transition-group(contact-pill-down),
+::view-transition-group(contact-field),
 ::view-transition-group(work-frame),
 ::view-transition-group(work-back) {
   animation-duration: var(--dur-nav);
@@ -1787,31 +1788,63 @@ html:active-view-transition-type(chrome-grow)::view-transition-old(services-face
 }
 
 /*
-  Contact step hops morph face ↔ field (different shapes). Soft crossfade
-  with object-fit: none so the snapshots keep their natural size inside the
-  morphing group instead of stretching like chrome-grow does for faces.
+  Contact step hops. Face ↔ field use different VT names (services-face vs
+  contact-field), so each side fades on its own box — no circle→pill stretch.
+  Field ↔ field shares contact-field and keeps a pill radius in px so a height
+  change cannot turn the pair into an ellipse via border-radius: 50%.
 */
-html[data-chrome-vt-run='contact'] ::view-transition-image-pair(services-face) {
+::view-transition-image-pair(contact-field) {
+  isolation: auto;
+  overflow: hidden;
+  background: transparent;
+  border-radius: var(--radius);
+}
+
+html[data-chrome-vt-run='contact-face'] ::view-transition-old(services-face),
+html[data-chrome-vt-run='contact-face'] ::view-transition-old(contact-field) {
+  animation: vt-out var(--dur-nav) var(--ease-nav) both;
+  mix-blend-mode: normal;
+  object-fit: none;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+html[data-chrome-vt-run='contact-face'] ::view-transition-new(services-face),
+html[data-chrome-vt-run='contact-face'] ::view-transition-new(contact-field) {
+  animation: vt-in var(--dur-nav) var(--ease-nav) both;
+  mix-blend-mode: normal;
+  object-fit: none;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+html[data-chrome-vt-run='contact'] ::view-transition-image-pair(contact-field) {
   border-radius: var(--radius);
   overflow: hidden;
   background: transparent;
 }
 
-html[data-chrome-vt-run='contact'] ::view-transition-old(services-face),
-html[data-chrome-vt-run='contact'] ::view-transition-new(services-face) {
-  width: 100%;
-  height: 100%;
+html[data-chrome-vt-run='contact'] ::view-transition-old(contact-field),
+html[data-chrome-vt-run='contact'] ::view-transition-new(contact-field) {
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
   object-fit: none;
   object-position: center;
   mix-blend-mode: normal;
   animation: none;
 }
 
-html[data-chrome-vt-run='contact'] ::view-transition-old(services-face) {
+html[data-chrome-vt-run='contact'] ::view-transition-old(contact-field) {
   animation: vt-out var(--dur-nav) var(--ease-nav) both;
 }
 
-html[data-chrome-vt-run='contact'] ::view-transition-new(services-face) {
+html[data-chrome-vt-run='contact'] ::view-transition-new(contact-field) {
   animation: vt-in var(--dur-nav) var(--ease-nav) both;
 }
 
@@ -2698,7 +2731,8 @@ html.is-contact-open body {
 }
 
 /*
-  Contact chrome slots. Face scale and the visible field share services-face.
+  Contact chrome slots. Face keeps services-face. The visible field uses
+  contact-field so face ↔ field cannot size-morph a circle into a pill.
   Only :not([hidden]) so persistent step slots do not double-name. Down uses
   contact-pill-down. Back already gets services-back from [data-chrome-vt].
 */
@@ -2707,7 +2741,7 @@ html.is-contact-open body {
 }
 
 .contact-hub[data-chrome-vt] .contact-field:not([hidden]) {
-  view-transition-name: services-face;
+  view-transition-name: contact-field;
 }
 
 .contact-hub[data-chrome-vt] .arrow-pill[data-contact-step][hidden] {
@@ -3906,8 +3940,9 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
 .arrow-gallery {
   width: min(720px, 62vw);
   aspect-ratio: 16 / 10;
+  /* Circular round only — matches the growGallery clip-path mask. Superellipse
+     here made the resting frame jump when the mask cleared. */
   border-radius: var(--gallery-radius);
-  corner-shape: superellipse(1.436);
   overflow: visible;
   background: var(--arrow-fill);
   cursor: zoom-in;
@@ -3921,7 +3956,6 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
   inset: 0;
   overflow: hidden;
   border-radius: inherit;
-  corner-shape: inherit;
 }
 
 .arrow-gallery-media::before {
@@ -3947,7 +3981,6 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
   box-sizing: border-box;
   border: 1px solid var(--image-stroke);
   border-radius: inherit;
-  corner-shape: inherit;
   pointer-events: none;
 }
 
@@ -3964,7 +3997,6 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
   height: auto;
   aspect-ratio: auto;
   border-radius: 0;
-  corner-shape: unset;
   transform: none;
   cursor: zoom-out;
   background: transparent;
@@ -3981,11 +4013,6 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
   max-width: none;
   object-fit: cover;
   display: block;
-  corner-shape: inherit;
-}
-
-.arrow-nav.is-full .arrow-gallery {
-  corner-shape: unset;
 }
 
 .arrow-gallery :is(img, video)[hidden] {
@@ -4151,6 +4178,10 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
 
 .arrow-nav[data-kind='gallery']:not(.is-full, .is-cover) .arrow-gallery[data-project] .arrow-gallery-media {
   view-transition-name: work-frame;
+}
+
+.arrow-nav[data-kind='gallery'] .arrow-back {
+  z-index: 6;
 }
 
 .arrow-nav[data-kind='gallery']:not(.is-full, .is-cover) .arrow-back {
