@@ -156,6 +156,17 @@ const site = await getSite();
         document.documentElement.classList.add('reveal-gate');
         setTimeout(function () { document.documentElement.classList.remove('reveal-gate'); }, 3000);
       }
+      // Arrow intro CSS hides the pills until the module adds is-controls. If
+      // that module never boots (content blocker, network), lift the gate.
+      setTimeout(function () {
+        document.querySelectorAll('.arrow-nav.is-intro').forEach(function (nav) {
+          if (nav.getAttribute('data-ready') === '1') return;
+          nav.classList.add('is-controls', 'is-face-svg');
+          nav.classList.remove('is-intro');
+          var blob = nav.querySelector('.arrow-face-blob');
+          if (blob) blob.classList.add('is-face-settled');
+        });
+      }, 2500);
       (function () {
         var q = new URLSearchParams(location.search);
         var value = q.get('grid');

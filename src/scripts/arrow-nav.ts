@@ -21,6 +21,8 @@ const BLUR_REST = 0;
 /** The intro holds its first frame until two frames in a row drop at most one vsync. */
 const HOLD_CALM_MS = 34;
 const HOLD_MAX_MS = 400;
+/** Give WebGL this long to mount before the intro falls back to the SVG face. */
+const FACE_MOUNT_MS = 2000;
 
 const easeInOut = bezier(0.77, 0, 0.175, 1);
 
@@ -2175,8 +2177,23 @@ export function initArrowNav(root: ParentNode = document) {
       else {
         const maxW = Math.max(1, Math.round(face * INTRO_ZOOM * stretchFrom));
         const maxH = Math.max(1, Math.round(face * INTRO_ZOOM));
+        let timedOut = false;
         try {
-          mount = await mountFaceGL(svgFace, slot, maxW, maxH, DISP_FROM, BLUR_FROM);
+          mount = await Promise.race([
+            mountFaceGL(svgFace, slot, maxW, maxH, DISP_FROM, BLUR_FROM).then((next) => {
+              if (timedOut) {
+                next.gl?.destroy();
+                return { gl: null, reason: 'late-mount' } satisfies FaceMount;
+              }
+              return next;
+            }),
+            new Promise<FaceMount>((resolve) => {
+              setTimeout(() => {
+                timedOut = true;
+                resolve({ gl: null, reason: 'mount-timeout' });
+              }, FACE_MOUNT_MS);
+            }),
+          ]);
         } catch (error) {
           mount = { gl: null, reason: `error: ${(error as Error)?.message || error}` };
         }
