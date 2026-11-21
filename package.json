@@ -38,6 +38,7 @@
     "test:arrow-hold": "node tests/arrow-nav-hold.spec.mjs",
     "test:arrow-scrub": "node tests/arrow-nav-scrub.spec.mjs",
     "test:arrow-viewport": "node tests/arrow-nav-viewport.spec.mjs",
+    "test:arrow-enter": "node tests/arrow-nav-gallery-enter.spec.mjs",
     "test:viewport-layout": "node tests/viewport-layout.spec.mjs",
     "test:services-face": "node tests/services-hub-face.spec.mjs",
     "test:service-steps": "node tests/service-steps-layout.spec.mjs",

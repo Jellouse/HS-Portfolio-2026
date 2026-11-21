@@ -1606,12 +1606,6 @@ let galleryMaskOpen: boolean | null = null;
     fadeLines(nav);
     Promise.all(flightDone.length ? flightDone : anims).finally(() => {
       if (gen !== generation) return;
-      planes.forEach((plane) => plane.remove());
-      flightLock = false;
-      if (pendingGallerySlide) {
-        clearGalleryMedia();
-        showSlide(0, false);
-      }
       if (nav.dataset.kind === 'gallery') {
         flights().forEach((el) => {
           const home = flightHomes.get(el);
@@ -1619,6 +1613,12 @@ let galleryMaskOpen: boolean | null = null;
           flightHomes.delete(el);
           el.style.willChange = '';
         });
+      }
+      planes.forEach((plane) => plane.remove());
+      flightLock = false;
+      if (pendingGallerySlide) {
+        clearGalleryMedia();
+        showSlide(0, false);
       }
       if (nav.dataset.kind === 'gallery') faceEl().hidden = true;
       placeGalleryArrows();
