@@ -14,3 +14,145 @@ blocks:
     value:
       heading: How the work shows in her exhibitions
       text: fix
+  - discriminant: image
+    value:
+      src: /src/content/projects/bodil-ouedraogo/blocks/1/value/src.jpg
+      gallery: renders
+      frame: default
+      flush: false
+      outline: false
+  - discriminant: image
+    value:
+      src: /src/content/projects/bodil-ouedraogo/blocks/2/value/src.jpg
+      gallery: none
+      frame: default
+      flush: false
+      outline: false
+  - discriminant: image
+    value:
+      src: /src/content/projects/bodil-ouedraogo/blocks/3/value/src.jpg
+      gallery: none
+      frame: default
+      flush: false
+      outline: false
+  - discriminant: image
+    value:
+      src: /src/content/projects/bodil-ouedraogo/blocks/4/value/src.jpg
+      gallery: renders
+      frame: default
+      flush: false
+      outline: false
+  - discriminant: image
+    value:
+      src: /src/content/projects/bodil-ouedraogo/blocks/5/value/src.jpg
+      gallery: renders
+      frame: default
+      flush: false
+      outline: false
+  - discriminant: text
+    value:
+      heading: Benches
+      text: We took the butts of the sculpures and impressed them into the benchtops
+  - discriminant: image
+    value:
+      src: /src/content/projects/bodil-ouedraogo/blocks/7/value/src.jpg
+      gallery: none
+      frame: default
+      flush: false
+      outline: false
+  - discriminant: image
+    value:
+      src: /src/content/projects/bodil-ouedraogo/blocks/8/value/src.jpg
+      gallery: none
+      frame: default
+      flush: false
+      outline: false
+  - discriminant: image
+    value:
+      src: /src/content/projects/bodil-ouedraogo/blocks/9/value/src.jpg
+      gallery: none
+      frame: default
+      flush: false
+      outline: false
+  - discriminant: image
+    value:
+      src: /src/content/projects/bodil-ouedraogo/blocks/10/value/src.jpg
+      gallery: renders
+      frame: default
+      flush: false
+      outline: false
+  - discriminant: text
+    value:
+      heading: Concrete blocks
+      text: >-
+        Inspired by solid concrete blocks used in construction and modular city
+        furniture.
+  - discriminant: image
+    value:
+      src: /src/content/projects/bodil-ouedraogo/blocks/12/value/src.jpg
+      gallery: renders
+      frame: default
+      flush: false
+      outline: false
+  - discriminant: image
+    value:
+      src: /src/content/projects/bodil-ouedraogo/blocks/13/value/src.jpg
+      gallery: none
+      frame: default
+      flush: false
+      outline: false
+  - discriminant: image
+    value:
+      src: /src/content/projects/bodil-ouedraogo/blocks/14/value/src.jpg
+      gallery: renders
+      frame: default
+      flush: false
+      outline: false
+  - discriminant: pair
+    value:
+      layout: pair
+      left: /src/content/projects/bodil-ouedraogo/blocks/15/value/left.jpg
+      leftGallery: none
+      right: /src/content/projects/bodil-ouedraogo/blocks/15/value/right.jpg
+      rightGallery: none
+      frame: default
+      outline: false
+  - discriminant: image
+    value:
+      src: /src/content/projects/bodil-ouedraogo/blocks/16/value/src.jpg
+      gallery: none
+      frame: default
+      flush: false
+      outline: false
+  - discriminant: image
+    value:
+      src: /src/content/projects/bodil-ouedraogo/blocks/17/value/src.jpg
+      gallery: none
+      frame: default
+      flush: false
+      outline: false
+  - discriminant: text
+    value:
+      heading: Other cuts
+      text: Other sculptures we’ve made together over the years
+  - discriminant: image
+    value:
+      src: /src/content/projects/bodil-ouedraogo/blocks/19/value/src.jpg
+      gallery: renders
+      frame: default
+      flush: false
+      outline: false
+  - discriminant: image
+    value:
+      src: /src/content/projects/bodil-ouedraogo/blocks/20/value/src.jpg
+      gallery: renders
+      frame: default
+      flush: false
+      outline: false
+  - discriminant: image
+    value:
+      src: /src/content/projects/bodil-ouedraogo/blocks/21/value/src.jpg
+      gallery: none
+      frame: default
+      flush: false
+      outline: false
