@@ -156,3 +156,74 @@ blocks:
       frame: default
       flush: false
       outline: false
+  - discriminant: pair
+    value:
+      layout: pair
+      left: /src/content/projects/bodil-ouedraogo/blocks/22/value/left.jpg
+      leftGallery: none
+      right: /src/content/projects/bodil-ouedraogo/blocks/22/value/right.jpg
+      rightGallery: none
+      frame: default
+      outline: false
+  - discriminant: image
+    value:
+      src: /src/content/projects/bodil-ouedraogo/blocks/23/value/src.jpg
+      gallery: none
+      frame: default
+      flush: false
+      outline: false
+  - discriminant: image
+    value:
+      src: /src/content/projects/bodil-ouedraogo/blocks/24/value/src.jpg
+      gallery: none
+      frame: default
+      flush: false
+      outline: false
+  - discriminant: image
+    value:
+      src: /src/content/projects/bodil-ouedraogo/blocks/25/value/src.jpg
+      gallery: none
+      frame: default
+      flush: false
+      outline: false
+  - discriminant: image
+    value:
+      src: /src/content/projects/bodil-ouedraogo/blocks/26/value/src.jpg
+      gallery: none
+      frame: default
+      flush: false
+      outline: false
+  - discriminant: image
+    value:
+      src: /src/content/projects/bodil-ouedraogo/blocks/27/value/src.jpg
+      gallery: none
+      frame: default
+      flush: false
+      outline: false
+  - discriminant: image
+    value:
+      src: /src/content/projects/bodil-ouedraogo/blocks/28/value/src.jpg
+      gallery: none
+      frame: default
+      flush: false
+      outline: false
+  - discriminant: image
+    value:
+      src: /src/content/projects/bodil-ouedraogo/blocks/29/value/src.jpg
+      gallery: none
+      frame: default
+      flush: false
+      outline: false
+  - discriminant: image
+    value:
+      src: /src/content/projects/bodil-ouedraogo/blocks/30/value/src.jpg
+      gallery: none
+      frame: default
+      flush: false
+      outline: false
+  - discriminant: text
+    value:
+      heading: VPRO Snippet
+      text: >-
+        A little film leader for the dutch TV channel VPRO. Which regularly
+        invites artists to make little leaders for them.
