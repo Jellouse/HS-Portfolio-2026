@@ -74,3 +74,26 @@ blocks:
       frame: default
       flush: false
       outline: false
+  - discriminant: process
+    value:
+      images:
+        - src: >-
+            /src/content/projects/tonys-chocolonely/blocks/8/value/images/0/src.jpg
+          gallery: none
+          flush: false
+          outline: false
+        - src: >-
+            /src/content/projects/tonys-chocolonely/blocks/8/value/images/1/src.jpg
+          gallery: none
+          flush: false
+          outline: false
+        - src: >-
+            /src/content/projects/tonys-chocolonely/blocks/8/value/images/2/src.jpg
+          gallery: none
+          flush: false
+          outline: false
+        - src: >-
+            /src/content/projects/tonys-chocolonely/blocks/8/value/images/3/src.jpg
+          gallery: none
+          flush: false
+          outline: false
