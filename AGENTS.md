@@ -32,10 +32,33 @@ File names are kebab-case. A module that both pages use lives in `src/lib/` or `
 
 1. `npm run dev` and open `/keystatic`, or duplicate a project folder.
 2. Set title, caption (`Name, Year`), order, summary (two or three sentences), info lines (`Key: Value`, optional link on the value), and blocks. Leave out unknown info lines.
-3. Blocks are `text`, `image`, `pair`, `video`, or `process`. `process` is an optional centred Process label and a two-column grid of photos. The project page ends with a centred Info label and the info list, aligned to the image column. Gallery on an image, video, or pair side puts that piece in Web, 3D, Product, or Space.
+3. Blocks are `text`, `image`, `pair`, `video`, or `process`. `process` is an optional centred Process label and a two-column grid of photos and videos. The project page ends with a centred Info label and the info list, aligned to the image column. Gallery on an image, video, pair side, or process item puts that piece in Web, 3D, Product, or Space.
 4. Leave `published` off until the project has the images and alt text it needs.
 5. Put unknowns in `todo`. Those notes are not rendered.
 6. Update `src/pages/llms.txt.ts` only if you want a line the generator does not already build. It reads the collection.
+
+## Add a video to a process section
+
+Videos are not committed to the project's `process/` folder (that folder is photos only, uploaded at `/keystatic-upload`). They go to video storage, then into a Process item.
+
+1. Sign in to the CMS (`/keystatic`) so the upload is allowed.
+2. Open the project, or go to `/keystatic-upload`.
+3. Upload an mp4, webm, or mov (H.264 MP4 plays everywhere). The limit is 200 MB. A `.mov` is often HEVC and may only play in Safari; export as H.264 MP4 ("Most Compatible") if you can.
+4. In the project's Process block, add an item. Use Upload video on that item, or paste the URL into Video.
+5. Add a Poster still, or an Image, so the frame keeps its shape before the video loads. Alt text is optional. Flush and Outline work like they do on photos.
+6. To include it in a homepage gallery, set Gallery on that item (Web, 3D, Product, or Space).
+7. If "Use process folder" is on, folder photos show first, then any videos from the Process list. To mix a video between photos, turn the folder off and list every item in the Process block, in order.
+
+In YAML, a process item can look like this (the `src` image is the poster if `poster` is omitted):
+
+```yaml
+- src: /src/content/projects/<slug>/blocks/12/value/images/0/src.jpg
+  video: https://humansize-media.schnettker-johann.workers.dev/projects/<slug>/your-clip.mp4
+  alt: Workbench shot of the part
+  gallery: none
+  flush: false
+  outline: false
+```
 
 ## Type tokens
 

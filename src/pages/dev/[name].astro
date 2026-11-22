@@ -186,7 +186,21 @@ const halfSizes = '(min-width: 760px) 272px, calc((100vw - 48px) / 2)';
               {item.name === 'Peeps' && <Peeps maxH={2} />}
               {item.name === 'PeepsStatic' && <PeepsStatic />}
               {item.name === 'ProcessBlock' && sampleImage && (
-                <ProcessBlock images={[{ src: sampleImage.src, alt: sampleImage.alt }]} />
+                <ProcessBlock
+                  images={[
+                    { src: sampleImage.src, alt: sampleImage.alt },
+                    ...(sampleVideo
+                      ? [
+                          {
+                            src: sampleVideo.poster || sampleImage.src,
+                            video: sampleVideo.src,
+                            poster: sampleVideo.poster,
+                            alt: sampleVideo.alt || sampleImage.alt,
+                          },
+                        ]
+                      : []),
+                  ]}
+                />
               )}
               {item.name === 'ProjectCard' && project && <ProjectCard project={project} priority />}
               {item.name === 'ProjectFeed' && <iframe title="Home feed" src="/"></iframe>}

@@ -3,6 +3,7 @@ import type { ImageMetadata } from 'astro';
 import { getCollection, getEntry, type CollectionEntry } from 'astro:content';
 import { getProjects, getSite, renderInline } from './content';
 import { galleryCategoryValues } from './gallery-categories';
+import { isProcessVideo, processVideoPoster, processVideoSrc } from './project-blocks.mjs';
 import { imageHasAlpha } from './image-alpha';
 import { resolveImage } from './images';
 import { getProducts } from './shop';
@@ -90,7 +91,15 @@ function projectPieces(data: CollectionEntry<'projects'>['data']): Piece[] {
       add(value.leftGallery, { src: value.left, alt: value.leftAlt });
       add(value.rightGallery, { src: value.right, alt: value.rightAlt });
     } else if (block.discriminant === 'process') {
-      for (const image of value.images) add(image.gallery, { src: image.src, alt: image.alt });
+      for (const image of value.images) {
+        if (isProcessVideo(image)) {
+          const video = processVideoSrc(image);
+          const poster = processVideoPoster(image);
+          add(image.gallery, { src: poster || video, alt: image.alt, video, poster });
+        } else {
+          add(image.gallery, { src: image.src, alt: image.alt });
+        }
+      }
     }
   }
   return pieces;

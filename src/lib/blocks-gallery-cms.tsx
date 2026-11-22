@@ -197,9 +197,17 @@ function BlockPreview({
       <div style={tileMedia}>
         <div style={processGrid}>
           {photos.length
-            ? photos.map((photo: any) => (
-                <Thumb key={photo.key} asset={photo.fields?.src?.value} />
-              ))
+            ? photos.map((photo: any) =>
+                photo.fields?.video?.value ? (
+                  <VideoThumb
+                    key={photo.key}
+                    src={photo.fields.video.value}
+                    poster={photo.fields?.poster?.value || photo.fields?.src?.value}
+                  />
+                ) : (
+                  <Thumb key={photo.key} asset={photo.fields?.src?.value} />
+                ),
+              )
             : null}
         </div>
         <span style={tileBadge}>{kindLabel}</span>

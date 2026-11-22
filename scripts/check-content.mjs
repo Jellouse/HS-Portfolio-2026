@@ -73,6 +73,20 @@ export function checkContent(root) {
         if (!src) errors.push(`${rel} ${path}.value.src: missing image`);
       }
 
+      if (value && typeof value === 'object' && !Array.isArray(value) && value.discriminant === 'process') {
+        const images = Array.isArray(value.value?.images) ? value.value.images : [];
+        images.forEach((item, index) => {
+          const src = typeof item?.src === 'string' ? item.src.trim() : '';
+          const video = typeof item?.video === 'string' ? item.video.trim() : '';
+          if (!src && !video) {
+            errors.push(`${rel} ${path}.value.images[${index}]: process item needs an image or a video`);
+          }
+          if (video && !/^https?:\/\//i.test(video) && !/\.(mp4|webm|mov)(?:$|[?#])/i.test(video)) {
+            errors.push(`${rel} ${path}.value.images[${index}].video: use an mp4, webm, or mov URL`);
+          }
+        });
+      }
+
       if (value && typeof value === 'object' && !Array.isArray(value) && value.discriminant === 'project') {
         const field = `${path}.value.project`;
         const slug = typeof value.value?.project === 'string' ? value.value.project.trim() : '';

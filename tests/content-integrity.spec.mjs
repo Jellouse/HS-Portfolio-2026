@@ -133,4 +133,57 @@ try {
   rmSync(dir, { recursive: true, force: true });
 }
 
+const processDir = mkdtempSync(join(tmpdir(), 'hs-process-'));
+try {
+  mkdirSync(join(processDir, 'src/content/projects/demo'), { recursive: true });
+  writeFileSync(join(processDir, 'src/content/projects/demo/index.yaml'), 'title: Demo\n');
+  writeFileSync(
+    join(processDir, 'src/content/projects/demo/ok.yaml'),
+    [
+      'blocks:',
+      '  - discriminant: process',
+      '    value:',
+      '      images:',
+      '        - video: https://cdn.example/clip.mp4',
+      '          alt: A clip',
+      '        - src: /src/content/projects/demo/shot.jpg',
+      '          alt: A still',
+      '',
+    ].join('\n'),
+  );
+  mkdirSync(join(processDir, 'src/content/projects/demo'), { recursive: true });
+  writeFileSync(join(processDir, 'src/content/projects/demo/shot.jpg'), 'x');
+  const okErrors = checkContent(processDir).filter((line) => line.includes('ok.yaml'));
+  if (okErrors.length) {
+    console.error(okErrors.join('\n'));
+    throw new Error('process video item should pass the content check');
+  }
+
+  writeFileSync(
+    join(processDir, 'src/content/projects/demo/bad.yaml'),
+    [
+      'blocks:',
+      '  - discriminant: process',
+      '    value:',
+      '      images:',
+      '        - alt: empty item',
+      '        - video: not-a-video',
+      '',
+    ].join('\n'),
+  );
+  const bad = checkContent(processDir);
+  const need = [
+    'src/content/projects/demo/bad.yaml blocks[0].value.images[0]: process item needs an image or a video',
+    'src/content/projects/demo/bad.yaml blocks[0].value.images[1].video: use an mp4, webm, or mov URL',
+  ];
+  for (const line of need) {
+    if (!bad.includes(line)) {
+      console.error(bad.join('\n'));
+      throw new Error(`missing error: ${line}`);
+    }
+  }
+} finally {
+  rmSync(processDir, { recursive: true, force: true });
+}
+
 console.log('content integrity ok');
