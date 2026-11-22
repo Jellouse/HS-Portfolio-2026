@@ -10,14 +10,17 @@ rounded: true
 info: []
 processFromFolder: false
 blocks:
-  - discriminant: text
+  - discriminant: image
     value:
-      heading: How the work shows in her exhibitions
-      text: fix
+      src: /src/content/projects/bodil-ouedraogo/blocks/0/value/src.jpg
+      gallery: renders
+      frame: default
+      flush: false
+      outline: false
   - discriminant: image
     value:
       src: /src/content/projects/bodil-ouedraogo/blocks/1/value/src.jpg
-      gallery: renders
+      gallery: none
       frame: default
       flush: false
       outline: false
@@ -31,7 +34,7 @@ blocks:
   - discriminant: image
     value:
       src: /src/content/projects/bodil-ouedraogo/blocks/3/value/src.jpg
-      gallery: none
+      gallery: renders
       frame: default
       flush: false
       outline: false
@@ -42,17 +45,17 @@ blocks:
       frame: default
       flush: false
       outline: false
-  - discriminant: image
-    value:
-      src: /src/content/projects/bodil-ouedraogo/blocks/5/value/src.jpg
-      gallery: renders
-      frame: default
-      flush: false
-      outline: false
   - discriminant: text
     value:
       heading: Benches
       text: We took the butts of the sculpures and impressed them into the benchtops
+  - discriminant: image
+    value:
+      src: /src/content/projects/bodil-ouedraogo/blocks/6/value/src.jpg
+      gallery: none
+      frame: default
+      flush: false
+      outline: false
   - discriminant: image
     value:
       src: /src/content/projects/bodil-ouedraogo/blocks/7/value/src.jpg
@@ -70,13 +73,6 @@ blocks:
   - discriminant: image
     value:
       src: /src/content/projects/bodil-ouedraogo/blocks/9/value/src.jpg
-      gallery: none
-      frame: default
-      flush: false
-      outline: false
-  - discriminant: image
-    value:
-      src: /src/content/projects/bodil-ouedraogo/blocks/10/value/src.jpg
       gallery: renders
       frame: default
       flush: false
@@ -89,21 +85,21 @@ blocks:
         furniture.
   - discriminant: image
     value:
-      src: /src/content/projects/bodil-ouedraogo/blocks/12/value/src.jpg
+      src: /src/content/projects/bodil-ouedraogo/blocks/11/value/src.jpg
       gallery: renders
       frame: default
       flush: false
       outline: false
   - discriminant: image
     value:
-      src: /src/content/projects/bodil-ouedraogo/blocks/13/value/src.jpg
+      src: /src/content/projects/bodil-ouedraogo/blocks/12/value/src.jpg
       gallery: none
       frame: default
       flush: false
       outline: false
   - discriminant: image
     value:
-      src: /src/content/projects/bodil-ouedraogo/blocks/14/value/src.jpg
+      src: /src/content/projects/bodil-ouedraogo/blocks/13/value/src.jpg
       gallery: renders
       frame: default
       flush: false
@@ -111,22 +107,22 @@ blocks:
   - discriminant: pair
     value:
       layout: pair
-      left: /src/content/projects/bodil-ouedraogo/blocks/15/value/left.jpg
+      left: /src/content/projects/bodil-ouedraogo/blocks/14/value/left.jpg
       leftGallery: none
-      right: /src/content/projects/bodil-ouedraogo/blocks/15/value/right.jpg
+      right: /src/content/projects/bodil-ouedraogo/blocks/14/value/right.jpg
       rightGallery: none
       frame: default
       outline: false
   - discriminant: image
     value:
-      src: /src/content/projects/bodil-ouedraogo/blocks/16/value/src.jpg
+      src: /src/content/projects/bodil-ouedraogo/blocks/15/value/src.jpg
       gallery: none
       frame: default
       flush: false
       outline: false
   - discriminant: image
     value:
-      src: /src/content/projects/bodil-ouedraogo/blocks/17/value/src.jpg
+      src: /src/content/projects/bodil-ouedraogo/blocks/16/value/src.jpg
       gallery: none
       frame: default
       flush: false
@@ -137,6 +133,13 @@ blocks:
       text: Other sculptures we’ve made together over the years
   - discriminant: image
     value:
+      src: /src/content/projects/bodil-ouedraogo/blocks/18/value/src.jpg
+      gallery: renders
+      frame: default
+      flush: false
+      outline: false
+  - discriminant: image
+    value:
       src: /src/content/projects/bodil-ouedraogo/blocks/19/value/src.jpg
       gallery: renders
       frame: default
@@ -145,13 +148,6 @@ blocks:
   - discriminant: image
     value:
       src: /src/content/projects/bodil-ouedraogo/blocks/20/value/src.jpg
-      gallery: renders
-      frame: default
-      flush: false
-      outline: false
-  - discriminant: image
-    value:
-      src: /src/content/projects/bodil-ouedraogo/blocks/21/value/src.jpg
       gallery: none
       frame: default
       flush: false
@@ -159,11 +155,18 @@ blocks:
   - discriminant: pair
     value:
       layout: pair
-      left: /src/content/projects/bodil-ouedraogo/blocks/22/value/left.jpg
+      left: /src/content/projects/bodil-ouedraogo/blocks/21/value/left.jpg
       leftGallery: none
-      right: /src/content/projects/bodil-ouedraogo/blocks/22/value/right.jpg
+      right: /src/content/projects/bodil-ouedraogo/blocks/21/value/right.jpg
       rightGallery: none
       frame: default
+      outline: false
+  - discriminant: image
+    value:
+      src: /src/content/projects/bodil-ouedraogo/blocks/22/value/src.jpg
+      gallery: none
+      frame: default
+      flush: false
       outline: false
   - discriminant: image
     value:
@@ -214,16 +217,53 @@ blocks:
       frame: default
       flush: false
       outline: false
-  - discriminant: image
-    value:
-      src: /src/content/projects/bodil-ouedraogo/blocks/30/value/src.jpg
-      gallery: none
-      frame: default
-      flush: false
-      outline: false
   - discriminant: text
     value:
       heading: VPRO Snippet
       text: >-
         A little film leader for the dutch TV channel VPRO. Which regularly
         invites artists to make little leaders for them.
+  - discriminant: video
+    value:
+      src: >-
+        https://humansize-media.schnettker-johann.workers.dev/projects/bodil-ouedraogo/video-2024-10-08-07-56-45-mwr7294n.mp4
+      gallery: renders
+      frame: default
+      flush: false
+      outline: false
+  - discriminant: video
+    value:
+      src: >-
+        https://humansize-media.schnettker-johann.workers.dev/projects/bodil-ouedraogo/video-2024-10-14-20-53-29-mwr73952.mp4
+      gallery: renders
+      frame: default
+      flush: false
+      outline: false
+  - discriminant: process
+    value:
+      images:
+        - src: >-
+            /src/content/projects/bodil-ouedraogo/blocks/33/value/images/0/src.jpg
+          gallery: none
+          flush: false
+          outline: false
+        - src: >-
+            /src/content/projects/bodil-ouedraogo/blocks/33/value/images/1/src.jpg
+          gallery: none
+          flush: false
+          outline: false
+        - src: >-
+            /src/content/projects/bodil-ouedraogo/blocks/33/value/images/2/src.jpg
+          gallery: none
+          flush: false
+          outline: false
+        - src: >-
+            /src/content/projects/bodil-ouedraogo/blocks/33/value/images/3/src.jpg
+          gallery: none
+          flush: false
+          outline: false
+        - src: >-
+            /src/content/projects/bodil-ouedraogo/blocks/33/value/images/4/src.jpg
+          gallery: none
+          flush: false
+          outline: false
