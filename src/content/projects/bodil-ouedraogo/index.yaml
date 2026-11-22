@@ -3,16 +3,27 @@ year: 2023
 yearEnd: 2026
 published: true
 summary: >-
-  Since 2022, I have been collaborating with Bodil to work with 3D scans of
-  ancient sculptures. We isolate parts turn them into totally new bodies, give
-  them new meaning..
+  Since 2023 I've worked with Amsterdam artist [Bodil
+  Ouédraogo](https://www.bodilouedraogo.com/) on the 3D side of her sculptures.
+  She works from 3D scans of West African wooden figures from the collection of
+  her father, Mamadou Ouédraogo. I prepare the files that turn those scans into
+  new pieces. Most get 3D printed, and some are cast in concrete.
+
+
+  Her work has been shown at
+  [UNFAIR23](https://www.bodilouedraogo.com/framed-intimacy-01) in Amsterdam,
+  the [15th Gwangju Biennale](https://www.bodilouedraogo.com/framed-intimacy-),
+  [Art Rotterdam and the Stedelijk Museum
+  Amsterdam](https://www.bodilouedraogo.com/framed-intimacy-noun), and most
+  recently the [Rijksakademie Open Studios
+  2026](https://rijksakademie.nl/en/open-studios/2026/bodil-ouedraogo).
 rounded: true
 info:
-  - label: Artist website
+  - label: Artist
     value: Bodil Ouédraogo
     href: https://www.bodilouedraogo.com/
   - label: Role
-    value: 3D File Preparation
+    value: 3D file preparation, 3D animation (VPRO)
 processFromFolder: false
 blocks:
   - discriminant: image
@@ -52,8 +63,11 @@ blocks:
       outline: false
   - discriminant: text
     value:
-      heading: Benches
-      text: We took the butts of the sculpures and impressed them into the benchtops
+      heading: Stools
+      text: >-
+        The seats of the scanned figures, pressed into the tops of wooden
+        stools. Shown at the [Rijksakademie Open Studios
+        2026](https://rijksakademie.nl/en/open-studios/2026/bodil-ouedraogo).
   - discriminant: image
     value:
       src: /src/content/projects/bodil-ouedraogo/blocks/6/value/src.jpg
@@ -86,8 +100,8 @@ blocks:
     value:
       heading: Concrete blocks
       text: >-
-        Inspired by solid concrete blocks used in construction and modular city
-        furniture.
+        Interlocking concrete blocks, the kind that anchor things on the street.
+        The details from the scan are blown up and cast into the surface.
   - discriminant: image
     value:
       src: /src/content/projects/bodil-ouedraogo/blocks/11/value/src.jpg
@@ -134,8 +148,8 @@ blocks:
       outline: false
   - discriminant: text
     value:
-      heading: Other cuts
-      text: Other sculptures we’ve made together over the years
+      heading: Other pieces
+      text: Other sculptures I've prepared files for over the years.
   - discriminant: image
     value:
       src: /src/content/projects/bodil-ouedraogo/blocks/18/value/src.jpg
@@ -224,10 +238,10 @@ blocks:
       outline: false
   - discriminant: text
     value:
-      heading: VPRO Snippet
+      heading: VPRO snippet
       text: >-
-        A little film leader for the dutch TV channel VPRO. Which regularly
-        invites artists to make little leaders for them.
+        A short leader for the Dutch TV channel VPRO, which invites artists to
+        make them. Bodil made this one, and I did the 3D animation.
   - discriminant: video
     value:
       src: >-
