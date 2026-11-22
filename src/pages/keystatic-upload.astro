@@ -19,7 +19,7 @@ const branch = 'main';
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#ffffff" />
     <meta name="robots" content="noindex, nofollow" />
-    <title>Process photo upload</title>
+    <title>Process media upload</title>
     <style>
       @import '../styles/type.css';
       body { font: var(--text-ui)/var(--lh-ui) system-ui, sans-serif; max-width: 640px; margin: 40px auto; padding: 0 20px; color: #111; }
@@ -42,7 +42,9 @@ const branch = 'main';
     <p>
       Pick a project and drop photos. They are committed to its process folder in
       one commit and sorted by file name. Then turn on "Use process folder" in the
-      <a href="/keystatic">CMS</a>.
+      <a href="/keystatic">CMS</a>. Videos are not stored in that folder. Upload a
+      video below, then add it as a Process item in the CMS (paste the URL or use
+      Upload video on the item).
     </p>
     <div class="row">
       <select id="project">
@@ -191,7 +193,7 @@ const branch = 'main';
 </script>
     <hr style="margin:40px 0;border:0;border-top:1px solid #eee" />
     <h1>Video</h1>
-    <p>Upload a video to the video storage, then paste the URL into a video field in the CMS (or use the Upload video button there).</p>
+    <p>Upload a video to the video storage (mp4, webm, or mov, up to 200 MB; H.264 MP4 plays everywhere), then paste the URL into a Video block or a Process item in the CMS (or use the Upload video button there). Add a poster still so the frame keeps its shape.</p>
     <div class="row">
       <input id="vfile" type="file" accept="video/mp4,video/webm,video/quicktime,.mov" />
     </div>

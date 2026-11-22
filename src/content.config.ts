@@ -57,20 +57,28 @@ const pairBlock = z.object({
   }),
 });
 
+const processItem = z
+  .object({
+    src: z.preprocess(
+      (value) => (value == null || value === '' ? undefined : value),
+      z.string().optional(),
+    ),
+    video: z.string().nullish(),
+    poster: z.string().nullish(),
+    alt: z.string().default(''),
+    flush: z.boolean().default(false),
+    outline: z.boolean().default(false),
+    gallery: galleryField,
+  })
+  .refine(
+    (item) => Boolean(item.src?.trim() || item.video?.trim()),
+    { message: 'Process item needs an image or a video' },
+  );
+
 const processBlock = z.object({
   discriminant: z.literal('process'),
   value: z.object({
-    images: z
-      .array(
-        z.object({
-          src: z.string(),
-          alt: z.string().default(''),
-          flush: z.boolean().default(false),
-          outline: z.boolean().default(false),
-          gallery: galleryField,
-        }),
-      )
-      .default([]),
+    images: z.array(processItem).default([]),
   }),
 });
 

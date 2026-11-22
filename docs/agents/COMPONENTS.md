@@ -41,7 +41,7 @@ These were already shared. Pages and other components keep using them.
 | VideoBlock | `src/components/VideoBlock.astro` | `src`, `poster?`, `label?`, `frame?`, `flush?`, `outline?` | `/work/:slug` |
 | ImageBlock | `src/components/ImageBlock.astro` | `src`, `alt`, `frame?`, `priority?`, `flush?`, `outline?` | `/work/:slug` |
 | ImagePair | `src/components/ImagePair.astro` | `left`, `leftAlt`, `right`, `rightAlt`, `leftPriority?`, `rightPriority?`, `frame?`, `outline?` | `/work/:slug` |
-| ProcessBlock | `src/components/ProcessBlock.astro` | `images` | `/work/:slug` |
+| ProcessBlock | `src/components/ProcessBlock.astro` | `images` (`src` and/or `video`, `poster?`, `alt`, `flush?`, `outline?`) | `/work/:slug` |
 | TextBlock | `src/components/TextBlock.astro` | `text`, `heading?`, `year?` | `/work/:slug` |
 | ProjectHero | `src/components/ProjectHero.astro` | `title`, `years?`, `summary?` | `/work/:slug` |
 | ProjectArticle | `src/components/ProjectArticle.astro` | `project`, `processFolderSrcs?` | `/work/:slug`, `/preview/:slug` |

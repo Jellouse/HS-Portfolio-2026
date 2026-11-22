@@ -163,7 +163,7 @@ export default config({
           label: 'Use process folder',
           defaultValue: false,
           description:
-            'Show every image in this project\'s process/ folder, sorted by file name. Upload many at once at /keystatic-upload. If the folder is empty, the Process photos below are used.',
+            'Show every image in this project\'s process/ folder, sorted by file name. Upload many photos at once at /keystatic-upload. If the folder is empty, the Process items below are used. Videos are not stored in that folder; add them as Process items below, and they appear after the folder photos.',
         }),
         blocks: withBlocksGallery(
           fields.blocks(
@@ -253,7 +253,17 @@ export default config({
                 schema: fields.object({
                   images: fields.array(
                     fields.object({
-                      src: imageField('Image', { required: true }),
+                      src: imageField('Image', {
+                        description:
+                          'A still photo, or the poster if this item is a video. Leave empty when the video already has a poster.',
+                      }),
+                      video: videoField(
+                        'Video',
+                        'Optional. mp4, webm, or mov. Plays muted on a loop, like other videos. Add a poster or an Image so the frame keeps its shape. Keep it short; H.264 MP4 plays everywhere. The limit is 200 MB.',
+                      ),
+                      poster: imageField('Poster', {
+                        description: 'Optional still for a video. Used if Image is empty.',
+                      }),
                       alt: fields.text({
                         label: 'Alt text',
                         description: 'Optional.',
@@ -268,10 +278,12 @@ export default config({
                       outline,
                     }),
                     {
-                      label: 'Photos',
+                      label: 'Photos and videos',
                       description:
-                        'When the process folder is on, the page uses that folder. A Gallery choice here still includes the photo.',
-                      itemLabel: (props) => props.fields.alt.value || 'Photo',
+                        'When the process folder is on, the page uses that folder for photos, then any videos listed here. A Gallery choice still includes the item.',
+                      itemLabel: (props) =>
+                        props.fields.alt.value ||
+                        (props.fields.video.value ? 'Video' : 'Photo'),
                     },
                   ),
                 }),
