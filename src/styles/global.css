@@ -4143,12 +4143,14 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
 .arrow-project {
   position: relative;
   box-sizing: border-box;
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: var(--space-2xs);
+  width: max-content;
   height: var(--arrow-control);
-  max-width: 100%;
+  max-width: calc(100vw - 2 * var(--margin));
   margin-top: var(--space-sm);
+  margin-inline: auto;
   padding: 0 var(--space-md);
   border-radius: var(--radius);
   background: var(--arrow-fill);
