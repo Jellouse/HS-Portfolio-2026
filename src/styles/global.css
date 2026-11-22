@@ -833,7 +833,7 @@ html[data-sky-ink='white'] body:has([data-sky]) .project {
   font-size: var(--text);
   line-height: var(--lh);
   letter-spacing: var(--track);
-  text-align: center;
+  text-align: left;
 }
 
 .project-summary p {
