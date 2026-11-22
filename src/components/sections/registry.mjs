@@ -154,7 +154,7 @@ export const existing = [
   { name: 'MarkFace', file: 'src/components/MarkFace.astro', props: [], pages: [] },
   { name: 'Peeps', file: 'src/components/Peeps.astro', props: ['maxH?: number'], pages: ['every page, through Footer'] },
   { name: 'PeepsStatic', file: 'src/components/PeepsStatic.astro', props: [], pages: ['every page, through Peeps'] },
-  { name: 'ProcessBlock', file: 'src/components/ProcessBlock.astro', props: ['images: { src, alt, flush?, outline? }[]'], pages: ['/work/:slug'] },
+  { name: 'ProcessBlock', file: 'src/components/ProcessBlock.astro', props: ['images: { src?, video?, poster?, alt, flush?, outline? }[]'], pages: ['/work/:slug'] },
   { name: 'ProjectArticle', file: 'src/components/ProjectArticle.astro', props: ['project: ProjectEntry', 'processFolderSrcs?'], pages: ['/work/:slug', '/preview/:slug'] },
   { name: 'ProjectCard', file: 'src/components/ProjectCard.astro', props: ['project: ProjectEntry', 'priority?: boolean'], pages: ['/'] },
   { name: 'ProjectFeed', file: 'src/components/ProjectFeed.astro', props: ['projects: ProjectEntry[]', 'about: string[]'], pages: ['/'] },

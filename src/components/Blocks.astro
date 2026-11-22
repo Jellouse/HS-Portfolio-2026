@@ -7,7 +7,7 @@ import TextBlock from './TextBlock.astro';
 import VideoBlock from './VideoBlock.astro';
 import type { ProjectEntry } from '../lib/content';
 import { processFolderAlt, processFolderImages } from '../lib/images';
-import { resolveProcessFolderForRender } from '../lib/project-blocks.mjs';
+import { processItemsForRender, resolveProcessFolderForRender } from '../lib/project-blocks.mjs';
 
 interface Props {
   blocks: ProjectEntry['data']['blocks'];
@@ -38,6 +38,7 @@ const folderSrcs = resolveProcessFolderForRender(
 const folder = folderSrcs.map((src) => ({ src, alt: processFolderAlt(src), flush: false }));
 const useFolder = Boolean(processFromFolder) && folder.length > 0;
 const hasProcessBlock = blocks.some((b) => b.discriminant === 'process');
+const processMedia = (blockImages = []) => processItemsForRender(blockImages, folder, useFolder);
 
 let imageCount = 0;
 const eager = () => imageCount++ < 2;
@@ -86,7 +87,7 @@ const markEntry = () => {
       return (
         <>
           {takeInfo() && <Info items={info} />}
-          <ProcessBlock images={useFolder ? folder : block.value.images} />
+          <ProcessBlock images={processMedia(block.value.images)} />
         </>
       );
     }
@@ -116,7 +117,7 @@ const markEntry = () => {
 {useFolder && !hasProcessBlock && (
   <>
     {takeInfo() && <Info items={info} />}
-    <ProcessBlock images={folder} />
+    <ProcessBlock images={processMedia()} />
   </>
 )}
 {takeInfo() && <Info items={info} />}

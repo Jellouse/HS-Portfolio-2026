@@ -927,6 +927,7 @@ html[data-sky-ink='white'] body:has([data-sky]) .project {
 }
 
 .process-grid img,
+.process-grid video,
 .image-block img,
 .pair img {
   width: 100%;

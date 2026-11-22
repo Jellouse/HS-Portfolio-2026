@@ -1,35 +1,69 @@
 ---
 import BlurImage from './BlurImage.astro';
+import VideoFrame from './VideoFrame.astro';
 import { resolveImageSource } from '../lib/images';
+import { isProcessVideo, processVideoPoster, processVideoSrc } from '../lib/project-blocks.mjs';
 
-interface Photo {
-  src: string;
+interface Media {
+  src?: string;
+  video?: string | null;
+  poster?: string | null;
   alt: string;
   flush?: boolean;
   outline?: boolean;
 }
 
 interface Props {
-  images: Photo[];
+  images: Media[];
 }
 
 const { images } = Astro.props;
+const items = images.map((image) => {
+  if (isProcessVideo(image)) {
+    const poster = processVideoPoster(image);
+    return {
+      kind: 'video' as const,
+      src: processVideoSrc(image),
+      poster: poster ? resolveImageSource(poster) : undefined,
+      alt: image.alt,
+      flush: image.flush === true,
+      outline: image.outline === true,
+    };
+  }
+  return {
+    kind: 'image' as const,
+    src: resolveImageSource(image.src ?? ''),
+    alt: image.alt,
+    flush: image.flush === true,
+    outline: image.outline === true,
+  };
+});
 ---
 
 {
-  images.length > 0 && (
+  items.length > 0 && (
     <section class="process fade-in">
       <h2 class="process-label">Process</h2>
       <div class="process-grid">
-        {images.map((image) => (
-          <BlurImage
-            src={resolveImageSource(image.src)}
-            alt={image.alt}
-            sizes="(min-width: 760px) 268px, calc((100vw - 56px) / 2)"
-            flush={image.flush === true}
-            outline={image.outline === true}
-          />
-        ))}
+        {items.map((item) =>
+          item.kind === 'video' ? (
+            <VideoFrame
+              src={item.src}
+              poster={item.poster}
+              label={item.alt}
+              flush={item.flush}
+              outline={item.outline}
+            />
+          ) : (
+            <BlurImage
+              src={item.src}
+              alt={item.alt}
+              sizes="(min-width: 760px) 268px, calc((100vw - 56px) / 2)"
+              flush={item.flush}
+              outline={item.outline}
+            />
+          ),
+        )}
       </div>
     </section>
   )

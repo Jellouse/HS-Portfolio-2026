@@ -51,6 +51,6 @@ A save on the deployed admin commits through the GitHub App. Vercel rebuilds the
 
 ## Content
 
-See `AGENTS.md` for the schema, how to add a project, and the house rules.
+See `AGENTS.md` for the schema, how to add a project, and the house rules. Process grids can include videos as well as photos: upload the file at `/keystatic-upload` or with the Upload video button in the CMS, then add it as a Process item (mp4, webm, or mov, up to 200 MB; add a poster still). Details are in `AGENTS.md` under "Add a video to a process section".
 
 Email on the site is schnettker.johann@gmail.com.

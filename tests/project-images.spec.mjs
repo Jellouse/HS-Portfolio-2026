@@ -6,7 +6,9 @@ import { createHash } from 'node:crypto';
 import { createRequire } from 'node:module';
 import {
   collectBlockImageSrcs,
+  isProcessVideo,
   planArticleImageSrcs,
+  processItemsForRender,
 } from '../src/lib/project-blocks.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -97,6 +99,59 @@ for (const slug of slugs) {
   } else {
     console.log(`atomic-campaigns: ${planned.length} unique planned images OK`);
   }
+}
+
+{
+  const photo = { src: '/src/content/projects/demo/a.jpg', alt: 'A' };
+  const clip = {
+    video: 'https://example.com/clip.mp4',
+    poster: '/src/content/projects/demo/poster.jpg',
+    alt: 'Clip',
+  };
+  const folder = [{ src: '/src/content/projects/demo/process/1.jpg', alt: '1' }];
+  const mixed = processItemsForRender([photo, clip], folder, false);
+  if (mixed.length !== 2 || mixed[0] !== photo || mixed[1] !== clip) {
+    console.error('processItemsForRender: expected photo then video when folder is off');
+    failed++;
+  }
+  const withFolder = processItemsForRender([photo, clip], folder, true);
+  if (
+    withFolder.length !== 2 ||
+    withFolder[0] !== folder[0] ||
+    withFolder[1] !== clip
+  ) {
+    console.error('processItemsForRender: folder photos should lead, then process videos');
+    failed++;
+  }
+  if (!isProcessVideo(clip) || isProcessVideo(photo)) {
+    console.error('isProcessVideo: expected only the video item to match');
+    failed++;
+  }
+  const blocks = [
+    {
+      discriminant: 'process',
+      value: { images: [photo, clip] },
+    },
+  ];
+  const collected = collectBlockImageSrcs(blocks);
+  if (collected.join(',') !== `${photo.src},${clip.poster}`) {
+    console.error(`collectBlockImageSrcs: expected photo and poster, got ${collected.join(',')}`);
+    failed++;
+  }
+  const planned = planArticleImageSrcs(blocks, {
+    processFromFolder: true,
+    folderSrcs: folder.map((item) => item.src),
+  });
+  if (planned.join(',') !== folder[0].src) {
+    console.error(`planArticleImageSrcs: expected only folder photos, got ${planned.join(',')}`);
+    failed++;
+  }
+  const plannedListed = planArticleImageSrcs(blocks);
+  if (plannedListed.join(',') !== photo.src) {
+    console.error(`planArticleImageSrcs: expected listed photo only, got ${plannedListed.join(',')}`);
+    failed++;
+  }
+  console.log('process video items: render merge and image-src plan OK');
 }
 
 if (failed) {
