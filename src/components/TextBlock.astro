@@ -3,21 +3,30 @@ import { paragraphs } from '../lib/content';
 import Prose from './sections/Prose.astro';
 
 interface Props {
-  text: string;
+  text?: string;
   heading?: string;
   year?: string;
 }
 
 const { text, heading, year } = Astro.props;
+const parts = text?.trim() ? paragraphs(text) : [];
+const headingOnly = Boolean(heading) && parts.length === 0;
+const empty = !heading && parts.length === 0;
 ---
 
-<section class="text-block fade-in" data-titled={heading ? '' : undefined}>
-  {
-    heading && (
-      <h2 class="text-block-title">
-        {heading}{year ? <>, <span class="project-year">{year}</span></> : null}
-      </h2>
-    )
-  }
-  <Prose paragraphs={paragraphs(text)} />
-</section>
+{
+  !empty && (
+    <section
+      class="text-block fade-in"
+      data-titled={heading ? '' : undefined}
+      data-heading-only={headingOnly ? '' : undefined}
+    >
+      {heading && (
+        <h2 class="text-block-title">
+          {heading}{year ? <>, <span class="project-year">{year}</span></> : null}
+        </h2>
+      )}
+      {parts.length > 0 && <Prose paragraphs={parts} />}
+    </section>
+  )
+}

@@ -32,7 +32,7 @@ File names are kebab-case. A module that both pages use lives in `src/lib/` or `
 
 1. `npm run dev` and open `/keystatic`, or duplicate a project folder.
 2. Set title, caption (`Name, Year`), order, summary (two or three sentences), info lines (`Key: Value`, optional link on the value), and blocks. Leave out unknown info lines.
-3. Blocks are `text`, `image`, `pair`, `video`, or `process`. `process` is an optional centred Process label and a two-column grid of photos and videos. The project page ends with a centred Info label and the info list, aligned to the image column. Gallery on an image, video, pair side, or process item puts that piece in Web, 3D, Product, or Space.
+3. Blocks are `text`, `image`, `pair`, `video`, or `process`. A text block can be a title, body, or both. `process` is an optional centred Process label and a two-column grid of photos and videos. The project page ends with a centred Info label and the info list, aligned to the image column. Gallery on an image, video, pair side, or process item puts that piece in Web, 3D, Product, or Space.
 4. Leave `published` off until the project has the images and alt text it needs.
 5. Put unknowns in `todo`. Those notes are not rendered.
 6. Update `src/pages/llms.txt.ts` only if you want a line the generator does not already build. It reads the collection.
@@ -67,7 +67,7 @@ Defined in `src/styles/type.css`. Whole pixels. Use the variables. Do not write 
 | Token | Value | Use |
 | --- | --- | --- |
 | `--text` / `--lh` | 23px / 29px | Body, titles, captions, footer, menus |
-| `--text-lead` / `--lh-lead` | 28px / 35px | Titled text blocks on desktop. Below 760 they alias `--text` / `--lh` |
+| `--text-lead` / `--lh-lead` | 28px / 35px | Gallery scrub numbers. Below 760 they alias `--text` / `--lh` |
 | `--text-ui` / `--lh-ui` | 16px / 22px | Admin and utility UI |
 | `--text-meta` / `--lh-meta` | 13px / 16px | Badges, canvas chrome, small CMS labels |
 | `--text-fine` / `--lh-fine` | 11px / 14px | Hero dials (`?dials` only) |

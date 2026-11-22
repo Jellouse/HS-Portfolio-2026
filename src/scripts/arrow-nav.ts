@@ -422,6 +422,15 @@ export function initArrowNav(root: ParentNode = document) {
     });
   };
 
+  const projectPillMax = () => {
+    const probe = document.createElement('div');
+    probe.style.cssText = 'position:absolute;visibility:hidden;pointer-events:none;width:calc(100vw - 2 * var(--margin));height:0';
+    document.body.append(probe);
+    const max = Math.max(1, Math.round(probe.getBoundingClientRect().width));
+    probe.remove();
+    return max;
+  };
+
   const fitProjectLink = () => {
     const link = nav.querySelector<HTMLAnchorElement>('[data-nav-project]');
     const title = nav.querySelector<HTMLElement>('[data-nav-project-title]');
@@ -429,22 +438,32 @@ export function initArrowNav(root: ParentNode = document) {
     if (!link || !title || !action || link.hidden) return;
     const item = screen()?.slides[slide];
     const full = item?.action || '';
-    action.textContent = full;
-    if (!matchMedia('(max-width: 759px)').matches || !full) return;
-    const max = link.parentElement?.clientWidth ?? 0;
-    const width = () => {
+    const short = full === 'View project' ? 'View' : full;
+    const max = projectPillMax();
+    if (!full) {
+      action.textContent = '';
+      return;
+    }
+    const measure = (label: string) => {
+      action.textContent = label;
       link.style.width = 'max-content';
       link.style.maxWidth = 'none';
       title.style.minWidth = 'max-content';
       title.style.overflow = 'visible';
-      const value = link.offsetWidth;
+      title.style.textOverflow = 'clip';
+      const value = Math.ceil(link.getBoundingClientRect().width);
       link.style.width = '';
       link.style.maxWidth = '';
       title.style.minWidth = '';
       title.style.overflow = '';
+      title.style.textOverflow = '';
       return value;
     };
-    if (width() > max && full === 'View project') action.textContent = 'View';
+    if (measure(full) <= max) {
+      action.textContent = full;
+      return;
+    }
+    action.textContent = short;
   };
 
   const clearGalleryMedia = () => {
@@ -2141,6 +2160,8 @@ let galleryMaskOpen: boolean | null = null;
     relayout();
   });
   window.addEventListener('resize', relayout);
+  const pillResize = new ResizeObserver(() => fitProjectLink());
+  pillResize.observe(nav);
   if (opened === 'landing') runIntro();
   else {
     introPlaying = false;

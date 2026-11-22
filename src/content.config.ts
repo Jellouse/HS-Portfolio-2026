@@ -11,10 +11,14 @@ const frame = z.enum(['default', 'wide']);
 
 const textBlock = z.object({
   discriminant: z.literal('text'),
-  value: z.object({
-    heading: z.string().optional(),
-    text: z.string(),
-  }),
+  value: z
+    .object({
+      heading: z.string().optional(),
+      text: z.string().optional().default(''),
+    })
+    .refine((value) => Boolean((value.heading ?? '').trim() || (value.text ?? '').trim()), {
+      message: 'A text block needs a title or body',
+    }),
 });
 
 const imageBlock = z.object({

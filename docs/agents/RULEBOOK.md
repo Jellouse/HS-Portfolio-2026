@@ -11,7 +11,7 @@ Whole pixels only. Sizes live in `src/styles/type.css`. `src/lib/type-scale.ts` 
 | Token | Value | Where it shows up |
 | --- | --- | --- |
 | `--text` / `--lh` | 23px / 29px | Body, titles, captions, footer, menus. This is the size the public pages use. |
-| `--text-lead` / `--lh-lead` | 28px / 35px | Titled text blocks on desktop. Below 760 they alias `--text` / `--lh`. |
+| `--text-lead` / `--lh-lead` | 28px / 35px | Gallery scrub numbers. Below 760 they alias `--text` / `--lh`. |
 | `--text-ui` / `--lh-ui` | 16px / 22px | Admin and utility UI. |
 | `--text-meta` / `--lh-meta` | 13px / 16px | Badges, canvas chrome, small CMS labels. |
 | `--text-fine` / `--lh-fine` | 11px / 14px | Hero dials (`?dials` only). |
