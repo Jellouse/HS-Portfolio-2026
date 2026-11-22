@@ -1,13 +1,18 @@
 title: Collaborating with Bodil Ouédraogo
 year: 2023
-yearEnd: 0
+yearEnd: 2026
 published: true
 summary: >-
   Since 2022, I have been collaborating with Bodil to work with 3D scans of
   ancient sculptures. We isolate parts turn them into totally new bodies, give
   them new meaning..
 rounded: true
-info: []
+info:
+  - label: Artist website
+    value: Bodil Ouédraogo
+    href: https://www.bodilouedraogo.com/
+  - label: Role
+    value: 3D File Preparation
 processFromFolder: false
 blocks:
   - discriminant: image
