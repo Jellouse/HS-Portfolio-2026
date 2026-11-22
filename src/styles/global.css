@@ -874,18 +874,13 @@ html[data-sky-ink='white'] body:has([data-sky]) .project {
 
 .text-block[data-titled] .text-block-title {
   margin: 0 0 var(--space-title);
-  font-size: var(--text-lead);
-  line-height: var(--lh-lead);
+  font-size: var(--text);
+  line-height: var(--lh);
   text-align: center;
 }
 
-.text-block[data-titled] p {
-  font-size: var(--text-lead);
-  line-height: var(--lh-lead);
-}
-
-.text-block[data-titled] p:not(:last-child) {
-  margin-bottom: var(--lh-lead);
+.text-block[data-heading-only] .text-block-title {
+  margin-bottom: 0;
 }
 
 .image-block {
@@ -3891,6 +3886,7 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
   width: min(720px, 62vw);
   aspect-ratio: 16 / 10;
   border-radius: var(--gallery-radius);
+  corner-shape: superellipse(1.436);
   overflow: visible;
   background: var(--arrow-fill);
   cursor: zoom-in;
@@ -3904,6 +3900,7 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
   inset: 0;
   overflow: hidden;
   border-radius: inherit;
+  corner-shape: inherit;
 }
 
 .arrow-gallery-media::before {
@@ -3929,6 +3926,7 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
   box-sizing: border-box;
   border: 1px solid var(--image-stroke);
   border-radius: inherit;
+  corner-shape: inherit;
   pointer-events: none;
 }
 
@@ -3945,6 +3943,7 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
   height: auto;
   aspect-ratio: auto;
   border-radius: 0;
+  corner-shape: unset;
   transform: none;
   cursor: zoom-out;
   background: transparent;
@@ -3961,6 +3960,11 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
   max-width: none;
   object-fit: cover;
   display: block;
+  corner-shape: inherit;
+}
+
+.arrow-nav.is-full .arrow-gallery {
+  corner-shape: unset;
 }
 
 .arrow-gallery :is(img, video)[hidden] {
@@ -4138,10 +4142,12 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
 
 .arrow-project {
   position: relative;
+  box-sizing: border-box;
   display: inline-flex;
   align-items: center;
   gap: var(--space-2xs);
   height: var(--arrow-control);
+  max-width: 100%;
   margin-top: var(--space-sm);
   padding: 0 var(--space-md);
   border-radius: var(--radius);
@@ -4150,8 +4156,17 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
   text-decoration: none;
 }
 
+.arrow-project [data-nav-project-title] {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .arrow-project-action {
+  flex-shrink: 0;
   color: var(--muted);
+  white-space: nowrap;
 }
 
 .arrow-nav.is-cover .arrow-project,
@@ -4267,23 +4282,6 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
   .arrow-copy,
   .arrow-caption {
     max-width: calc(100% - 2 * var(--margin));
-  }
-
-  .arrow-project {
-    max-width: 100%;
-    box-sizing: border-box;
-  }
-
-  .arrow-project [data-nav-project-title] {
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .arrow-project-action {
-    flex-shrink: 0;
-    white-space: nowrap;
   }
 
   .arrow-hint {

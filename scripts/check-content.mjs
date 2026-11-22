@@ -68,6 +68,12 @@ export function checkContent(root) {
         }
       }
 
+      if (value && typeof value === 'object' && !Array.isArray(value) && value.discriminant === 'text') {
+        const heading = typeof value.value?.heading === 'string' ? value.value.heading.trim() : '';
+        const text = typeof value.value?.text === 'string' ? value.value.text.trim() : '';
+        if (!heading && !text) errors.push(`${rel} ${path}: text block needs a title or body`);
+      }
+
       if (value && typeof value === 'object' && !Array.isArray(value) && value.discriminant === 'image') {
         const src = typeof value.value?.src === 'string' ? value.value.src.trim() : '';
         if (!src) errors.push(`${rel} ${path}.value.src: missing image`);

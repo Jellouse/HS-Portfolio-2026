@@ -13,7 +13,6 @@ blocks:
   - discriminant: text
     value:
       heading: How the work shows in her exhibitions
-      text: fix
   - discriminant: image
     value:
       src: /src/content/projects/bodil-ouedraogo/blocks/1/value/src.jpg

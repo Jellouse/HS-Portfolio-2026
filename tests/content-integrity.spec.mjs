@@ -94,7 +94,22 @@ const dir = mkdtempSync(join(tmpdir(), 'hs-content-'));
 try {
   mkdirSync(join(dir, 'src/content/projects/demo'), { recursive: true });
   mkdirSync(join(dir, 'src/content/services'), { recursive: true });
-  writeFileSync(join(dir, 'src/content/projects/demo/index.yaml'), 'title: Demo\n');
+  writeFileSync(
+    join(dir, 'src/content/projects/demo/index.yaml'),
+    [
+      'title: Demo',
+      'blocks:',
+      '  - discriminant: text',
+      '    value:',
+      '      heading: Headline only',
+      '  - discriminant: text',
+      '    value:',
+      '      text: Body only',
+      '  - discriminant: text',
+      '    value: {}',
+      '',
+    ].join('\n'),
+  );
   writeFileSync(
     join(dir, 'src/content/services/broken.yaml'),
     [
@@ -122,6 +137,7 @@ try {
     'src/content/services/broken.yaml sections[0].images[1].value.src: missing image',
     'src/content/services/broken.yaml sections[0].images[2].value.src: missing image /src/content/services/images/nope.jpg',
     'src/content/services/broken.yaml projects[0]: unknown project nope',
+    'src/content/projects/demo/index.yaml blocks[2]: text block needs a title or body',
   ];
   for (const line of need) {
     if (!errors.includes(line)) {

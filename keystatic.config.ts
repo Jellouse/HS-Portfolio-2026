@@ -173,13 +173,12 @@ export default config({
                 schema: fields.object({
                   heading: fields.text({
                     label: 'Title',
-                    description: 'Optional. Shown centred above the text, like the case title. With a title the text is set larger.',
+                    description: 'Optional. Shown centred above the text, like the case title. A title on its own is fine.',
                   }),
                   text: fields.text({
                     label: 'Text',
                     multiline: true,
-                    description: 'A link is [label](https://...).',
-                    validation: { isRequired: true, length: { min: 1 } },
+                    description: 'Optional. Leave empty for a title only. A link is [label](https://...).',
                   }),
                 }),
               },
