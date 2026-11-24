@@ -1,67 +1,32 @@
 ---
 export const prerender = true;
 
-import mark from '../../assets/industrial-bloom-mark.svg?raw';
+import ArrowNav from '../../components/ArrowNav.astro';
 import Base from '../../layouts/Base.astro';
-import IntroHero from '../../components/sections/IntroHero.astro';
-import ShopIntro from '../../components/sections/ShopIntro.astro';
-import ShopProduct from '../../components/sections/ShopProduct.astro';
-import { getProducts } from '../../lib/shop';
+import { getShopNav } from '../../lib/arrow-nav';
 import { absoluteUrl } from '../../lib/content';
 
-const products = (await getProducts()).filter((p) => p.data.overview.show !== false);
+const tree = await getShopNav();
+const shop = tree.nodes[0];
 const jsonLd = {
   '@context': 'https://schema.org',
   '@type': 'ItemList',
   name: 'Industrial Bloom shop',
   url: absoluteUrl(Astro.site, '/shop/'),
-  itemListElement: products.map((p, i) => ({
+  itemListElement: shop.slides.map((slide, i) => ({
     '@type': 'ListItem',
     position: i + 1,
-    name: p.data.overview.title || p.data.name,
-    url: absoluteUrl(Astro.site, `/shop/${p.id}/`),
+    name: slide.title,
+    url: absoluteUrl(Astro.site, slide.href),
   })),
 };
-const sizes = '(min-width: 1440px) 439px, (min-width: 760px) 30vw, calc(50vw - 30px)';
 ---
 
-<Base jsonLd={jsonLd} title="Industrial Bloom shop · Humansize" description="Industrial Bloom: solid aluminium vases made from extrusion profiles, handmade in Germany in small numbered editions.">
-  <div class="shop-page page-grid">
-    <IntroHero variant="shop">
-      <div slot="illustration" class="shop-ring-layer" data-shop-ring-layer>
-        <div class="shop-ring" data-shop-ring>
-          <div class="shop-mark" data-spin-mark aria-hidden="true" set:html={mark} />
-        </div>
-      </div>
-    </IntroHero>
-    <ShopIntro />
-    {products.map((product, index) => <ShopProduct product={product} index={index} sizes={sizes} />)}
-  </div>
+<Base
+  jsonLd={jsonLd}
+  title="Industrial Bloom shop · Humansize"
+  description="Industrial Bloom: solid aluminium vases made from extrusion profiles, handmade in Germany in small numbered editions."
+  hideFooter
+>
+  <ArrowNav tree={tree} startScreen="shop" backHref="/" />
 </Base>
-
-<script>
-  import { initSpinMark } from '../../scripts/spin-mark';
-  import { initShopDetails } from '../../scripts/shop-details';
-  import { scrollToId } from '../../scripts/scroll-to-id';
-  document.querySelector('[data-shop-about]')?.addEventListener('click', (e) => {
-    if (!document.getElementById('shop-about')) return;
-    e.preventDefault();
-    const about = scrollToId('shop-about');
-    if (!about) return;
-    about.focus({ preventScroll: true });
-  });
-
-  initShopDetails();
-
-  import { refreshPrices } from '../../scripts/shop-price';
-  refreshPrices();
-
-  const start = () => {
-    const el = document.querySelector<HTMLElement>('[data-spin-mark]');
-    if (el) initSpinMark(el);
-  };
-  start();
-  addEventListener('pageshow', (e) => {
-    if (e.persisted) start();
-  });
-</script>

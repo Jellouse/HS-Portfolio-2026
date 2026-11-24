@@ -271,7 +271,7 @@ export function initArrowNav(root: ParentNode = document) {
   let warmIdle = 0;
   let warmGen = 0;
 
-  type WarmItem = { src: string; poster: string; blur?: string; kind: string; href?: string };
+  type WarmItem = { src: string; mobile?: string; poster: string; blur?: string; kind: string; href?: string };
 
   const warmUrl = (src: string | undefined, priority: 'high' | 'low' | 'auto') => {
     if (!src || warmImages.has(src)) return;
@@ -286,6 +286,7 @@ export function initArrowNav(root: ParentNode = document) {
   const warmSlide = (item: WarmItem | undefined, priority: 'high' | 'low' | 'auto') => {
     if (!item?.src) return;
     if (item.blur) warmUrl(item.blur, priority === 'low' ? 'low' : 'auto');
+    if (item.mobile && phone()) warmUrl(item.mobile, priority);
     if (item.kind === 'video') {
       if (item.poster) warmUrl(item.poster, priority);
       if (!warmVideos.has(item.src)) {
@@ -439,6 +440,7 @@ export function initArrowNav(root: ParentNode = document) {
     const item = screen()?.slides[slide];
     const full = item?.action || '';
     const short = full === 'View project' ? 'View' : full;
+    const compact = phone() && full === 'Learn more' ? '+' : full;
     const max = projectPillMax();
     if (!full) {
       action.textContent = '';
@@ -459,8 +461,8 @@ export function initArrowNav(root: ParentNode = document) {
       title.style.textOverflow = '';
       return value;
     };
-    if (measure(full) <= max) {
-      action.textContent = full;
+    if (measure(compact) <= max && (compact === full || phone())) {
+      action.textContent = compact;
       return;
     }
     action.textContent = short;
@@ -475,6 +477,7 @@ export function initArrowNav(root: ParentNode = document) {
     photo.getAnimations().forEach((anim) => anim.cancel());
     photo.removeAttribute('src');
     photo.alt = '';
+    nav.querySelector<HTMLSourceElement>('[data-nav-source]')?.removeAttribute('srcset');
     photo.style.opacity = '0';
     photo.hidden = true;
     clip.onloadedmetadata = null;
@@ -494,6 +497,7 @@ export function initArrowNav(root: ParentNode = document) {
     slide = (index + count) % count;
     const item = node.slides[slide];
     const photo = nav.querySelector<HTMLImageElement>('[data-nav-photo]')!;
+    const source = nav.querySelector<HTMLSourceElement>('[data-nav-source]');
     const clip = nav.querySelector<HTMLVideoElement>('[data-nav-video]')!;
     const caption = nav.querySelector<HTMLElement>('[data-nav-caption]')!;
     const title = caption.querySelector<HTMLElement>('.arrow-caption-title')!;
@@ -511,6 +515,10 @@ export function initArrowNav(root: ParentNode = document) {
     const buy = caption.querySelector<HTMLElement>('[data-nav-buy]')!;
     const slug = caption.querySelector<HTMLInputElement>('[data-nav-buy-slug]')!;
     const gallery = nav.querySelector<HTMLElement>('[data-nav-gallery]')!;
+    if (source) {
+      if (item.kind === 'image' && item.mobile) source.srcset = item.mobile;
+      else source.removeAttribute('srcset');
+    }
     const cutout = !!item.alpha;
     photo.classList.toggle('is-alpha', cutout);
     gallery.classList.toggle('is-alpha', cutout);
@@ -769,7 +777,15 @@ export function initArrowNav(root: ParentNode = document) {
           : nav.querySelector<HTMLElement>('[data-nav-gallery]')!.getBoundingClientRect());
     const size = controlSize();
     const pad = phone() ? 20 : 48;
-    const y = edges ? Math.round(view.top + (view.height - size) / 2) : Math.round(box.top + box.height / 2 - size / 2);
+    // On a phone the arrows sit in the caption row with the product pill.
+    const caption = nav.querySelector<HTMLElement>('[data-nav-caption]');
+    const captionMid = caption && !caption.hidden ? caption.getBoundingClientRect() : null;
+    const y = edges
+      ? Math.round(
+          (phone() && captionMid && captionMid.height > 0 ? captionMid.top + captionMid.height / 2 : view.top + view.height / 2) -
+            size / 2,
+        )
+      : Math.round(box.top + box.height / 2 - size / 2);
     const spots: [HTMLElement, number][] = [
       [left, edges ? view.left + pad : Math.round(view.left + (box.left - view.left) / 2 - size / 2)],
       [right, edges ? Math.round(view.right - pad - size) : Math.round(box.right + (view.right - box.right) / 2 - size / 2)],
@@ -796,12 +812,9 @@ export function initArrowNav(root: ParentNode = document) {
     back.style.transform = 'none';
   };
 
-  const dropFull = () => {
-    full = false;
-    fullGen += 1;
+  const resetCover = () => {
     nav.classList.remove('is-full', 'is-cover', 'is-zoom');
     const gallery = galleryEl();
-    gallery.getAnimations().forEach((anim) => anim.cancel());
     gallery.style.position = '';
     gallery.style.left = '';
     gallery.style.top = '';
@@ -815,6 +828,22 @@ export function initArrowNav(root: ParentNode = document) {
     gallery.style.borderRadius = '';
     gallery.style.clipPath = '';
     gallery.style.transition = '';
+  };
+
+  const dropFull = (keepChrome = false) => {
+    full = false;
+    fullGen += 1;
+    const gallery = galleryEl();
+    gallery.getAnimations().forEach((anim) => anim.cancel());
+    if (keepChrome) {
+      // Keep the cover geometry on the gallery so it shrinks out of the full
+      // bleed, but hand the controls back to their landing look straight away.
+      nav.classList.remove('is-full', 'is-zoom');
+      gallery.style.clipPath = '';
+      gallery.style.transition = '';
+      return;
+    }
+    resetCover();
   };
 
   const setFull = (open: boolean) => {
@@ -973,6 +1002,10 @@ export function initArrowNav(root: ParentNode = document) {
     const gallery = galleryEl();
     const caption = nav.querySelector<HTMLElement>('[data-nav-caption]')!;
     if (gallery.hidden) return;
+    if (full) {
+      caption.style.top = '';
+      return;
+    }
     const height = gallery.offsetHeight;
     const bottom = nav.clientHeight / 2 + height / 2;
     caption.style.top = `${Math.round((bottom + nav.clientHeight) / 2)}px`;
@@ -1092,6 +1125,7 @@ let galleryMaskOpen: boolean | null = null;
     open: boolean,
     fromT: number | null,
     locked?: { width: number; height: number } | null,
+    fromFull = false,
   ) => {
     const gallery = galleryEl();
     const genAt = generation;
@@ -1113,7 +1147,10 @@ let galleryMaskOpen: boolean | null = null;
     const insetX = Math.max(0, (gw - faceW) / 2);
     const insetY = Math.max(0, (gh - faceW) / 2);
     const faceR = faceW / 2;
-    const fullR = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--gallery-radius')) || 48;
+    const fullR =
+      fromFull && !open
+        ? 0
+        : parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--gallery-radius')) || 48;
     const maskAt = (t: number) => {
       const u = Math.min(1, Math.max(0, t));
       const x = Math.round(insetX * (1 - u));
@@ -1144,6 +1181,7 @@ let galleryMaskOpen: boolean | null = null;
         gallery.style.width = '';
         gallery.style.height = '';
         gallery.style.aspectRatio = '';
+        if (fromFull) resetCover();
       }
       galleryMaskOpen = null;
       if (open) gallery.hidden = false;
@@ -1203,14 +1241,20 @@ let galleryMaskOpen: boolean | null = null;
     return track;
   };
 
-  const paintScrubHud = (clientX: number, snapIndex?: number) => {
+  const markHoverDot = (index: number) => {
+    Array.from(dotsEl().children).forEach((el, i) => {
+      el.classList.toggle('is-hover', i === index && !el.classList.contains('is-on'));
+    });
+  };
+
+  const paintScrubHud = (
+    clientX: number,
+    progress: { count: number; index: number; indexF: number } = scrubProgress(clientX),
+  ) => {
     const hud = scrubEl();
     if (!hud) return;
-    const progress = scrubProgress(clientX);
-    const count = progress.count;
+    const { count, index, indexF } = progress;
     if (count < 2) return;
-    const index = snapIndex ?? progress.index;
-    const indexF = snapIndex ?? progress.indexF;
     const track = ensureScrubTrack(count);
     if (!track) return;
     const gallery = galleryEl().getBoundingClientRect();
@@ -1239,6 +1283,7 @@ let galleryMaskOpen: boolean | null = null;
     hud.style.left = '';
     const track = hud.querySelector<HTMLElement>('[data-nav-scrub-track]');
     if (track) track.style.transform = '';
+    markHoverDot(-1);
   };
 
   const endScrub = (resume: boolean) => {
@@ -1268,26 +1313,30 @@ let galleryMaskOpen: boolean | null = null;
   const hoverFine = () => matchMedia('(hover: hover) and (pointer: fine)').matches;
   let hoveringDots = false;
 
-  const dotIndexAt = (clientX: number) => {
-    let best = slide;
-    let bestDist = Infinity;
-    Array.from(dotsEl().children).forEach((el, i) => {
+  const hoverProgress = (clientX: number) => {
+    const centres = Array.from(dotsEl().children).map((el) => {
       const box = (el as HTMLElement).getBoundingClientRect();
-      const dist = Math.abs(clientX - (box.left + box.width / 2));
-      if (dist < bestDist) {
-        bestDist = dist;
-        best = i;
-      }
+      return box.left + box.width / 2;
     });
-    return best;
+    const count = centres.length;
+    if (count < 2) return { count, index: slide, indexF: slide };
+    if (clientX <= centres[0]) return { count, index: 0, indexF: 0 };
+    if (clientX >= centres[count - 1]) return { count, index: count - 1, indexF: count - 1 };
+    let i = 0;
+    while (i < count - 2 && clientX > centres[i + 1]) i += 1;
+    const span = centres[i + 1] - centres[i];
+    const indexF = span > 0 ? i + (clientX - centres[i]) / span : i;
+    return { count, index: Math.min(count - 1, Math.round(indexF)), indexF };
   };
 
-  const openHoverHud = (clientX: number, snapIndex?: number) => {
+  const openHoverHud = (clientX: number) => {
     const node = screen();
     const hud = scrubEl();
     if (!hud || !node || node.kind !== 'gallery' || node.slides.length < 2) return;
     hud.hidden = false;
-    paintScrubHud(clientX, snapIndex ?? dotIndexAt(clientX));
+    const progress = hoverProgress(clientX);
+    paintScrubHud(clientX, progress);
+    markHoverDot(progress.index);
   };
 
   const closeHoverHud = (resume: boolean) => {
@@ -1364,7 +1413,10 @@ let galleryMaskOpen: boolean | null = null;
   const travel = (id: string, push: boolean) => {
     if (introOn || id === screenId || (id !== 'landing' && !nodes.has(id))) return;
     if (introPlaying) endIntro();
-    if (full) dropFull();
+    const wasGallery = nav.dataset.kind === 'gallery';
+    const closeBox = wasGallery ? { width: galleryEl().offsetWidth, height: galleryEl().offsetHeight } : null;
+    const closingFull = full && !reduce && wasGallery;
+    if (full) dropFull(closingFull);
     const gen = ++generation;
     clearScrollFlip(false);
     stopHold(false);
@@ -1374,13 +1426,6 @@ let galleryMaskOpen: boolean | null = null;
     const ease = cssEase('--ease-nav');
     const slot = nav.querySelector<HTMLElement>('.arrow-slot')!;
     const slotBefore = slot.getBoundingClientRect();
-    const wasGallery = nav.dataset.kind === 'gallery';
-    const closeBox = wasGallery
-      ? {
-          width: galleryEl().offsetWidth,
-          height: galleryEl().offsetHeight,
-        }
-      : null;
     let fromMask: number | null = null;
     const maskAnim = galleryEl().getAnimations()[0];
     if (maskAnim && galleryMaskOpen != null) {
@@ -1433,6 +1478,11 @@ let galleryMaskOpen: boolean | null = null;
     const enteringGallery = !wasGallery && nav.dataset.kind === 'gallery';
     const outward = depthOf(id) > depthOf(fromId);
     const nowGallery = nav.dataset.kind === 'gallery';
+    if (!nowGallery && !closingFull) resetCover();
+    if (nowGallery && screen()?.full) {
+      full = true;
+      nav.classList.add('is-full', 'is-cover');
+    }
     let pendingGallerySlide = false;
     if (!reduce) flightLock = true;
     if (nowGallery) {
@@ -1449,11 +1499,11 @@ let galleryMaskOpen: boolean | null = null;
         showSlide(0, false);
       }
     }
-    placeGalleryArrows(null, true);
     placeCopy();
     placeCaption();
+    placeGalleryArrows(null, true);
     if (!reduce && nowGallery !== wasGallery) {
-      growGallery(nowGallery, fromMask, nowGallery ? null : closeBox);
+      growGallery(nowGallery, fromMask, nowGallery ? null : closeBox, !nowGallery && closingFull);
     }
 
     const route = nodes.get(id)?.href;
@@ -1698,6 +1748,11 @@ let galleryMaskOpen: boolean | null = null;
 
   const activate = (dir: Dir) => {
     const node = screen();
+    const backHref = nav.dataset.backHref;
+    if (dir === 'up' && backHref && (full || screenId === start)) {
+      location.assign(backHref);
+      return;
+    }
     if (node?.kind === 'gallery' && (dir === 'left' || dir === 'right')) {
       showSlide(slide + (dir === 'right' ? 1 : -1));
       return;
@@ -1711,7 +1766,8 @@ let galleryMaskOpen: boolean | null = null;
       }
     }
     if (dir === 'up' && full) {
-      setFull(false);
+      if (node?.full) travel(node.parent === 'landing' ? 'landing' : node.parent, true);
+      else setFull(false);
       return;
     }
     if (dir === 'up' && node) {
@@ -1831,6 +1887,7 @@ let galleryMaskOpen: boolean | null = null;
     if (scrubbing) return;
     const target = event.target as Element | null;
     if (target?.closest?.('[data-nav-dots], [data-nav-scrub]')) return;
+    if (screen()?.full) return;
     setFull(!full);
   });
 
@@ -1905,12 +1962,15 @@ let galleryMaskOpen: boolean | null = null;
     const node = screen();
     if (!node || node.kind !== 'gallery' || node.slides.length < 2) return;
     if (!(event.target as Element | null)?.closest?.('[data-nav-dots]')) return;
-    const next = dotIndexAt(event.clientX);
+    const next = hoverProgress(event.clientX).index;
     if (next !== slide) {
       showSlide(next);
       playSnick();
     }
-    if (hoveringDots) openHoverHud(event.clientX, next);
+    if (hoveringDots) {
+      const count = screen()?.slides.length ?? 0;
+      paintScrubHud(event.clientX, { count, index: next, indexF: next });
+    }
   });
 
   window.addEventListener('keydown', (event) => {
@@ -1920,12 +1980,17 @@ let galleryMaskOpen: boolean | null = null;
     if ((event.key === ' ' || event.key === 'Enter') && screen()?.kind === 'gallery') {
       event.preventDefault();
       if (event.repeat || introOn || pressFrom) return;
+      if (screen()?.full) return;
       setFull(!full);
       return;
     }
     if ((backKey(event.key) || event.key === 'ArrowUp') && full) {
       event.preventDefault();
       if (event.repeat || introOn) return;
+      if (screen()?.full) {
+        activate('up');
+        return;
+      }
       setFull(false);
       return;
     }
@@ -2201,17 +2266,23 @@ let galleryMaskOpen: boolean | null = null;
   };
 
   const hash = location.hash.replace('#', '');
-  const opened = hash && nodes.has(hash) && !nodes.get(hash)?.href ? hash : 'landing';
+  const start = nav.dataset.start && nodes.has(nav.dataset.start) ? nav.dataset.start : '';
+  const opened = start || (hash && nodes.has(hash) && !nodes.get(hash)?.href ? hash : 'landing');
+  const keepPath = opened === 'landing' || opened === start;
   history.replaceState(
     { arrow: opened },
     '',
-    opened === 'landing' ? location.pathname + location.search : `${location.pathname}${location.search}#${opened}`,
+    keepPath ? location.pathname + location.search : `${location.pathname}${location.search}#${opened}`,
   );
   const routed = takeRoute();
   const returning = routed && opened !== 'landing' && nodes.get(routed)?.href && nodes.get(routed)?.parent === opened && isTraverse() ? routed : null;
   screenId = returning ?? opened;
   if (screenId !== 'landing') applyCopy(screenId);
   paintChrome(screenId);
+  if (screen()?.full) {
+    full = true;
+    nav.classList.add('is-full', 'is-cover');
+  }
   warmRoutes(screenId);
   if (opened !== 'landing' && nodes.get(opened)?.kind === 'gallery') showSlide(0, false);
   placeCopy();
@@ -2219,6 +2290,12 @@ let galleryMaskOpen: boolean | null = null;
   placeGalleryArrows();
   const relayout = () => {
     const current = screen()?.kind === 'gallery' ? screen()?.slides[slide] : null;
+    if (current && full) {
+      const box = galleryEl();
+      box.style.width = '';
+      box.style.height = '';
+      box.style.aspectRatio = '';
+    }
     if (current && !full) fitGallery(current, false);
     placeCopy();
     placeCaption();

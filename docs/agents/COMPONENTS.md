@@ -10,13 +10,13 @@ These were repeated, or the same menu and price markup copied across pages. The 
 
 | Component | File | Props | Pages |
 | --- | --- | --- | --- |
-| Prose | `src/components/sections/Prose.astro` | `paragraphs: string[]` | `/`, `/shop/`, `/shop/:slug`, `/work/:slug` |
-| Price | `src/components/sections/Price.astro` | `slug`, `mode` (`suffix` or `prefix`), `text` | `/shop/`, `/shop/:slug` |
-| MainMenu | `src/components/sections/MainMenu.astro` | `variant` (`header`, `shop`, or `project`), `home?` | `/`, `/shop/` |
+| Prose | `src/components/sections/Prose.astro` | `paragraphs: string[]` | `/`, `/shop/:slug`, `/work/:slug` |
+| Price | `src/components/sections/Price.astro` | `slug`, `mode` (`suffix` or `prefix`), `text` | `/shop/:slug` |
+| MainMenu | `src/components/sections/MainMenu.astro` | `variant` (`header`, `shop`, or `project`), `home?` | dev catalogue |
 | CornerMark | `src/components/sections/CornerMark.astro` | `class`, `href`, `label`, slot for the mark | dev catalogue |
-| IntroHero | `src/components/sections/IntroHero.astro` | `variant` (`home` or `shop`), `site?`, illustration slot | `/shop/` |
-| ShopIntro | `src/components/sections/ShopIntro.astro` | none | `/shop/` |
-| ShopProduct | `src/components/sections/ShopProduct.astro` | `product`, `index`, `sizes` | `/shop/` |
+| IntroHero | `src/components/sections/IntroHero.astro` | `variant` (`home` or `shop`), `site?`, illustration slot | dev catalogue |
+| ShopIntro | `src/components/sections/ShopIntro.astro` | none | dev catalogue |
+| ShopProduct | `src/components/sections/ShopProduct.astro` | `product`, `index`, `sizes` | dev catalogue |
 | ShopDetailHead | `src/components/sections/ShopDetailHead.astro` | `title`, `slug`, `eur` | `/shop/:slug` |
 | ShopCopy | `src/components/sections/ShopCopy.astro` | `text` | `/shop/:slug` |
 | ShopFigure | `src/components/sections/ShopFigure.astro` | `src`, `alt`, `sizes`, `outline?`, `priority?` | `/shop/:slug` |
@@ -36,7 +36,7 @@ These were already shared. Pages and other components keep using them.
 | --- | --- | --- | --- |
 | About | `src/components/About.astro` | `paragraphs` | `/` |
 | Blocks | `src/components/Blocks.astro` | `blocks`, `slug?`, `processFromFolder?`, `processFolderSrcs?`, `info?` | `/work/:slug`, `/preview/:slug` |
-| BlurImage | `src/components/BlurImage.astro` | `src`, `alt`, `sizes`, `priority?`, `plain?`, `flush?`, `outline?`, `fade?` defaults to true | `/`, `/shop/`, `/shop/:slug`, `/work/:slug` |
+| BlurImage | `src/components/BlurImage.astro` | `src`, `alt`, `sizes`, `priority?`, `plain?`, `flush?`, `outline?`, `fade?` defaults to true | `/`, `/shop/:slug`, `/work/:slug` |
 | VideoFrame | `src/components/VideoFrame.astro` | `src`, `poster?`, `label?`, `plain?`, `flush?`, `outline?`, `priority?`, `fade?` defaults to true | `/`, `/work/:slug` |
 | VideoBlock | `src/components/VideoBlock.astro` | `src`, `poster?`, `label?`, `frame?`, `flush?`, `outline?` | `/work/:slug` |
 | ImageBlock | `src/components/ImageBlock.astro` | `src`, `alt`, `frame?`, `priority?`, `flush?`, `outline?` | `/work/:slug` |
@@ -63,6 +63,10 @@ These were already shared. Pages and other components keep using them.
 | LeadCard | `src/components/LeadCard.astro` | none | not mounted |
 
 `BlurImage` and `VideoFrame` add `scroll-media` when `fade` is true. True is the default. Leave it.
+
+## Shop gallery
+
+`/shop` and the homepage Shop screen are the same fullscreen gallery. Both render `src/components/ArrowNav.astro`, which is also the homepage. The slides come from `shopSlides()` in `src/lib/arrow-nav.ts`: one per product with `overview.show` on, in `order`, from the product's `viewer.desktop` and `viewer.mobile` images. `/shop` passes `startScreen="shop"` and `backHref="/"`, so it opens on the gallery and the back control is a plain link home. The `full` flag on the Shop screen in `arrow-nav.yaml` makes it open fullscreen on both.
 
 ## Proposed
 

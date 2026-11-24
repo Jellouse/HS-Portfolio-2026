@@ -4,9 +4,13 @@ import type { ArrowTree } from '../lib/arrow-nav';
 
 interface Props {
   tree: ArrowTree;
+  /** Open on this screen instead of the landing. /shop opens on the shop gallery. */
+  startScreen?: string;
+  /** A plain link for the back control when there is no landing behind it. */
+  backHref?: string;
 }
 
-const { tree } = Astro.props;
+const { tree, startScreen, backHref } = Astro.props;
 ---
 
 <script is:inline>
@@ -33,7 +37,7 @@ const { tree } = Astro.props;
   })();
 </script>
 
-<div class="arrow-nav is-intro" data-arrow-nav data-no-letter data-no-reveal data-kind="landing" data-screen="landing">
+<div class="arrow-nav is-intro" data-arrow-nav data-no-letter data-no-reveal data-kind="landing" data-screen="landing" data-start={startScreen} data-back-href={backHref}>
   <div class="arrow-copy" data-nav-copy>
     <h1 class="arrow-title" data-nav-title data-nav-line>{tree.landing.title}</h1>
     <div data-nav-body>
@@ -59,7 +63,10 @@ const { tree } = Astro.props;
       </div>
       <div class="arrow-gallery" data-nav-gallery hidden>
         <div class="arrow-gallery-media">
-          <img alt="" data-nav-photo hidden />
+          <picture class="arrow-gallery-picture">
+            <source data-nav-source media="(max-width: 759px)" />
+            <img alt="" data-nav-photo hidden />
+          </picture>
           <video data-nav-video hidden muted loop playsinline preload="auto"></video>
         </div>
         <div class="arrow-scrub" data-nav-scrub hidden aria-hidden="true">

@@ -1,9 +1,16 @@
 name: Type 28
-order: 4
+order: 2
 edition: of 4
 description: A small aluminium tube vase for a single flower.
 overview:
-  show: false
+  show: true
+viewer:
+  desktop:
+    src: /src/content/products/28/viewer/desktop/src.webp
+    alt: Type 28 aluminium vase with a single flower
+  mobile:
+    src: /src/content/products/28/viewer/mobile/src.webp
+    alt: Type 28 aluminium vase with a single flower
 detail:
   images:
     - src: /src/content/products/28/1.png

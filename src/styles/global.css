@@ -3828,14 +3828,14 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
   z-index: 6;
 }
 
-.arrow-nav.is-full :is(.arrow-pill, .arrow-back):not(.is-pressed) {
+.arrow-nav.is-full :is(.arrow-pill, .arrow-back, .arrow-project):not(.is-pressed) {
   background: color-mix(in srgb, var(--bg) 60%, transparent);
   color: var(--ink-fixed);
   backdrop-filter: blur(20px);
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .arrow-nav.is-full :is(.arrow-pill, .arrow-back):hover:not(.is-pressed) {
+  .arrow-nav.is-full :is(.arrow-pill, .arrow-back, .arrow-project):hover:not(.is-pressed) {
     background: color-mix(in srgb, var(--bg) 76%, transparent);
     color: var(--ink-fixed);
   }
@@ -3915,7 +3915,12 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
   pointer-events: none;
 }
 
-.arrow-gallery-media > :is(img, video) {
+.arrow-gallery-picture {
+  display: contents;
+}
+
+.arrow-gallery-media > :is(img, video),
+.arrow-gallery-picture > img {
   position: relative;
   z-index: 1;
 }
@@ -4022,8 +4027,13 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
 
 @media (hover: hover) and (pointer: fine) and (min-width: 760px) {
   .arrow-dots {
+    left: 50%;
+    right: auto;
+    width: max-content;
+    transform: translateX(-50%);
     pointer-events: auto;
-    padding-bottom: var(--space-sm);
+    padding: var(--space-sm) var(--space-2xs);
+    margin-top: calc(var(--space-sm) * -1);
     cursor: pointer;
     user-select: none;
     -webkit-user-select: none;
@@ -4031,6 +4041,7 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
 
   .arrow-nav.is-cover .arrow-dots,
   .arrow-nav.is-full .arrow-dots {
+    margin-top: 0;
     margin-bottom: calc(var(--space-sm) * -1);
   }
 }
@@ -4120,6 +4131,10 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
   height: 4px;
 }
 
+.arrow-dot.is-hover:not(.is-on) {
+  background: var(--ink);
+}
+
 .arrow-nav.is-cover .arrow-scrub,
 .arrow-nav.is-full .arrow-scrub {
   bottom: calc(48px + var(--space-2xs));
@@ -4133,6 +4148,42 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
 .arrow-nav.is-cover .arrow-caption {
   opacity: 0;
   pointer-events: none;
+}
+
+/* The shop sits on white, so its controls keep the grey fill they have on the
+   landing. A 60% white pill would disappear. The blur still frosts them over
+   the vase. */
+.arrow-nav.is-cover[data-screen='shop'] :is(.arrow-pill, .arrow-back, .arrow-project):not(.is-pressed) {
+  background: var(--arrow-fill);
+  color: var(--ink);
+  backdrop-filter: blur(20px);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .arrow-nav.is-cover[data-screen='shop'] :is(.arrow-pill, .arrow-back, .arrow-project):hover:not(.is-pressed) {
+    background: color-mix(in srgb, var(--arrow-fill) 86%, var(--ink));
+  }
+}
+
+/* The shop gallery is full from the start, so its caption stays: the product
+   pill is the only way through to the product page. */
+.arrow-nav.is-cover[data-screen='shop'] .arrow-caption {
+  top: auto;
+  bottom: calc(48px + var(--space-md));
+  z-index: 6;
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-50%);
+}
+
+.arrow-nav.is-cover[data-screen='shop'] .arrow-gallery {
+  cursor: default;
+}
+
+@media (max-width: 759px) {
+  .arrow-nav.is-cover[data-screen='shop'] .arrow-caption {
+    bottom: calc(var(--margin) + var(--space-md));
+  }
 }
 
 .arrow-caption-title {

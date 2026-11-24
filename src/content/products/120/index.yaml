@@ -1,5 +1,5 @@
 name: Type 120
-order: 2
+order: 3
 edition: of 2
 description: >-
   An aluminium vase made from one textured extrusion profile, for a medium-sized
@@ -25,6 +25,13 @@ overview:
     alt: Type-120 aluminium vase
     outline: false
     gallery: none
+viewer:
+  desktop:
+    src: /src/content/products/120/viewer/desktop/src.webp
+    alt: Type-120 aluminium vase with fritillaria
+  mobile:
+    src: /src/content/products/120/viewer/mobile/src.webp
+    alt: Type-120 aluminium vase with fritillaria
 detail:
   description: >-
     A single aluminium extrusion profile with a textured, architectural surface.

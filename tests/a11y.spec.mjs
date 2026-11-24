@@ -50,9 +50,15 @@ await p.keyboard.press('Tab');
 check(await p.evaluate(() => document.activeElement.matches('[data-project-back]')), 'Tab lands on Back');
 check(await p.evaluate(() => !document.querySelector('.project-menu')), 'project page has no old menu');
 
-await p.goto(B + '/shop/', { waitUntil: 'load' });
-await p.waitForTimeout(400);
-await p.focus('.site-menu [data-contact-open]');
+await p.goto(B + '/', { waitUntil: 'load' });
+await p.waitForFunction(() => {
+  const nav = document.querySelector('[data-arrow-nav]');
+  return nav && nav.classList.contains('is-controls') && !nav.classList.contains('is-intro');
+}, null, { timeout: 20000 });
+await p.click('[data-dir="down"]');
+await p.waitForFunction(() => document.querySelector('[data-arrow-nav]')?.dataset.screen === 'about', null, { timeout: 10000 });
+await p.waitForTimeout(600);
+await p.focus('[data-screen="about"] [data-contact-open]');
 await p.keyboard.press('Enter');
 await p.waitForSelector('[data-contact]', { timeout: 8000 });
 await p.waitForTimeout(300);
@@ -66,14 +72,20 @@ await p.waitForTimeout(300);
 check((await p.evaluate(() => scrollY)) === y0, 'dialog: page does not scroll (desktop)');
 await p.keyboard.press('Escape');
 await p.waitForTimeout(100);
-check(await p.evaluate(() => document.activeElement.matches('.site-menu [data-contact-open]')), 'dialog: Esc returns focus to Contact');
+check(await p.evaluate(() => !!document.activeElement.closest('[data-screen="about"]')), 'dialog: Esc returns focus to Contact');
 
 for (const [label, opt] of [['desktop', { viewport: { width: 1440, height: 900 } }], ['mobile', { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true }]]) {
   const ctx = await browser.newContext(opt);
   const q = await ctx.newPage();
-  await q.goto(B + '/shop/', { waitUntil: 'load' });
-  await q.waitForTimeout(400);
-  await q.evaluate(() => document.querySelector('.site-menu [data-contact-open]').click());
+  await q.goto(B + '/', { waitUntil: 'load' });
+  await q.waitForFunction(() => {
+    const nav = document.querySelector('[data-arrow-nav]');
+    return nav && nav.classList.contains('is-controls') && !nav.classList.contains('is-intro');
+  }, null, { timeout: 20000 });
+  await q.click('[data-dir="down"]');
+  await q.waitForFunction(() => document.querySelector('[data-arrow-nav]')?.dataset.screen === 'about', null, { timeout: 10000 });
+  await q.waitForTimeout(500);
+  await q.click('[data-screen="about"] [data-contact-open]');
   await q.waitForSelector('[data-contact]', { timeout: 8000 });
   await q.waitForTimeout(300);
   await q.evaluate(() => document.querySelector('[data-service="Physical Build"]').click());

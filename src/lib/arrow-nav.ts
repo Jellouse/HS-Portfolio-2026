@@ -6,12 +6,13 @@ import { galleryCategoryValues } from './gallery-categories';
 import { isProcessVideo, processVideoPoster, processVideoSrc } from './project-blocks.mjs';
 import { imageHasAlpha } from './image-alpha';
 import { resolveImage } from './images';
-import { getProducts } from './shop';
+import { getProducts, type ProductEntry } from './shop';
 
 export type ArrowDir = 'left' | 'right' | 'up' | 'down';
 
 export type ArrowSlide = {
   src: string;
+  mobile: string;
   poster: string;
   blur: string;
   alt: string;
@@ -28,12 +29,21 @@ export type ArrowSlide = {
 };
 
 const GALLERY_MAX = 2000;
+// The shop fills the viewport, so it keeps the 2x export. A 1600px desktop at 2x is 3200.
+const SHOP_MAX = 3200;
 
-async function galleryStill(file: ImageMetadata, alpha: boolean) {
+async function galleryStill(
+  file: ImageMetadata,
+  alpha: boolean,
+  quality?: number,
+  maxWidth = GALLERY_MAX,
+  format?: 'webp' | 'png' | 'avif',
+) {
   const display = await getImage({
     src: file,
-    width: Math.min(GALLERY_MAX, file.width),
-    format: alpha ? 'png' : 'webp',
+    width: Math.min(maxWidth, file.width),
+    format: format ?? (alpha ? 'png' : 'webp'),
+    ...(quality ? { quality } : {}),
   });
   const blur = alpha
     ? ''
@@ -56,6 +66,7 @@ export type ArrowNode = {
   title: string;
   body: string;
   kind: 'branch' | 'gallery' | 'placeholder';
+  full?: boolean;
   slides: ArrowSlide[];
   paragraphs: string[];
   href?: string;
@@ -111,6 +122,7 @@ async function imageSlide(piece: Piece, title: string, caption: string, slug: st
     const still = poster ? await galleryStill(poster, false) : { src: '', blur: '' };
     return {
       src: piece.video,
+      mobile: '',
       poster: still.src,
       blur: still.blur,
       alt: piece.alt,
@@ -131,6 +143,7 @@ async function imageSlide(piece: Piece, title: string, caption: string, slug: st
   const still = await galleryStill(file, alpha);
   return {
     src: still.src,
+    mobile: '',
     poster: '',
     blur: still.blur,
     alt: piece.alt,
@@ -147,10 +160,45 @@ async function imageSlide(piece: Piece, title: string, caption: string, slug: st
   };
 }
 
+async function viewerSlide(
+  product: ProductEntry,
+  desktop: { src?: string | null; alt?: string },
+  mobile?: { src?: string | null; alt?: string },
+): Promise<ArrowSlide> {
+  const file = resolveImage(desktop.src!);
+  // The shop frames are cut out, so the page background shows around the vase.
+  const alpha = await imageHasAlpha(file);
+  const still = await galleryStill(file, alpha, 62, SHOP_MAX, 'avif');
+  const phone = mobile?.src ? resolveImage(mobile.src) : null;
+  const phoneAlpha = phone ? await imageHasAlpha(phone) : false;
+  return {
+    src: still.src,
+    mobile: phone ? (await galleryStill(phone, phoneAlpha, 62, SHOP_MAX, 'avif')).src : '',
+    poster: '',
+    blur: still.blur,
+    alt: desktop.alt || mobile?.alt || product.data.name,
+    title: product.data.name,
+    caption: '',
+    product: '',
+    alpha,
+    kind: 'image',
+    width: file.width,
+    height: file.height,
+    slug: '',
+    href: `/shop/${product.id}/`,
+    action: 'Learn more',
+  };
+}
+
 async function shopSlides(): Promise<ArrowSlide[]> {
   const products = (await getProducts()).filter((product) => product.data.overview.show !== false);
   const slides: ArrowSlide[] = [];
   for (const product of products) {
+    const viewer = product.data.viewer;
+    if (viewer?.desktop?.src) {
+      slides.push(await viewerSlide(product, viewer.desktop, viewer.mobile));
+      continue;
+    }
     const seen = new Set<string>();
     const detail = product.data.detail;
     const images = [
@@ -168,6 +216,7 @@ async function shopSlides(): Promise<ArrowSlide[]> {
       const still = await galleryStill(file, alpha);
       slides.push({
         src: still.src,
+        mobile: '',
         poster: '',
         blur: still.blur,
         alt: image.alt || product.data.name,
@@ -248,10 +297,36 @@ export async function getArrowNav(): Promise<ArrowTree> {
           title: node.title,
           body: node.body,
           kind: node.kind,
+          full: node.full === true,
           paragraphs: node.id === 'about' ? site.about.map((paragraph) => renderInline(paragraph)) : [],
           slides,
         };
       }),
     ).then(async (list) => [...list, ...(await serviceNodes())]),
+  };
+}
+
+// /shop renders the shop gallery on its own. Same slides, same controls, no landing behind it.
+export async function getShopNav(): Promise<ArrowTree> {
+  const entry = await getEntry('arrowNav', 'arrow-nav');
+  if (!entry) throw new Error('Missing src/content/site/arrow-nav.yaml');
+  const node = entry.data.nodes.find((item) => item.id === 'shop');
+  if (!node) throw new Error('Missing the shop screen in src/content/site/arrow-nav.yaml');
+  return {
+    landing: entry.data.landing,
+    nodes: [
+      {
+        id: node.id,
+        parent: node.parent,
+        dir: node.dir,
+        label: node.label,
+        title: node.title,
+        body: node.body,
+        kind: node.kind,
+        full: node.full === true,
+        paragraphs: [],
+        slides: await shopSlides(),
+      },
+    ],
   };
 }

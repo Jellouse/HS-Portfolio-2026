@@ -304,7 +304,7 @@ export default config({
           name: { label: 'Name', validation: { isRequired: true, length: { min: 1 } } },
           slug: { label: 'Slug', description: 'Also the /shop/<slug> URL and the product key in /admin.' },
         }),
-        order: fields.integer({ label: 'Order', description: 'Position on /shop, low first.', defaultValue: 99 }),
+        order: fields.integer({ label: 'Order', description: 'Position in the shop gallery, low first.', defaultValue: 99 }),
         edition: fields.text({ label: 'Edition', description: 'e.g. of 8' }),
         dimensions: fields.text({ label: 'Dimensions', description: 'Optional, e.g. 200 mm tall' }),
         description: fields.text({ label: 'Description', multiline: true, validation: { isRequired: true, length: { min: 1 } } }),
@@ -317,7 +317,7 @@ export default config({
         ),
         overview: fields.object(
           {
-            show: fields.checkbox({ label: 'Show on /shop', defaultValue: true }),
+            show: fields.checkbox({ label: 'Show in the shop gallery', defaultValue: true }),
             title: fields.text({ label: 'Title', description: 'As shown on /shop, e.g. Type-660. Empty: the name.' }),
             description: fields.text({ label: 'Description', description: 'Optional line under the caption.', multiline: true }),
             left: fields.object({
@@ -330,6 +330,34 @@ export default config({
             }, { label: 'Right image' }),
           },
           { label: '/shop overview', description: 'The product section on /shop: an image pair and its caption.' },
+        ),
+        viewer: fields.object(
+          {
+            desktop: fields.object(
+              {
+                src: { ...fields.image({ label: 'Desktop image', directory: 'src/content/products', publicPath: '/src/content/products' }) },
+                alt: fields.text({ label: 'Alt text' }),
+              },
+              {
+                label: 'Desktop',
+                description: '16:10 crop, white background, no outline. Shown in the fullscreen shop gallery from 760 up.',
+              },
+            ),
+            mobile: fields.object(
+              {
+                src: { ...fields.image({ label: 'Mobile image', directory: 'src/content/products', publicPath: '/src/content/products' }) },
+                alt: fields.text({ label: 'Alt text' }),
+              },
+              {
+                label: 'Mobile',
+                description: 'Portrait crop for a phone, about 390 by 695. Same photo as desktop, tighter. Empty falls back to desktop.',
+              },
+            ),
+          },
+          {
+            label: 'Shop gallery',
+            description: 'The fullscreen vase gallery on /shop and on the homepage Shop screen. One slide per product, in Order.',
+          },
         ),
         detail: fields.object(
           {
@@ -616,6 +644,11 @@ export default config({
                 { label: 'Placeholder', value: 'placeholder' },
               ],
               defaultValue: 'branch',
+            }),
+            full: fields.checkbox({
+              label: 'Open fullscreen',
+              defaultValue: false,
+              description: 'A gallery that fills the viewport, with the image edge to edge. Used by Shop.',
             }),
           }),
           {

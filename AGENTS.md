@@ -6,9 +6,9 @@ Read [docs/agents/RULEBOOK.md](docs/agents/RULEBOOK.md) before any edit. It is m
 
 ## Structure
 
-- `src/pages/index.astro` is the homepage. Home and `/shop` share `IntroHero` (illustration slot, name, menu). The first project peeks above the fold.
+- `src/pages/index.astro` is the homepage. It renders `ArrowNav` (the landing face and the screens behind it).
 - `src/pages/work/[slug].astro` builds every published project from its block list. New projects do not need a new page.
-- `src/pages/shop/index.astro` and `src/pages/shop/[slug].astro` are the vase shop.
+- `src/pages/shop/index.astro` is the vase shop: a fullscreen gallery that renders `ArrowNav` with `startScreen="shop"`, so it matches the homepage Shop screen. `src/pages/shop/[slug].astro` is one product.
 - `src/pages/canvas.astro` is the review board. `src/pages/admin.astro` is shop admin. `src/pages/preview/[slug].astro` is the CMS preview.
 - `src/content.config.ts` is the typed schema. `keystatic.config.ts` edits the same files. Keep the two in step.
 - `src/styles/type.css` is the only place font size, line height, and tracking are defined. `src/lib/type-scale.ts` mirrors those values for inline styles. `tests/type-scale.spec.mjs` fails if they drift.
@@ -22,7 +22,7 @@ File names are kebab-case. A module that both pages use lives in `src/lib/` or `
 ## Where content lives
 
 - Site copy, email, about, socials: `src/content/site/site.yaml`
-- Homepage screens: `src/content/site/arrow-nav.yaml`, edited in Keystatic as Homepage. Web, 3D, Product, and Space galleries come from the Gallery field on each project image or video. The project title and summary are the headline and caption. Shop uses the product images whose Gallery field is Shop, with the product name and Learn more. The About screen reads the About paragraphs from `site.yaml`.
+- Homepage screens: `src/content/site/arrow-nav.yaml`, edited in Keystatic as Homepage. Web, 3D, Product, and Space galleries come from the Gallery field on each project image or video. The project title and summary are the headline and caption. Shop uses each product's Shop gallery images, desktop and mobile, with the product name and Learn more. The About screen reads the About paragraphs from `site.yaml`.
 - One folder per project: `src/content/projects/<slug>/index.yaml` plus images in that folder
 - Products: `src/content/products/<slug>/index.yaml`
 - Image paths in YAML are absolute from the repo, like `/src/content/projects/atomic-ski/blocks/0/value/src.jpg`
@@ -94,7 +94,7 @@ Do not change these. They are the design.
 - Scroll-linked blur reveal: `src/scripts/text-blur-scroll.ts` paints `.reveal-word` on scroll (15vh band at the bottom, the same band in reverse at the top). Link underlines use the same `--reveal` progress.
 - Links: 1px underline, 3px offset (`text-underline-offset: 3px`).
 - `@Humansize` on desktop hover: the `@` fades in and the word slides so the pair stays centred on the same point. The shift is `translateX(-50%)` of the `@` itself (`Header.astro`, `.brand-shift`). No measured width.
-- Homepage face and shop ring: size comes from `src/lib/intro-layout.ts` and `src/lib/viewport-layout.ts`. They sit in the page and scroll with it. Intro nav fade still uses `src/scripts/intro-face.ts`, `src/scripts/shop-intro.ts`, and `src/lib/intro-scroll.ts`.
+- Homepage face: size comes from `src/lib/intro-layout.ts` and `src/lib/viewport-layout.ts`. It sits in the page and scrolls with it. Intro nav fade still uses `src/scripts/intro-face.ts` and `src/lib/intro-scroll.ts`. The old shop ring is kept in the CSS and `IntroHero`, but nothing renders it.
 - View transitions: the root transition fades the new page in over the old one. Product pages open with the menu, not the mark. Project pages open with the back control.
 
 ## Layout grid
@@ -117,6 +117,7 @@ Defined in `src/styles/global.css`:
 - `KEYSTATIC_STORAGE=github npm run dev` local CMS in GitHub mode, for the one-time app setup
 - `npm run build` static pages plus the Keystatic server routes
 - `npm run preview` serve the build
+- `node scripts/shop-viewer-crops.mjs <dir>` rebuilds the shop gallery images from the vase masters named `660`, `28`, `120`, `490`. It composes each vase onto a white 16:10 or 390:695 frame at the share of the width and the rim height set in the recipe, so a 2x export lands on the same picture.
 - `npm test` builds, then runs every spec in `tests/run.mjs`. It must pass before any merge.
 - `npm run test:quick` runs the specs without rebuilding. Filter with `node tests/run.mjs intro shop`.
 
@@ -124,7 +125,7 @@ Set `SITE_URL` to the production origin (no trailing slash). On Vercel it falls 
 
 ## Verification
 
-- `npm test` is the behaviour check: touch scroll, reveal, intro face, shop ring, view transitions, underlines, canvas auth, shop grid.
+- `npm test` is the behaviour check: touch scroll, reveal, intro face, view transitions, underlines, canvas auth, shop gallery.
 - Pixel check, after two builds: `node scripts/visual-capture.mjs <static-root> <out-dir> <port>` then `node scripts/visual-diff.mjs <before-dir> <after-dir>`. Static root is `.vercel/output/static`. Captures `/`, `/shop/`, `/work/industrial-bloom/`, and `/work/tonys-chocolonely/` at 1440 and 390, full page, reduced motion, so the idle face and footer loop do not move between shots.
 - `node scripts/brand-hover-crops.mjs` checks the `@Humansize` hover does not overlap.
 - `BASE_URL=https://humansize.de npm run test:scroll` runs the touch scroll spec against a deployed site.

@@ -1,5 +1,5 @@
 name: Type 490
-order: 3
+order: 4
 edition: of 2
 dimensions: OD 160 / ID 80 mm, 250 mm tall
 description: >-
@@ -26,6 +26,13 @@ overview:
     alt: Type-490 aluminium ring vase
     outline: false
     gallery: none
+viewer:
+  desktop:
+    src: /src/content/products/490/viewer/desktop/src.webp
+    alt: Type-490 aluminium vase with parrot tulips
+  mobile:
+    src: /src/content/products/490/viewer/mobile/src.webp
+    alt: Type-490 aluminium vase with parrot tulips
 detail:
   description: >-
     Four curved aluminium extrusion profiles, joined into a ring. 160 mm across,

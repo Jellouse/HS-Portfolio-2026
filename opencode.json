@@ -1,0 +1,10 @@
+{
+  "mcp": {
+    "servers": {
+      "framer": {
+        "type": "remote",
+        "url": "https://mcp.framer.com/mcp"
+      }
+    }
+  }
+}

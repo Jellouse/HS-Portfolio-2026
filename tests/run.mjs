@@ -4,8 +4,6 @@ import { cpus } from 'node:os';
 
 const SPECS = [
   ['a11y', 'tests/a11y.spec.mjs'],
-  ['shop-intro', 'tests/shop-intro.spec.mjs'],
-  ['shop-ring-size', 'tests/shop-ring-size.spec.mjs'],
   ['intro', 'tests/intro-face.spec.mjs'],
   ['intro-layout', 'tests/intro-layout.spec.mjs'],
   ['type-scale', 'tests/type-scale.spec.mjs'],
@@ -22,7 +20,6 @@ const SPECS = [
   ['reveal-first-paint', 'tests/reveal-first-paint.spec.mjs'],
   ['footer-faces', 'tests/footer-faces.spec.mjs'],
   ['link-underline', 'tests/link-underline.spec.mjs'],
-  ['spin', 'tests/spin-mark.spec.mjs'],
   ['vt', 'tests/view-transition.spec.mjs'],
   ['about-services', 'tests/about-services-flight.spec.mjs'],
   ['landing-face', 'tests/landing-face-settle.spec.mjs'],

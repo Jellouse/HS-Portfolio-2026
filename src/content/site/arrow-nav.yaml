@@ -28,6 +28,7 @@ nodes:
     label: Shop
     title: Shop
     kind: gallery
+    full: true
   - id: about
     parent: landing
     dir: down

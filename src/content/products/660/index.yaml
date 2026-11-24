@@ -24,6 +24,13 @@ overview:
     alt: Type-660 tall aluminium vase
     outline: false
     gallery: none
+viewer:
+  desktop:
+    src: /src/content/products/660/viewer/desktop/src.webp
+    alt: Type-660 aluminium vase with red flowers
+  mobile:
+    src: /src/content/products/660/viewer/mobile/src.webp
+    alt: Type-660 aluminium vase with red flowers
 detail:
   title: Type-660
   description: >-

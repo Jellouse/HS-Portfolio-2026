@@ -69,24 +69,14 @@ const go = async (label, click, expectPath) => {
 await page.goto(`${BASE}/shop/`, { waitUntil: 'load' });
 await wait(1800);
 
-const firstDetail = await page.getAttribute('a.shop-pair >> nth=0', 'href');
-await go('/shop -> detail (click)', () => page.click('a.shop-pair >> nth=0'), firstDetail);
-await go('detail menu -> /shop', () => page.click('.project-menu a[href="/shop"]'), '/shop');
-await go('/shop -> detail again', () => page.click('a.shop-pair >> nth=0'), firstDetail);
-await go('detail menu -> /shop again', () => page.click('.project-menu a[href="/shop"]'), '/shop');
+const firstDetail = await page.getAttribute('[data-nav-project]', 'href');
+await go('/shop -> detail (pill)', () => page.click('[data-nav-project]'), firstDetail);
+await go('detail back -> /shop', () => page.click('[data-project-back]'), '/shop/');
+await go('/shop -> detail again', () => page.click('[data-nav-project]'), firstDetail);
+await go('detail back -> /shop again', () => page.click('[data-project-back]'), '/shop/');
 
 await page.goto(`${BASE}/work/atomic-ski/`, { waitUntil: 'load' });
 await go('project back -> home', () => page.click('[data-project-back]'), '/');
-
-await page.goto(`${BASE}/`, { waitUntil: 'load' });
-await wait(2000);
-await page.evaluate(() => scrollTo(0, 280));
-await wait(400);
-const firstWork = await page.getAttribute('.card a', 'href');
-if (firstWork) {
-  await go('home (scrolled) -> project', () => page.click('.card a'), firstWork);
-  await go('project -> home again', () => page.click('[data-project-back]'), '/');
-}
 
 await browser.close();
 server.close();

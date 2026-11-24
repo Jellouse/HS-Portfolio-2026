@@ -139,16 +139,12 @@ export async function capture(outDir, port = 4377) {
         });
         if (route === '/') await page.waitForSelector('[data-intro-settled]', { timeout: 20000 }).catch(() => {});
         if (route === '/shop/') {
-          await page.waitForSelector('[data-ring-settled]', { timeout: 20000 }).catch(() => {});
           await page.waitForFunction(() => {
-            const mark = document.querySelector('.shop-mark');
-            const canvas = document.querySelector('canvas.shop-ring-canvas');
-            if (!mark || !canvas) return false;
-            if (!mark.classList.contains('has-canvas') || !mark.classList.contains('at-top') || canvas.width === 0) return false;
-            const stamp = canvas.toDataURL();
-            const same = canvas.dataset.visualStamp === stamp;
-            canvas.dataset.visualStamp = stamp;
-            return same;
+            const nav = document.querySelector('[data-arrow-nav]');
+            const frame = document.querySelector('.arrow-gallery');
+            const img = document.querySelector('[data-nav-photo]');
+            if (!nav || nav.dataset.screen !== 'shop' || !frame || frame.hidden) return false;
+            return !!img && img.complete && img.naturalWidth > 0;
           }, null, { timeout: 20000, polling: 50 }).catch(() => {});
         }
         await page.evaluate(async () => {

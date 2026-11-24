@@ -166,6 +166,11 @@ const productPhoto = z.object({
   gallery: galleryField,
 });
 
+const viewerPhoto = z.object({
+  src: z.string().nullish(),
+  alt: z.string().default(''),
+});
+
 const products = defineCollection({
   loader: glob({
     pattern: '**/index.yaml',
@@ -190,6 +195,13 @@ const products = defineCollection({
         right: productPhoto.optional(),
       })
       .default({ show: true }),
+
+    viewer: z
+      .object({
+        desktop: viewerPhoto.optional(),
+        mobile: viewerPhoto.optional(),
+      })
+      .default({}),
 
     detail: z
       .object({
@@ -298,6 +310,7 @@ const arrowNav = defineCollection({
           title: z.string().default(''),
           body: z.string().default(''),
           kind: z.enum(['branch', 'gallery', 'placeholder']),
+          full: z.boolean().default(false),
         }),
       )
       .default([]),
