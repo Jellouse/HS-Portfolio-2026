@@ -2,14 +2,16 @@
 
 import { SHIPPING_CENTS, SHIPPING_COUNTRIES, stock } from './store.mjs';
 
+// Stock lives in Neon and changes without a rebuild, so this runs on stale data.
+// Any doubt reads SoldOut: a build must never claim a serial is free.
 async function availability(slug: string): Promise<'InStock' | 'SoldOut'> {
-  if (!process.env.DATABASE_URL) return 'InStock';
+  if (!process.env.DATABASE_URL) return 'SoldOut';
   try {
     const { getPool } = await import('./server.mjs');
     const s = (await stock(getPool()))[slug];
-    return s?.soldOut ? 'SoldOut' : 'InStock';
+    return s && !s.soldOut ? 'InStock' : 'SoldOut';
   } catch {
-    return 'InStock';
+    return 'SoldOut';
   }
 }
 
