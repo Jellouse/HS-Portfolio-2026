@@ -4020,6 +4020,21 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
   transform-origin: left center;
 }
 
+@media (hover: hover) and (pointer: fine) and (min-width: 760px) {
+  .arrow-dots {
+    pointer-events: auto;
+    padding-bottom: var(--space-sm);
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .arrow-nav.is-cover .arrow-dots,
+  .arrow-nav.is-full .arrow-dots {
+    margin-bottom: calc(var(--space-sm) * -1);
+  }
+}
+
 .arrow-scrub {
   --scrub-slot: 40px;
   position: absolute;

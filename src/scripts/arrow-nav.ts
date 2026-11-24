@@ -1203,11 +1203,14 @@ let galleryMaskOpen: boolean | null = null;
     return track;
   };
 
-  const paintScrubHud = (clientX: number) => {
+  const paintScrubHud = (clientX: number, snapIndex?: number) => {
     const hud = scrubEl();
     if (!hud) return;
-    const { count, index, indexF } = scrubProgress(clientX);
-    if (count < 1) return;
+    const progress = scrubProgress(clientX);
+    const count = progress.count;
+    if (count < 2) return;
+    const index = snapIndex ?? progress.index;
+    const indexF = snapIndex ?? progress.indexF;
     const track = ensureScrubTrack(count);
     if (!track) return;
     const gallery = galleryEl().getBoundingClientRect();
@@ -1229,19 +1232,22 @@ let galleryMaskOpen: boolean | null = null;
 
   const indexFromScrubX = (clientX: number) => scrubProgress(clientX).index;
 
+  const resetScrubHud = () => {
+    const hud = scrubEl();
+    if (!hud) return;
+    hud.hidden = true;
+    hud.style.left = '';
+    const track = hud.querySelector<HTMLElement>('[data-nav-scrub-track]');
+    if (track) track.style.transform = '';
+  };
+
   const endScrub = (resume: boolean) => {
     if (!scrubbing) return;
     scrubbing = false;
     scrubPointer = 0;
     scrubLock = false;
     nav.classList.remove('is-scrubbing');
-    const hud = scrubEl();
-    if (hud) {
-      hud.hidden = true;
-      hud.style.left = '';
-      const track = hud.querySelector<HTMLElement>('[data-nav-scrub-track]');
-      if (track) track.style.transform = '';
-    }
+    resetScrubHud();
     const item = screen()?.slides[slide];
     if (item && !full) {
       fitGallery(item, true);
@@ -1257,6 +1263,38 @@ let galleryMaskOpen: boolean | null = null;
     if (next === slide) return;
     showSlide(next);
     playSnick();
+  };
+
+  const hoverFine = () => matchMedia('(hover: hover) and (pointer: fine)').matches;
+  let hoveringDots = false;
+
+  const dotIndexAt = (clientX: number) => {
+    let best = slide;
+    let bestDist = Infinity;
+    Array.from(dotsEl().children).forEach((el, i) => {
+      const box = (el as HTMLElement).getBoundingClientRect();
+      const dist = Math.abs(clientX - (box.left + box.width / 2));
+      if (dist < bestDist) {
+        bestDist = dist;
+        best = i;
+      }
+    });
+    return best;
+  };
+
+  const openHoverHud = (clientX: number, snapIndex?: number) => {
+    const node = screen();
+    const hud = scrubEl();
+    if (!hud || !node || node.kind !== 'gallery' || node.slides.length < 2) return;
+    hud.hidden = false;
+    paintScrubHud(clientX, snapIndex ?? dotIndexAt(clientX));
+  };
+
+  const closeHoverHud = (resume: boolean) => {
+    if (!hoveringDots) return;
+    hoveringDots = false;
+    if (!scrubbing) resetScrubHud();
+    if (resume) startAutoplay();
   };
 
   const releasePointer = () => {
@@ -1331,6 +1369,7 @@ let galleryMaskOpen: boolean | null = null;
     clearScrollFlip(false);
     stopHold(false);
     endScrub(false);
+    closeHoverHud(false);
     stopAutoplay();
     const ease = cssEase('--ease-nav');
     const slot = nav.querySelector<HTMLElement>('.arrow-slot')!;
@@ -1840,6 +1879,38 @@ let galleryMaskOpen: boolean | null = null;
   dotsEl().addEventListener('lostpointercapture', (event) => {
     if (!scrubbing || event.pointerId !== scrubPointer) return;
     endScrub(true);
+  });
+
+  dotsEl().addEventListener('pointerenter', (event) => {
+    if (event.pointerType !== 'mouse' || scrubbing || phone() || !hoverFine()) return;
+    const node = screen();
+    if (!node || node.kind !== 'gallery' || node.slides.length < 2) return;
+    hoveringDots = true;
+    stopAutoplay();
+    openHoverHud(event.clientX);
+  });
+
+  dotsEl().addEventListener('pointermove', (event) => {
+    if (!hoveringDots || scrubbing || event.pointerType !== 'mouse') return;
+    openHoverHud(event.clientX);
+  });
+
+  dotsEl().addEventListener('pointerleave', () => {
+    if (scrubbing) return;
+    closeHoverHud(true);
+  });
+
+  dotsEl().addEventListener('click', (event) => {
+    if (phone() || scrubbing) return;
+    const node = screen();
+    if (!node || node.kind !== 'gallery' || node.slides.length < 2) return;
+    if (!(event.target as Element | null)?.closest?.('[data-nav-dots]')) return;
+    const next = dotIndexAt(event.clientX);
+    if (next !== slide) {
+      showSlide(next);
+      playSnick();
+    }
+    if (hoveringDots) openHoverHud(event.clientX, next);
   });
 
   window.addEventListener('keydown', (event) => {
