@@ -4165,6 +4165,13 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
   }
 }
 
+/* The caption box spans the phone width, so it sits over the edge arrows.
+   Keep the arrows above it or the pointer lands on the caption. */
+.arrow-nav.is-cover[data-screen='shop'] .arrow-pill[data-dir='left'],
+.arrow-nav.is-cover[data-screen='shop'] .arrow-pill[data-dir='right'] {
+  z-index: 7;
+}
+
 /* The shop gallery is full from the start, so its caption stays: the product
    pill is the only way through to the product page. */
 .arrow-nav.is-cover[data-screen='shop'] .arrow-caption {

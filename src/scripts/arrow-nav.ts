@@ -777,13 +777,15 @@ export function initArrowNav(root: ParentNode = document) {
           : nav.querySelector<HTMLElement>('[data-nav-gallery]')!.getBoundingClientRect());
     const size = controlSize();
     const pad = phone() ? 20 : 48;
-    // On a phone the arrows sit in the caption row with the product pill.
+    // On a phone the arrows sit in the caption row with the product pill. Centre
+    // on the pill itself: the caption box also holds the pill's top margin.
     const caption = nav.querySelector<HTMLElement>('[data-nav-caption]');
-    const captionMid = caption && !caption.hidden ? caption.getBoundingClientRect() : null;
+    const pill = caption?.querySelector<HTMLElement>('[data-nav-project]:not([hidden]), [data-nav-buy]:not([hidden])');
+    const row = pill ?? (caption && !caption.hidden ? caption : null);
+    const rowMid = row ? row.getBoundingClientRect() : null;
     const y = edges
       ? Math.round(
-          (phone() && captionMid && captionMid.height > 0 ? captionMid.top + captionMid.height / 2 : view.top + view.height / 2) -
-            size / 2,
+          (phone() && rowMid && rowMid.height > 0 ? rowMid.top + rowMid.height / 2 : view.top + view.height / 2) - size / 2,
         )
       : Math.round(box.top + box.height / 2 - size / 2);
     const spots: [HTMLElement, number][] = [
