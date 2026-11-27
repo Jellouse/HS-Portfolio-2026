@@ -3,7 +3,7 @@ export const sections = [
     name: 'Prose',
     file: 'src/components/sections/Prose.astro',
     props: ['paragraphs: string[]'],
-    pages: ['/', '/shop/', '/shop/:slug', '/work/:slug'],
+    pages: ['/', '/shop/:slug', '/work/:slug'],
     files: [
       'src/components/About.astro',
       'src/components/TextBlock.astro',
@@ -17,10 +17,9 @@ export const sections = [
     name: 'Price',
     file: 'src/components/sections/Price.astro',
     props: ['slug: string', 'mode: "suffix" | "prefix"', 'text: string'],
-    pages: ['/shop/', '/shop/:slug'],
+    pages: ['/shop/:slug'],
     files: [
       'src/components/Info.astro',
-      'src/components/sections/ShopProduct.astro',
       'src/components/sections/ShopDetailHead.astro',
     ],
     roots: [],
@@ -61,14 +60,6 @@ export const sections = [
     pages: [],
     files: ['src/pages/dev/[name].astro'],
     roots: ['shop-intro'],
-  },
-  {
-    name: 'ShopProduct',
-    file: 'src/components/sections/ShopProduct.astro',
-    props: ['product: ProductEntry', 'index: number', 'sizes: string'],
-    pages: [],
-    files: ['src/pages/dev/[name].astro'],
-    roots: ['shop-product'],
   },
   {
     name: 'ShopDetailHead',

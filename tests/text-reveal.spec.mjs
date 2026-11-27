@@ -92,37 +92,6 @@ for (const url of urls) {
   console.log(`${url}: ${blocks.length} below-the-fold text blocks`);
 }
 
-await page.goto(BASE + '/shop/', { waitUntil: 'load' });
-const btn = page.locator('.shop-details').first();
-await btn.scrollIntoViewIfNeeded();
-if ((await btn.getAttribute('aria-expanded')) !== 'false') failures.push('/shop: Details not closed by default');
-
-const sample = () => page.evaluate(() => {
-  const b = document.querySelector('.shop-details');
-  const p = document.getElementById(b.getAttribute('aria-controls'));
-  const words = [...p.querySelectorAll('.reveal-word')];
-  const byLine = {};
-  for (const w of words) (byLine[w.style.getPropertyValue('--line')] ??= []).push(+getComputedStyle(w).opacity);
-  const lines = Object.keys(byLine).sort((x, y) => x - y).map((k) => Math.max(...byLine[k]));
-  const clipped = getComputedStyle(p).overflow !== 'visible' || getComputedStyle(p.firstElementChild).overflow !== 'visible';
-  return { lines, clipped, expanded: b.getAttribute('aria-expanded'), hidden: p.hidden, h: p.getBoundingClientRect().height };
-});
-await btn.click();
-await page.waitForTimeout(200);
-const mid = await sample();
-if (mid.clipped) failures.push('/shop: Details panel clips its text (overflow not visible)');
-if (!(mid.lines.length >= 2 && mid.lines[0] > mid.lines.at(-1) + 0.02)) failures.push(`/shop: Details lines did not reveal one by one (${mid.lines})`);
-await page.waitForTimeout(800);
-const open = await sample();
-if (!(open.expanded === 'true' && !open.hidden && open.h > 20 && open.lines.every((o) => o > 0.99))) failures.push('/shop: Details did not open fully');
-await btn.press('Enter');
-await page.waitForTimeout(90);
-const out = await sample();
-if (!(out.lines.at(-1) < out.lines[0] - 0.02)) failures.push(`/shop: Details did not close in reverse, last line first (${out.lines})`);
-await page.waitForTimeout(1000);
-const closed = await sample();
-if (!(closed.expanded === 'false' && closed.hidden)) failures.push('/shop: Details did not close via keyboard');
-
 await browser.close();
 server.close();
 if (failures.length) { console.error(failures.join('\n')); process.exit(1); }

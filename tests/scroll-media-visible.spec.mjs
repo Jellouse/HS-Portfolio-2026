@@ -73,9 +73,9 @@ for (const [name, vp, url, scrollPrep] of [
       scrollTo(0, Math.max(0, scrollY + r.top + r.height / 2 - innerHeight / 2));
     });
   }],
-  ['desktop shop', { width: 1440, height: 900 }, '/shop/', async (page) => {
+  ['desktop shop', { width: 1440, height: 900 }, '/shop/660/', async (page) => {
     await page.evaluate(() => {
-      const frame = document.querySelector('.shop-pair .frame');
+      const frame = document.querySelector('main .frame');
       if (!frame) return;
       const r = frame.getBoundingClientRect();
       scrollTo(0, Math.max(0, scrollY + r.top + r.height / 2 - innerHeight / 2));

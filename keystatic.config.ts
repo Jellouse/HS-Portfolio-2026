@@ -63,8 +63,6 @@ function videoField(label: string, description?: string) {
   return { ...field, Input: withUpload(field.Input as any) };
 }
 
-const productGallery = gallerySelect('Include this in a homepage gallery. Shop uses the product name and Learn more.');
-
 const outline = fields.checkbox({
   label: 'Outline',
   defaultValue: false,
@@ -305,8 +303,6 @@ export default config({
           slug: { label: 'Slug', description: 'Also the /shop/<slug> URL and the product key in /admin.' },
         }),
         order: fields.integer({ label: 'Order', description: 'Position in the shop gallery, low first.', defaultValue: 99 }),
-        edition: fields.text({ label: 'Edition', description: 'e.g. of 8' }),
-        dimensions: fields.text({ label: 'Dimensions', description: 'Optional, e.g. 200 mm tall' }),
         description: fields.text({ label: 'Description', multiline: true, validation: { isRequired: true, length: { min: 1 } } }),
         seo: fields.object(
           {
@@ -319,17 +315,8 @@ export default config({
           {
             show: fields.checkbox({ label: 'Show in the shop gallery', defaultValue: true }),
             title: fields.text({ label: 'Title', description: 'As shown on /shop, e.g. Type-660. Empty: the name.' }),
-            description: fields.text({ label: 'Description', description: 'Optional line under the caption.', multiline: true }),
-            left: fields.object({
-              src: { ...fields.image({ label: 'Image', directory: 'src/content/products', publicPath: '/src/content/products' }) },
-              alt: fields.text({ label: 'Alt text' }), outline, gallery: productGallery,
-            }, { label: 'Left image' }),
-            right: fields.object({
-              src: { ...fields.image({ label: 'Image', directory: 'src/content/products', publicPath: '/src/content/products' }) },
-              alt: fields.text({ label: 'Alt text' }), outline, gallery: productGallery,
-            }, { label: 'Right image' }),
           },
-          { label: '/shop overview', description: 'The product section on /shop: an image pair and its caption.' },
+          { label: '/shop overview', description: 'The product in the fullscreen shop gallery.' },
         ),
         viewer: fields.object(
           {
@@ -364,20 +351,20 @@ export default config({
             title: fields.text({ label: 'Title', description: 'e.g. Type-660. Empty: the name.' }),
             description: fields.text({ label: 'Intro', multiline: true, description: 'Empty: the description above.' }),
             images: fields.array(
-              fields.object({ src: { ...fields.image({ label: 'Image', directory: 'src/content/products', publicPath: '/src/content/products', validation: { isRequired: true } }) }, alt: fields.text({ label: 'Alt text' }), outline, gallery: productGallery }),
+              fields.object({ src: { ...fields.image({ label: 'Image', directory: 'src/content/products', publicPath: '/src/content/products', validation: { isRequired: true } }) }, alt: fields.text({ label: 'Alt text' }), outline }),
               { label: 'Top images', description: 'Big images at the top of the detail page.', itemLabel: (props) => props.fields.alt.value || 'Image' },
             ),
             sections: fields.array(
               fields.object({
                 heading: fields.text({ label: 'Heading' }),
                 text: fields.text({ label: 'Text', multiline: true }),
-                image: fields.object({ src: { ...fields.image({ label: 'Image', directory: 'src/content/products', publicPath: '/src/content/products' }) }, alt: fields.text({ label: 'Alt text' }), outline, gallery: productGallery }, { label: 'Image' }),
+                image: fields.object({ src: { ...fields.image({ label: 'Image', directory: 'src/content/products', publicPath: '/src/content/products' }) }, alt: fields.text({ label: 'Alt text' }), outline }, { label: 'Image' }),
               }),
               { label: 'Sections', description: 'Centred heading, text, one image.', itemLabel: (props) => props.fields.heading.value || 'Section' },
             ),
             wildTitle: fields.text({ label: 'Gallery heading', description: 'e.g. In the wild' }),
             wild: fields.array(
-              fields.object({ src: { ...fields.image({ label: 'Image', directory: 'src/content/products', publicPath: '/src/content/products', validation: { isRequired: true } }) }, alt: fields.text({ label: 'Alt text' }), outline, gallery: productGallery }),
+              fields.object({ src: { ...fields.image({ label: 'Image', directory: 'src/content/products', publicPath: '/src/content/products', validation: { isRequired: true } }) }, alt: fields.text({ label: 'Alt text' }), outline }),
               { label: 'Gallery images', description: 'Two columns, in reading order.', itemLabel: (props) => props.fields.alt.value || 'Image' },
             ),
             info: fields.array(
