@@ -195,43 +195,8 @@ async function shopSlides(): Promise<ArrowSlide[]> {
   const slides: ArrowSlide[] = [];
   for (const product of products) {
     const viewer = product.data.viewer;
-    if (viewer?.desktop?.src) {
-      slides.push(await viewerSlide(product, viewer.desktop, viewer.mobile));
-      continue;
-    }
-    const seen = new Set<string>();
-    const detail = product.data.detail;
-    const images = [
-      product.data.overview.left,
-      product.data.overview.right,
-      ...detail.images,
-      ...detail.sections.map((section) => section.image),
-      ...detail.wild,
-    ];
-    for (const image of images) {
-      if (!image?.src || image.gallery !== 'shop' || seen.has(image.src)) continue;
-      seen.add(image.src);
-      const file = resolveImage(image.src);
-      const alpha = await imageHasAlpha(file);
-      const still = await galleryStill(file, alpha);
-      slides.push({
-        src: still.src,
-        mobile: '',
-        poster: '',
-        blur: still.blur,
-        alt: image.alt || product.data.name,
-        title: product.data.name,
-        caption: '',
-        product: '',
-        alpha,
-        kind: 'image',
-        width: file.width,
-        height: file.height,
-        slug: '',
-        href: `/shop/${product.id}/`,
-        action: 'Learn more',
-      });
-    }
+    if (!viewer?.desktop?.src) continue;
+    slides.push(await viewerSlide(product, viewer.desktop, viewer.mobile));
   }
   return slides;
 }

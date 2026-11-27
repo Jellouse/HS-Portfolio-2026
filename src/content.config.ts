@@ -163,7 +163,6 @@ const productPhoto = z.object({
   src: z.string().nullish(),
   alt: z.string().default(''),
   outline: z.boolean().default(false),
-  gallery: galleryField,
 });
 
 const viewerPhoto = z.object({
@@ -180,8 +179,6 @@ const products = defineCollection({
   schema: z.object({
     name: z.string(),
     order: z.number().default(99),
-    edition: z.string().optional(),
-    dimensions: z.string().optional(),
     description: z.string(),
 
     seo: z.object({ title: z.string().optional(), description: z.string().optional() }).default({}),
@@ -190,9 +187,6 @@ const products = defineCollection({
       .object({
         show: z.boolean().default(true),
         title: z.string().optional(),
-        description: z.string().optional(),
-        left: productPhoto.optional(),
-        right: productPhoto.optional(),
       })
       .default({ show: true }),
 

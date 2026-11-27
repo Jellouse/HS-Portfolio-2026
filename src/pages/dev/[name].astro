@@ -33,7 +33,6 @@ import ShopDetailSection from '../../components/sections/ShopDetailSection.astro
 import ShopFigure from '../../components/sections/ShopFigure.astro';
 import ShopInfo from '../../components/sections/ShopInfo.astro';
 import ShopIntro from '../../components/sections/ShopIntro.astro';
-import ShopProduct from '../../components/sections/ShopProduct.astro';
 import ShopWild from '../../components/sections/ShopWild.astro';
 import { existing, sections } from '../../components/sections/registry.mjs';
 import { getProjects, getSite } from '../../lib/content';
@@ -72,7 +71,6 @@ const sampleVideo = (() => {
   return null;
 })();
 const imageSizes = '(min-width: 1440px) 666px, (min-width: 760px) 552px, calc(100vw - 40px)';
-const shopSizes = '(min-width: 1440px) 439px, (min-width: 760px) 30vw, calc(50vw - 30px)';
 const detailSizes = '(min-width: 760px) calc(5 * var(--col) + 4 * var(--gutter)), calc(100vw - 40px)';
 const halfSizes = '(min-width: 760px) 272px, calc((100vw - 48px) / 2)';
 ---
@@ -141,7 +139,6 @@ const halfSizes = '(min-width: 760px) 272px, calc((100vw - 48px) / 2)';
                 </CornerMark>
               )}
               {item.name === 'ShopIntro' && <ShopIntro />}
-              {item.name === 'ShopProduct' && product && <ShopProduct product={product} index={0} sizes={shopSizes} />}
               {item.name === 'ShopDetailHead' && product && (
                 <ShopDetailHead title={product.data.detail.title || product.data.name} slug={product.id} eur={seedEur(product.id)} />
               )}

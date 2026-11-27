@@ -24,7 +24,7 @@ File names are kebab-case. A module that both pages use lives in `src/lib/` or `
 - Site copy, email, about, socials: `src/content/site/site.yaml`
 - Homepage screens: `src/content/site/arrow-nav.yaml`, edited in Keystatic as Homepage. Web, 3D, Product, and Space galleries come from the Gallery field on each project image or video. The project title and summary are the headline and caption. Shop uses each product's Shop gallery images, desktop and mobile, with the product name and Learn more. The About screen reads the About paragraphs from `site.yaml`.
 - One folder per project: `src/content/projects/<slug>/index.yaml` plus images in that folder
-- Products: `src/content/products/<slug>/index.yaml`
+- Products: `src/content/products/<slug>/index.yaml`. Fields are name, order, description, SEO, `overview.show` and `overview.title`, the `viewer` desktop and mobile crops, and the `detail` block list.
 - Image paths in YAML are absolute from the repo, like `/src/content/projects/atomic-ski/blocks/0/value/src.jpg`
 - Services: `src/content/services/<slug>.yaml`. A project image stores the project slug plus its own file in `src/content/services/images/`. Other photos are files there too.
 
