@@ -1,5 +1,4 @@
 import { initHeroBlob } from './hero-blob';
-import { mountFaceGL, type FaceGL, type FaceMount } from './arrow-face-gl';
 import { mountFaceGlance, type FaceGlance } from './face-glance';
 import { introDebug, introDebugOn } from './intro-debug';
 import { playSnick } from './ui-sound';
@@ -9,19 +8,30 @@ import type { ArrowDir, ArrowTree } from '../lib/arrow-nav';
 
 type Dir = ArrowDir | 'up';
 
-const INTRO_MS = 7200;
-const INTRO_REVEAL_MS = 4400;
+// Landing intro, from the Jitter export (60fps frames in comments).
+// 0f holds the big face, 19.2f starts the shrink, 124.74f is the hand-off
+// frame, 202.2f is where everything has landed. 243.6f is the scene end.
+const INTRO_MS = 3370; // 202.2f
+const INTRO_HOLD_MS = 320; // 19.2f
+const INTRO_EYE_CLOSE_MS = 1199; // 71.94f
+const INTRO_MID_MS = 2079; // 124.74f
+const INTRO_COPY_MS = 2314; // 138.84f
+const INTRO_FACE_FROM = 150 / 38.1; // 3.937
+const INTRO_FACE_MID = 140.68 / 38.1; // 3.692
+const INTRO_PILL_SHIFT = 100;
+const INTRO_COPY_SHIFT = 50;
+const INTRO_EYE_SQUINT = 30 / 119; // wide slit / tall eye, from the export
+const INTRO_FEATURE_SCALE = 1.1; // features are 10% larger until the final shrink
 const SLIDE_MS = 4200;
-const INTRO_ZOOM = 7;
-const INTRO_STRETCH = 2.4;
-const DISP_FROM = 100;
-const DISP_REST = 0;
-const BLUR_FROM = 2.2;
-const BLUR_REST = 0;
-const HOLD_CALM_MS = 34;
-const HOLD_MAX_MS = 400;
 
-const easeInOut = bezier(0.77, 0, 0.175, 1);
+const easeFaceIn = bezier(0.432, 0, 0.756, 0.4);
+const easeFaceOut = bezier(0.34, 0, 0, 1);
+const EASE_PILL = 'cubic-bezier(0.34, 0, 0, 1)';
+const EASE_INTRO_FADE = 'cubic-bezier(0, 0, 0, 1)';
+const EASE_INTRO_LINE = 'cubic-bezier(0, 0, 0, 1)'; // same curve as the fade
+const EASE_EYE_OPEN = 'cubic-bezier(0.42, 0, 0, 0.999)';
+const EASE_EYE_CLOSE = 'cubic-bezier(0.42, 0, 0, 1)';
+const EASE_EYE_FINAL = 'cubic-bezier(0.34, 0, 0, 1)';
 
 function bezier(x1: number, y1: number, x2: number, y2: number) {
   return (t: number) => {
@@ -101,7 +111,8 @@ export function initArrowNav(root: ParentNode = document) {
   let generation = 0;
   let introOn = true;
   let introPlaying = true;
-  let faceGL: FaceGL | null = null;
+  const introAnims: Animation[] = [];
+  let controlsTimer = 0;
   const faceGlance: FaceGlance = mountFaceGlance(nav);
   let pressed: HTMLElement | null = null;
   let pressFrom: 'key' | 'pointer' | null = null;
@@ -2074,30 +2085,125 @@ let galleryMaskOpen: boolean | null = null;
     }).catch(() => {});
   };
 
-  const revealIntro = () => {
-    const introFadeMs = 1400;
-    const ease = cssEase('--ease-out');
-    const targets = [...nav.querySelectorAll<HTMLElement>('.arrow-copy, .arrow-pill, .arrow-back, .arrow-hint')].filter((el) => !el.hidden);
-    const hint = nav.querySelector('.arrow-hint');
-    targets.forEach((el) => {
-      const anim = el.animate([{ opacity: 0 }, { opacity: 1 }], { duration: introFadeMs, easing: ease, fill: 'both' });
-      anim.finished.finally(() => {
-        anim.cancel();
-        if (el === hint) pulseHint();
-      }).catch(() => {});
+  const introShift = (dir: string): [number, number] => {
+    if (dir === 'up') return [0, -INTRO_PILL_SHIFT];
+    if (dir === 'down') return [0, INTRO_PILL_SHIFT];
+    if (dir === 'left') return [-INTRO_PILL_SHIFT, 0];
+    return [INTRO_PILL_SHIFT, 0];
+  };
+
+  const playIntroControls = () => {
+    const anims: Animation[] = [];
+    const pillMs = INTRO_MS - INTRO_MID_MS;
+    const copyMs = INTRO_MS - INTRO_COPY_MS;
+    nav.querySelectorAll<HTMLElement>('.arrow-pill:not([hidden]), .arrow-back:not([hidden])').forEach((el) => {
+      if (el.getBoundingClientRect().width < 1) return;
+      const dir = el.dataset.dir ?? 'up';
+      const [dx, dy] = introShift(dir);
+      anims.push(
+        el.animate([{ translate: `${dx}px ${dy}px` }, { translate: '0px 0px' }], {
+          duration: pillMs,
+          delay: INTRO_MID_MS,
+          easing: EASE_PILL,
+          fill: 'both',
+        }),
+      );
+      anims.push(
+        el.animate([{ opacity: 0 }, { opacity: 1 }], {
+          duration: copyMs,
+          delay: INTRO_COPY_MS,
+          easing: EASE_INTRO_FADE,
+          fill: 'both',
+        }),
+      );
     });
-    nav.classList.add('is-controls');
-    introOn = false;
+    const copy = nav.querySelector<HTMLElement>('.arrow-copy');
+    if (copy && !copy.hidden) {
+      anims.push(
+        copy.animate([{ translate: `0px -${INTRO_COPY_SHIFT}px` }, { translate: '0px 0px' }], {
+          duration: copyMs,
+          delay: INTRO_COPY_MS,
+          easing: EASE_INTRO_LINE,
+          fill: 'both',
+        }),
+      );
+      anims.push(
+        copy.animate([{ opacity: 0 }, { opacity: 1 }], {
+          duration: copyMs,
+          delay: INTRO_COPY_MS,
+          easing: EASE_INTRO_FADE,
+          fill: 'both',
+        }),
+      );
+    }
+    const hint = nav.querySelector<HTMLElement>('.arrow-hint');
+    if (hint && !hint.hidden && hint.getBoundingClientRect().height > 0) {
+      anims.push(
+        hint.animate([{ translate: `0px ${INTRO_COPY_SHIFT}px` }, { translate: '0px 0px' }], {
+          duration: copyMs,
+          delay: INTRO_COPY_MS,
+          easing: EASE_INTRO_LINE,
+          fill: 'both',
+        }),
+      );
+      anims.push(
+        hint.animate([{ opacity: 0 }, { opacity: 1 }], {
+          duration: copyMs,
+          delay: INTRO_COPY_MS,
+          easing: EASE_INTRO_FADE,
+          fill: 'both',
+        }),
+      );
+    }
+    introAnims.push(...anims);
+    controlsTimer = window.setTimeout(() => nav.classList.add('is-controls'), INTRO_MID_MS);
+  };
+
+  const playIntroEyes = (ms: number) => {
+    const squint = `scaleY(${INTRO_EYE_SQUINT})`;
+    const open = 'scaleY(1)';
+    const closeAt = Math.round((INTRO_EYE_CLOSE_MS / ms) * 1000) / 1000;
+    const midAt = Math.round((INTRO_MID_MS / ms) * 1000) / 1000;
+    const holdAt = Math.round((INTRO_HOLD_MS / ms) * 1000) / 1000;
+    nav.querySelectorAll<SVGPathElement>('.arrow-face-blob [data-face-eye]').forEach((eye) => {
+      const right = eye.dataset.faceEye === 'right';
+      const frames: Keyframe[] = right
+        ? [
+            { offset: 0, transform: squint, easing: 'linear' },
+            { offset: holdAt, transform: squint, easing: EASE_EYE_OPEN },
+            { offset: closeAt, transform: open, easing: EASE_EYE_CLOSE },
+            { offset: midAt, transform: squint, easing: EASE_EYE_FINAL },
+            { offset: 1, transform: open },
+          ]
+        : [
+            { offset: 0, transform: squint, easing: 'linear' },
+            { offset: closeAt, transform: squint, easing: EASE_EYE_CLOSE },
+            { offset: midAt, transform: open },
+          ];
+      introAnims.push(eye.animate(frames, { duration: ms, easing: 'linear', fill: 'both' }));
+    });
+  };
+
+  const playIntroFeatures = () => {
+    const move = nav.querySelector<SVGGElement>('.arrow-face-blob [data-face-move]');
+    if (!move) return;
+    introAnims.push(
+      move.animate([{ transform: `scale(${INTRO_FEATURE_SCALE})` }, { transform: 'scale(1)' }], {
+        duration: INTRO_MS - INTRO_MID_MS,
+        delay: INTRO_MID_MS,
+        easing: EASE_EYE_FINAL,
+        fill: 'both',
+      }),
+    );
   };
 
   function endIntro() {
     introPlaying = false;
+    introOn = false;
+    clearTimeout(controlsTimer);
+    nav.classList.add('is-controls');
     introDebug.end();
-    const dead = faceGL;
-    faceGL = null;
-    try {
-      dead?.destroy();
-    } catch {}
+    introAnims.splice(0).forEach((anim) => anim.cancel());
     nav.classList.remove('is-face-gl', 'is-face-svg');
     const scaleEl = nav.querySelector<HTMLElement>('[data-nav-scale]');
     const blob = nav.querySelector<HTMLElement>('.arrow-face-blob');
@@ -2122,7 +2228,9 @@ let galleryMaskOpen: boolean | null = null;
       el.style.height = '';
     });
     if (scaleEl) scaleEl.style.transform = '';
+    nav.setAttribute('data-intro-settled', '');
     syncGlance();
+    pulseHint();
   }
 
   const dropFaceFilter = () => {
@@ -2140,131 +2248,52 @@ let galleryMaskOpen: boolean | null = null;
 
   const runIntro = () => {
     const scaleEl = nav.querySelector<HTMLElement>('[data-nav-scale]')!;
-    const disp = nav.querySelector<SVGFEDisplacementMapElement>('feDisplacementMap');
-    const blur = nav.querySelector<SVGFEGaussianBlurElement>('feGaussianBlur');
     if (reduce) {
       settleFace();
       nav.classList.remove('is-intro');
       introOn = false;
       introPlaying = false;
+      nav.setAttribute('data-intro-settled', '');
       pulseHint();
       syncGlance();
       return;
     }
-    let revealed = false;
     const phone = matchMedia('(max-width: 759px)').matches;
     const face = parseFloat(getComputedStyle(nav).getPropertyValue('--arrow-face')) || (phone ? 48 : 64);
-    const stretchFrom = phone ? nav.clientWidth / Math.max(1, nav.clientHeight) : INTRO_STRETCH;
-    const blob = nav.querySelector<HTMLElement>('.arrow-face-blob');
     scaleEl.style.transform = 'none';
-    let started = performance.now();
-    let holding = true;
-    let holdFrom = 0;
-    let lastTick = 0;
-    let calm = 0;
-    const frame = (now: number, sync = false) => {
+    nav.classList.add('is-face-svg');
+    showRestingFace();
+    introDebug.path('svg');
+    playIntroEyes(INTRO_MS);
+    playIntroFeatures();
+    playIntroControls();
+    const started = performance.now();
+    introDebug.start(started);
+    const frame = (now: number) => {
       if (!introPlaying) return;
       const workFrom = introDebugOn ? performance.now() : 0;
-      if (holding) {
-        if (!sync) {
-          if (!holdFrom) holdFrom = now;
-          if (lastTick) introDebug.held(now - lastTick);
-          calm = lastTick && now - lastTick < HOLD_CALM_MS ? calm + 1 : 0;
-          lastTick = now;
-          if (calm >= 2 || now - holdFrom >= HOLD_MAX_MS) {
-            holding = false;
-            introDebug.start(now);
-          }
-        }
-        started = now;
+      const t = now - started;
+      let zoom = INTRO_FACE_FROM;
+      if (t > INTRO_HOLD_MS) {
+        const hold = Math.min(1, (t - INTRO_HOLD_MS) / (INTRO_MID_MS - INTRO_HOLD_MS));
+        zoom = INTRO_FACE_FROM + (INTRO_FACE_MID - INTRO_FACE_FROM) * easeFaceIn(hold);
       }
-      const t = Math.min(1, (now - started) / INTRO_MS);
-      const eased = easeInOut(t);
-      const zoom = INTRO_ZOOM + (1 - INTRO_ZOOM) * eased;
-      const stretch = stretchFrom + (1 - stretchFrom) * eased;
-      const dispNow = Math.round(DISP_FROM + (DISP_REST - DISP_FROM) * eased);
-      const soft = BLUR_FROM + (BLUR_REST - BLUR_FROM) * eased;
-      const w = Math.max(1, Math.round(face * zoom * stretch));
-      const h = Math.max(1, Math.round(face * zoom));
-      scaleEl.style.width = `${w}px`;
-      scaleEl.style.height = `${h}px`;
-      if (faceGL) {
-        try {
-          faceGL.draw({ w, h, disp: dispNow, blur: soft });
-        } catch (error) {
-          dropFaceGL(`draw: ${(error as Error)?.message || error}`);
-        }
+      if (t > INTRO_MID_MS) {
+        const land = Math.min(1, (t - INTRO_MID_MS) / (INTRO_MS - INTRO_MID_MS));
+        zoom = INTRO_FACE_MID + (1 - INTRO_FACE_MID) * easeFaceOut(land);
       }
-      if (!faceGL && blob) {
-        blob.style.width = `${w}px`;
-        blob.style.height = `${h}px`;
-      }
-      if (!faceGL) {
-        disp?.setAttribute('scale', String(dispNow));
-        blur?.setAttribute('stdDeviation', soft.toFixed(2));
-      }
-      if (!revealed && now - started >= INTRO_REVEAL_MS) {
-        revealed = true;
-        revealIntro();
-      }
+      const size = Math.max(1, Math.round(face * zoom));
+      scaleEl.style.width = `${size}px`;
+      scaleEl.style.height = `${size}px`;
       if (introDebugOn) introDebug.frame(now, performance.now() - workFrom);
-      if (t < 1) requestAnimationFrame(frame);
+      if (t < INTRO_MS) requestAnimationFrame(frame);
       else {
         endIntro();
-        if (!revealed) revealIntro();
         const hash = location.hash.replace('#', '');
         if (hash && nodes.has(hash)) travel(hash, false);
       }
     };
-    const dropFaceGL = (reason: string) => {
-      if (!faceGL) return;
-      const dead = faceGL;
-      faceGL = null;
-      try {
-        dead.destroy();
-      } catch {}
-      nav.classList.remove('is-face-gl');
-      if (!introPlaying) return;
-      nav.classList.add('is-face-svg');
-      const filterId = nav.querySelector('.arrow-face-blob filter')?.id;
-      if (filterId) nav.querySelector('.arrow-face-blob g')?.setAttribute('filter', `url(#${filterId})`);
-      introDebug.path('svg', reason);
-    };
-    const run = () => {
-      introDebug.hold(performance.now());
-      frame(performance.now(), true);
-    };
-    void (async () => {
-      await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
-      const svgFace = nav.querySelector<SVGSVGElement>('.arrow-face-blob');
-      const slot = scaleEl.closest<HTMLElement>('.arrow-slot');
-      let mount: FaceMount;
-      if (!svgFace || !slot) mount = { gl: null, reason: 'no-face' };
-      else {
-        const maxW = Math.max(1, Math.round(face * INTRO_ZOOM * stretchFrom));
-        const maxH = Math.max(1, Math.round(face * INTRO_ZOOM));
-        try {
-          mount = await mountFaceGL(svgFace, slot, maxW, maxH, DISP_FROM, BLUR_FROM);
-        } catch (error) {
-          mount = { gl: null, reason: `error: ${(error as Error)?.message || error}` };
-        }
-      }
-      if (!introPlaying) {
-        mount.gl?.destroy();
-        return;
-      }
-      if (mount.gl) {
-        faceGL = mount.gl;
-        faceGL.canvas.addEventListener('webglcontextlost', () => dropFaceGL('context-lost'));
-        nav.classList.add('is-face-gl');
-        dropFaceFilter();
-        introDebug.path('gl', '', mount.gl.setupMs, mount.gl.renderer);
-      } else {
-        nav.classList.add('is-face-svg');
-        introDebug.path('svg', mount.reason);
-      }
-      run();
-    })();
+    requestAnimationFrame(frame);
   };
 
   const hash = location.hash.replace('#', '');
@@ -2323,6 +2352,7 @@ let galleryMaskOpen: boolean | null = null;
     requestAnimationFrame(() => still.forEach((el) => (el.style.transition = '')));
     nav.classList.add('is-controls');
     settleFace();
+    nav.setAttribute('data-intro-settled', '');
     const hint = nav.querySelector<HTMLElement>('[data-nav-hint]');
     if (hint) hint.hidden = true;
   }
