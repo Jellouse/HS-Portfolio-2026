@@ -5,6 +5,7 @@ import React, {
   type CSSProperties,
   type ReactNode,
 } from 'react';
+import { mimeFor } from './cms-media';
 import { typePx } from './type-scale';
 
 type Asset = {
@@ -14,15 +15,6 @@ type Asset = {
 };
 
 type ModalState = { idx: number; isNew: boolean } | null;
-
-function mimeFor(extension: string) {
-  const ext = extension.toLowerCase();
-  if (ext === 'png') return 'image/png';
-  if (ext === 'webp') return 'image/webp';
-  if (ext === 'avif') return 'image/avif';
-  if (ext === 'gif') return 'image/gif';
-  return 'image/jpeg';
-}
 
 function getInitialValue(schema: any): any {
   switch (schema?.kind) {

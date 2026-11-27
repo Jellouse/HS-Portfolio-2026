@@ -20,15 +20,6 @@ export function applyPrices(data: Stock) {
   });
 }
 
-export async function refreshPrices() {
-  try {
-    const res = await fetch('/api/shop/stock', { signal: AbortSignal.timeout(4000) });
-    applyPrices(res.ok ? await res.json() : null);
-  } catch {
-
-  }
-}
-
 const NOTES: Record<string, string> = {
   soon: 'Checkout opens soon.',
   soldout: 'Sold out.',

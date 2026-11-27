@@ -1,5 +1,6 @@
 
-import { clearStableViewportHeight, stableViewportHeight } from '../lib/viewport-layout';
+import { prefersReducedMotion } from '../lib/browser';
+import { clearStableViewportHeight, stableViewportHeight, viewportProbe } from '../lib/viewport-layout';
 import { introFaceLayout } from '../lib/intro-layout';
 import { introCopyProgress, introScaleFromScroll } from '../lib/intro-scroll';
 import { setIntroCopy } from './intro-copy';
@@ -12,9 +13,8 @@ export function initIntroFace(hero: HTMLElement) {
   if (hero.dataset.introBound === '1') return;
   hero.dataset.introBound = '1';
 
-  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const probe = document.createElement('div');
-  probe.style.cssText = 'position:absolute;top:0;left:0;width:1px;height:100svh;visibility:hidden;pointer-events:none';
+  const reduced = prefersReducedMotion();
+  const probe = viewportProbe();
   document.body.appendChild(probe);
 
   const ac = new AbortController();

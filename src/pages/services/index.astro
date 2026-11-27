@@ -2,6 +2,7 @@
 export const prerender = true;
 
 import { getCollection } from 'astro:content';
+import BackArrow from '../../components/BackArrow.astro';
 import HeroBlob from '../../components/HeroBlob.astro';
 import Base from '../../layouts/Base.astro';
 import { serviceButtonLabel as buttonLabel } from '../../lib/arrow-nav';
@@ -30,10 +31,7 @@ const description = 'Physical Build and Digital Build. Retail store design, Fram
     <h1 class="sr-only">Services</h1>
     <div class="arrow-stage">
       <a class="arrow-back" href="/" data-services-back aria-label="Back">
-        <svg viewBox="0 0 21 20" aria-hidden="true">
-          <path d="M2.11719 7H13.1172C16.4309 7 19.1172 9.68629 19.1172 13C19.1172 16.3137 16.4309 19 13.1172 19H5.98082" fill="none" stroke="currentColor" stroke-width="2"></path>
-          <path d="M7.53027 13.2324L1.41406 7.11621L7.53027 0.999995" fill="none" stroke="currentColor" stroke-width="2"></path>
-        </svg>
+        <BackArrow />
       </a>
       <div class="arrow-slot">
         <div class="arrow-face">
@@ -55,56 +53,20 @@ const description = 'Physical Build and Digital Build. Retail store design, Fram
 
 <script>
   import { bindAppViewport } from '../../lib/viewport-layout';
+  import { bindArrowControls } from '../../scripts/arrow-controls';
   import { bindRouteReturn } from '../../scripts/arrow-route';
   import { mountFaceGlance } from '../../scripts/face-glance';
-  import { playSnick } from '../../scripts/ui-sound';
 
   bindAppViewport();
   bindRouteReturn();
   const root = document.querySelector<HTMLElement>('[data-services-hub]');
-  const back = root?.querySelector<HTMLAnchorElement>('[data-services-back]');
-  if (root) mountFaceGlance(root).setEnabled(true);
-  if (root && back) {
-    const control = (dir: string) => root.querySelector<HTMLAnchorElement>(`[data-dir="${dir}"]`);
-    const typing = (event: Event) =>
-      event.target instanceof Element && !!event.target.closest('input, textarea, [contenteditable="true"]');
-    back.addEventListener('click', (event) => {
-      if (!document.referrer.startsWith(location.origin) || history.length < 2) return;
-      event.preventDefault();
-      history.back();
-    });
-    const press = (el: HTMLElement) => {
-      root.querySelectorAll('.is-pressed').forEach((item) => item.classList.remove('is-pressed'));
-      el.classList.add('is-pressed');
-      playSnick();
-    };
-    root.addEventListener('pointerdown', (event) => {
-      if (event.button !== 0) return;
-      const el = (event.target as Element).closest<HTMLElement>('.arrow-pill, .arrow-back');
-      if (el && root.contains(el)) press(el);
-    });
-    const release = () => root.querySelectorAll('.is-pressed').forEach((el) => el.classList.remove('is-pressed'));
-    window.addEventListener('pointerup', release);
-    window.addEventListener('pointercancel', release);
-    const keyControl = (key: string) => {
-      if (key === 'ArrowLeft') return control('left');
-      if (key === 'ArrowRight') return control('right');
-      if (key === 'ArrowUp' || key === 'Escape' || key === 'Backspace') return back;
-      return null;
-    };
-    window.addEventListener('keydown', (event) => {
-      if (event.metaKey || event.altKey || event.ctrlKey || event.repeat || typing(event)) return;
-      if (document.documentElement.classList.contains('is-contact-open')) return;
-      const el = keyControl(event.key);
-      if (!el) return;
-      event.preventDefault();
-      press(el);
-    });
-    window.addEventListener('keyup', (event) => {
-      const el = keyControl(event.key);
-      if (!el?.classList.contains('is-pressed')) return;
-      el.classList.remove('is-pressed');
-      el.click();
+  if (root) {
+    mountFaceGlance(root).setEnabled(true);
+    bindArrowControls({
+      root,
+      back: root.querySelector('[data-services-back]'),
+      left: root.querySelector('[data-dir="left"]'),
+      right: root.querySelector('[data-dir="right"]'),
     });
   }
 </script>

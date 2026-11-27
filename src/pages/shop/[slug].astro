@@ -1,6 +1,7 @@
 ---
 export const prerender = true;
 
+import BackArrow from '../../components/BackArrow.astro';
 import ShopBuyBar from '../../components/sections/ShopBuyBar.astro';
 import ShopCopy from '../../components/sections/ShopCopy.astro';
 import ShopDetailHead from '../../components/sections/ShopDetailHead.astro';
@@ -67,10 +68,7 @@ const half = '(min-width: 760px) 272px, calc((100vw - 48px) / 2)';
 >
   <article class="shop-detail page-grid" data-slug={product.id}>
     <a class="arrow-back project-back" href="/#shop" data-project-back aria-label="Back">
-      <svg viewBox="0 0 21 20" aria-hidden="true">
-        <path d="M2.11719 7H13.1172C16.4309 7 19.1172 9.68629 19.1172 13C19.1172 16.3137 16.4309 19 13.1172 19H5.98082" fill="none" stroke="currentColor" stroke-width="2"></path>
-        <path d="M7.53027 13.2324L1.41406 7.11621L7.53027 0.999995" fill="none" stroke="currentColor" stroke-width="2"></path>
-      </svg>
+      <BackArrow />
     </a>
     <ShopDetailHead title={title} slug={product.id} eur={eur} />
     <ShopCopy text={intro} />

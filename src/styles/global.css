@@ -749,15 +749,19 @@ html:has([data-sky]) body {
   margin-bottom: 0;
 }
 
-.project {
-  --arrow-control: 64px;
+.project,
+.shop-detail {
+  --arrow-control: 70px;
   --arrow-fill: rgb(0 0 0 / 6%);
   position: relative;
+}
+
+.project {
   padding: 32px var(--pad) 40px;
   padding-top: calc(var(--space-lg) + var(--arrow-control) + var(--space-lg));
 }
 
-html[data-sky-ink='white'] body:has([data-sky]) .project {
+html[data-sky-ink='white'] body:has([data-sky]) :is(.project, .shop-detail, .arrow-nav) {
   --arrow-fill: rgb(255 255 255 / 10%);
 }
 
@@ -1702,7 +1706,10 @@ html[data-chrome-vt-run] ::view-transition-new(root) {
 }
 
 ::view-transition-image-pair(work-back) {
-  background: var(--page-bg);
+  isolation: auto;
+  overflow: hidden;
+  background: transparent;
+  border-radius: 50%;
 }
 
 ::view-transition-image-pair(services-back),
@@ -1842,7 +1849,9 @@ html[data-chrome-vt-run='contact'] ::view-transition-new(contact-field) {
 ::view-transition-new(work-back) {
   animation: none;
   mix-blend-mode: normal;
+  width: 100%;
   height: 100%;
+  object-fit: fill;
 }
 
 html:active-view-transition-type(work)::view-transition-old(root) {
@@ -2293,18 +2302,12 @@ body .site-header.is-menu-fade:not(.is-menu-open) .who .time {
 }
 
 .shop-detail {
-  --arrow-control: 64px;
-  --arrow-fill: rgb(0 0 0 / 6%);
-  position: relative;
   padding-top: calc(var(--space-lg) + var(--arrow-control) + var(--space-lg));
   padding-bottom: 116px;
 }
 .shop-detail > .project-back {
   grid-column: 1 / -1;
   width: var(--arrow-control);
-}
-html[data-sky-ink='white'] body:has([data-sky]) .shop-detail {
-  --arrow-fill: rgb(255 255 255 / 10%);
 }
 .shop-detail > * {
   grid-column: calc((var(--cols) - var(--content-span)) / 2 + 1) / span var(--content-span);
@@ -2445,7 +2448,6 @@ html[data-sky-ink='white'] body:has([data-sky]) .shop-detail {
 }
 @media (max-width: 759px) {
   .shop-detail {
-    --arrow-control: 48px;
     padding-top: calc(var(--space-lg) + var(--arrow-control) + var(--space-lg));
     padding-right: var(--margin);
     padding-bottom: 96px;
@@ -3396,12 +3398,12 @@ body:has(.arrow-nav:not(.contact-hub)) {
 }
 
 .arrow-nav {
-  --arrow-face: var(--arrow-control);
+  --arrow-face: var(--arrow-pill-h);
   --arrow-about-face: 360px;
-  --arrow-control: 64px;
+  --arrow-control: 70px;
   --arrow-gap: var(--space-lg);
   --arrow-pill-h: var(--arrow-control);
-  --arrow-pill-radius: var(--radius);
+  --arrow-pill-radius: 35px;
   --arrow-pill-pad: var(--space-md);
   --arrow-fill: rgb(0 0 0 / 6%);
   position: relative;
@@ -3414,11 +3416,7 @@ body:has(.arrow-nav:not(.contact-hub)) {
 /* Landing chrome, measured from the Jitter intro export at 1440x900. */
 @media (min-width: 760px) {
   .arrow-nav[data-screen='landing'] {
-    --arrow-face: 79px;
     --arrow-gap: 38px;
-    --arrow-pill-h: 70px;
-    --arrow-pill-radius: 35px;
-    --arrow-pill-pad: 41px;
   }
 }
 
@@ -3447,10 +3445,6 @@ html[data-app-inset] body:has(.arrow-nav[data-screen='about']) {
 
 html[data-app-inset] body:has(.arrow-nav[data-screen='about']) main#content {
   min-height: 0;
-}
-
-html[data-sky-ink='white'] body:has([data-sky]) .arrow-nav {
-  --arrow-fill: rgb(255 255 255 / 10%);
 }
 
 html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
@@ -3700,21 +3694,6 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
 .arrow-nav.is-intro .arrow-face-blob {
   overflow: visible;
   border-radius: 0;
-}
-
-.arrow-face-gl {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  right: auto;
-  bottom: auto;
-  transform: translate(-50%, -50%);
-  z-index: 4;
-  pointer-events: none;
-}
-
-.arrow-nav.is-intro.is-face-gl .arrow-face-blob {
-  visibility: hidden;
 }
 
 .intro-debug {
@@ -4338,7 +4317,8 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
 
 @media (max-width: 759px) {
   .arrow-nav,
-  .project {
+  .project,
+  .shop-detail {
     --arrow-about-face: 200px;
     --arrow-control: 48px;
   }

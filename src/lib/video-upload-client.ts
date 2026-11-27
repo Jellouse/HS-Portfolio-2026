@@ -1,8 +1,5 @@
 
-export function cmsToken() {
-  const m = document.cookie.match(/(?:^|;\s*)keystatic-gh-access-token=([^;]+)/);
-  return m ? decodeURIComponent(m[1]) : '';
-}
+import { cmsTokenFromCookie } from './cms-media';
 
 export function isHevcRisk(file: File) {
   return /\.mov$/i.test(file.name) || file.type === 'video/quicktime';
@@ -16,7 +13,7 @@ export async function uploadVideo(file: File, folder: string, onProgress: (p: nu
   }
   const res = await fetch('/api/video-upload', {
     method: 'POST',
-    headers: { 'content-type': 'application/json', authorization: `Bearer ${cmsToken()}` },
+    headers: { 'content-type': 'application/json', authorization: `Bearer ${cmsTokenFromCookie() ?? ''}` },
     body: JSON.stringify({ name: file.name, type: file.type, folder, size: file.size }),
   });
   const data = await res.json().catch(() => ({}));

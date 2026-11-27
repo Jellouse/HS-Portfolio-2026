@@ -1,5 +1,7 @@
 
 
+import { prefersReducedMotion } from '../lib/browser';
+
 const SPIN_MS = 4800;
 const REST = 90;
 const SNAP_MS = 650;
@@ -32,7 +34,7 @@ addEventListener('pagereveal', (e) => {
 
 export function initSpinMark(el: HTMLElement): () => void {
   const started = performance.now();
-  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const reduced = prefersReducedMotion();
   const handoff = takeHandoff();
 
   const loading = !reduced && handoff === null;

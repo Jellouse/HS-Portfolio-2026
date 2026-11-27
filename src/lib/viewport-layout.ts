@@ -35,6 +35,14 @@ type ViewBox = {
 };
 
 const VIEW_SLACK = 1;
+const PROBE_STYLE =
+  'position:absolute;top:0;left:0;width:1px;height:100svh;visibility:hidden;pointer-events:none';
+
+export function viewportProbe(): HTMLDivElement {
+  const probe = document.createElement('div');
+  probe.style.cssText = PROBE_STYLE;
+  return probe;
+}
 
 export function visibleAppView(
   view: ViewBox | null | undefined,
@@ -79,9 +87,7 @@ export function applyAppView(view: AppView, root: HTMLElement = document.documen
 
 
 export function measureAppView(): AppView {
-  const probe = document.createElement('div');
-  probe.style.cssText =
-    'position:absolute;top:0;left:0;width:1px;height:100svh;visibility:hidden;pointer-events:none';
+  const probe = viewportProbe();
   document.body.append(probe);
   const view = visibleAppView(window.visualViewport, probe.getBoundingClientRect().height, {
     width: document.documentElement.clientWidth || window.innerWidth,
@@ -98,9 +104,7 @@ export function syncAppViewport(): AppView {
 }
 
 export function bindAppViewport(onChange?: (view: AppView) => void): () => void {
-  const probe = document.createElement('div');
-  probe.style.cssText =
-    'position:absolute;top:0;left:0;width:1px;height:100svh;visibility:hidden;pointer-events:none';
+  const probe = viewportProbe();
   document.body.append(probe);
 
   const sync = () => {

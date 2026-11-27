@@ -1,12 +1,13 @@
 
 
+import { prefersReducedMotion } from '../lib/browser';
 import { playIn, playOut, prepareReveal, revealDuration } from './text-reveal';
 
 const HEIGHT_MS = 400;
 const LEAD_MS = 120;
 
 export function initShopDetails() {
-  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const reduced = prefersReducedMotion();
   document.querySelectorAll<HTMLButtonElement>('.shop-details[aria-controls]').forEach((button) => {
     const panel = document.getElementById(button.getAttribute('aria-controls') || '');
     const text = panel?.querySelector<HTMLElement>('.shop-desc');

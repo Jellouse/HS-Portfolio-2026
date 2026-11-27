@@ -20,6 +20,9 @@ const snick: Note[] = [
 
 let ac: AudioContext | null = null;
 let noise: AudioBuffer | null = null;
+let started = 0;
+
+const SNICK_MS = 120;
 
 const wake = () => {
   const Ctx = window.AudioContext;
@@ -73,4 +76,10 @@ export const playSnick = () => {
     else src.start(t0);
     src.stop(t1 + 0.02);
   }
+  started = performance.now();
 };
+
+export function snickRemaining(): number {
+  if (!started) return 0;
+  return Math.max(0, SNICK_MS - (performance.now() - started));
+}

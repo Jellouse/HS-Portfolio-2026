@@ -1,5 +1,7 @@
 
 
+import { prefersReducedMotion } from '../lib/browser';
+
 const BLUR_PX = 4;
 const LIFT_PX = 4;
 const RANGE = 0.15;
@@ -79,7 +81,7 @@ function schedulePaint() {
 }
 
 export function paintScrollWords(root: ParentNode = document) {
-  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  if (prefersReducedMotion()) return;
   const vh = document.documentElement.clientHeight || window.innerHeight;
   const items = words(root);
   const states = items.map((word) => wordRevealState(word, vh));
@@ -92,7 +94,7 @@ export function flushScrollWordBlur() {
 }
 
 export function initScrollWordBlur() {
-  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  if (prefersReducedMotion()) return;
   if (bound) {
     flushScrollWordBlur();
     return;

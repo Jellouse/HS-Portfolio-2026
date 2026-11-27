@@ -1,9 +1,10 @@
+import { isTypingTarget, prefersReducedMotion } from '../lib/browser';
 import { initHeroBlob } from './hero-blob';
 import { mountFaceGlance, type FaceGlance } from './face-glance';
 import { introDebug, introDebugOn } from './intro-debug';
 import { playSnick } from './ui-sound';
 import { bindAppViewport, syncAppViewport } from '../lib/viewport-layout';
-import { isTraverse, leaveForRoute, takeRoute } from './arrow-route';
+import { isTraverse, leaveForRoute, routeAfterSnick, takeRoute } from './arrow-route';
 import type { ArrowDir, ArrowTree } from '../lib/arrow-nav';
 
 type Dir = ArrowDir | 'up';
@@ -81,7 +82,7 @@ export function initArrowNav(root: ParentNode = document) {
   const tree = JSON.parse(raw) as ArrowTree;
   const nodes = new Map(tree.nodes.map((node) => [node.id, node]));
   const stage = nav.querySelector<HTMLElement>('[data-nav-stage]')!;
-  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const reduce = prefersReducedMotion();
   const moveMs = () => cssMs('--dur-nav');
   const gap = 8;
 
@@ -1763,7 +1764,7 @@ let galleryMaskOpen: boolean | null = null;
     const node = screen();
     const backHref = nav.dataset.backHref;
     if (dir === 'up' && backHref && (full || screenId === start)) {
-      location.assign(backHref);
+      routeAfterSnick(backHref);
       return;
     }
     if (node?.kind === 'gallery' && (dir === 'left' || dir === 'right')) {
@@ -1794,7 +1795,7 @@ let galleryMaskOpen: boolean | null = null;
     const next = child(screenId, dir);
     if (!next) return;
     if (next.href && !tree.nodes.some((node) => node.parent === next.id)) {
-      location.assign(next.href);
+      routeAfterSnick(next.href);
       return;
     }
     travel(next.id, true);
@@ -1803,7 +1804,7 @@ let galleryMaskOpen: boolean | null = null;
   const onGalleryWheel = (event: WheelEvent) => {
     if (introOn || pressFrom) return;
     if (event.ctrlKey || event.metaKey) return;
-    if (typingTarget(event)) return;
+    if (isTypingTarget(event.target)) return;
     if (document.documentElement.classList.contains('is-contact-open')) return;
     const node = screen();
     if (!node || node.kind !== 'gallery' || node.slides.length < 2) return;
@@ -1887,9 +1888,6 @@ let galleryMaskOpen: boolean | null = null;
     Escape: 'up',
     Backspace: 'up',
   };
-
-  const typingTarget = (event: Event) =>
-    event.target instanceof Element && !!event.target.closest('input, textarea, [contenteditable="true"]');
 
   const backKey = (key: string) => key === 'Escape' || key === 'Backspace';
 
@@ -1988,23 +1986,13 @@ let galleryMaskOpen: boolean | null = null;
 
   window.addEventListener('keydown', (event) => {
     if (event.metaKey || event.altKey || event.ctrlKey) return;
-    if (typingTarget(event)) return;
+    if (isTypingTarget(event.target)) return;
     if (document.documentElement.classList.contains('is-contact-open')) return;
     if ((event.key === ' ' || event.key === 'Enter') && screen()?.kind === 'gallery') {
       event.preventDefault();
       if (event.repeat || introOn || pressFrom) return;
       if (screen()?.full) return;
       setFull(!full);
-      return;
-    }
-    if ((backKey(event.key) || event.key === 'ArrowUp') && full) {
-      event.preventDefault();
-      if (event.repeat || introOn) return;
-      if (screen()?.full) {
-        activate('up');
-        return;
-      }
-      setFull(false);
       return;
     }
     const dir = keyDir[event.key];
@@ -2204,7 +2192,7 @@ let galleryMaskOpen: boolean | null = null;
     nav.classList.add('is-controls');
     introDebug.end();
     introAnims.splice(0).forEach((anim) => anim.cancel());
-    nav.classList.remove('is-face-gl', 'is-face-svg');
+    nav.classList.remove('is-face-svg');
     const scaleEl = nav.querySelector<HTMLElement>('[data-nav-scale]');
     const blob = nav.querySelector<HTMLElement>('.arrow-face-blob');
     scaleEl?.getAnimations().forEach((anim) => anim.cancel());
@@ -2259,7 +2247,7 @@ let galleryMaskOpen: boolean | null = null;
       return;
     }
     const phone = matchMedia('(max-width: 759px)').matches;
-    const face = parseFloat(getComputedStyle(nav).getPropertyValue('--arrow-face')) || (phone ? 48 : 64);
+    const face = parseFloat(getComputedStyle(nav).getPropertyValue('--arrow-face')) || (phone ? 48 : 70);
     scaleEl.style.transform = 'none';
     nav.classList.add('is-face-svg');
     showRestingFace();

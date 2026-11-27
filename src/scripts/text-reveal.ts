@@ -1,5 +1,6 @@
 
 
+import { prefersReducedMotion } from '../lib/browser';
 import {
   applyWordReveal,
   clearWordReveal,
@@ -127,7 +128,7 @@ export function adoptReveal(host: Host) {
 }
 
 export function initTextReveal() {
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  if (prefersReducedMotion()) return;
 
   const boot = () => {
     const all = [...document.querySelectorAll<Host>(SELECTOR)].filter(

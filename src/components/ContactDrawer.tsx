@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal, flushSync } from 'react-dom';
+import { isTypingTarget } from '../lib/browser';
 import { canChromeVt, reduceMotion, runChromeVt } from '../lib/chrome-vt';
 import { typePx } from '../lib/type-scale';
 import { mountFaceGlance } from '../scripts/face-glance';
@@ -476,7 +477,7 @@ export default function ContactDrawer({ email: address }: { email: string }) {
       }
 
       const s = stepRef.current;
-      const inField = e.target instanceof Element && !!e.target.closest('input, textarea, [contenteditable="true"]');
+      const inField = isTypingTarget(e.target);
       const navWhileTyping = e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'Backspace' || e.key === 'Enter';
       if (inField && !navWhileTyping) return;
       if (inField && e.key === 'Enter' && e.shiftKey) return;

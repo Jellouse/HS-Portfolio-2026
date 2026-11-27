@@ -1,3 +1,5 @@
+import { snickRemaining } from './ui-sound';
+
 export const ROUTE_KEY = 'arrow-route';
 export const ROUTE_SWAP_KEY = 'arrow-route-swap';
 
@@ -21,6 +23,13 @@ export function leaveForRoute(id: string, href: string) {
   write(ROUTE_KEY, id);
   write(ROUTE_SWAP_KEY, '1');
   location.assign(href);
+}
+
+/** Leave the document only after the click sound has had time to play. */
+export function routeAfterSnick(href: string) {
+  const wait = snickRemaining();
+  if (wait > 0) window.setTimeout(() => location.assign(href), wait);
+  else location.assign(href);
 }
 
 export function takeRoute() {

@@ -37,6 +37,7 @@ These were already shared. Pages and other components keep using them.
 | About | `src/components/About.astro` | `paragraphs` | `/` |
 | Blocks | `src/components/Blocks.astro` | `blocks`, `slug?`, `processFromFolder?`, `processFolderSrcs?`, `info?` | `/work/:slug`, `/preview/:slug` |
 | BlurImage | `src/components/BlurImage.astro` | `src`, `alt`, `sizes`, `priority?`, `plain?`, `flush?`, `outline?`, `fade?` defaults to true | `/`, `/shop/:slug`, `/work/:slug` |
+| BackArrow | `src/components/BackArrow.astro` | `navBack?: boolean` | `/`, `/shop`, `/shop/:slug`, `/work/:slug`, `/services` |
 | VideoFrame | `src/components/VideoFrame.astro` | `src`, `poster?`, `label?`, `plain?`, `flush?`, `outline?`, `priority?`, `fade?` defaults to true | `/`, `/work/:slug` |
 | VideoBlock | `src/components/VideoBlock.astro` | `src`, `poster?`, `label?`, `frame?`, `flush?`, `outline?` | `/work/:slug` |
 | ImageBlock | `src/components/ImageBlock.astro` | `src`, `alt`, `frame?`, `priority?`, `flush?`, `outline?` | `/work/:slug` |

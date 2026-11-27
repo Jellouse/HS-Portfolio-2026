@@ -1,4 +1,5 @@
-import { clearStableViewportHeight, stableViewportHeight } from '../lib/viewport-layout';
+import { prefersReducedMotion } from '../lib/browser';
+import { clearStableViewportHeight, stableViewportHeight, viewportProbe } from '../lib/viewport-layout';
 import { introFaceLayout, shopRingWidth } from '../lib/intro-layout';
 import { introScrollT } from '../lib/intro-scroll';
 import { setIntroCopy } from './intro-copy';
@@ -7,13 +8,12 @@ export function initShopIntro(head: HTMLElement) {
   const host = head.querySelector<HTMLElement>('[data-shop-ring]');
   const title = head.querySelector<HTMLElement>('.shop-head-title');
   if (!host || !title) return;
-  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const reduced = prefersReducedMotion();
   let R = 1;
   let lastW = -1;
 
   const layer = head.querySelector<HTMLElement>('[data-shop-ring-layer]')!;
-  const probe = document.createElement('div');
-  probe.style.cssText = 'position:absolute;top:0;left:0;width:1px;height:100svh;visibility:hidden;pointer-events:none';
+  const probe = viewportProbe();
   document.body.appendChild(probe);
 
   const mark = host.querySelector<HTMLElement>('.shop-mark')!;

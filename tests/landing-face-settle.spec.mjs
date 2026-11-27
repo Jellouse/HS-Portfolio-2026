@@ -35,10 +35,9 @@ const probe = () => {
     const nav = document.querySelector('[data-arrow-nav]');
     const scale = nav?.querySelector('.arrow-face-scale');
     if (scale) {
-      const gl = nav.classList.contains('is-face-gl') && nav.querySelector('.arrow-face-gl');
       const blob = nav.querySelector('.arrow-face-blob');
       const shown = blob && getComputedStyle(blob).visibility !== 'hidden' && getComputedStyle(blob).display !== 'none';
-      const boxes = [gl ? scale : null, shown ? blob : null].filter(Boolean).map((el) => el.getBoundingClientRect());
+      const boxes = [shown ? blob : null].filter(Boolean).map((el) => el.getBoundingClientRect());
       const w = Math.max(0, ...boxes.map((r) => r.width));
       const h = Math.max(0, ...boxes.map((r) => r.height));
       window.__faces.push({
@@ -46,7 +45,7 @@ const probe = () => {
         w,
         h,
         intro: nav.classList.contains('is-intro'),
-        path: nav.classList.contains('is-face-gl') ? 'gl' : nav.classList.contains('is-face-svg') ? 'svg' : '',
+        path: nav.classList.contains('is-face-svg') ? 'svg' : '',
       });
     }
     requestAnimationFrame(sample);

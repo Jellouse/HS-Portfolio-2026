@@ -1,5 +1,7 @@
 
 
+import { prefersReducedMotion } from '../lib/browser';
+
 const SELECTOR = '.fade-in';
 
 function inFirstView(el: Element) {
@@ -25,7 +27,7 @@ function reveal(el: Element) {
 
 export function initScrollFade() {
   if (document.documentElement.classList.contains('has-scroll-motion')) return;
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  if (prefersReducedMotion()) return;
   if (!('IntersectionObserver' in window)) return;
 
   const nodes = Array.from(document.querySelectorAll(SELECTOR));

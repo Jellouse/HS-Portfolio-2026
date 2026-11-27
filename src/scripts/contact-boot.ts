@@ -18,7 +18,11 @@ export function bootContact() {
     mounted = true;
   };
 
-  const ensure = () => (mounting ??= mount());
+  const ensure = () =>
+    (mounting ??= mount().catch((error) => {
+      mounting = null;
+      throw error;
+    }));
 
   document.addEventListener(
     'pointerdown',
@@ -35,12 +39,14 @@ export function bootContact() {
       if (!target || mounted) return;
       event.preventDefault();
       event.stopPropagation();
-      void ensure().then(() => target.click());
+      void ensure()
+        .then(() => target.click())
+        .catch(() => {});
     },
     true,
   );
 
-  const prefetch = () => void ensure();
+  const prefetch = () => void ensure().catch(() => {});
   const schedule = () => {
     if ('requestIdleCallback' in window) window.requestIdleCallback(prefetch, { timeout: 4000 });
     else setTimeout(prefetch, 4000);

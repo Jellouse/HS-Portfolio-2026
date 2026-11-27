@@ -1,4 +1,5 @@
 import type { ImageMetadata } from 'astro';
+import { naturalCollator } from './collator';
 
 const images = import.meta.glob<ImageMetadata>(
   '/src/content/{projects,products,services}/**/*.{jpg,jpeg,png,webp,avif}',
@@ -63,11 +64,9 @@ export function resolveImageSource(src: string): ImageMetadata | string {
   );
 }
 
-const collator = new Intl.Collator('en', { numeric: true, sensitivity: 'base' });
-
 export function processFolderImages(slug: string): string[] {
   const prefix = `/src/content/projects/${slug}/process/`;
   return Object.keys(images)
     .filter((key) => key.startsWith(prefix))
-    .sort((a, b) => collator.compare(a.slice(prefix.length), b.slice(prefix.length)));
+    .sort((a, b) => naturalCollator.compare(a.slice(prefix.length), b.slice(prefix.length)));
 }

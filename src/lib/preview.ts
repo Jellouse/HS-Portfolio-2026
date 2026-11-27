@@ -1,6 +1,7 @@
 import { createGitHubReader } from '@keystatic/core/reader/github';
 import config from '../../keystatic.config';
 import { CMS_REPO } from './cms-auth';
+import { naturalCollator } from './collator';
 import type { ProjectEntry } from './content';
 
 const SAFE_REF = /^[A-Za-z0-9._\/-]{1,200}$/;
@@ -27,11 +28,10 @@ export async function listProcessFolderFromGitHub(
   if (!res.ok) return [];
   const items = (await res.json()) as Array<{ type?: string; name?: string; path?: string }>;
   if (!Array.isArray(items)) return [];
-  const collator = new Intl.Collator('en', { numeric: true, sensitivity: 'base' });
   return items
     .filter((item) => item.type === 'file' && item.name && /\.(jpe?g|png|webp|avif)$/i.test(item.name))
     .map((item) => `/${item.path}`)
-    .sort((a, b) => collator.compare(a, b));
+    .sort((a, b) => naturalCollator.compare(a, b));
 }
 
 export function toProjectEntry(slug: string, data: Record<string, unknown>): ProjectEntry {

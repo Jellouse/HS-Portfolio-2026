@@ -1,4 +1,5 @@
 import { flushSync } from 'react-dom';
+import { prefersReducedMotion } from './browser';
 
 export type ChromeVtType = 'chrome-shrink' | 'chrome-grow';
 
@@ -8,7 +9,7 @@ export type ChromeVtOptions = {
 };
 
 export function reduceMotion() {
-  return matchMedia('(prefers-reduced-motion: reduce)').matches;
+  return prefersReducedMotion();
 }
 
 export function canChromeVt() {

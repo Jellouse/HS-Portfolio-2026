@@ -2,7 +2,7 @@
 
 import React, { type ReactNode } from 'react';
 import { withImageOptimize } from './image-field-optimize';
-import { CMS_TOKEN_COOKIE } from './cms-auth';
+import { cmsTokenFromCookie, mimeFor } from './cms-media';
 import { typePx } from './type-scale';
 
 type Asset = {
@@ -10,28 +10,6 @@ type Asset = {
   filename: string;
   extension: string;
 };
-
-function mimeFor(extension: string) {
-  const ext = extension.toLowerCase();
-  if (ext === 'png') return 'image/png';
-  if (ext === 'webp') return 'image/webp';
-  if (ext === 'avif') return 'image/avif';
-  if (ext === 'gif') return 'image/gif';
-  return 'image/jpeg';
-}
-
-function cmsToken(): string | undefined {
-  if (typeof document === 'undefined') return undefined;
-  const match = document.cookie.match(
-    new RegExp(`(?:^|;\\s*)${CMS_TOKEN_COOKIE}=([^;]+)`),
-  );
-  if (!match) return undefined;
-  try {
-    return decodeURIComponent(match[1]);
-  } catch {
-    return match[1];
-  }
-}
 
 function branchFromLocation(): string {
   if (typeof location === 'undefined') return 'main';
@@ -69,7 +47,7 @@ export async function downloadCmsImage(opts: {
       download: '1',
     });
     const headers: HeadersInit = {};
-    const token = cmsToken();
+    const token = cmsTokenFromCookie();
     if (token) headers.authorization = `Bearer ${token}`;
     const res = await fetch(`/api/preview-image?${params}`, {
       credentials: 'same-origin',

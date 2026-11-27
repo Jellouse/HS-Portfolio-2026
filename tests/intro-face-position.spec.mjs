@@ -31,14 +31,13 @@ const BASE = 'http://127.0.0.1:4358';
 
 const probe = () => {
   const nav = document.querySelector('[data-arrow-nav]');
-  const gl = nav?.querySelector('.arrow-face-gl');
   const scale = nav?.querySelector('.arrow-face-scale');
-  const shown = gl || scale;
+  const shown = scale;
   const r = shown?.getBoundingClientRect();
   return {
     intro: !!nav?.classList.contains('is-intro'),
     controls: !!nav?.classList.contains('is-controls'),
-    path: nav?.classList.contains('is-face-gl') ? 'gl' : nav?.classList.contains('is-face-svg') ? 'svg' : '',
+    path: nav?.classList.contains('is-face-svg') ? 'svg' : '',
     vw: innerWidth,
     vh: innerHeight,
     el: shown?.className || '',
@@ -70,7 +69,7 @@ const run = async (type, engine, size, label) => {
   await page.waitForFunction(
     () => {
       const nav = document.querySelector('[data-arrow-nav]');
-      return nav && (nav.classList.contains('is-face-gl') || nav.classList.contains('is-face-svg') || !nav.classList.contains('is-intro'));
+      return nav && (nav.classList.contains('is-face-svg') || !nav.classList.contains('is-intro'));
     },
     null,
     { timeout: 8000 },
