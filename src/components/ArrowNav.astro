@@ -87,7 +87,106 @@ const { tree, startScreen, backHref } = Astro.props;
   <script type="application/json" data-nav-tree set:html={JSON.stringify(tree)}></script>
 </div>
 
+<script is:inline>
+  (function () {
+    // Hashed galleries are painted here, during parse, so the return from a
+    // project shares one snapshot. The frame size matches frameFor in arrow-nav.ts.
+    var hash = location.hash.replace('#', '');
+    if (!hash) return;
+    var raw = document.querySelector('[data-nav-tree]');
+    if (!raw) return;
+    var tree;
+    try {
+      tree = JSON.parse(raw.textContent || '');
+    } catch (e) {
+      return;
+    }
+    var node = null;
+    var nodes = tree.nodes || [];
+    for (var i = 0; i < nodes.length; i++) {
+      if (nodes[i].id === hash) node = nodes[i];
+    }
+    if (!node || node.kind !== 'gallery' || !node.slides || !node.slides.length) return;
+    var nav = raw.closest('[data-arrow-nav]');
+    if (!nav) return;
+    var slide = node.slides[0];
+    nav.dataset.kind = 'gallery';
+    nav.dataset.screen = hash;
+    nav.classList.remove('is-intro');
+    nav.classList.add('is-controls');
+    var face = nav.querySelector('[data-nav-face]');
+    var gallery = nav.querySelector('[data-nav-gallery]');
+    var copy = nav.querySelector('[data-nav-copy]');
+    var caption = nav.querySelector('[data-nav-caption]');
+    var hint = nav.querySelector('[data-nav-hint]');
+    if (face) face.hidden = true;
+    if (copy) copy.hidden = true;
+    if (hint) hint.hidden = true;
+    if (caption) caption.hidden = false;
+    if (!gallery) return;
+    gallery.hidden = false;
+    if (slide.slug) gallery.dataset.project = slide.slug;
+    if (slide.alpha) gallery.classList.add('is-alpha');
+    var photo = gallery.querySelector('[data-nav-photo]');
+    var clip = gallery.querySelector('[data-nav-video]');
+    if (slide.kind === 'video') {
+      if (photo) photo.hidden = true;
+      if (clip) {
+        clip.hidden = false;
+        if (slide.poster) clip.poster = slide.poster;
+        clip.src = slide.src;
+      }
+    } else if (photo) {
+      if (clip) clip.hidden = true;
+      photo.hidden = false;
+      photo.alt = slide.alt || '';
+      photo.src = slide.src;
+    }
+    var phone = matchMedia('(max-width: 759px)').matches;
+    var control = phone ? 48 : 70;
+    var hostW = window.innerWidth;
+    var hostH = window.innerHeight;
+    var margin = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--margin'));
+    if (!margin) margin = Math.max(20, Math.min(160, (hostW - 1120) / 2));
+    var maxW = phone ? Math.round(hostW - 2 * control - 2 * margin) : Math.round(Math.min(720, hostW * 0.62));
+    var maxH = Math.round(Math.min(hostH * 0.62, hostH - control * 2));
+    var ratio = slide.width > 0 && slide.height > 0 ? slide.width / slide.height : 1.6;
+    var w = Math.max(1, maxW);
+    var h = Math.max(1, Math.round(w / ratio));
+    if (maxH > 0 && h > maxH) {
+      h = maxH;
+      w = Math.max(1, Math.round(h * ratio));
+    }
+    if (node.full) nav.classList.add('is-full', 'is-cover');
+    else {
+      gallery.style.width = w + 'px';
+      gallery.style.height = h + 'px';
+    }
+    var back = nav.querySelector('[data-dir="up"]');
+    if (back) back.hidden = false;
+    var side = ['left', 'right'];
+    for (var s = 0; s < side.length; s++) {
+      var button = nav.querySelector('[data-dir="' + side[s] + '"]');
+      if (!button) continue;
+      button.hidden = false;
+      button.dataset.mode = 'icon';
+      var label = button.querySelector('[data-nav-label]');
+      if (label) label.hidden = true;
+    }
+    var down = nav.querySelector('[data-dir="down"]');
+    if (down) down.hidden = true;
+    var link = nav.querySelector('[data-nav-project]');
+    if (link && slide.href) {
+      link.hidden = false;
+      link.href = slide.href;
+    }
+  })();
+</script>
+
 <script>
   import { initArrowNav } from '../scripts/arrow-nav';
-  requestAnimationFrame(() => initArrowNav());
+  // Hash opens (the way back from a project) paint in the inline script above,
+  // before the document snapshot. This pass fills in the rest.
+  if (location.hash) initArrowNav();
+  else requestAnimationFrame(() => initArrowNav());
 </script>
