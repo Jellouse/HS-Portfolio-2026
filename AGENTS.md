@@ -123,6 +123,10 @@ Defined in `src/styles/global.css`:
 
 Set `SITE_URL` to the production origin (no trailing slash). On Vercel it falls back to `VERCEL_PROJECT_PRODUCTION_URL`.
 
+## IndexNow
+
+After a production deploy, `node scripts/indexnow.mjs` reads `https://humansize.de/sitemap-index.xml` and POSTs every page URL to IndexNow (Bing and other engines). Hook it to a GitHub Action on `deployment_status` that runs only when the Production environment succeeds (`.github/workflows/indexnow.yml`). The key file is `public/398ce50c2ca330238bb8a413da11b56e.txt`, served as plain text at the site root with no redirect and no noindex. The script always exits 0, so a failed ping never fails a build.
+
 ## Verification
 
 - `npm test` is the behaviour check: touch scroll, reveal, intro face, view transitions, underlines, canvas auth, shop gallery.
