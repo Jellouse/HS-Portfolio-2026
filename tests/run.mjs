@@ -29,6 +29,8 @@ const SPECS = [
   ['canvas-pages', 'tests/canvas-pages.spec.mjs'],
   ['canvas', 'tests/canvas-auth.spec.mjs'],
   ['shop', 'tests/shop-checkout.spec.mjs'],
+  ['project-sections', 'tests/project-sections.spec.mjs'],
+  ['project-pages', 'tests/project-pages.spec.mjs'],
   ['project-images', 'tests/project-images.spec.mjs'],
   ['content', 'tests/content-integrity.spec.mjs'],
   ['scroll-media', 'tests/scroll-media-visible.spec.mjs'],

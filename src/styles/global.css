@@ -757,7 +757,7 @@ html:has([data-sky]) body {
 }
 
 .project {
-  padding: 32px var(--pad) 40px;
+  padding: 32px var(--pad) calc(40px + var(--project-tail, 0px));
   padding-top: calc(var(--space-lg) + var(--arrow-control) + var(--space-lg));
 }
 

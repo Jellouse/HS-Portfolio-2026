@@ -8,7 +8,7 @@ Read [docs/agents/RULEBOOK.md](docs/agents/RULEBOOK.md) before any edit. It is m
 
 - `src/pages/index.astro` is the homepage. It renders `ArrowNav` (the landing face and the screens behind it).
 - `src/pages/work/[slug].astro` builds every published project from its block list. New projects do not need a new page.
-- `src/pages/shop/index.astro` is the vase shop: a fullscreen gallery that renders `ArrowNav` with `startScreen="shop"`, so it matches the homepage Shop screen. `src/pages/shop/[slug].astro` is one product.
+- `src/pages/shop/index.astro` is the vase shop: a fullscreen gallery that renders `ArrowNav` with `startScreen="shop"`, so it matches the homepage Shop screen. `src/pages/shop/[slug].astro` is one product, with no footer.
 - `src/pages/canvas.astro` is the review board. `src/pages/admin.astro` is shop admin. `src/pages/preview/[slug].astro` is the CMS preview.
 - `src/content.config.ts` is the typed schema. `keystatic.config.ts` edits the same files. Keep the two in step.
 - `src/styles/type.css` is the only place font size, line height, and tracking are defined. `src/lib/type-scale.ts` mirrors those values for inline styles. `tests/type-scale.spec.mjs` fails if they drift.
@@ -98,6 +98,11 @@ Do not change these. They are the design.
 - Homepage face: size comes from `src/lib/intro-layout.ts` and `src/lib/viewport-layout.ts`. It sits in the page and scrolls with it. Intro nav fade still uses `src/scripts/intro-face.ts` and `src/lib/intro-scroll.ts`. The old shop ring is kept in the CSS and `IntroHero`, but nothing renders it.
 - Landing intro: `src/scripts/arrow-nav.ts` runs the Jitter export (Scene-1, 60fps). The face holds at 3.937x, shrinks in two eased steps (320ms and 2079ms) to its resting size at 3370ms, the eyes squint and open, and the pills slide in 100px from their own side while the copy and hint fade. Keep those frame values.
 - View transitions: the root transition fades the new page in over the old one. Product pages open with the menu, not the mark. Project pages open with the back control.
+- Project pages step with the arrow keys, desktop only. Down brings the next block to the middle of the screen, Up the one before. Up leaves the page only from the very top, where it presses Back. Blocks are `image-block`, `pair`, `text-block`, `process`, and `info` (`src/scripts/project-sections.ts`). A process grid steps one row at a time: its items sit two to a row with no wrapper, so a row is the items sharing a top edge, the way `project-media-scroll.ts` reads them. The Process label travels with the first row. A block taller than the screen cannot centre, so it lands with its top on screen and the end of the page is its own stop.
+- Where those numbers become stops is `src/lib/project-stops.mjs` (`stopBoxes`, `stopPositions`, `tailRoom`). The page measures, that module decides. `tests/project-pages.spec.mjs` uses the same module to walk every published project at 1440 and 390, so a project added tomorrow is checked without editing the spec. `--project-tail` is measured again whenever the page grows, because a video frame takes its poster the first time it comes near, and every stop below it would otherwise land off by the difference. `--project-tail`, set by the same script, is the room under the last block that lets it reach the middle too. It stays `0` on phones. Products do not step. Project and product pages have no footer.
+- The step is a critically damped spring in `project-sections.ts` (`STEP_MS`, 360ms), not the browser's smooth scroll. A native smooth scroll starts from rest every call, so pressing fast restarted the slow ramp and the page felt slower the quicker you pressed. The spring keeps its velocity when the target moves, so a second press adds distance to a scroll already going. It never overshoots. `prefers-reduced-motion` jumps straight to the stop. A wheel or a trackpad flick during a step hands the page back.
+- Holding an arrow repeats the step the way holding a gallery arrow does (`arrow-controls.ts`): one step at once, then a 480ms pause, then repeats every 0.78 of the wait before, down to 80ms. The spring carries the speed between repeats, so a held key reads as one accelerating scroll rather than a series of stops. Holding Up climbs back to the top and stays there. It never presses Back, so leaving still takes its own press.
+- `preventDefault()` comes before the `event.repeat` check on Up and Down. A held key fires keydown over and over, and any repeat left un-prevented lets the browser scroll natively on top of the steps. That reads as a couple of hops and then a slow linear crawl. The gallery already ordered it this way. Do not move the repeat check first.
 
 ## Layout grid
 
@@ -131,7 +136,7 @@ After a production deploy, `node scripts/indexnow.mjs` reads `https://humansize.
 
 ## Verification
 
-- `npm test` is the behaviour check: touch scroll, reveal, intro face, view transitions, underlines, canvas auth, shop gallery.
+- `npm test` is the behaviour check: touch scroll, reveal, intro face, view transitions, underlines, canvas auth, shop gallery, project section stepping.
 - Pixel check, after two builds: `node scripts/visual-capture.mjs <static-root> <out-dir> <port>` then `node scripts/visual-diff.mjs <before-dir> <after-dir>`. Static root is `.vercel/output/static`. Captures `/`, `/shop/`, `/work/industrial-bloom/`, and `/work/tonys-chocolonely/` at 1440 and 390, full page, reduced motion, so the idle face and footer loop do not move between shots.
 - `node scripts/brand-hover-crops.mjs` checks the `@Humansize` hover does not overlap.
 - `BASE_URL=https://humansize.de npm run test:scroll` runs the touch scroll spec against a deployed site.
