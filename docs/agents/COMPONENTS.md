@@ -49,12 +49,12 @@ These were already shared. Pages and other components keep using them.
 | ProjectFeed | `src/components/ProjectFeed.astro` | `projects`, `about` | `/` |
 | Info | `src/components/Info.astro` | `items` | `/work/:slug`, `/shop/:slug` |
 | Header | `src/components/Header.astro` | `site` | `/` |
-| Footer | `src/components/Footer.astro` | `site` | every page, through Base |
+| Footer | `src/components/Footer.astro` | `site` | every page but project and product, through Base (`hideFooter`) |
 | Seo | `src/components/Seo.astro` | `title`, `description`, `image?`, `type?`, `jsonLd?`, `noindex?` | every page, through Base |
 | ContactSheet | `src/components/ContactSheet.astro` | `email` | every page, through Base |
 | ContactDrawer | `src/components/ContactDrawer.tsx` | `email` | every page, through ContactSheet. Full-viewport hub reusing arrow face / pill / back chrome. Step hops and About open/close go through `runChromeVt` (`src/lib/chrome-vt.ts`). |
 | ContactFace | `src/components/ContactFace.tsx` | `filterId?` | ContactDrawer service step |
-| Peeps | `src/components/Peeps.astro` | `maxH?` | every page, through Footer |
+| Peeps | `src/components/Peeps.astro` | `maxH?` | every page but project and product, through Footer |
 | PeepsStatic | `src/components/PeepsStatic.astro` | none | every page, through Peeps |
 | HeroBlob | `src/components/HeroBlob.astro` | none | `/` |
 | Mark | `src/components/Mark.astro` | none | `/` when `?hero=gradient` |

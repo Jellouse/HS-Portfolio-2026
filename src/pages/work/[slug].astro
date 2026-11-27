@@ -30,6 +30,7 @@ const title = `${project.data.seoTitle?.trim() || projectLabel(project.data)} ·
   description={summary}
   type="article"
   jsonLd={projectJsonLd(project, pageUrl)}
+  hideFooter
 >
   <ProjectArticle project={project} />
 </Base>
