@@ -3792,19 +3792,21 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
   border-radius: var(--gallery-radius);
   corner-shape: superellipse(1.436);
   overflow: visible;
-  background: var(--arrow-fill);
   cursor: zoom-in;
   transition:
     width var(--dur-media) var(--ease-nav),
     height var(--dur-media) var(--ease-nav);
 }
 
+/* The fill and stroke live on the media. That element is the work-frame
+   snapshot, so the plate travels with the picture into the project and back. */
 .arrow-gallery-media {
   position: absolute;
   inset: 0;
   overflow: hidden;
   border-radius: inherit;
   corner-shape: inherit;
+  background: var(--arrow-fill);
 }
 
 .arrow-gallery-media::before {
@@ -3828,10 +3830,11 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
   z-index: 1;
 }
 
-.arrow-gallery::after {
+.arrow-gallery-media::after {
   content: '';
   position: absolute;
   inset: 0;
+  z-index: 1;
   box-sizing: border-box;
   border: 1px solid var(--image-stroke);
   border-radius: inherit;
@@ -3839,8 +3842,8 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
   pointer-events: none;
 }
 
-.arrow-nav.is-cover .arrow-gallery::after,
-.arrow-nav.is-full .arrow-gallery::after {
+.arrow-nav.is-cover .arrow-gallery-media::after,
+.arrow-nav.is-full .arrow-gallery-media::after {
   content: none;
 }
 
@@ -3855,10 +3858,10 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
   corner-shape: unset;
   transform: none;
   cursor: zoom-out;
-  background: transparent;
 }
 
-.arrow-gallery.is-alpha {
+.arrow-nav.is-cover .arrow-gallery-media,
+.arrow-gallery.is-alpha .arrow-gallery-media {
   background: transparent;
 }
 
