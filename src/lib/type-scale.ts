@@ -11,6 +11,8 @@ export const typeScale = {
   'lh-fine': '14px',
   'text-hint': '18px',
   'lh-hint': '24px',
+  'text-hint-sm': '14px',
+  'lh-hint-sm': '18px',
   'lh-snug': '20px',
   track: '-0.02em',
   'track-none': '0px',

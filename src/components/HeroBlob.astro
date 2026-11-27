@@ -87,11 +87,13 @@ const faceEvenodd = `${faceHead}${faceMouth}${faceEyeL}${faceEyeR}`;
       )}
       <g data-face-glance-layer>
         <path d={faceHead} fill={fill}></path>
-        <path data-face-mouth d={faceMouth}></path>
-        <g clip-path={`url(#${filterId}-clip)`}>
-          <g data-face-features>
-            <path d={faceEyeL}></path>
-            <path d={faceEyeR}></path>
+        <g data-face-move>
+          <path data-face-mouth d={faceMouth}></path>
+          <g clip-path={`url(#${filterId}-clip)`}>
+            <g data-face-features>
+              <path data-face-eye="left" d={faceEyeL}></path>
+              <path data-face-eye="right" d={faceEyeR}></path>
+            </g>
           </g>
         </g>
       </g>

@@ -53,7 +53,7 @@ const probe = () => {
 
 const SAMPLES = [
   { name: 'early', waitMs: 1600, wantControls: false },
-  { name: 'revealed', waitMs: 5200, wantControls: true },
+  { name: 'revealed', waitMs: 3300, wantControls: true },
 ];
 
 const run = async (type, engine, size, label) => {
@@ -88,7 +88,7 @@ const run = async (type, engine, size, label) => {
       failures.push(`${tag} ${sample.name}: intro already over`);
       continue;
     }
-    if (mid.path !== 'gl') failures.push(`${tag} ${sample.name}: expected GPU face, got ${mid.path || 'none'}`);
+    if (mid.path !== 'svg') failures.push(`${tag} ${sample.name}: expected SVG face, got ${mid.path || 'none'}`);
     if (mid.cx == null || mid.cy == null) {
       failures.push(`${tag} ${sample.name}: no visible face box`);
       continue;

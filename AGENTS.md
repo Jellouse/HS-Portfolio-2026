@@ -72,6 +72,7 @@ Defined in `src/styles/type.css`. Whole pixels. Use the variables. Do not write 
 | `--text-meta` / `--lh-meta` | 13px / 16px | Badges, canvas chrome, small CMS labels |
 | `--text-fine` / `--lh-fine` | 11px / 14px | Hero dials (`?dials` only) |
 | `--text-hint` / `--lh-hint` | 18px / 24px | The arrow-key hint on the landing |
+| `--text-hint-sm` / `--lh-hint-sm` | 14px / 18px | The landing hint at 760 and up |
 | `--lh-snug` | 20px | Canvas group labels |
 | `--track` | -0.02em | Every line of site text |
 | `--track-none` | 0px | The preview badge, which opts out |
@@ -95,6 +96,7 @@ Do not change these. They are the design.
 - Links: 1px underline, 3px offset (`text-underline-offset: 3px`).
 - `@Humansize` on desktop hover: the `@` fades in and the word slides so the pair stays centred on the same point. The shift is `translateX(-50%)` of the `@` itself (`Header.astro`, `.brand-shift`). No measured width.
 - Homepage face: size comes from `src/lib/intro-layout.ts` and `src/lib/viewport-layout.ts`. It sits in the page and scrolls with it. Intro nav fade still uses `src/scripts/intro-face.ts` and `src/lib/intro-scroll.ts`. The old shop ring is kept in the CSS and `IntroHero`, but nothing renders it.
+- Landing intro: `src/scripts/arrow-nav.ts` runs the Jitter export (Scene-1, 60fps). The face holds at 3.937x, shrinks in two eased steps (320ms and 2079ms) to its resting size at 3370ms, the eyes squint and open, and the pills slide in 100px from their own side while the copy and hint fade. Keep those frame values.
 - View transitions: the root transition fades the new page in over the old one. Product pages open with the menu, not the mark. Project pages open with the back control.
 
 ## Layout grid
