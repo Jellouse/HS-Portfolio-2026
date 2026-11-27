@@ -1,9 +1,9 @@
 const SHIFT = 100;
 
-const STACK = '.project .scroll-media, .feed .card .scroll-media, .shop-product .scroll-media, .shop-detail .scroll-media';
+const STACK = '.project .scroll-media, .feed .card .scroll-media, .shop-detail .scroll-media';
 
 export function isStackFrame(frame: HTMLElement) {
-  return Boolean(frame.closest('.project, .feed .card, .shop-product, .shop-detail'));
+  return Boolean(frame.closest('.project, .feed .card, .shop-detail'));
 }
 
 const applied = new WeakMap<HTMLElement, number>();
@@ -23,12 +23,6 @@ function layoutTop(frame: HTMLElement) {
 function motionMates(frame: HTMLElement) {
   const card = frame.closest('.feed .card');
   if (card) return [...card.children].filter((el): el is HTMLElement => el.classList.contains('caption'));
-  const product = frame.closest('.shop-product');
-  if (product) {
-    return [...product.children].filter(
-      (el): el is HTMLElement => el.classList.contains('shop-caption') || el.classList.contains('shop-desc-wrap'),
-    );
-  }
   return [];
 }
 

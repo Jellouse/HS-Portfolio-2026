@@ -16,7 +16,6 @@ These were repeated, or the same menu and price markup copied across pages. The 
 | CornerMark | `src/components/sections/CornerMark.astro` | `class`, `href`, `label`, slot for the mark | dev catalogue |
 | IntroHero | `src/components/sections/IntroHero.astro` | `variant` (`home` or `shop`), `site?`, illustration slot | dev catalogue |
 | ShopIntro | `src/components/sections/ShopIntro.astro` | none | dev catalogue |
-| ShopProduct | `src/components/sections/ShopProduct.astro` | `product`, `index`, `sizes` | dev catalogue |
 | ShopDetailHead | `src/components/sections/ShopDetailHead.astro` | `title`, `slug`, `eur` | `/shop/:slug` |
 | ShopCopy | `src/components/sections/ShopCopy.astro` | `text` | `/shop/:slug` |
 | ShopFigure | `src/components/sections/ShopFigure.astro` | `src`, `alt`, `sizes`, `outline?`, `priority?` | `/shop/:slug` |
@@ -68,6 +67,8 @@ These were already shared. Pages and other components keep using them.
 ## Shop gallery
 
 `/shop` and the homepage Shop screen are the same fullscreen gallery. Both render `src/components/ArrowNav.astro`, which is also the homepage. The slides come from `shopSlides()` in `src/lib/arrow-nav.ts`: one per product with `overview.show` on, in `order`, from the product's `viewer.desktop` and `viewer.mobile` images. `/shop` passes `startScreen="shop"` and `backHref="/"`, so it opens on the gallery and the back control is a plain link home. The `full` flag on the Shop screen in `arrow-nav.yaml` makes it open fullscreen on both.
+
+The gallery is the only place `overview` is read, and it needs just `show` and `title`. `viewer` is required for a product to appear: a product without `viewer.desktop.src` is skipped. The product photos in `detail`, `overview`, and the project Gallery field no longer feed the shop, so they carry no Gallery choice.
 
 ## Proposed
 
