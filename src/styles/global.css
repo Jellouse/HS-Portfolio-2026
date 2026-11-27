@@ -3791,7 +3791,7 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
   left: 50%;
   bottom: calc(50% + var(--arrow-face) / 2 + var(--arrow-gap));
   width: var(--arrow-control);
-  height: var(--arrow-pill-h);
+  height: var(--arrow-pill-h, var(--arrow-control));
   padding: 0;
   border-radius: 50%;
   display: grid;
