@@ -28,7 +28,7 @@ const og = image
   : null;
 
 const useDefault = Astro.url.pathname === '/' || !og;
-const ogUrl = useDefault ? new URL('/og/og-2026-11.jpg', Astro.site).href : new URL(og!.src, Astro.site).href;
+const ogUrl = useDefault ? new URL('/og/og-2026-11-1.jpg', Astro.site).href : new URL(og!.src, Astro.site).href;
 const ogW = useDefault ? 1200 : og!.attributes.width ?? Math.min(1200, image!.width);
 const ogH = useDefault ? 630 : og!.attributes.height ?? Math.min(630, image!.height);
 const ogType = 'image/jpeg';
