@@ -23,13 +23,17 @@ const check = (ok, label) => { console.log(`${ok ? 'ok  ' : 'FAIL'} ${label}`); 
 const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
 let posted = null;
 await page.route('**/api/contact', (route) => { posted = JSON.parse(route.request().postData()); route.fulfill({ json: { ok: true } }); });
-await page.goto('http://127.0.0.1:4355/shop/', { waitUntil: 'load' });
+await page.goto('http://127.0.0.1:4355/', { waitUntil: 'load' });
+await page.waitForFunction(() => {
+  const nav = document.querySelector('[data-arrow-nav]');
+  return nav && nav.classList.contains('is-controls') && !nav.classList.contains('is-intro');
+}, null, { timeout: 25000 });
 await page.waitForTimeout(500);
 const layoutBefore = await page.evaluate(() => {
   const grid = document.querySelector('.page-grid');
   return grid ? Math.round(grid.getBoundingClientRect().left) : 0;
 });
-await page.click('.site-menu [data-contact-open]');
+await page.click('[data-arrow-nav] [data-dir="down"]');
 await page.waitForSelector('[data-contact]', { timeout: 8000 });
 await page.waitForTimeout(400);
 const layoutAfter = await page.evaluate(() => {
@@ -40,14 +44,21 @@ check(Math.abs(layoutBefore - layoutAfter) <= 1, `opening contact does not shift
 const panel = await page.evaluate(() => {
   const el = document.querySelector('.contact-panel');
   const r = el.getBoundingClientRect();
-  return { top: Math.round(r.top), height: Math.round(r.height), face: !!el.querySelector('.arrow-face-blob'), pills: el.querySelectorAll('[data-service]').length };
+  return {
+    top: Math.round(r.top),
+    height: Math.round(r.height),
+    question: el.querySelector('.contact-ask-title')?.textContent?.trim(),
+    options: el.querySelectorAll('.contact-option').length,
+    rows: [...el.querySelectorAll('.contact-options-row')].map((row) => row.children.length),
+  };
 });
 check(panel.top === 0 && panel.height === 900, `hub fills the viewport (y=${panel.top}, h=${panel.height})`);
-check(panel.face && panel.pills === 3, `service step shows the face and three pills (${panel.face}, ${panel.pills})`);
-await page.click('[data-service="Physical Build"]');
+check(panel.question === 'What can i help you with?', `step 1 asks the question (${panel.question})`);
+check(panel.options === 6 && panel.rows.join('') === '321', `step 1 is a 3-2-1 pyramid (${panel.rows.join('-')})`);
+await page.click('[data-service="Retail store"]');
 await page.waitForFunction(() => !document.documentElement.hasAttribute('data-chrome-vt-run'), null, { timeout: 2000 }).catch(() => {});
-check(await page.isVisible('#contact-project'), 'picking a service goes to step 2');
-check(await page.isDisabled('[data-contact-next]'), 'Confirm is off while the project is empty');
+check(await page.isVisible('#contact-project'), 'picking an option goes to step 2');
+check(await page.isDisabled('[data-contact-down]'), 'Next is off while the project is empty');
 check(await page.isVisible('[data-contact-back]'), 'Back control is visible on step 2');
 await page.fill('#contact-project', 'A shop fit-out');
 await page.keyboard.press('Enter');
@@ -56,22 +67,26 @@ check(await page.isVisible('#contact-email'), 'Enter goes to step 3');
 await page.fill('#contact-email', 'a@b.co');
 await page.keyboard.press('Enter');
 await page.waitForTimeout(300);
-check(posted?.service === 'Physical Build' && posted?.project === 'A shop fit-out' && posted?.email === 'a@b.co', 'submit posts all answers');
-check((await page.textContent('[data-contact-msg]')).includes('Thank you'), 'thank-you shows');
-check(await page.isVisible('.contact-home'), 'Go home shows on thank-you');
+check(posted?.service === 'Retail store' && posted?.project === 'A shop fit-out' && posted?.email === 'a@b.co', 'submit posts all answers');
+check((await page.textContent('[data-contact-msg]')).includes('Thank you'), 'thank-you shows');check(await page.isVisible('.contact-home'), 'Go home shows on thank-you');
 await page.keyboard.press('Escape');
-await page.waitForFunction(() => !document.querySelector('[data-contact]'), null, { timeout: 5000 }).catch(() => {});
-check(await page.evaluate(() => !document.querySelector('[data-contact]')), 'Esc closes from thank-you');
-await page.click('.site-menu [data-contact-open]');
-await page.waitForSelector('[data-contact]', { timeout: 8000 });
+await page.waitForFunction(() => document.querySelector('.contact-panel')?.dataset.state === 'closed', null, { timeout: 5000 }).catch(() => {});
+check(await page.evaluate(() => document.querySelector('.contact-panel')?.dataset.state === 'closed'), 'Esc closes from thank-you');
+await page.click('[data-arrow-nav] [data-dir="down"]');
+await page.waitForFunction(() => document.querySelector('.contact-panel')?.dataset.state === 'open', null, { timeout: 8000 });
 await page.waitForTimeout(400);
-check(await page.evaluate(() => document.activeElement?.matches('[data-service]')), 'focus moves into the hub');
+check(await page.evaluate(() => document.activeElement?.matches('.contact-option')), 'focus moves into the form');
 for (let i = 0; i < 6; i++) await page.keyboard.press('Tab');
-check(await page.evaluate(() => !!document.activeElement?.closest('[data-contact]')), 'Tab stays inside the hub');
-check(await page.evaluate(() => document.querySelector('[data-contact]').getAttribute('role') === 'dialog'), 'hub is a dialog');
+check(await page.evaluate(() => !!document.activeElement?.closest('[data-contact]')), 'Tab stays inside the form');
+check(await page.evaluate(() => document.querySelector('[data-contact]').getAttribute('role') === 'dialog'), 'form is a dialog');
 await page.keyboard.press('Escape');
-await page.waitForFunction(() => !document.querySelector('[data-contact]'), null, { timeout: 5000 }).catch(() => {});
-check(await page.evaluate(() => !document.querySelector('[data-contact]') && document.activeElement?.matches('[data-contact-open]')), 'Esc closes and focus returns to the opener');
+await page.waitForFunction(() => document.querySelector('.contact-panel')?.dataset.state === 'closed', null, { timeout: 5000 }).catch(() => {});
+check(
+  await page.evaluate(
+    () => document.querySelector('.contact-panel')?.dataset.state === 'closed' && document.activeElement?.getAttribute('data-dir') === 'down',
+  ),
+  'Esc closes and focus returns to the opener',
+);
 await browser.close();
 server.close();
 if (failures.length) process.exit(1);

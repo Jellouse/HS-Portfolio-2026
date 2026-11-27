@@ -86,21 +86,32 @@ try {
   await page.goto(url + '/', { waitUntil: 'load' });
   await wait(1500);
   check((await page.locator('[data-haptic-overlay]').count()) > 0, 'iOS haptic overlays active');
-  await page.goto(url + '/shop/', { waitUntil: 'load' });
+  await page.goto(url + '/', { waitUntil: 'load' });
+  await page.waitForFunction(() => {
+    const nav = document.querySelector('[data-arrow-nav]');
+    return nav && nav.classList.contains('is-controls') && !nav.classList.contains('is-intro');
+  }, null, { timeout: 25000 });
+  await wait(400);
+  await page.tap('[data-arrow-nav] [data-dir="down"]');
+  await page.waitForSelector('[data-contact]', { timeout: 8000 });
   await wait(700);
-  await page.tap('.site-menu [data-contact-open]');
-  await wait(700);
-  check(await page.evaluate(() => document.querySelector('.contact-panel')?.dataset.state === 'open'), 'tap Contact opens the contact hub');
+  check(await page.evaluate(() => document.querySelector('.contact-panel')?.dataset.state === 'open'), 'tap Contact opens the contact form');
   const hits = await page.evaluate(() =>
-    [...document.querySelectorAll('[data-contact] [data-service]')].map((a) => {
+    [...document.querySelectorAll('[data-contact] .contact-option')].map((a) => {
       const r = a.getBoundingClientRect();
       return a.contains(document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2));
     }),
   );
-  check(hits.length === 3 && hits.every(Boolean), `service options are the tap target (${hits.length})`);
+  check(hits.length === 6 && hits.every(Boolean), `contact options are the tap target (${hits.length})`);
+  await page.tap('[data-contact] [data-service="Other"]');
+  await page.waitForFunction(() => document.querySelector('.contact-panel')?.dataset.step === '2', null, { timeout: 5000 });
+  await page.waitForFunction(() => document.activeElement?.id === 'contact-project', null, { timeout: 5000 }).catch(() => {});
+  check(await page.evaluate(() => document.activeElement?.id === 'contact-project'), 'a tap on an option opens the project field');
+  await page.evaluate(() => document.querySelector('[data-contact] .arrow-back').click());
+  await page.waitForFunction(() => document.querySelector('.contact-panel')?.dataset.step === '1', null, { timeout: 5000 });
   await page.tap('[data-contact] .arrow-back');
-  await page.waitForFunction(() => !document.querySelector('.contact-panel'), null, { timeout: 5000 }).catch(() => {});
-  check(await page.evaluate(() => !document.querySelector('.contact-panel')), 'tap Back closes the hub');
+  await page.waitForFunction(() => document.querySelector('.contact-panel')?.dataset.state === 'closed', null, { timeout: 5000 }).catch(() => {});
+  check(await page.evaluate(() => document.querySelector('.contact-panel')?.dataset.state === 'closed'), 'tap Back closes the form');
   await page.goto(url + '/work/industrial-bloom/', { waitUntil: 'load' });
   await wait(500);
   check(await page.evaluate(() => location.pathname.startsWith('/work/')), 'opens a case page');

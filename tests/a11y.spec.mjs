@@ -55,14 +55,11 @@ await p.waitForFunction(() => {
   const nav = document.querySelector('[data-arrow-nav]');
   return nav && nav.classList.contains('is-controls') && !nav.classList.contains('is-intro');
 }, null, { timeout: 20000 });
-await p.click('[data-dir="down"]');
-await p.waitForFunction(() => document.querySelector('[data-arrow-nav]')?.dataset.screen === 'about', null, { timeout: 10000 });
-await p.waitForTimeout(600);
-await p.focus('[data-screen="about"] [data-contact-open]');
+await p.focus('[data-dir="down"]');
 await p.keyboard.press('Enter');
 await p.waitForSelector('[data-contact]', { timeout: 8000 });
 await p.waitForTimeout(300);
-check(await p.evaluate(() => document.activeElement.matches('[data-service]')), 'dialog: initial focus on the first option');
+check(await p.evaluate(() => document.activeElement.matches('.contact-option')), 'dialog: initial focus on the first option');
 for (let i = 0; i < 8; i++) await p.keyboard.press('Tab');
 check(await p.evaluate(() => !!document.activeElement.closest('[data-contact]')), 'dialog: Tab stays inside');
 const y0 = await p.evaluate(() => scrollY);
@@ -71,8 +68,8 @@ await p.mouse.wheel(0, 600);
 await p.waitForTimeout(300);
 check((await p.evaluate(() => scrollY)) === y0, 'dialog: page does not scroll (desktop)');
 await p.keyboard.press('Escape');
-await p.waitForTimeout(100);
-check(await p.evaluate(() => !!document.activeElement.closest('[data-screen="about"]')), 'dialog: Esc returns focus to Contact');
+await p.waitForTimeout(300);
+check(await p.evaluate(() => document.activeElement?.getAttribute('data-dir') === 'down'), 'dialog: Esc returns focus to Contact');
 
 for (const [label, opt] of [['desktop', { viewport: { width: 1440, height: 900 } }], ['mobile', { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true }]]) {
   const ctx = await browser.newContext(opt);
@@ -83,12 +80,9 @@ for (const [label, opt] of [['desktop', { viewport: { width: 1440, height: 900 }
     return nav && nav.classList.contains('is-controls') && !nav.classList.contains('is-intro');
   }, null, { timeout: 20000 });
   await q.click('[data-dir="down"]');
-  await q.waitForFunction(() => document.querySelector('[data-arrow-nav]')?.dataset.screen === 'about', null, { timeout: 10000 });
-  await q.waitForTimeout(500);
-  await q.click('[data-screen="about"] [data-contact-open]');
   await q.waitForSelector('[data-contact]', { timeout: 8000 });
   await q.waitForTimeout(300);
-  await q.evaluate(() => document.querySelector('[data-service="Physical Build"]').click());
+  await q.evaluate(() => document.querySelector('[data-service="Retail store"]').click());
   await q.waitForTimeout(300);
   const fits = () => q.evaluate(() => { const t = document.querySelector('#contact-project'); return t.scrollHeight <= t.clientHeight + 1 || t.clientHeight >= t.parentElement.clientHeight - 29; });
   let ok = true;
@@ -101,7 +95,7 @@ for (const [label, opt] of [['desktop', { viewport: { width: 1440, height: 900 }
   await q.evaluate(() => { const t = document.querySelector('#contact-project'); t.focus(); t.setRangeText(' pasted '.repeat(40), t.value.length, t.value.length, 'end'); t.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertFromPaste' })); });
   check(await q.evaluate(() => { const t = document.querySelector('#contact-project'); return t.clientHeight <= t.parentElement.clientHeight && t.scrollTop + t.clientHeight >= t.scrollHeight - 1; }), `${label}: paste past the max scrolls inside, caret line visible`);
   await q.evaluate(() => { const t = document.querySelector('#contact-project'); t.value = 'one'; t.dispatchEvent(new InputEvent('input', { bubbles: true })); });
-  check(await q.evaluate(() => Math.round(document.querySelector('#contact-project').clientHeight) === 29 && getComputedStyle(document.querySelector('#contact-project')).textAlign === 'center'), `${label}: back to one centred line after delete`);
+  check(await q.evaluate(() => { const t = document.querySelector('#contact-project'); const lh = parseFloat(getComputedStyle(t).lineHeight); return Math.round(t.clientHeight) === Math.round(lh) && getComputedStyle(t).textAlign === 'center'; }), `${label}: back to one centred line after delete`);
   if (label === 'mobile') {
     const y0 = await q.evaluate(() => scrollY);
     const cdp = await q.context().newCDPSession(q);

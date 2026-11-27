@@ -186,15 +186,21 @@ await page.screenshot({ path: join(SHOTS, 'x-in-app-landing-after.png'), scale: 
 
 const landingMid = landingAfter.face?.mid;
 await page.click('[data-dir="down"]');
-await page.waitForFunction(() => document.querySelector('[data-arrow-nav]')?.dataset.screen === 'about', null, { timeout: 8000 });
+await page.waitForSelector('[data-contact]', { timeout: 8000 });
 await page.waitForTimeout(200);
-const aboutAfter = await metrics();
-if (!aboutAfter.inset) failures.push('about after the tweet should keep data-app-inset');
-check('about after tweet', aboutAfter, AFTER);
-if (landingMid != null && aboutAfter.face && Math.abs(aboutAfter.face.mid - landingMid) > 8) {
-  failures.push(`about face mid ${aboutAfter.face.mid.toFixed(1)} moved from landing ${landingMid.toFixed(1)}`);
+const contactAfter = await page.evaluate(() => {
+  const panel = document.querySelector('.contact-panel');
+  const box = panel.getBoundingClientRect();
+  const next = panel.querySelector('[data-contact-down]').getBoundingClientRect();
+  return { top: Math.round(box.top), height: Math.round(box.height), nextBottom: Math.round(next.bottom), view: Math.round(innerHeight) };
+});
+if (contactAfter.top !== 0 || contactAfter.height !== contactAfter.view) {
+  failures.push(`contact after the tweet does not fill the visible viewport (${contactAfter.top}, ${contactAfter.height} of ${contactAfter.view})`);
 }
-await page.screenshot({ path: join(SHOTS, 'x-in-app-about-after.png'), scale: 'css' });
+if (contactAfter.nextBottom > contactAfter.view) {
+  failures.push(`contact Next sits under the visible edge (${contactAfter.nextBottom} > ${contactAfter.view})`);
+}
+await page.screenshot({ path: join(SHOTS, 'x-in-app-contact-after.png'), scale: 'css' });
 
 await page.goto(`${BASE}services/`, { waitUntil: 'load' });
 await page.waitForSelector('[data-services-hub] .arrow-face', { timeout: 15000 });

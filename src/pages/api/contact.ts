@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro';
 import { getPool } from '../../lib/shop/server.mjs';
 import { contactConfirmationEmail } from '../../lib/contact-confirmation-email';
+import { contactServiceValues } from '../../lib/contact-services';
 
 export const prerender = false;
 
@@ -60,7 +61,7 @@ async function mail(service: string, project: string, email: string) {
     return false;
   }
 }
-const SERVICES = new Set(['Physical Build', 'Digital Build', 'Other']);
+const SERVICES = new Set(contactServiceValues);
 
 export const POST: APIRoute = async ({ request }) => {
   let body: Record<string, unknown>;

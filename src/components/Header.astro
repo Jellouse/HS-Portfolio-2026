@@ -27,14 +27,5 @@ const home = Astro.url.pathname === '/';
 
 <script>
   import { initSocials } from '../scripts/socials';
-  import { scrollToId } from '../scripts/scroll-to-id';
   initSocials();
-  document.querySelector('[data-about-link]')?.addEventListener('click', (e) => {
-    if (!document.getElementById('about')) return;
-    e.preventDefault();
-    const about = scrollToId('about');
-    if (!about) return;
-    if (!about.hasAttribute('tabindex')) about.setAttribute('tabindex', '-1');
-    about.focus({ preventScroll: true });
-  });
 </script>

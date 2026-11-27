@@ -1,11 +1,22 @@
-
 export function bootContact() {
   const root = document.querySelector<HTMLElement>('[data-contact-root]');
   if (!root || root.dataset.bound === '1') return;
   root.dataset.bound = '1';
   const email = root.dataset.email || '';
   let mounting: Promise<void> | null = null;
-  let mounted = false;
+
+  // The drawer sets this once its document listeners are installed.
+  const ready = () => document.documentElement.hasAttribute('data-contact-ready');
+
+  const settle = () =>
+    new Promise<void>((done) => {
+      const started = performance.now();
+      const tick = () => {
+        if (ready() || performance.now() - started > 3000) done();
+        else requestAnimationFrame(tick);
+      };
+      tick();
+    });
 
   const mount = async () => {
     const [{ default: ContactDrawer }, { createElement }, { createRoot }] = await Promise.all([
@@ -14,8 +25,7 @@ export function bootContact() {
       import('react-dom/client'),
     ]);
     createRoot(root).render(createElement(ContactDrawer, { email }));
-    await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
-    mounted = true;
+    await settle();
   };
 
   const ensure = () =>
@@ -36,7 +46,7 @@ export function bootContact() {
     'click',
     (event) => {
       const target = (event.target as Element | null)?.closest?.<HTMLElement>('[data-contact-open]');
-      if (!target || mounted) return;
+      if (!target || ready()) return;
       event.preventDefault();
       event.stopPropagation();
       void ensure()

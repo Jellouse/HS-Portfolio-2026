@@ -303,7 +303,7 @@ const arrowNav = defineCollection({
           label: z.string().default(''),
           title: z.string().default(''),
           body: z.string().default(''),
-          kind: z.enum(['branch', 'gallery', 'placeholder']),
+          kind: z.enum(['branch', 'gallery', 'placeholder', 'contact']),
           full: z.boolean().default(false),
         }),
       )

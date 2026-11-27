@@ -23,3 +23,13 @@ export const contactPresets = ['Physical Build', 'Digital Build'];
 
 /** Every service value the api accepts. */
 export const contactServiceValues = [...contactChoices.map((choice) => choice.value), ...contactPresets];
+
+/** An Inquire button names a build. Anything else is not a service, so step 1 asks. */
+export function contactService(value: string | null | undefined) {
+  return value && contactServiceValues.includes(value) ? value : '';
+}
+
+/** A preset already answers step 1, so the form opens on the description. */
+export function isContactPreset(value: string) {
+  return contactPresets.includes(value);
+}
