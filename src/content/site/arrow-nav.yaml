@@ -1,7 +1,6 @@
 # Desktop arrow navigation.
 # landing is the root. Each screen's parent id and dir place its button.
-# Galleries read the Gallery field on each project. A contact node opens the
-# contact form instead of a screen, so it keeps the landing behind it.
+# Galleries read the Gallery field on each project.
 landing:
   title: Humansize
   body: >-
@@ -30,13 +29,13 @@ nodes:
     title: Shop
     kind: gallery
     full: true
-  - id: contact
+  - id: about
     parent: landing
     dir: down
-    label: Contact
+    label: About
     title: ""
     body: ""
-    kind: contact
+    kind: branch
   - id: web
     parent: digital
     dir: left
