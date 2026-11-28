@@ -22,7 +22,7 @@ File names are kebab-case. A module that both pages use lives in `src/lib/` or `
 ## Where content lives
 
 - Site copy, email, about, socials: `src/content/site/site.yaml`
-- Homepage screens: `src/content/site/arrow-nav.yaml`, edited in Keystatic as Homepage. Web, 3D, Product, and Space galleries come from the Gallery field on each project image or video. The project title and summary are the headline and caption. Shop uses each product's Shop gallery images, desktop and mobile, with the product name and Learn more. The About screen reads the About paragraphs from `site.yaml`.
+- Homepage screens: `src/content/site/arrow-nav.yaml`, edited in Keystatic as Homepage. Web, 3D, Product, and Space galleries come from the Gallery field on each project image or video. The project title and summary are the headline and caption. Shop uses each product's Shop gallery images, desktop and mobile, with the product name and Learn more. The down button is the Contact screen (kind `contact`) and opens the contact form.
 - One folder per project: `src/content/projects/<slug>/index.yaml` plus images in that folder
 - Products: `src/content/products/<slug>/index.yaml`. Fields are name, order, description, SEO, `overview.show` and `overview.title`, the `viewer` desktop and mobile crops, and the `detail` block list.
 - Image paths in YAML are absolute from the repo, like `/src/content/projects/atomic-ski/blocks/0/value/src.jpg`
@@ -116,7 +116,7 @@ Defined in `src/styles/global.css`:
 - Press G to toggle the column overlay, in dev or on `/canvas` frames (`?canvas=1`). `?grid=1` also shows it.
 - Case page spacing: `--space-block` (84px desktop, the margin on mobile), `--space-text` (240 / 160), `--space-section` (240 / 160). Pair and process gaps use `--gutter`. Paragraph gaps inside text use `--lh`.
 
-`--scroll-nudge` (100px desktop, 0 on phones) is how far About scrolls above the text. `src/scripts/scroll-to-id.ts` reads it.
+`--scroll-nudge` (100px desktop, 0 on phones) is how far the shop About anchor scrolls above the text. `src/scripts/scroll-to-id.ts` reads it.
 
 ## Commands
 
@@ -184,7 +184,7 @@ Shop env on Vercel: `DATABASE_URL` (Neon), `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_
 - Mobile scroll is sacred. Never put an `<input type=checkbox switch>` under the finger (WebKit 321591): use a label overlay with a visibility:hidden switch. No non-passive touch listeners on content. No `touch-action: none` on cards or captions. `npm test` must stay green.
 - Johann's voice is plain, direct, and short. No fluff.
 - No em dashes.
-- No colon reveals and no "X, not Y" constructions in new copy. The about text is an exception: keep it verbatim.
+- No colon reveals and no "X, not Y" constructions in new copy. The site about text in `site.yaml` is an exception: keep it verbatim.
 - Email is `schnettker.johann@gmail.com` only.
 - Do not invent clients, numbers, quotes, or credits. Mark gaps as `TODO` in the content file.
 - Bodil Ouédraogo: the scans already exist. Johann makes sculptures from them. He does not do the scanning.

@@ -2,17 +2,15 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react
 import { createPortal, flushSync } from 'react-dom';
 import { isTypingTarget } from '../lib/browser';
 import { canChromeVt, reduceMotion, runChromeVt } from '../lib/chrome-vt';
+import { contactChoiceRows, contactService, isContactPreset } from '../lib/contact-services';
 import { typePx } from '../lib/type-scale';
-import { mountFaceGlance } from '../scripts/face-glance';
 import { playSnick } from '../scripts/ui-sound';
-import ContactFace from './ContactFace';
 
-const TITLES: Record<number, string> = { 1: 'Pick a service', 2: 'Describe your project', 3: 'Add your email' };
-const SERVICES = [
-  { value: 'Physical Build', label: 'Physical build', dir: 'left' as const },
-  { value: 'Digital Build', label: 'Digital build', dir: 'right' as const },
-  { value: 'Other', label: 'Other', dir: 'down' as const },
-];
+const TITLES: Record<number, string> = {
+  1: 'What can i help you with?',
+  2: 'Describe your project',
+  3: 'Add your email',
+};
 const THANKS = "Thank you, i'll be in contact soon.";
 
 const BACK_SVG = (
@@ -27,45 +25,32 @@ const BACK_SVG = (
   </svg>
 );
 
+type Answers = { service: string; project: string; email: string };
+
+const EMPTY: Answers = { service: '', project: '', email: '' };
+
 function focusables(root: HTMLElement) {
   return [...root.querySelectorAll<HTMLElement>('button:not([disabled]), textarea, input, a[href]')].filter(
     (el) => el.offsetParent !== null && !el.closest('[hidden]'),
   );
 }
 
-function openerFromAbout(el: HTMLElement | null) {
-  if (!el?.hasAttribute('data-contact-open')) return false;
-  return !!document.querySelector('.arrow-nav[data-screen="about"]');
-}
-
-function muteAboutChrome(mute: boolean) {
-  document.querySelectorAll<HTMLElement>('.arrow-nav:not(.contact-hub)').forEach((nav) => {
-    nav.classList.toggle('is-contact-covered', mute);
-  });
-}
-
-function resetAboutGlance() {
-  document
-    .querySelectorAll<HTMLElement>('.arrow-nav[data-screen="about"] .arrow-face-blob[data-glance]')
-    .forEach((el) => el.removeAttribute('data-glance'));
-}
-
-function syncPanel(el: HTMLElement | null, open: boolean, step: number) {
+function syncPanel(el: HTMLElement | null, open: boolean, step: number, answers: Answers = EMPTY) {
   if (!el) return;
-  el.classList.toggle('is-closed', !open);
   el.dataset.state = open ? 'open' : 'closed';
   el.setAttribute('aria-hidden', open ? 'false' : 'true');
   if (open) el.setAttribute('aria-modal', 'true');
   else el.removeAttribute('aria-modal');
   document.documentElement.classList.toggle('is-contact-open', open);
-  syncStep(el, step, { project: '', email: '' });
+  syncStep(el, step, answers);
+  // `is-closed` is what hides the panel, and it also suppresses the opening
+  // animation (`.contact-panel.is-entered { animation: none }`). It has to come
+  // off after `syncStep`, or opening runs the step sync with the panel still
+  // hidden and the fade never plays, which made the transition inconsistent.
+  el.classList.toggle('is-closed', !open);
 }
 
-function syncStep(
-  el: HTMLElement | null,
-  step: number,
-  filled: { project: string; email: string } = { project: '', email: '' },
-) {
+function syncStep(el: HTMLElement | null, step: number, answers: Answers = EMPTY) {
   if (!el) return;
   el.dataset.step = step === 4 ? 'done' : String(step);
 
@@ -88,22 +73,21 @@ function syncStep(
 
   const down = el.querySelector<HTMLElement>('[data-contact-down]');
   if (down) {
-    const label = step === 1 ? 'Other' : step === 2 ? 'Confirm' : 'Send';
+    const label = step === 1 ? 'Next' : step === 2 ? 'Confirm' : 'Send';
     if (down.textContent !== label) down.textContent = label;
-    if (step === 1) {
-      down.setAttribute('data-service', 'Other');
-      down.removeAttribute('data-contact-next');
-    } else {
-      down.removeAttribute('data-service');
-      down.setAttribute('data-contact-next', '');
-    }
     const disabled =
-      step === 2 ? !filled.project.trim() : step === 3 ? !filled.email.trim() : false;
+      step === 1
+        ? !answers.service
+        : step === 2
+          ? !answers.project.trim()
+          : step === 3
+            ? !answers.email.trim()
+            : false;
     down.toggleAttribute('disabled', disabled);
   }
 }
 
-export default function ContactDrawer({ email: address }: { email: string }) {
+export default function ContactDrawer(_props: { email: string }) {
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState(1);
   const [service, setService] = useState('');
@@ -112,12 +96,11 @@ export default function ContactDrawer({ email: address }: { email: string }) {
   const [msg, setMsg] = useState(THANKS);
   const [live, setLive] = useState('');
   const opener = useRef<HTMLElement | null>(null);
-  const fromAbout = useRef(false);
   const panel = useRef<HTMLDivElement>(null);
   const hub = useRef<HTMLFormElement>(null);
   const text = useRef<HTMLTextAreaElement>(null);
   const field = useRef<HTMLDivElement>(null);
-  const emailRef = useRef<HTMLInputElement>(null);
+  const emailInput = useRef<HTMLInputElement>(null);
   const msgRef = useRef<HTMLParagraphElement>(null);
   const lines = useRef(0);
   const pressed = useRef<HTMLElement | null>(null);
@@ -125,12 +108,18 @@ export default function ContactDrawer({ email: address }: { email: string }) {
   const stepRef = useRef(step);
   const serviceRef = useRef(service);
   const projectRef = useRef(project);
-  const emailRefValue = useRef(email);
+  const emailValue = useRef(email);
   const moving = useRef(false);
   stepRef.current = step;
   serviceRef.current = service;
   projectRef.current = project;
-  emailRefValue.current = email;
+  emailValue.current = email;
+
+  const answersNow = (): Answers => ({
+    service: serviceRef.current,
+    project: projectRef.current,
+    email: emailValue.current,
+  });
 
   const announce = (t: string) => {
     setLive('');
@@ -140,11 +129,11 @@ export default function ContactDrawer({ email: address }: { email: string }) {
   const setStepChrome = (next: number) => {
     const from = stepRef.current;
     if (next === from) return;
-    const filled = { project: projectRef.current, email: emailRefValue.current };
+    const answers = answersNow();
     const run = () => {
       stepRef.current = next;
       flushSync(() => setStep(next));
-      syncStep(panel.current, next, filled);
+      syncStep(panel.current, next, answers);
     };
     if (next === 4 || from === 4 || !canChromeVt()) {
       run();
@@ -153,34 +142,32 @@ export default function ContactDrawer({ email: address }: { email: string }) {
     }
     panel.current?.classList.add('is-entered');
     moving.current = true;
-    const faceHop = from === 1 || next === 1;
-    void runChromeVt(run, { flag: faceHop ? 'contact-face' : 'contact' }).finally(() => {
+    void runChromeVt(run, { flag: 'contact' }).finally(() => {
       moving.current = false;
+      focusStep(next);
       if (next >= 1 && next <= 3) announce(`Step ${next} of 3: ${TITLES[next]}`);
     });
   };
 
   const close = useCallback(() => {
-    if (fromAbout.current && stepRef.current === 1 && canChromeVt()) {
-      resetAboutGlance();
-      void runChromeVt(() => {
-        muteAboutChrome(false);
-        stepRef.current = 1;
-        flushSync(() => {
-          setStep(1);
-          setOpen(false);
-        });
-        syncPanel(panel.current, false, 1);
-      }, { flag: 'about-contact-out', types: ['chrome-grow'] });
+    const el = panel.current;
+    const finish = () => {
+      flushSync(() => setOpen(false));
+      syncPanel(panel.current, false, stepRef.current, answersNow());
+    };
+    if (!el || reduceMotion() || !el.classList.contains('is-entered')) {
+      finish();
       return;
     }
-    muteAboutChrome(false);
-    flushSync(() => setOpen(false));
-    syncPanel(panel.current, false, stepRef.current);
+    const anim = el.animate([{ opacity: 1 }, { opacity: 0 }], {
+      duration: 200,
+      easing: 'cubic-bezier(0.23, 1, 0.32, 1)',
+      fill: 'both',
+    });
+    anim.finished.then(finish, finish);
   }, []);
 
   const goHome = () => {
-    muteAboutChrome(false);
     flushSync(() => setOpen(false));
     syncPanel(panel.current, false, 1);
     if (location.pathname !== '/') location.assign('/');
@@ -192,42 +179,39 @@ export default function ContactDrawer({ email: address }: { email: string }) {
       if (!t) return;
       e.preventDefault();
       opener.current = t;
-      fromAbout.current = openerFromAbout(t);
-      const preset = t.getAttribute('data-contact-service');
+      const preset = contactService(t.getAttribute('data-contact-service'));
       lines.current = 0;
       if (text.current) text.current.style.height = '';
-      const next = preset && SERVICES.some((s) => s.value === preset) ? 2 : 1;
-      const nextService =
-        preset && SERVICES.some((s) => s.value === preset) ? preset : '';
-      serviceRef.current = nextService;
+      const next = isContactPreset(preset) ? 2 : 1;
+      serviceRef.current = isContactPreset(preset) ? preset : '';
       flushSync(() => {
+        setService(isContactPreset(preset) ? preset : '');
         setProject('');
         setEmail('');
         setMsg(THANKS);
-        setService(nextService);
       });
-      const openHub = () => {
-        muteAboutChrome(fromAbout.current);
-        stepRef.current = next;
-        flushSync(() => {
-          setStep(next);
-          setOpen(true);
-        });
-        syncPanel(panel.current, true, next);
-        if (fromAbout.current) panel.current?.classList.add('is-entered');
-      };
-      if (fromAbout.current && next === 1) {
-        resetAboutGlance();
-        void runChromeVt(openHub, { flag: 'about-contact-in' }).finally(() => {
-          announce(`Contact. Step ${next} of 3: ${TITLES[next]}`);
-        });
-      } else {
-        openHub();
-        announce(`Contact. Step ${next} of 3: ${TITLES[next]}`);
-      }
+      stepRef.current = next;
+      flushSync(() => {
+        setStep(next);
+        setOpen(true);
+      });
+      syncPanel(panel.current, true, next, {
+        service: isContactPreset(preset) ? preset : '',
+        project: '',
+        email: '',
+      });
+      // The button that opened the form is under the pointer. Without this, the
+      // option that lands there would show its hover state before the pointer
+      // has moved, so a fresh screen would look part-selected.
+      hub.current?.removeAttribute('data-pointer');
+      announce(`Contact. Step ${next} of 3: ${TITLES[next]}`);
     };
     document.addEventListener('click', onClick);
     return () => document.removeEventListener('click', onClick);
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-contact-ready', '');
   }, []);
 
   useLayoutEffect(() => {
@@ -243,24 +227,30 @@ export default function ContactDrawer({ email: address }: { email: string }) {
     } else {
       root.style.removeProperty('--scroll-lock');
       body.style.removeProperty('padding-right');
-      muteAboutChrome(false);
     }
   }, [open]);
 
+  // The panel is created hidden, so a CSS animation on it never starts: there is
+  // no frame where it is visible and animating. Run the fade here, once it is on
+  // screen, and lock it afterwards so a step change does not replay the fade.
   useEffect(() => {
     if (!open) return;
     const el = panel.current;
     if (!el) return;
-    if (fromAbout.current || document.documentElement.hasAttribute('data-contact-vt')) {
+    el.classList.remove('is-entered');
+    if (reduceMotion()) {
       el.classList.add('is-entered');
       return;
     }
+    const anim = el.animate([{ opacity: 0 }, { opacity: 1 }], {
+      duration: 400,
+      easing: 'cubic-bezier(0.23, 1, 0.32, 1)',
+      fill: 'both',
+    });
     const lock = () => el.classList.add('is-entered');
-    el.addEventListener('animationend', lock, { once: true });
-    const t = window.setTimeout(lock, 450);
+    anim.finished.then(lock, lock);
     return () => {
-      window.clearTimeout(t);
-      el.removeEventListener('animationend', lock);
+      anim.cancel();
     };
   }, [open]);
 
@@ -281,18 +271,11 @@ export default function ContactDrawer({ email: address }: { email: string }) {
   }, [open, step]);
 
   useEffect(() => {
-    if (!open || step !== 1 || !hub.current) return;
-    const glance = mountFaceGlance(hub.current);
-    glance.setEnabled(true);
-    return () => glance.destroy();
-  }, [open, step]);
-
-  useEffect(() => {
     if (!open || !hub.current) return;
     const root = hub.current;
     const onDown = (event: PointerEvent) => {
       if (event.button !== 0) return;
-      const el = (event.target as Element).closest<HTMLElement>('.arrow-pill, .arrow-back');
+      const el = (event.target as Element).closest<HTMLElement>('.arrow-pill, .arrow-back, .contact-option');
       if (!el || !root.contains(el) || (el as HTMLButtonElement).disabled) return;
       pressed.current?.classList.remove('is-pressed');
       pressed.current = el;
@@ -349,14 +332,17 @@ export default function ContactDrawer({ email: address }: { email: string }) {
     return () => removeEventListener('resize', r);
   }, [step, measure]);
 
+  const optionEls = () =>
+    [...(hub.current?.querySelectorAll<HTMLElement>('.contact-option') ?? [])].filter((el) => el.offsetParent !== null);
+
   const focusStep = (s = step) => {
     const el =
       s === 2
         ? text.current
         : s === 3
-          ? emailRef.current
+          ? emailInput.current
           : s === 1
-            ? hub.current?.querySelector<HTMLElement>('[data-service]')
+            ? hub.current?.querySelector<HTMLElement>(`[data-service="${serviceRef.current}"]`) ?? optionEls()[0]
             : s === 4
               ? msgRef.current
               : hub.current?.querySelector<HTMLElement>('.arrow-back');
@@ -364,20 +350,13 @@ export default function ContactDrawer({ email: address }: { email: string }) {
   };
 
   useEffect(() => {
-    if (open) requestAnimationFrame(() => focusStep());
+    if (open && !moving.current) requestAnimationFrame(() => focusStep());
   }, [step, open]);
-
-  const isFilled = (s = stepRef.current) => {
-    if (s === 1) return !!serviceRef.current;
-    if (s === 2) return !!projectRef.current.trim();
-    if (s === 3) return !!emailRefValue.current && !!emailRef.current?.checkValidity();
-    return false;
-  };
 
   const send = () => {
     const svc = serviceRef.current;
     const proj = projectRef.current.trim();
-    const mail = emailRefValue.current.trim();
+    const mail = emailValue.current.trim();
     setStepChrome(4);
     void (async () => {
       try {
@@ -389,11 +368,18 @@ export default function ContactDrawer({ email: address }: { email: string }) {
         if (!res.ok) throw new Error(String(res.status));
         announce(THANKS);
       } catch {
-        const m = `That didn’t go through. Please email ${address} instead.`;
+        const m = 'That didn’t go through. Please email hello@humansize.de instead.';
         setMsg(m);
         announce(m);
       }
     })();
+  };
+
+  const isFilled = (s = stepRef.current) => {
+    if (s === 1) return !!serviceRef.current;
+    if (s === 2) return !!projectRef.current.trim();
+    if (s === 3) return !!emailValue.current && !!emailInput.current?.checkValidity();
+    return false;
   };
 
   const go = (dir: 1 | -1, s = stepRef.current, ok = isFilled(s)) => {
@@ -404,14 +390,13 @@ export default function ContactDrawer({ email: address }: { email: string }) {
     }
     if (dir === 1 && !ok) return;
     if (dir === 1 && s === 3) return void send();
-    const n = Math.min(3, Math.max(1, s + dir));
-    setStepChrome(n);
+    setStepChrome(Math.min(3, Math.max(1, s + dir)));
   };
 
   const pickService = (value: string) => {
     if (moving.current) return;
     serviceRef.current = value;
-    flushSync(() => setService(value));
+    if (service !== value) flushSync(() => setService(value));
     setStepChrome(2);
   };
 
@@ -429,8 +414,8 @@ export default function ContactDrawer({ email: address }: { email: string }) {
       go(-1, s);
       return;
     }
-    if (s === 1 && (dir === 'left' || dir === 'right' || dir === 'down')) {
-      controlFor(dir)?.click();
+    if (s === 1) {
+      if (dir === 'down') controlFor('down')?.click();
       return;
     }
     if ((s === 2 || s === 3) && dir === 'down') {
@@ -440,6 +425,24 @@ export default function ContactDrawer({ email: address }: { email: string }) {
     if (s === 4 && (dir === 'down' || dir === 'home')) {
       goHome();
     }
+  };
+
+  // Left and Right walk the options in reading order: along a row, then on to
+  // the first column of the next row, and round from the ends. The option you
+  // land on is the one chosen, so Next comes alive as soon as you move. Up and
+  // Down never change the choice; they press Back and Next.
+  const moveOption = (key: string) => {
+    const list = optionEls();
+    if (!list.length) return;
+    const active = document.activeElement as HTMLElement | null;
+    const at = active ? list.indexOf(active) : -1;
+    const shift = key === 'ArrowLeft' ? -1 : 1;
+    const next = at < 0 ? 0 : (at + shift + list.length) % list.length;
+    const el = list[next];
+    el.focus();
+    const value = el.dataset.service ?? '';
+    serviceRef.current = value;
+    if (service !== value) flushSync(() => setService(value));
   };
 
   useEffect(() => {
@@ -477,6 +480,33 @@ export default function ContactDrawer({ email: address }: { email: string }) {
       }
 
       const s = stepRef.current;
+      if (s === 1) {
+        // Left and Right move the selection through the options. Up is Back,
+        // Down is Next, and Next stays off until an option has been chosen.
+        if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+          e.preventDefault();
+          if (!e.repeat) moveOption(e.key);
+          return;
+        }
+        if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+          e.preventDefault();
+          if (e.repeat || pressKey.current || moving.current) return;
+          const target = e.key === 'ArrowUp' ? controlFor('back') : controlFor('down');
+          if (!target || (target as HTMLButtonElement).disabled) return;
+          clearPress();
+          pressKey.current = e.key;
+          pressed.current = target;
+          target.classList.add('is-pressed');
+          playSnick();
+          return;
+        }
+        if (e.key === 'Backspace') {
+          e.preventDefault();
+          if (!e.repeat) close();
+        }
+        return;
+      }
+
       const inField = isTypingTarget(e.target);
       const navWhileTyping = e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'Backspace' || e.key === 'Enter';
       if (inField && !navWhileTyping) return;
@@ -493,8 +523,7 @@ export default function ContactDrawer({ email: address }: { email: string }) {
       };
       const dir = map[e.key];
       if (!dir) return;
-      if (s === 1 && (dir === 'left' || dir === 'right' || dir === 'down' || dir === 'up')) {
-      } else if ((s === 2 || s === 3) && (dir === 'up' || dir === 'down')) {
+      if ((s === 2 || s === 3) && (dir === 'up' || dir === 'down')) {
       } else if (s === 4 && (dir === 'down' || dir === 'home' || dir === 'up')) {
       } else return;
 
@@ -536,9 +565,9 @@ export default function ContactDrawer({ email: address }: { email: string }) {
 
   const stepAttr = step === 4 ? 'done' : String(step);
   const showStep = open ? step : 1;
-  const chrome = showStep >= 1 && showStep <= 3;
-  const downLabel = showStep === 1 ? 'Other' : showStep === 2 ? 'Confirm' : 'Send';
-  const downDisabled = showStep === 2 ? !project.trim() : showStep === 3 ? !email.trim() : false;
+  const downLabel = showStep === 1 ? 'Next' : showStep === 2 ? 'Confirm' : 'Send';
+  const downDisabled =
+    showStep === 1 ? !service : showStep === 2 ? !project.trim() : showStep === 3 ? !email.trim() : false;
 
   return createPortal(
     <div
@@ -560,15 +589,16 @@ export default function ContactDrawer({ email: address }: { email: string }) {
         ref={hub}
         className="arrow-nav contact-hub is-controls"
         data-contact-hub=""
-        data-chrome-vt={open && chrome ? '' : undefined}
+        data-chrome-vt={open ? '' : undefined}
         noValidate
         onSubmit={(e) => e.preventDefault()}
+        onPointerMove={() => hub.current?.setAttribute('data-pointer', '')}
       >
         <p className="sr-only" aria-live="polite" data-contact-live="">
           {live}
         </p>
         <div className="arrow-stage">
-          {chrome && (
+          {showStep <= 3 && (
             <>
               <button
                 type="button"
@@ -581,12 +611,30 @@ export default function ContactDrawer({ email: address }: { email: string }) {
               </button>
               <div className="arrow-slot">
                 <div className="contact-center" data-contact-center="">
-                  <div className="arrow-face" data-nav-face="" data-contact-step="1" hidden={showStep !== 1}>
-                    <div className="arrow-face-scale">
-                      <span className="arrow-face-plate" aria-hidden="true" />
-                      <ContactFace />
+                  <section className="contact-ask" data-contact-step="1" hidden={showStep !== 1}>
+                    <h3 className="contact-ask-title" id="contact-ask-title">
+                      What can i help you with?
+                    </h3>
+                    <div className="contact-options" role="group" aria-labelledby="contact-ask-title">
+                      {contactChoiceRows.map((row, index) => (
+                        <div className="contact-options-row" key={index}>
+                          {row.map((value) => (
+                            <button
+                              key={value}
+                              type="button"
+                              className="contact-option"
+                              data-row={index}
+                              data-service={value}
+                              data-chosen={service === value ? '' : undefined}
+                              onClick={() => pickService(value)}
+                            >
+                              {value}
+                            </button>
+                          ))}
+                        </div>
+                      ))}
                     </div>
-                  </div>
+                  </section>
                   <div
                     className="contact-field"
                     data-contact-field=""
@@ -613,7 +661,7 @@ export default function ContactDrawer({ email: address }: { email: string }) {
                       Add your email
                     </label>
                     <input
-                      ref={emailRef}
+                      ref={emailInput}
                       id="contact-email"
                       name="email"
                       type="email"
@@ -625,32 +673,16 @@ export default function ContactDrawer({ email: address }: { email: string }) {
                   </div>
                 </div>
 
-                {SERVICES.filter((s) => s.dir !== 'down').map((s) => (
-                  <button
-                    key={s.value}
-                    type="button"
-                    className="arrow-pill"
-                    data-dir={s.dir}
-                    data-service={s.value}
-                    data-contact-step="1"
-                    hidden={showStep !== 1}
-                    onClick={() => pickService(s.value)}
-                  >
-                    {s.label}
-                  </button>
-                ))}
-
                 <button
                   type="button"
                   className="arrow-pill"
                   data-dir="down"
                   data-contact-down=""
-                  data-service={showStep === 1 ? 'Other' : undefined}
-                  data-contact-next={showStep > 1 ? '' : undefined}
                   disabled={downDisabled}
                   onClick={() => {
-                    if (showStep === 1) pickService('Other');
-                    else go(1);
+                    if (showStep === 1) {
+                      if (service) pickService(service);
+                    } else go(1);
                   }}
                 >
                   {downLabel}

@@ -15,7 +15,6 @@ export function reduceMotion() {
 export function canChromeVt() {
   return typeof document.startViewTransition === 'function' && !reduceMotion();
 }
-
 export function runChromeVt(update: () => void, opts: ChromeVtOptions = {}): Promise<void> {
   if (!canChromeVt()) {
     update();
@@ -24,7 +23,7 @@ export function runChromeVt(update: () => void, opts: ChromeVtOptions = {}): Pro
   const root = document.documentElement;
   const flag = opts.flag ?? '';
   root.dataset.chromeVtRun = flag;
-  if (flag === 'contact' || flag === 'contact-face' || flag.startsWith('about-contact')) {
+  if (flag === 'contact') {
     root.dataset.contactVt = '';
   }
 

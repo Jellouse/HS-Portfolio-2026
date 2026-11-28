@@ -245,17 +245,6 @@ export function initArrowNav(root: ParentNode = document) {
       const arrows = gallery && dir !== 'down';
       button.dataset.mode = arrows ? 'icon' : 'text';
       button.removeAttribute('data-contact-open');
-      if (id === 'about' && (dir === 'left' || dir === 'right')) {
-        button.hidden = false;
-        if (chevron) chevron.hidden = true;
-        if (label) {
-          label.hidden = false;
-          label.textContent = dir === 'left' ? 'Services' : 'Contact';
-        }
-        if (dir === 'right') button.setAttribute('data-contact-open', '');
-        button.removeAttribute('aria-label');
-        continue;
-      }
       if (arrows) {
         button.hidden = false;
         if (label) label.hidden = true;
@@ -274,6 +263,10 @@ export function initArrowNav(root: ParentNode = document) {
         label.textContent = next.label;
       }
       button.removeAttribute('aria-label');
+      if (next.kind === 'contact') {
+        button.setAttribute('data-contact-open', '');
+        button.setAttribute('aria-haspopup', 'dialog');
+      }
     }
     syncGlance();
   };
@@ -998,11 +991,6 @@ export function initArrowNav(root: ParentNode = document) {
   const placeCopy = () => {
     const copy = nav.querySelector<HTMLElement>('[data-nav-copy]')!;
     const back = nav.querySelector<HTMLElement>('[data-dir="up"]')!;
-    if (nav.dataset.screen === 'about') {
-      copy.style.top = '';
-      copy.style.transform = '';
-      return;
-    }
     copy.style.transform = '';
     const origin = document.documentElement.hasAttribute('data-app-inset')
       ? nav.getBoundingClientRect().top
@@ -1788,12 +1776,12 @@ let galleryMaskOpen: boolean | null = null;
       travel(node.parent === 'landing' ? 'landing' : node.parent, true);
       return;
     }
-    if (screenId === 'about' && dir === 'right') {
-      if (pressFrom === 'key') nav.querySelector<HTMLElement>('[data-dir="right"]')?.click();
-      return;
-    }
     const next = child(screenId, dir);
     if (!next) return;
+    if (next.kind === 'contact') {
+      if (pressFrom === 'key') nav.querySelector<HTMLElement>(`[data-dir="${dir}"]`)?.click();
+      return;
+    }
     if (next.href && !tree.nodes.some((node) => node.parent === next.id)) {
       routeAfterSnick(next.href);
       return;
@@ -2323,7 +2311,7 @@ let galleryMaskOpen: boolean | null = null;
   };
 
   bindAppViewport(() => {
-    if (nav.dataset.screen !== 'about' && (scrollX || scrollY)) window.scrollTo(0, 0);
+    if (scrollX || scrollY) window.scrollTo(0, 0);
     relayout();
   });
   window.addEventListener('resize', relayout);

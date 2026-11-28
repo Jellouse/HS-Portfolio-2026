@@ -5,7 +5,6 @@ export const sections = [
     props: ['paragraphs: string[]'],
     pages: ['/', '/shop/:slug', '/work/:slug'],
     files: [
-      'src/components/About.astro',
       'src/components/TextBlock.astro',
       'src/components/ProjectHero.astro',
       'src/components/sections/ShopIntro.astro',
@@ -128,11 +127,9 @@ export const sections = [
 ];
 
 export const existing = [
-  { name: 'About', file: 'src/components/About.astro', props: ['paragraphs: string[]'], pages: ['/'] },
   { name: 'Blocks', file: 'src/components/Blocks.astro', props: ['blocks', 'slug?', 'processFromFolder?', 'processFolderSrcs?', 'info?'], pages: ['/work/:slug', '/preview/:slug'] },
   { name: 'BlurImage', file: 'src/components/BlurImage.astro', props: ['src', 'alt', 'sizes', 'priority?', 'plain?', 'flush?', 'outline?', 'fade? = true'], pages: ['/', '/shop/', '/shop/:slug', '/work/:slug'] },
   { name: 'ContactDrawer', file: 'src/components/ContactDrawer.tsx', props: ['email: string'], pages: ['every page, through ContactSheet'] },
-  { name: 'ContactFace', file: 'src/components/ContactFace.tsx', props: ['filterId?'], pages: ['ContactDrawer service step'] },
   { name: 'ContactSheet', file: 'src/components/ContactSheet.astro', props: ['email: string'], pages: ['every page, through Base'] },
   { name: 'Footer', file: 'src/components/Footer.astro', props: ['site: SiteData'], pages: ['every page, through Base'] },
   { name: 'Header', file: 'src/components/Header.astro', props: ['site: SiteData'], pages: ['/'] },
@@ -148,7 +145,7 @@ export const existing = [
   { name: 'ProcessBlock', file: 'src/components/ProcessBlock.astro', props: ['images: { src?, video?, poster?, alt, flush?, outline? }[]'], pages: ['/work/:slug'] },
   { name: 'ProjectArticle', file: 'src/components/ProjectArticle.astro', props: ['project: ProjectEntry', 'processFolderSrcs?'], pages: ['/work/:slug', '/preview/:slug'] },
   { name: 'ProjectCard', file: 'src/components/ProjectCard.astro', props: ['project: ProjectEntry', 'priority?: boolean'], pages: ['/'] },
-  { name: 'ProjectFeed', file: 'src/components/ProjectFeed.astro', props: ['projects: ProjectEntry[]', 'about: string[]'], pages: ['/'] },
+  { name: 'ProjectFeed', file: 'src/components/ProjectFeed.astro', props: ['projects: ProjectEntry[]'], pages: ['/'] },
   { name: 'ProjectHero', file: 'src/components/ProjectHero.astro', props: ['title: string', 'years?: string', 'summary?: string'], pages: ['/work/:slug'] },
   { name: 'Seo', file: 'src/components/Seo.astro', props: ['title', 'description', 'image?', 'type?', 'jsonLd?', 'noindex?'], pages: ['every page, through Base'] },
   { name: 'SmallMenu', file: 'src/components/SmallMenu.astro', props: [], pages: [] },

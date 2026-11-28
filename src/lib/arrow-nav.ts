@@ -1,7 +1,7 @@
 import { getImage } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
-import { getCollection, getEntry, type CollectionEntry } from 'astro:content';
-import { getProjects, getSite, renderInline } from './content';
+import { getEntry, type CollectionEntry } from 'astro:content';
+import { getProjects, renderInline } from './content';
 import { galleryCategoryValues } from './gallery-categories';
 import { isProcessVideo, processVideoPoster, processVideoSrc } from './project-blocks.mjs';
 import { imageHasAlpha } from './image-alpha';
@@ -65,7 +65,7 @@ export type ArrowNode = {
   label: string;
   title: string;
   body: string;
-  kind: 'branch' | 'gallery' | 'placeholder';
+  kind: 'branch' | 'gallery' | 'placeholder' | 'contact';
   full?: boolean;
   slides: ArrowSlide[];
   paragraphs: string[];
@@ -206,33 +206,10 @@ export function serviceButtonLabel(title: string) {
   return lower.charAt(0).toUpperCase() + lower.slice(1);
 }
 
-async function serviceNodes(): Promise<ArrowNode[]> {
-  const services = (await getCollection('services')).sort((a, b) => a.data.order - b.data.order);
-  const [left, right] = services;
-  const base = { title: '', body: '', kind: 'branch' as const, slides: [], paragraphs: [] };
-  const hub: ArrowNode = { ...base, id: 'services', parent: 'about', dir: 'left', label: 'Services', href: '/services/' };
-  const pills = ([['left', left], ['right', right]] as const).flatMap(([dir, entry]) =>
-    entry
-      ? [
-          {
-            ...base,
-            id: `services-${entry.id}`,
-            parent: 'services',
-            dir,
-            label: serviceButtonLabel(entry.data.title),
-            href: `/services/${entry.id}/`,
-          } satisfies ArrowNode,
-        ]
-      : [],
-  );
-  return [hub, ...pills];
-}
-
 export async function getArrowNav(): Promise<ArrowTree> {
   const entry = await getEntry('arrowNav', 'arrow-nav');
   if (!entry) throw new Error('Missing src/content/site/arrow-nav.yaml');
   const { landing, nodes } = entry.data;
-  const site = await getSite();
   const projects = await getProjects();
   return {
     landing,
@@ -263,11 +240,11 @@ export async function getArrowNav(): Promise<ArrowTree> {
           body: node.body,
           kind: node.kind,
           full: node.full === true,
-          paragraphs: node.id === 'about' ? site.about.map((paragraph) => renderInline(paragraph)) : [],
+          paragraphs: [],
           slides,
         };
       }),
-    ).then(async (list) => [...list, ...(await serviceNodes())]),
+    ),
   };
 }
 

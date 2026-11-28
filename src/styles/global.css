@@ -1648,23 +1648,19 @@ html[data-chrome-vt-run] ::view-transition-new(root) {
   opacity: 1;
 }
 
-[data-chrome-vt] .arrow-face-scale,
-.arrow-nav[data-screen='about'] .arrow-face-scale {
+[data-chrome-vt] .arrow-face-scale {
   view-transition-name: services-face;
 }
 
-[data-chrome-vt] .arrow-back,
-.arrow-nav[data-screen='about'] .arrow-back {
+[data-chrome-vt] .arrow-back {
   view-transition-name: services-back;
 }
 
-[data-chrome-vt] .arrow-pill[data-dir='left']:not([data-mode='icon']),
-.arrow-nav[data-screen='about'] .arrow-pill[data-dir='left'] {
+[data-chrome-vt] .arrow-pill[data-dir='left']:not([data-mode='icon']) {
   view-transition-name: arrow-pill-left;
 }
 
-[data-chrome-vt] .arrow-pill[data-dir='right']:not([data-mode='icon']),
-.arrow-nav[data-screen='about'] .arrow-pill[data-dir='right'] {
+[data-chrome-vt] .arrow-pill[data-dir='right']:not([data-mode='icon']) {
   view-transition-name: arrow-pill-right;
 }
 
@@ -1784,28 +1780,6 @@ html:active-view-transition-type(chrome-grow)::view-transition-old(services-face
   overflow: hidden;
   background: transparent;
   border-radius: var(--radius);
-}
-
-html[data-chrome-vt-run='contact-face'] ::view-transition-old(services-face),
-html[data-chrome-vt-run='contact-face'] ::view-transition-old(contact-field) {
-  animation: vt-out var(--dur-nav) var(--ease-nav) both;
-  mix-blend-mode: normal;
-  object-fit: none;
-  width: auto;
-  height: auto;
-  max-width: 100%;
-  max-height: 100%;
-}
-
-html[data-chrome-vt-run='contact-face'] ::view-transition-new(services-face),
-html[data-chrome-vt-run='contact-face'] ::view-transition-new(contact-field) {
-  animation: vt-in var(--dur-nav) var(--ease-nav) both;
-  mix-blend-mode: normal;
-  object-fit: none;
-  width: auto;
-  height: auto;
-  max-width: 100%;
-  max-height: 100%;
 }
 
 html[data-chrome-vt-run='contact'] ::view-transition-image-pair(contact-field) {
@@ -2574,21 +2548,11 @@ html.is-contact-open body {
   display: none;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .contact-panel {
-    animation: contact-in var(--dur-sheet) var(--ease-out) both;
-  }
-
-  html[data-contact-vt] .contact-panel,
-  .contact-panel.is-entered {
-    animation: none;
-  }
-}
-
-@keyframes contact-in {
-  from {
-    opacity: 0;
-  }
+/* The opening fade runs from ContactDrawer: the panel is created hidden, so an
+   animation declared here would never start. `is-entered` is still the flag that
+   says the enter is done, and a step change must not replay it. */
+.contact-panel.is-entered {
+  animation: none;
 }
 
 .contact-hub {
@@ -2596,41 +2560,12 @@ html.is-contact-open body {
   color: inherit;
 }
 
-.arrow-nav.is-contact-covered :is(.arrow-face-scale, .arrow-back, .arrow-pill[data-dir='left'], .arrow-pill[data-dir='right']) {
-  view-transition-name: none;
-}
-
-.contact-hub .arrow-face {
-  pointer-events: none;
-}
-
-.contact-hub[data-chrome-vt] .arrow-face[hidden] .arrow-face-scale {
-  view-transition-name: none;
-}
-
-.contact-hub[data-chrome-vt] .contact-field:not([hidden]) {
+.contact-hub[data-chrome-vt] :is(.contact-ask, .contact-field):not([hidden]) {
   view-transition-name: contact-field;
-}
-
-.contact-hub[data-chrome-vt] .arrow-pill[data-contact-step][hidden] {
-  view-transition-name: none;
-}
-
-.contact-hub .arrow-face-scale,
-.contact-hub .arrow-face-blob {
-  transition: none;
 }
 
 .contact-hub[data-chrome-vt] .arrow-pill[data-dir='down'] {
   view-transition-name: contact-pill-down;
-}
-
-html[data-chrome-vt-run='about-contact-in'] ::view-transition-old(services-face) {
-  animation: vt-out var(--dur-nav) var(--ease-nav) both;
-}
-
-html[data-chrome-vt-run='about-contact-in'] ::view-transition-new(services-face) {
-  animation: vt-in var(--dur-nav) var(--ease-nav) both;
 }
 
 .contact-center {
@@ -2643,7 +2578,7 @@ html[data-chrome-vt-run='about-contact-in'] ::view-transition-new(services-face)
   pointer-events: none;
 }
 
-.contact-center .arrow-face,
+.contact-center .contact-ask,
 .contact-center .contact-field {
   position: relative;
   left: auto;
@@ -2652,16 +2587,150 @@ html[data-chrome-vt-run='about-contact-in'] ::view-transition-new(services-face)
   pointer-events: auto;
 }
 
+.contact-ask {
+  box-sizing: border-box;
+  /* Wide enough for the widest row of pills, because this box is the snapshot
+     the step transition animates. A narrower box would clip the pill ends. */
+  width: max-content;
+  max-width: calc(100% - 2 * var(--margin));
+  margin: 0;
+  text-align: center;
+}
+
+.contact-ask-title {
+  margin: 0 0 var(--space-md);
+  font-size: var(--text);
+  line-height: var(--lh);
+  font-weight: 400;
+  letter-spacing: var(--track);
+}
+
+.contact-options {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.contact-options-row {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .contact-panel[data-step='1'] .contact-ask-title,
+  .contact-panel[data-step='1'] .contact-options-row {
+    animation: contact-ask-in var(--dur-media) var(--ease-out-expo) both;
+  }
+
+  .contact-panel[data-step='1'] .contact-options-row:not(:first-child) {
+    animation-delay: 30ms;
+  }
+}
+
+@keyframes contact-ask-in {
+  from {
+    opacity: 0;
+    filter: blur(4px);
+  }
+}
+
+.contact-option {
+  box-sizing: border-box;
+  margin: 0;
+  height: var(--arrow-pill-h);
+  padding: 0 var(--space-md);
+  display: grid;
+  place-items: center;
+  font-size: var(--text);
+  line-height: var(--lh);
+  letter-spacing: var(--track);
+  color: var(--ink);
+  white-space: nowrap;
+  background: var(--arrow-fill);
+  border-radius: var(--arrow-pill-radius);
+  transition:
+    background-color var(--dur-hover) var(--ease-out),
+    color var(--dur-hover) var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  /* Only after the pointer has actually moved inside the form. On open the
+     pointer still rests where the landing's Down button was, which lands on the
+     bottom option and made it look pre-selected. */
+  .contact-hub[data-pointer] .contact-option:hover:not(.is-pressed):not(:focus-visible) {
+    background: color-mix(in srgb, var(--arrow-fill) 86%, var(--ink));
+  }
+}
+
+/* Being chosen and being focused are different. The ring shows where the arrow
+   keys are; the red fill shows what has been picked. */
+.contact-hub .contact-option:focus-visible {
+  outline: none;
+  background: color-mix(in srgb, var(--arrow-fill) 74%, var(--ink));
+}
+
+.contact-option[data-chosen] {
+  background: var(--red);
+  color: var(--bg);
+}
+
+.contact-option[data-chosen]:focus-visible {
+  background: var(--red);
+  color: var(--bg);
+}
+
+.contact-option.is-pressed {
+  background: var(--red);
+  color: var(--bg);
+}
+
+/* The form puts the back control at the top and the action at the bottom, not around a face. */
+.contact-hub .arrow-back {
+  top: var(--space-xl);
+  bottom: auto;
+  transform: translateX(-50%);
+}
+
+.contact-hub .arrow-pill[data-dir='down'] {
+  top: auto;
+  bottom: var(--space-xl);
+  transform: translateX(-50%);
+}
+
+@media (max-width: 759px) {
+  .contact-options,
+  .contact-options-row {
+    gap: 6px;
+  }
+
+  .contact-option {
+    /* The three-wide row is about 15em of text. Whatever is left over becomes padding. */
+    padding: 0 min(10px, calc((100vw - 2 * var(--margin) - 15em - 12px) / 6));
+  }
+
+  .contact-hub .arrow-back {
+    top: var(--space-lg);
+  }
+
+  .contact-hub .arrow-pill[data-dir='down'] {
+    bottom: var(--space-lg);
+  }
+}
+
 .contact-field {
   box-sizing: border-box;
   display: flex;
   align-items: center;
-  width: min(24em, calc(100% - 2 * var(--margin)));
+  width: min(25em, calc(100% - 2 * var(--margin)));
   min-height: var(--arrow-control);
   max-height: calc(var(--lh) * 8 + 16px + 16px);
   padding: 16px var(--space-md);
   background: var(--arrow-fill);
-  border-radius: var(--radius);
+  /* Half the control height, the same pill as the option buttons, so a
+     one-line field has fully round ends. */
+  border-radius: var(--arrow-pill-radius);
 }
 
 .contact-field textarea,
@@ -2843,10 +2912,11 @@ html[data-chrome-vt-run='about-contact-in'] ::view-transition-new(services-face)
   }
 }
 
+/* The focus ring follows the element's own shape. Rounding it to 2px flattened
+   the contact pills and anything else with a large radius. */
 :focus-visible {
   outline: 1px solid var(--ink);
   outline-offset: 4px;
-  border-radius: 2px;
 }
 
 [tabindex="-1"]:focus {
@@ -3056,10 +3126,6 @@ html[data-chrome-vt-run='about-contact-in'] ::view-transition-new(services-face)
 
 body.is-services-landing {
   overflow: hidden;
-}
-
-body.is-services-landing:has(.arrow-nav[data-screen='about']) {
-  overflow: auto;
 }
 
 body.is-services-landing main#content {
@@ -3298,7 +3364,6 @@ body:has(.arrow-nav:not(.contact-hub)) {
 
 .arrow-nav {
   --arrow-face: var(--arrow-pill-h);
-  --arrow-about-face: 360px;
   --arrow-control: 70px;
   --arrow-gap: var(--space-lg);
   --arrow-pill-h: var(--arrow-control);
@@ -3320,30 +3385,12 @@ body:has(.arrow-nav:not(.contact-hub)) {
 }
 
 
-html[data-app-inset] .arrow-nav:not([data-screen='about']):not(.contact-hub) {
+html[data-app-inset] .arrow-nav:not(.contact-hub) {
   position: fixed;
   top: var(--app-vt);
   left: var(--app-vl);
   width: var(--app-vw);
   height: var(--app-vh);
-}
-
-html[data-app-inset] .arrow-nav[data-screen='about'] {
-  position: fixed;
-  top: var(--app-vt);
-  left: var(--app-vl);
-  width: var(--app-vw);
-  height: var(--app-vh);
-  min-height: 0;
-  overflow: auto;
-}
-
-html[data-app-inset] body:has(.arrow-nav[data-screen='about']) {
-  overflow: hidden;
-}
-
-html[data-app-inset] body:has(.arrow-nav[data-screen='about']) main#content {
-  min-height: 0;
 }
 
 html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
@@ -3445,77 +3492,6 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
     transform var(--dur-nav) var(--ease-nav),
     width var(--dur-nav) var(--ease-nav),
     height var(--dur-nav) var(--ease-nav);
-}
-
-.arrow-nav[data-screen='about'] .arrow-face-scale {
-  width: var(--arrow-about-face);
-  height: var(--arrow-about-face);
-}
-
-.arrow-nav[data-screen='about'] {
-  --face-glance: calc(var(--face-glance-rest) * var(--arrow-face) / var(--arrow-about-face) / 1.18);
-}
-
-.arrow-nav[data-screen='about'] .arrow-face-blob {
-  transform: scale(1.18) translateY(-1px);
-}
-
-.arrow-nav[data-screen='about'] .arrow-back {
-  top: calc(25% - var(--arrow-about-face) / 4);
-  bottom: auto;
-  transform: translate(-50%, -50%);
-}
-
-.arrow-nav[data-screen='about'] .arrow-pill[data-dir='left'] {
-  right: auto;
-  left: calc(25% - var(--arrow-about-face) / 4);
-  transform: translate(-50%, -50%);
-}
-
-.arrow-nav[data-screen='about'] .arrow-pill[data-dir='right'] {
-  left: calc(75% + var(--arrow-about-face) / 4);
-  right: auto;
-  transform: translate(-50%, -50%);
-}
-
-.arrow-nav[data-screen='about'] {
-  height: auto;
-  min-height: var(--app-vh);
-  overflow: visible;
-  padding-top: calc(var(--app-vh) / 2 + var(--arrow-about-face) / 2 + var(--space-text-titled));
-  padding-bottom: var(--space-lg);
-}
-
-.arrow-nav[data-screen='about'] .arrow-stage {
-  position: absolute;
-  top: 0;
-  right: 0;
-  left: 0;
-  height: var(--app-vh);
-  bottom: auto;
-}
-
-.arrow-nav[data-screen='about'] .arrow-copy {
-  position: relative;
-  left: auto;
-  top: auto;
-  width: var(--content-width);
-  max-width: calc(100% - 2 * var(--margin));
-  max-height: none;
-  align-items: flex-start;
-  text-align: left;
-  overflow: visible;
-  transform: none;
-  margin-right: auto;
-  margin-left: auto;
-}
-
-.arrow-nav[data-screen='about'] .arrow-line {
-  text-align: left;
-}
-
-.arrow-nav[data-screen='about'] .arrow-body {
-  color: var(--ink);
 }
 
 .arrow-face-plate {
@@ -4221,7 +4197,6 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
   .arrow-nav,
   .project,
   .shop-detail {
-    --arrow-about-face: 200px;
     --arrow-control: 48px;
   }
 
@@ -4297,44 +4272,6 @@ html[data-sky-ink='white'] body:has([data-sky]) .arrow-gallery {
 
   .js .arrow-nav.is-intro:not(.is-face-svg) .arrow-face-blob g {
     filter: none;
-  }
-
-  .arrow-nav[data-screen='about'] .arrow-face-scale,
-  .arrow-nav[data-screen='about'] .arrow-face-blob {
-    width: var(--arrow-face);
-    height: var(--arrow-face);
-    transform: none;
-  }
-
-  .arrow-nav[data-screen='about'] .arrow-back {
-    top: auto;
-    bottom: calc(50% + var(--arrow-face) / 2 + var(--space-sm));
-    transform: translateX(-50%);
-  }
-
-  .arrow-nav[data-screen='about'] .arrow-pill[data-dir='left'],
-  .arrow-nav[data-screen='about'] .arrow-pill[data-dir='right'] {
-    top: 50%;
-    transform: translateY(-50%);
-  }
-
-  .arrow-nav[data-screen='about'] .arrow-pill[data-dir='left'] {
-    left: auto;
-    right: calc(50% + var(--arrow-face) / 2 + var(--space-sm));
-  }
-
-  .arrow-nav[data-screen='about'] .arrow-pill[data-dir='right'] {
-    left: calc(50% + var(--arrow-face) / 2 + var(--space-sm));
-    right: auto;
-  }
-
-  .arrow-nav[data-screen='about'] {
-    padding-top: calc(var(--app-vh) / 2 + var(--arrow-face) / 2 + var(--space-text-titled));
-  }
-
-  .arrow-nav[data-screen='about'] .arrow-copy {
-    top: auto;
-    max-height: none;
   }
 
   .arrow-nav.is-cover .arrow-dots {

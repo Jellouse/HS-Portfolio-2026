@@ -10,8 +10,7 @@ These were repeated, or the same menu and price markup copied across pages. The 
 
 | Component | File | Props | Pages |
 | --- | --- | --- | --- |
-| Prose | `src/components/sections/Prose.astro` | `paragraphs: string[]` | `/`, `/shop/:slug`, `/work/:slug` |
-| Price | `src/components/sections/Price.astro` | `slug`, `mode` (`suffix` or `prefix`), `text` | `/shop/:slug` |
+| Prose | `src/components/sections/Prose.astro` | `paragraphs: string[]` | `/`, `/shop/:slug`, `/work/:slug` || Price | `src/components/sections/Price.astro` | `slug`, `mode` (`suffix` or `prefix`), `text` | `/shop/:slug` |
 | MainMenu | `src/components/sections/MainMenu.astro` | `variant` (`header`, `shop`, or `project`), `home?` | dev catalogue |
 | CornerMark | `src/components/sections/CornerMark.astro` | `class`, `href`, `label`, slot for the mark | dev catalogue |
 | IntroHero | `src/components/sections/IntroHero.astro` | `variant` (`home` or `shop`), `site?`, illustration slot | dev catalogue |
@@ -33,7 +32,6 @@ These were already shared. Pages and other components keep using them.
 
 | Component | File | Props | Pages |
 | --- | --- | --- | --- |
-| About | `src/components/About.astro` | `paragraphs` | `/` |
 | Blocks | `src/components/Blocks.astro` | `blocks`, `slug?`, `processFromFolder?`, `processFolderSrcs?`, `info?` | `/work/:slug`, `/preview/:slug` |
 | BlurImage | `src/components/BlurImage.astro` | `src`, `alt`, `sizes`, `priority?`, `plain?`, `flush?`, `outline?`, `fade?` defaults to true | `/`, `/shop/:slug`, `/work/:slug` |
 | BackArrow | `src/components/BackArrow.astro` | `navBack?: boolean` | `/`, `/shop`, `/shop/:slug`, `/work/:slug`, `/services` |
@@ -46,14 +44,13 @@ These were already shared. Pages and other components keep using them.
 | ProjectHero | `src/components/ProjectHero.astro` | `title`, `years?`, `summary?` | `/work/:slug` |
 | ProjectArticle | `src/components/ProjectArticle.astro` | `project`, `processFolderSrcs?` | `/work/:slug`, `/preview/:slug` |
 | ProjectCard | `src/components/ProjectCard.astro` | `project`, `priority?` | `/` |
-| ProjectFeed | `src/components/ProjectFeed.astro` | `projects`, `about` | `/` |
+| ProjectFeed | `src/components/ProjectFeed.astro` | `projects` | `/` |
 | Info | `src/components/Info.astro` | `items` | `/work/:slug`, `/shop/:slug` |
 | Header | `src/components/Header.astro` | `site` | `/` |
 | Footer | `src/components/Footer.astro` | `site` | every page but project and product, through Base (`hideFooter`) |
 | Seo | `src/components/Seo.astro` | `title`, `description`, `image?`, `type?`, `jsonLd?`, `noindex?` | every page, through Base |
 | ContactSheet | `src/components/ContactSheet.astro` | `email` | every page, through Base |
-| ContactDrawer | `src/components/ContactDrawer.tsx` | `email` | every page, through ContactSheet. Full-viewport hub reusing arrow face / pill / back chrome. Step hops and About open/close go through `runChromeVt` (`src/lib/chrome-vt.ts`). |
-| ContactFace | `src/components/ContactFace.tsx` | `filterId?` | ContactDrawer service step |
+| ContactDrawer | `src/components/ContactDrawer.tsx` | `email` | every page, through ContactSheet. Full-viewport contact form: the question, the 3-2-1 pyramid of services, then project and email. The landing Contact button opens it. Step hops go through `runChromeVt` (`src/lib/chrome-vt.ts`). |
 | Peeps | `src/components/Peeps.astro` | `maxH?` | every page but project and product, through Footer |
 | PeepsStatic | `src/components/PeepsStatic.astro` | none | every page, through Peeps |
 | HeroBlob | `src/components/HeroBlob.astro` | none | `/` |
@@ -78,7 +75,7 @@ These look related and stay separate. Folding them into one component would pick
 | --- | --- | --- |
 | Centred label | `info-label`, `process-label`, `shop-detail-heading`, `text-block-title` | The margins differ (`60px`, `72px`, `--lh`, and the titled text block). |
 | Photo grid | `process-grid` and `shop-wild-grid` | Process uses `--gutter`. The wild grid uses `12px 8px`. |
-| Text section | `about`, `shop-intro`, `text-block`, `project-summary` | `Prose` is the shared paragraphs. The shells use `--space-text`, `--space-text-titled`, and the shop intro offset. |
+| Text section | `shop-intro`, `text-block`, `project-summary` | `Prose` is the shared paragraphs. The shells use `--space-text`, `--space-text-titled`, and the shop intro offset. |
 | Media frame | `image-block` and `shop-detail-image` | Project images use the content span. Shop figures use their own bottom margin. |
-| Services landing | `services-hub` | Back, the face, and Physical Build / Digital Build. Same controls as the homepage. Contact reuses this chrome in `ContactDrawer`. |
+| Services landing | `services-hub` | Back, the face, and Physical Build / Digital Build. Same controls as the homepage. Reached from `/services/`, the header menu on the home page, and the service pages. |
 | Services detail | `service-page` | Grey face, process chart, and FAQ. `Prose`, `BlurImage`, and `VideoFrame` are the shared pieces inside it. |

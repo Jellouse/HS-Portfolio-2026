@@ -590,7 +590,7 @@ export default config({
             id: fields.text({
               label: 'Id',
               description:
-                'Stable name. Other screens use it as their parent. The screen named about shows the About paragraphs from Site.',
+                'Stable name. Other screens use it as their parent. A screen with kind Contact opens the contact form.',
               validation: { isRequired: true },
             }),
             parent: fields.text({
@@ -624,10 +624,12 @@ export default config({
             }),
             kind: fields.select({
               label: 'Kind',
-              description: 'Branch is another set of buttons. Gallery is photos. Placeholder is an empty screen.',
+              description:
+                'Branch is another set of buttons. Gallery is photos. Contact opens the contact form. Placeholder is an empty screen.',
               options: [
                 { label: 'Branch', value: 'branch' },
                 { label: 'Gallery', value: 'gallery' },
+                { label: 'Contact', value: 'contact' },
                 { label: 'Placeholder', value: 'placeholder' },
               ],
               defaultValue: 'branch',

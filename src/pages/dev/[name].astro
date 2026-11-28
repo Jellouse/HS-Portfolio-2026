@@ -1,6 +1,5 @@
 ---
 import '../../styles/global.css';
-import About from '../../components/About.astro';
 import Blocks from '../../components/Blocks.astro';
 import BlurImage from '../../components/BlurImage.astro';
 import ContactSheet from '../../components/ContactSheet.astro';
@@ -160,7 +159,6 @@ const halfSizes = '(min-width: 760px) 272px, calc((100vw - 48px) / 2)';
               {item.name === 'ShopInfo' && project && <ShopInfo items={project.data.info} />}
               {item.name === 'ShopBuyBar' && product && <ShopBuyBar slug={product.id} />}
               {item.name === 'NotFound' && <NotFound />}
-              {item.name === 'About' && <About paragraphs={site.about} />}
               {item.name === 'Blocks' && project && <Blocks blocks={project.data.blocks.slice(0, 2)} slug={project.id} info={project.data.info} />}
               {item.name === 'BlurImage' && sampleImage && (
                 <BlurImage src={resolveImageSource(sampleImage.src)} alt={sampleImage.alt} sizes={imageSizes} priority />

@@ -21,7 +21,7 @@ const SPECS = [
   ['footer-faces', 'tests/footer-faces.spec.mjs'],
   ['link-underline', 'tests/link-underline.spec.mjs'],
   ['vt', 'tests/view-transition.spec.mjs'],
-  ['about-services', 'tests/about-services-flight.spec.mjs'],
+  ['about-services', 'tests/contact-ask.spec.mjs'],
   ['landing-face', 'tests/landing-face-settle.spec.mjs'],
   ['face-glance', 'tests/face-glance.spec.mjs'],
   ['hscroll', 'tests/no-hscroll.spec.mjs'],

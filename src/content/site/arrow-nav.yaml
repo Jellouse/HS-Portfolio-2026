@@ -29,13 +29,13 @@ nodes:
     title: Shop
     kind: gallery
     full: true
-  - id: about
+  - id: contact
     parent: landing
     dir: down
-    label: About
+    label: Contact
     title: ""
     body: ""
-    kind: branch
+    kind: contact
   - id: web
     parent: digital
     dir: left

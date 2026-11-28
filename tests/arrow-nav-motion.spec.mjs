@@ -193,14 +193,15 @@ for (const target of targets) {
   await step('physical-to-space', () => press('right'), 'space');
   await step('space-browser-back', back, 'physical');
   await step('physical-browser-back', back, 'landing');
-  await step('landing-to-about', () => press('down'), 'about');
-  await step('about-to-landing', () => press('up'), 'landing');
-  await step('landing-to-about-2', () => press('down'), 'about');
-  await page.evaluate(() => window.scrollTo(0, 400));
-  await page.waitForTimeout(200);
-  const scrolled = await page.evaluate(() => window.scrollY);
-  if (!scrolled) failures.push(`${target.name}: the about screen did not scroll`);
-  await step('about-scrolled-escape', () => page.keyboard.press('Escape'), 'landing');
+  await step('landing-to-about', () => press('down'), 'landing');
+  await page.waitForSelector('[data-contact]', { timeout: 5000 });
+  await page.waitForTimeout(600);
+  if (await page.evaluate(() => document.querySelector('[data-arrow-nav]')?.dataset.screen !== 'landing')) {
+    failures.push(`${target.name}: Contact moved the landing off its screen`);
+  }
+  await page.keyboard.press('Escape');
+  await page.waitForFunction(() => !document.querySelector('[data-contact]'), null, { timeout: 5000 }).catch(() => {});
+  await page.waitForTimeout(400);
   await step('landing-to-shop', () => press('up'), 'shop');
   await step('shop-to-landing', () => press('up'), 'landing');
 

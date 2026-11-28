@@ -116,12 +116,13 @@ try {
       report(width, `${path} before`, await measure(page, width));
       if (width !== 390 || !thorough.has(path)) continue;
       if (path === '/') {
-        const about = page.locator('#about');
-        if (await about.count()) {
-          await about.scrollIntoViewIfNeeded();
-          await wait(100);
-          report(width, '/#about', await measure(page, width));
-        }
+        await page.evaluate(() => document.querySelector('[data-dir="down"]')?.click());
+        await page.waitForSelector('[data-contact]', { timeout: 5000 }).catch(() => {});
+        await wait(300);
+        report(width, '/contact step 1', await measure(page, width));
+        await page.keyboard.press('Escape');
+        await page.waitForFunction(() => !document.querySelector('[data-contact]'), null, { timeout: 5000 }).catch(() => {});
+        await wait(200);
       }
       const max = await page.evaluate(() => Math.max(0, document.documentElement.scrollHeight - innerHeight));
       const steps = Math.min(24, Math.max(4, Math.ceil(max / 500)));
