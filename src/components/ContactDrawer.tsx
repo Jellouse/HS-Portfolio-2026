@@ -37,13 +37,17 @@ function focusables(root: HTMLElement) {
 
 function syncPanel(el: HTMLElement | null, open: boolean, step: number, answers: Answers = EMPTY) {
   if (!el) return;
-  el.classList.toggle('is-closed', !open);
   el.dataset.state = open ? 'open' : 'closed';
   el.setAttribute('aria-hidden', open ? 'false' : 'true');
   if (open) el.setAttribute('aria-modal', 'true');
   else el.removeAttribute('aria-modal');
   document.documentElement.classList.toggle('is-contact-open', open);
   syncStep(el, step, answers);
+  // `is-closed` is what hides the panel, and it also suppresses the opening
+  // animation (`.contact-panel.is-entered { animation: none }`). It has to come
+  // off after `syncStep`, or opening runs the step sync with the panel still
+  // hidden and the fade never plays, which made the transition inconsistent.
+  el.classList.toggle('is-closed', !open);
 }
 
 function syncStep(el: HTMLElement | null, step: number, answers: Answers = EMPTY) {
@@ -83,7 +87,7 @@ function syncStep(el: HTMLElement | null, step: number, answers: Answers = EMPTY
   }
 }
 
-export default function ContactDrawer({ email: address }: { email: string }) {
+export default function ContactDrawer(_props: { email: string }) {
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState(1);
   const [service, setService] = useState('');
@@ -196,6 +200,10 @@ export default function ContactDrawer({ email: address }: { email: string }) {
         project: '',
         email: '',
       });
+      // The button that opened the form is under the pointer. Without this, the
+      // option that lands there would show its hover state before the pointer
+      // has moved, so a fresh screen would look part-selected.
+      hub.current?.removeAttribute('data-pointer');
       announce(`Contact. Step ${next} of 3: ${TITLES[next]}`);
     };
     document.addEventListener('click', onClick);
@@ -222,17 +230,27 @@ export default function ContactDrawer({ email: address }: { email: string }) {
     }
   }, [open]);
 
+  // The panel is created hidden, so a CSS animation on it never starts: there is
+  // no frame where it is visible and animating. Run the fade here, once it is on
+  // screen, and lock it afterwards so a step change does not replay the fade.
   useEffect(() => {
     if (!open) return;
     const el = panel.current;
     if (!el) return;
-    el.getAnimations().forEach((anim) => anim.cancel());
+    el.classList.remove('is-entered');
+    if (reduceMotion()) {
+      el.classList.add('is-entered');
+      return;
+    }
+    const anim = el.animate([{ opacity: 0 }, { opacity: 1 }], {
+      duration: 400,
+      easing: 'cubic-bezier(0.23, 1, 0.32, 1)',
+      fill: 'both',
+    });
     const lock = () => el.classList.add('is-entered');
-    el.addEventListener('animationend', lock, { once: true });
-    const t = window.setTimeout(lock, 450);
+    anim.finished.then(lock, lock);
     return () => {
-      window.clearTimeout(t);
-      el.removeEventListener('animationend', lock);
+      anim.cancel();
     };
   }, [open]);
 
@@ -350,7 +368,7 @@ export default function ContactDrawer({ email: address }: { email: string }) {
         if (!res.ok) throw new Error(String(res.status));
         announce(THANKS);
       } catch {
-        const m = `That didn’t go through. Please email ${address} instead.`;
+        const m = 'That didn’t go through. Please email hello@humansize.de instead.';
         setMsg(m);
         announce(m);
       }
@@ -409,36 +427,22 @@ export default function ContactDrawer({ email: address }: { email: string }) {
     }
   };
 
-  // Sideways along a row, up and down between rows, always the closest button in the row above or below.
+  // Left and Right walk the options in reading order: along a row, then on to
+  // the first column of the next row, and round from the ends. The option you
+  // land on is the one chosen, so Next comes alive as soon as you move. Up and
+  // Down never change the choice; they press Back and Next.
   const moveOption = (key: string) => {
     const list = optionEls();
     if (!list.length) return;
-    const rowOf = (el: HTMLElement) => Number(el.dataset.row);
-    const rows = [...new Set(list.map(rowOf))];
     const active = document.activeElement as HTMLElement | null;
     const at = active ? list.indexOf(active) : -1;
-    if (at < 0) {
-      (key === 'ArrowUp' || key === 'ArrowLeft' ? list[list.length - 1] : list[0]).focus();
-      return;
-    }
-    const current = list[at];
-    if (key === 'ArrowLeft' || key === 'ArrowRight') {
-      const line = list.filter((el) => rowOf(el) === rowOf(current));
-      const i = line.indexOf(current);
-      const shift = key === 'ArrowLeft' ? -1 : 1;
-      line[(i + shift + line.length) % line.length].focus();
-      return;
-    }
-    const index = rows.indexOf(rowOf(current));
-    const nextRow = rows[(index + (key === 'ArrowUp' ? -1 : 1) + rows.length) % rows.length];
-    const line = list.filter((el) => rowOf(el) === nextRow);
-    const box = current.getBoundingClientRect();
-    const middle = box.left + box.width / 2;
-    const distance = (el: HTMLElement) => {
-      const r = el.getBoundingClientRect();
-      return Math.abs(r.left + r.width / 2 - middle);
-    };
-    line.reduce((best, el) => (distance(el) < distance(best) ? el : best), line[0]).focus();
+    const shift = key === 'ArrowLeft' ? -1 : 1;
+    const next = at < 0 ? 0 : (at + shift + list.length) % list.length;
+    const el = list[next];
+    el.focus();
+    const value = el.dataset.service ?? '';
+    serviceRef.current = value;
+    if (service !== value) flushSync(() => setService(value));
   };
 
   useEffect(() => {
@@ -477,9 +481,23 @@ export default function ContactDrawer({ email: address }: { email: string }) {
 
       const s = stepRef.current;
       if (s === 1) {
-        if (e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+        // Left and Right move the selection through the options. Up is Back,
+        // Down is Next, and Next stays off until an option has been chosen.
+        if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
           e.preventDefault();
           if (!e.repeat) moveOption(e.key);
+          return;
+        }
+        if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+          e.preventDefault();
+          if (e.repeat || pressKey.current || moving.current) return;
+          const target = e.key === 'ArrowUp' ? controlFor('back') : controlFor('down');
+          if (!target || (target as HTMLButtonElement).disabled) return;
+          clearPress();
+          pressKey.current = e.key;
+          pressed.current = target;
+          target.classList.add('is-pressed');
+          playSnick();
           return;
         }
         if (e.key === 'Backspace') {
@@ -574,6 +592,7 @@ export default function ContactDrawer({ email: address }: { email: string }) {
         data-chrome-vt={open ? '' : undefined}
         noValidate
         onSubmit={(e) => e.preventDefault()}
+        onPointerMove={() => hub.current?.setAttribute('data-pointer', '')}
       >
         <p className="sr-only" aria-live="polite" data-contact-live="">
           {live}
@@ -606,13 +625,8 @@ export default function ContactDrawer({ email: address }: { email: string }) {
                               className="contact-option"
                               data-row={index}
                               data-service={value}
+                              data-chosen={service === value ? '' : undefined}
                               onClick={() => pickService(value)}
-                              onFocus={() => {
-                                if (serviceRef.current !== value) {
-                                  serviceRef.current = value;
-                                  setService(value);
-                                }
-                              }}
                             >
                               {value}
                             </button>

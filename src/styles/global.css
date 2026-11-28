@@ -2548,21 +2548,11 @@ html.is-contact-open body {
   display: none;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .contact-panel {
-    animation: contact-in var(--dur-sheet) var(--ease-out) both;
-  }
-
-  html[data-contact-vt] .contact-panel,
-  .contact-panel.is-entered {
-    animation: none;
-  }
-}
-
-@keyframes contact-in {
-  from {
-    opacity: 0;
-  }
+/* The opening fade runs from ContactDrawer: the panel is created hidden, so an
+   animation declared here would never start. `is-entered` is still the flag that
+   says the enter is done, and a step change must not replay it. */
+.contact-panel.is-entered {
+  animation: none;
 }
 
 .contact-hub {
@@ -2599,7 +2589,10 @@ html.is-contact-open body {
 
 .contact-ask {
   box-sizing: border-box;
-  width: min(24em, calc(100% - 2 * var(--margin)));
+  /* Wide enough for the widest row of pills, because this box is the snapshot
+     the step transition animates. A narrower box would clip the pill ends. */
+  width: max-content;
+  max-width: calc(100% - 2 * var(--margin));
   margin: 0;
   text-align: center;
 }
@@ -2644,28 +2637,46 @@ html.is-contact-open body {
 }
 
 .contact-option {
+  box-sizing: border-box;
   margin: 0;
-  padding: 10px 20px;
+  height: var(--arrow-pill-h);
+  padding: 0 var(--space-md);
+  display: grid;
+  place-items: center;
   font-size: var(--text);
   line-height: var(--lh);
   letter-spacing: var(--track);
   color: var(--ink);
   white-space: nowrap;
   background: var(--arrow-fill);
-  border-radius: var(--radius);
+  border-radius: var(--arrow-pill-radius);
   transition:
     background-color var(--dur-hover) var(--ease-out),
     color var(--dur-hover) var(--ease-out);
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .contact-option:hover:not(.is-pressed):not(:focus-visible) {
+  /* Only after the pointer has actually moved inside the form. On open the
+     pointer still rests where the landing's Down button was, which lands on the
+     bottom option and made it look pre-selected. */
+  .contact-hub[data-pointer] .contact-option:hover:not(.is-pressed):not(:focus-visible) {
     background: color-mix(in srgb, var(--arrow-fill) 86%, var(--ink));
   }
 }
 
+/* Being chosen and being focused are different. The ring shows where the arrow
+   keys are; the red fill shows what has been picked. */
 .contact-hub .contact-option:focus-visible {
   outline: none;
+  background: color-mix(in srgb, var(--arrow-fill) 74%, var(--ink));
+}
+
+.contact-option[data-chosen] {
+  background: var(--red);
+  color: var(--bg);
+}
+
+.contact-option[data-chosen]:focus-visible {
   background: var(--red);
   color: var(--bg);
 }
@@ -2696,9 +2707,7 @@ html.is-contact-open body {
 
   .contact-option {
     /* The three-wide row is about 15em of text. Whatever is left over becomes padding. */
-    padding: 10px min(10px, calc((100vw - 2 * var(--margin) - 15em - 12px) / 6));
-    font-size: var(--text-ui);
-    line-height: var(--lh-ui);
+    padding: 0 min(10px, calc((100vw - 2 * var(--margin) - 15em - 12px) / 6));
   }
 
   .contact-hub .arrow-back {
@@ -2714,12 +2723,14 @@ html.is-contact-open body {
   box-sizing: border-box;
   display: flex;
   align-items: center;
-  width: min(24em, calc(100% - 2 * var(--margin)));
+  width: min(25em, calc(100% - 2 * var(--margin)));
   min-height: var(--arrow-control);
   max-height: calc(var(--lh) * 8 + 16px + 16px);
   padding: 16px var(--space-md);
   background: var(--arrow-fill);
-  border-radius: var(--radius);
+  /* Half the control height, the same pill as the option buttons, so a
+     one-line field has fully round ends. */
+  border-radius: var(--arrow-pill-radius);
 }
 
 .contact-field textarea,
@@ -2901,10 +2912,11 @@ html.is-contact-open body {
   }
 }
 
+/* The focus ring follows the element's own shape. Rounding it to 2px flattened
+   the contact pills and anything else with a large radius. */
 :focus-visible {
   outline: 1px solid var(--ink);
   outline-offset: 4px;
-  border-radius: 2px;
 }
 
 [tabindex="-1"]:focus {
