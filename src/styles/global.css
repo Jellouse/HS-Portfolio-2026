@@ -2568,13 +2568,23 @@ html.is-contact-open body {
   view-transition-name: contact-pill-down;
 }
 
+.contact-hub .arrow-stage:has(.contact-center) {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr auto 1fr;
+  justify-items: center;
+  align-items: center;
+}
+
 .contact-center {
-  position: absolute;
-  inset: 0;
+  position: relative;
+  inset: auto;
   z-index: 2;
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 100%;
+  grid-row: 2;
   pointer-events: none;
 }
 
@@ -2686,17 +2696,23 @@ html.is-contact-open body {
   color: var(--bg);
 }
 
-/* The form puts the back control at the top and the action at the bottom, not around a face. */
-.contact-hub .arrow-back {
-  top: var(--space-xl);
+/* Back and Next sit in the leftover bands above and below the form, the same
+   way the landing chrome sits in the space around the face. */
+.contact-hub .arrow-back,
+.contact-hub .arrow-pill[data-dir='down'] {
+  position: relative;
+  left: auto;
+  top: auto;
   bottom: auto;
-  transform: translateX(-50%);
+  transform: none;
+}
+
+.contact-hub .arrow-back {
+  grid-row: 1;
 }
 
 .contact-hub .arrow-pill[data-dir='down'] {
-  top: auto;
-  bottom: var(--space-xl);
-  transform: translateX(-50%);
+  grid-row: 3;
 }
 
 @media (max-width: 759px) {
@@ -2710,12 +2726,60 @@ html.is-contact-open body {
     padding: 0 min(10px, calc((100vw - 2 * var(--margin) - 15em - 12px) / 6));
   }
 
-  .contact-hub .arrow-back {
-    top: var(--space-lg);
+  /* Step 1 on a phone: pick a service to continue, no Next chrome.
+     390x695 is the reference. Gap and padding take the leftover width after
+     the three labels, so the row stays inside the viewport as the phone
+     narrows. Label size drops a step when the row is tight. */
+  .contact-panel[data-step='1'] .contact-hub .arrow-pill[data-dir='down'] {
+    display: none;
   }
 
-  .contact-hub .arrow-pill[data-dir='down'] {
-    bottom: var(--space-lg);
+  .contact-panel[data-step='1'] .contact-hub .arrow-stage {
+    container-type: inline-size;
+    container-name: contact-step;
+  }
+
+  .contact-panel[data-step='1'] .contact-ask {
+    --contact-ask-free: calc(100vw - var(--gutter) - 14em);
+    --contact-ask-gap: clamp(6px, calc(var(--contact-ask-free) / 6.5), var(--space-xs));
+    --contact-ask-pad: clamp(6px, calc((var(--contact-ask-free) - 2 * var(--contact-ask-gap)) / 6), var(--space-sm));
+    --contact-ask-h: clamp(40px, 13.333vw, 52px);
+    width: max-content;
+    max-width: calc(100vw - var(--gutter));
+    font-size: var(--text);
+  }
+
+  .contact-panel[data-step='1'] .contact-ask-title {
+    font-size: var(--text-hint);
+    line-height: var(--lh-hint);
+  }
+
+  .contact-panel[data-step='1'] .contact-options,
+  .contact-panel[data-step='1'] .contact-options-row {
+    gap: var(--contact-ask-gap);
+    max-width: 100%;
+  }
+
+  .contact-panel[data-step='1'] .contact-option {
+    height: var(--contact-ask-h);
+    padding: 0 var(--contact-ask-pad);
+    border-radius: calc(var(--contact-ask-h) / 2);
+    font-size: var(--text);
+    line-height: var(--lh);
+  }
+
+  @container contact-step (max-width: 359px) {
+    .contact-ask {
+      --text: var(--text-ui);
+      --lh: var(--lh-ui);
+    }
+  }
+
+  @container contact-step (max-width: 329px) {
+    .contact-ask {
+      --text: var(--text-hint-sm);
+      --lh: var(--lh-hint-sm);
+    }
   }
 }
 

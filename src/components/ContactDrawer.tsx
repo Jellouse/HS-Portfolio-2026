@@ -609,8 +609,7 @@ export default function ContactDrawer(_props: { email: string }) {
               >
                 {BACK_SVG}
               </button>
-              <div className="arrow-slot">
-                <div className="contact-center" data-contact-center="">
+              <div className="contact-center" data-contact-center="">
                   <section className="contact-ask" data-contact-step="1" hidden={showStep !== 1}>
                     <h3 className="contact-ask-title" id="contact-ask-title">
                       What can i help you with?
@@ -671,23 +670,21 @@ export default function ContactDrawer(_props: { email: string }) {
                       onChange={(e) => setEmail(e.target.value)}
                     />
                   </div>
-                </div>
-
-                <button
-                  type="button"
-                  className="arrow-pill"
-                  data-dir="down"
-                  data-contact-down=""
-                  disabled={downDisabled}
-                  onClick={() => {
-                    if (showStep === 1) {
-                      if (service) pickService(service);
-                    } else go(1);
-                  }}
-                >
-                  {downLabel}
-                </button>
               </div>
+              <button
+                type="button"
+                className="arrow-pill"
+                data-dir="down"
+                data-contact-down=""
+                disabled={downDisabled}
+                onClick={() => {
+                  if (showStep === 1) {
+                    if (service) pickService(service);
+                  } else go(1);
+                }}
+              >
+                {downLabel}
+              </button>
             </>
           )}
 

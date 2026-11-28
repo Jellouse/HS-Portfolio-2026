@@ -111,6 +111,10 @@ const run = async (engine, type, size, label) => {
       back: !!panel.querySelector('.arrow-back'),
       next: !!panel.querySelector('[data-contact-down]'),
       nextOff: panel.querySelector('[data-contact-down]')?.disabled,
+      nextShown: (() => {
+        const el = panel.querySelector('[data-contact-down]');
+        return el ? getComputedStyle(el).display !== 'none' : false;
+      })(),
     };
   });
   must(step1.screen === 'landing', `${tag}: opening Contact left the landing on ${step1.screen}`);
@@ -122,9 +126,39 @@ const run = async (engine, type, size, label) => {
     `${tag}: options read ${step1.labels.join('|')}`,
   );
   must(step1.active.includes('contact-option'), `${tag}: focus did not land on an option`);
-  must(step1.back && step1.next, `${tag}: step 1 is missing its back or next control`);
+  must(step1.back, `${tag}: step 1 is missing its back control`);
+  if (type === 'mobile') {
+    must(!step1.nextShown, `${tag}: step 1 still shows Next on mobile`);
+  } else {
+    must(step1.next && step1.nextShown, `${tag}: step 1 is missing its next control`);
+  }
   must(step1.nextOff === false, `${tag}: Next is off while an option is already chosen`);
   must(step1.scrollWidth <= step1.viewport, `${tag}: step 1 overflows sideways (${step1.scrollWidth} > ${step1.viewport})`);
+
+  if (type === 'mobile') {
+    const original = page.viewportSize();
+    for (const wide of [320, 360, 390, 430]) {
+      await page.setViewportSize({ width: wide, height: original.height });
+      const fit = await page.evaluate(() => {
+        const option = document.querySelector('.contact-option');
+        const pills = [...document.querySelectorAll('.contact-option')].map((el) => el.getBoundingClientRect());
+        const row = pills.slice(0, 3);
+        const left = Math.min(...row.map((p) => p.left));
+        const right = Math.max(...row.map((p) => p.right));
+        return {
+          left,
+          right,
+          vw: innerWidth,
+          fs: getComputedStyle(option).fontSize,
+          ok: left >= -0.5 && right <= innerWidth + 0.5 && document.documentElement.scrollWidth <= innerWidth,
+        };
+      });
+      must(fit.ok, `${tag}: step 1 clips at ${wide} (left ${fit.left.toFixed(1)}, right ${fit.right.toFixed(1)}, vw ${fit.vw})`);
+      const wantFs = wide <= 329 ? '14px' : wide <= 359 ? '16px' : '18px';
+      must(fit.fs === wantFs, `${tag}: step 1 type is ${fit.fs} at ${wide}, not ${wantFs}`);
+    }
+    await page.setViewportSize(original);
+  }
 
   // Arrow keys walk the pyramid: along a row, then to the nearest button in the row above or below.
   const order = [];

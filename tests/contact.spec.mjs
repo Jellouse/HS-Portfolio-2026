@@ -56,6 +56,31 @@ check(panel.top === 0 && panel.height === 900, `hub fills the viewport (y=${pane
 check(panel.question === 'What can i help you with?', `step 1 asks the question (${panel.question})`);
 check(panel.options === 6 && panel.rows.join('') === '321', `step 1 is a 3-2-1 pyramid (${panel.rows.join('-')})`);
 
+const chrome = await page.evaluate(() => {
+  const mid = (el) => {
+    const b = el.getBoundingClientRect();
+    return b.top + b.height / 2;
+  };
+  const back = document.querySelector('.contact-hub .arrow-back');
+  const next = document.querySelector('.contact-hub .arrow-pill[data-dir="down"]');
+  const ask = document.querySelector('.contact-ask');
+  const askBox = ask.getBoundingClientRect();
+  return {
+    back: mid(back),
+    next: mid(next),
+    above: askBox.top / 2,
+    below: (askBox.bottom + innerHeight) / 2,
+  };
+});
+check(
+  Math.abs(chrome.back - chrome.above) <= 2,
+  `Back sits in the middle of the space above the ask (${chrome.back.toFixed(1)} vs ${chrome.above.toFixed(1)})`,
+);
+check(
+  Math.abs(chrome.next - chrome.below) <= 2,
+  `Next sits in the middle of the space below the ask (${chrome.next.toFixed(1)} vs ${chrome.below.toFixed(1)})`,
+);
+
 // The options are the same pill as Next: full control height, full radius.
 const sizes = await page.evaluate(() => {
   const round = (n) => Math.round(n);
